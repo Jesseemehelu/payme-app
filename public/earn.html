@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PAYME — Earn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0B1020;
+      --bg-light: #F6F8FC;
+      --accent-blue: #2563EB;
+      --accent-blue-hover: #1D4ED8;
+      --accent-cyan: #06B6D4;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --card-bg: #FFFFFF;
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --shadow-soft: 0 10px 30px -5px rgba(11, 16, 32, 0.05);
+      --shadow-card: 0 20px 40px -15px rgba(37, 99, 235, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 90px;
+    }
+
+    @media (min-width: 1024px) {
+      body { padding-bottom: 40px; }
+    }
+
+    /* TOP HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--bg-dark);
+      text-decoration: none;
+      letter-spacing: -0.03em;
+    }
+    .brand-logo span { color: var(--accent-blue); }
+
+    .desktop-nav { display: none; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .icon-btn:hover { background: #F1F5F9; border-color: #CBD5E1; transform: translateY(-1px); }
+
+    /* PAGE LAYOUT */
+    .earn-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 20px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .earn-header-section {
+      margin-bottom: 28px;
+    }
+    .earn-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--bg-dark);
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .earn-sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* EARN GRID */
+    .earn-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* EARN CARD */
+    .earn-card-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Active referral card styling */
+    .earn-card-item.active-option {
+      border-color: #BFDBFE;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+      cursor: pointer;
+    }
+    .earn-card-item.active-option:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.12);
+      border-color: var(--accent-blue);
+    }
+    .earn-card-item.active-option:active {
+      transform: scale(0.98);
+    }
+
+    /* Disabled cards styling */
+    .earn-card-item.disabled-option {
+      opacity: 0.75;
+      cursor: not-allowed;
+      background: #FAFAFC;
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      background: var(--bg-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-available {
+      background: #EFF6FF;
+      color: var(--accent-blue);
+      border: 1px solid #DBEAFE;
+    }
+    .badge-coming {
+      background: #F1F5F9;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-body h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--bg-dark);
+      margin-bottom: 6px;
+    }
+    .card-body p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+
+    .card-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+    }
+
+    .arrow-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #EFF6FF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-blue);
+      transition: transform 0.2s ease;
+    }
+    .earn-card-item.active-option:hover .arrow-btn {
+      transform: translateX(4px);
+      background: var(--accent-blue);
+      color: #FFFFFF;
+    }
+
+    /* DESKTOP LAYOUT (2x2 GRID) */
+    @media (min-width: 768px) {
+      .earn-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .desktop-nav { display: flex; gap: 32px; list-style: none; }
+      .desktop-nav a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.92rem; transition: color 0.2s; }
+      .desktop-nav a.active, .desktop-nav a:hover { color: var(--accent-blue); }
+      .mobile-bottom-nav { display: none; }
+    }
+
+    /* MOBILE BOTTOM NAV */
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 1000;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      width: 20%;
+    }
+    .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+    .nav-item.active { color: var(--accent-blue); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="nav-container">
+      <a href="/dashboard.html" class="brand-logo">PAYME<span>.</span></a>
+
+      <!-- Desktop Navbar -->
+      <ul class="desktop-nav">
+        <li><a href="/dashboard.html">Dashboard</a></li>
+        <li><a href="/earn" class="active">Earn</a></li>
+        <li><a href="/dashboard.html#referrals">Referrals</a></li>
+        <li><a href="/dashboard.html#leaderboard">Leaderboard</a></li>
+      </ul>
+
+      <div class="header-actions">
+        <!-- Support Button -->
+        <a href="https://wa.me/+2348034399095" target="_blank" class="icon-btn" title="Contact Support on WhatsApp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN EARN CONTENT -->
+  <main class="earn-container">
+    <div class="earn-header-section">
+      <h1 class="earn-title">Earn</h1>
+      <p class="earn-sub">Choose how you want to earn with PAYME.</p>
+    </div>
+
+    <div class="earn-cards-grid">
+
+      <!-- CARD 1: REFERRAL (ACTIVE) -->
+      <a href="/dashboard.html#referrals" class="earn-card-item active-option">
+        <div>
+          <div class="card-top-row">
+            <div class="icon-wrapper">🔗</div>
+            <span class="status-badge badge-available">Available</span>
+          </div>
+          <div class="card-body">
+            <h3>Invite Friends</h3>
+            <p>Earn ₦15 for every eligible referral.</p>
+          </div>
+        </div>
+        <div class="card-action-row">
+          <span>Start Referring</span>
+          <div class="arrow-btn">&rarr;</div>
+        </div>
+      </a>
+
+      <!-- CARD 2: GAMES (ACTIVE) -->
+<a href="/game" class="earn-card-item" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
+  <div>
+    <div class="card-top-row">
+      <div class="icon-wrapper">🎮</div>
+      <span class="status-badge" style="background: rgba(37, 99, 235, 0.1); color: #2563EB;">PLAY</span>
+    </div>
+    <div class="card-body">
+      <h3>PAYME Spin</h3>
+      <p>Spin the wheel for ₦50 and win exciting rewards.</p>
+    </div>
+  </div>
+</a>
+
+
+      <!-- CARD 3: TASKS (COMING SOON) -->
+      <div class="earn-card-item disabled-option">
+        <div>
+          <div class="card-top-row">
+            <div class="icon-wrapper">✓</div>
+            <span class="status-badge badge-coming">Coming Soon</span>
+          </div>
+          <div class="card-body">
+            <h3>Tasks</h3>
+            <p>Complete simple tasks and earn rewards.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: GIVEAWAYS (COMING SOON) -->
+      <div class="earn-card-item disabled-option">
+        <div>
+          <div class="card-top-row">
+            <div class="icon-wrapper">🎁</div>
+            <span class="status-badge badge-coming">Coming Soon</span>
+          </div>
+          <div class="card-body">
+            <h3>Giveaways</h3>
+            <p>Take part in special PAYME giveaways and events.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mobile-bottom-nav">
+    <a href="/dashboard.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </a>
+    <a href="/earn" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+      Earn
+    </a>
+    <a href="/dashboard.html#referrals" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      Referrals
+    </a>
+    <a href="/dashboard.html#leaderboard" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+      Leaderboard
+    </a>
+    <a href="https://wa.me/+2348034399095" target="_blank" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+      Support
+    </a>
+  </nav>
+
+</body>
+</html>

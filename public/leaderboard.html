@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PAYME — Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0B1020;
+      --bg-surface: #F8FAFC;
+      --accent-blue: #2563EB;
+      --accent-cyan: #06B6D4;
+      --accent-indigo: #4F46E5;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --card-bg: #FFFFFF;
+      --radius-sm: 14px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --shadow-soft: 0 10px 30px -5px rgba(11, 16, 32, 0.04);
+      --shadow-card: 0 20px 40px -10px rgba(37, 99, 235, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      padding: 16px 16px 40px;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* NAV HEADER */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-top: 8px;
+    }
+    .back-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; color: var(--text-main); font-weight: 700;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.2s ease;
+    }
+    .back-btn:active { transform: scale(0.95); background: #F1F5F9; }
+    .page-title { font-size: 1.25rem; font-weight: 800; color: var(--bg-dark); letter-spacing: -0.02em; }
+    .live-indicator {
+      display: flex; align-items: center; gap: 6px;
+      background: #DCFCE7; color: #15803D;
+      padding: 6px 12px; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.05em; border: 1px solid #BBF7D0;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px; background: #22C55E; border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    /* FINTECH HERO BANNER */
+    .challenge-card {
+      background: linear-gradient(135deg, #0B1020 0%, #1E1B4B 50%, #1E293B 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: 26px 22px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -10px rgba(11, 16, 32, 0.35);
+    }
+    .challenge-card::before {
+      content: ''; position: absolute; top: -40%; right: -20%;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+    .challenge-card::after {
+      content: ''; position: absolute; bottom: -30%; left: -10%;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .card-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border); color: #38BDF8;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em;
+      padding: 5px 12px; border-radius: 99px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .challenge-card h2 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .challenge-card p { font-size: 0.83rem; color: #94A3B8; font-weight: 500; margin-bottom: 20px; }
+
+    /* TIMER BOX */
+    .timer-container {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .timer-label { font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.04em; }
+    .timer-val { font-size: 1.25rem; font-weight: 800; font-mono: monospace; color: #FFFFFF; letter-spacing: -0.01em; }
+
+    /* PRIZE TIERS */
+    .prizes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .prize-item {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 12px 8px; text-align: center;
+      transition: transform 0.2s ease;
+    }
+    .prize-item.rank-1 { background: rgba(250, 204, 21, 0.12); border-color: rgba(250, 204, 21, 0.3); }
+    .prize-rank { font-size: 0.72rem; font-weight: 800; color: #CBD5E1; margin-bottom: 2px; }
+    .prize-amount { font-size: 1.05rem; font-weight: 800; color: #38BDF8; }
+    .prize-item.rank-1 .prize-amount { color: #FACC15; }
+
+    /* CURRENT USER RANK BANNER */
+    .user-rank-card {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: white; border-radius: var(--radius-md);
+      padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; box-shadow: 0 12px 28px -6px rgba(37, 99, 235, 0.35);
+      position: relative; overflow: hidden;
+    }
+    .user-rank-card::after {
+      content: ''; position: absolute; right: -10%; bottom: -30%; width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+    .rank-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #93C5FD; }
+    .rank-val { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+    .rank-meta { text-align: right; }
+    .eligible-text { font-size: 0.88rem; font-weight: 800; color: #FFFFFF; }
+    .action-subtext { font-size: 0.75rem; color: #FDE047; font-weight: 700; margin-top: 1px; }
+
+    /* LEADERBOARD LIST CONTAINER */
+    .section-card {
+      background: var(--card-bg); border-radius: var(--radius-lg);
+      padding: 22px 18px; border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft); margin-bottom: 20px;
+    }
+    .card-head { margin-bottom: 16px; }
+    .card-title { font-size: 1.1rem; font-weight: 800; color: var(--bg-dark); letter-spacing: -0.01em; }
+    .card-desc { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    .list-wrapper { display: flex; flex-direction: column; gap: 10px; }
+
+    /* LEADERBOARD ITEM */
+    .user-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-radius: var(--radius-sm);
+      background: #F8FAFC; border: 1px solid #F1F5F9;
+      transition: all 0.2s ease;
+    }
+    .user-row.top-three { background: #FFFFFF; border-color: var(--border-color); box-shadow: var(--shadow-soft); }
+    .user-row.is-me { background: #EFF6FF !important; border-color: #BFDBFE !important; }
+
+    .user-row-left { display: flex; align-items: center; gap: 14px; }
+    .rank-badge-box {
+      width: 36px; height: 36px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.95rem; background: #E2E8F0; color: #475569;
+    }
+    .rank-1 .rank-badge-box { background: #FEF08A; color: #854D0E; font-size: 1.1rem; }
+    .rank-2 .rank-badge-box { background: #E2E8F0; color: #334155; font-size: 1.1rem; }
+    .rank-3 .rank-badge-box { background: #FFEDD5; color: #9A3412; font-size: 1.1rem; }
+
+    .user-details { display: flex; flex-direction: column; }
+    .user-details .uname { font-weight: 700; font-size: 0.9rem; color: var(--bg-dark); letter-spacing: -0.01em; }
+    .user-details .count { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+    .reward-val { font-weight: 800; font-size: 0.95rem; color: var(--accent-blue); letter-spacing: -0.01em; }
+
+    .empty-state { text-align: center; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; padding: 24px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <div class="top-bar">
+    <a href="/dashboard.html" class="back-btn" title="Back to Dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    </a>
+    <h1 class="page-title">Referral Leaderboard</h1>
+    <div class="live-indicator">
+      <div class="pulse-dot"></div>
+      <span>Live</span>
+    </div>
+  </div>
+
+  <!-- CHALLENGE BANNER -->
+  <div class="challenge-card">
+    <div class="card-tag">⚡ Weekly Sprint</div>
+    <h2>Referral Challenge</h2>
+    <p>Invite friends. Climb higher. Win weekly rewards!</p>
+
+    <div class="timer-container">
+      <span class="timer-label">Ends In</span>
+      <span class="timer-val" id="countdownTimer">2d 10h 47m 03s</span>
+    </div>
+
+    <div class="prizes-grid">
+      <div class="prize-item rank-1">
+        <div class="prize-rank">🥇 1st Place</div>
+        <div class="prize-amount">₦500</div>
+      </div>
+      <div class="prize-item">
+        <div class="prize-rank">🥈 2nd Place</div>
+        <div class="prize-amount">₦200</div>
+      </div>
+      <div class="prize-item">
+        <div class="prize-rank">🥉 3rd Place</div>
+        <div class="prize-amount">₦50</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRENT USER STATUS BANNER -->
+  <div class="user-rank-card">
+    <div>
+      <div class="rank-label">Your Current Position</div>
+      <div class="rank-val" id="userCurrentRank">Unranked</div>
+    </div>
+    <div class="rank-meta">
+      <div class="eligible-text" id="userEligibleCount">0 Referrals</div>
+      <div class="action-subtext" id="userActionPrompt">Invite 1 user to rank!</div>
+    </div>
+  </div>
+
+  <!-- TOP REFERRERS LIST -->
+  <div class="section-card">
+    <div class="card-head">
+      <h3 class="card-title">Top 10 Referrers</h3>
+      <p class="card-desc">Rankings update automatically as referrals join.</p>
+    </div>
+
+    <div class="list-wrapper" id="topReferrersList">
+      <div class="empty-state">Loading rankings...</div>
+    </div>
+  </div>
+
+  <!-- PREVIOUS WINNERS -->
+  <div class="section-card">
+    <div class="card-head">
+      <h3 class="card-title">Previous Champions</h3>
+      <p class="card-desc">Winners from completed weekly challenges.</p>
+    </div>
+    <div class="empty-state">No past winners recorded yet.</div>
+  </div>
+
+  <script>
+    async function loadLeaderboardData() {
+      try {
+        const [lbRes, userRes] = await Promise.all([
+          fetch('/api/leaderboard'),
+          fetch('/api/user/dashboard')
+        ]);
+
+        const lbData = await lbRes.json();
+        const userData = userRes.ok ? await userRes.json() : null;
+        const currentUser = userData && userData.success ? userData.user : null;
+
+        const listContainer = document.getElementById('topReferrersList');
+
+        if (!lbData.success || !lbData.leaderboard || lbData.leaderboard.length === 0) {
+          listContainer.innerHTML = '<div class="empty-state">No referrals recorded yet for this week. Be the first!</div>';
+          return;
+        }
+
+        const items = lbData.leaderboard;
+        let currentUserRank = -1;
+        let currentUserReferrals = currentUser ? (currentUser.totalReferrals || currentUser.successfulReferrals || 0) : 0;
+
+        listContainer.innerHTML = items.map((user, index) => {
+          const rank = index + 1;
+          const name = user.username ? '@' + user.username : (user.fullName || '@User');
+          
+          const refCount = Number(user.totalReferrals ?? user.referrals ?? user.successfulReferrals ?? 0);
+          const earnings = Number(user.referralEarnings ?? user.earnings ?? 0);
+
+          const isMe = currentUser && (
+            (user.id && user.id === currentUser.id) || 
+            (user.username && user.username === currentUser.username)
+          );
+
+          if (isMe) {
+            currentUserRank = rank;
+            currentUserReferrals = refCount;
+          }
+
+          const rankBadges = ['🥇', '🥈', '🥉'];
+          const rankClass = rank <= 3 ? `top-three rank-${rank}` : '';
+          const displayRank = rankBadges[index] || `#${rank}`;
+
+          return `
+            <div class="user-row ${rankClass} ${isMe ? 'is-me' : ''}">
+              <div class="user-row-left">
+                <div class="rank-badge-box">${displayRank}</div>
+                <div class="user-details">
+                  <span class="uname">${name} ${isMe ? '(You)' : ''}</span>
+                  <span class="count">${refCount} Referral${refCount === 1 ? '' : 's'}</span>
+                </div>
+              </div>
+              <span class="reward-val">₦${earnings.toLocaleString()}</span>
+            </div>
+          `;
+        }).join('');
+
+        // Update rank banner for logged-in user
+        const rankValEl = document.getElementById('userCurrentRank');
+        const countEl = document.getElementById('userEligibleCount');
+        const promptEl = document.getElementById('userActionPrompt');
+
+        countEl.innerText = `${currentUserReferrals} Referral${currentUserReferrals === 1 ? '' : 's'}`;
+
+        if (currentUserRank > 0) {
+          rankValEl.innerText = `#${currentUserRank}`;
+          promptEl.innerText = 'Keep inviting to hold your spot!';
+        } else if (currentUserReferrals > 0) {
+          rankValEl.innerText = 'Unranked';
+          promptEl.innerText = 'Top 10 spots are higher up!';
+        } else {
+          rankValEl.innerText = 'Unranked';
+          promptEl.innerText = 'Invite 1 user to rank!';
+        }
+
+      } catch (err) {
+        console.error('Error loading leaderboard:', err);
+        document.getElementById('topReferrersList').innerHTML = 
+          '<div class="empty-state">Unable to load live standings right now.</div>';
+      }
+    }
+
+    // Countdown Timer
+    function startCountdown() {
+      let duration = 2 * 86400 + 10 * 3600 + 47 * 60 + 3;
+      const timerEl = document.getElementById('countdownTimer');
+
+      setInterval(() => {
+        if (duration <= 0) return;
+        duration--;
+        const d = Math.floor(duration / 86400);
+        const h = Math.floor((duration % 86400) / 3600);
+        const m = Math.floor((duration % 3600) / 60);
+        const s = duration % 60;
+        timerEl.innerText = `${d}d ${h}h ${m}m ${s < 10 ? '0' : ''}${s}s`;
+      }, 1000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadLeaderboardData();
+      startCountdown();
+      setInterval(loadLeaderboardData, 5000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAYME Spin - Spin. Win. Repeat.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: #0B1020; color: #F8FAFC; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding-bottom: 40px; }
+
+    /* Header */
+    header { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+    .back-btn { color: #94A3B8; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .back-btn:hover { color: #FFFFFF; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .balance-badge { background: rgba(37, 99, 235, 0.15); border: 1px solid rgba(37, 99, 235, 0.3); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; color: #60A5FA; }
+    .support-link { color: #94A3B8; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+
+    /* Main Container */
+    .container { width: 100%; max-width: 480px; padding: 0 20px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+
+    /* Hero Section */
+    .hero { text-align: center; margin-top: 5px; }
+    .hero h1 { font-size: 1.8rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .hero p { color: #94A3B8; font-size: 0.9rem; }
+    .cost-tag { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; color: #38BDF8; font-weight: 600; border: 1px solid rgba(56, 189, 248, 0.2); }
+
+    /* Wheel Container */
+    .wheel-wrapper { position: relative; width: 300px; height: 300px; margin: 10px auto; filter: drop-shadow(0 10px 25px rgba(37, 99, 235, 0.25)); }
+    .pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 24px solid #38BDF8; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+    canvas { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #1E293B; }
+
+    /* Spin Button */
+    .spin-btn { width: 100%; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); transition: transform 0.1s, opacity 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .spin-btn:active { transform: scale(0.98); }
+    .spin-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Cards & Sections */
+    .card { background: #131B31; border: 1px solid #1E293B; border-radius: 20px; padding: 20px; width: 100%; }
+    .card-title { font-size: 1rem; font-weight: 700; color: #FFFFFF; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Recent Spins */
+    .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; margin-top: 10px; }
+    .history-item { display: flex; justify-content: space-between; align-items: center; background: #0B1020; padding: 10px 14px; border-radius: 12px; border: 1px solid #1E293B; font-size: 0.85rem; }
+    .history-item .won { color: #4ADE80; font-weight: 700; }
+    .history-item .zero { color: #94A3B8; font-weight: 600; }
+    .history-time { font-size: 0.75rem; color: #64748B; }
+
+    /* Responsible Play Note */
+    .responsible-play { font-size: 0.75rem; color: #64748B; text-align: center; line-height: 1.4; padding: 0 10px; }
+
+    /* Modal Overlay */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(11, 16, 32, 0.8); backdrop-filter: blur(6px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-card { background: #131B31; border: 1px solid #1E293B; width: 100%; max-width: 340px; border-radius: 24px; padding: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .modal-title { font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin-bottom: 8px; }
+    .modal-desc { font-size: 1rem; color: #94A3B8; margin-bottom: 20px; }
+    .modal-btn { width: 100%; background: #2563EB; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/dashboard.html" class="back-btn">← Dashboard</a>
+    <div class="header-right">
+      <div class="balance-badge" id="headerBalance">₦0.00</div>
+      <a href="#" onclick="alert('Contact support at support@payme.ng'); return false;" class="support-link">Support</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Hero Section -->
+    <div class="hero">
+      <h1>PAYME Spin</h1>
+      <p>Spin. Win. Repeat.</p>
+      <div class="cost-tag">Spin cost: ₦50</div>
+    </div>
+
+    <!-- Wheel -->
+    <div class="wheel-wrapper">
+      <div class="pointer"></div>
+      <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <!-- Spin Action Button -->
+    <button class="spin-btn" id="spinBtn" onclick="startSpin()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg>
+      SPIN FOR ₦50
+    </button>
+
+    <!-- Recent Spins Card -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom: 8px;">Your Recent Spins</div>
+      <div class="history-list" id="historyList">
+        <p style="text-align: center; color: #64748B; font-size: 0.85rem; padding: 10px;">Your spins will appear here.</p>
+      </div>
+    </div>
+
+    <!-- Responsible Play -->
+    <div class="responsible-play">
+      <strong>Play responsibly:</strong> Each spin costs ₦50. Only play with money you can afford to lose. Entertainment value applies.
+    </div>
+
+  </div>
+
+  <!-- Result Modal -->
+  <div class="modal-overlay" id="resultModal">
+    <div class="modal-card">
+      <div class="modal-title" id="modalTitle">Congratulations! 🎉</div>
+      <div class="modal-desc" id="modalDesc">You won ₦100</div>
+      <button class="modal-btn" onclick="closeModal()">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    const segments = [
+      { label: '₦0', color: '#1E293B' },
+      { label: '₦10', color: '#2563EB' },
+      { label: '₦20', color: '#1D4ED8' },
+      { label: '₦50', color: '#3B82F6' },
+      { label: '₦100', color: '#1E40AF' },
+      { label: '₦250', color: '#38BDF8' },
+      { label: '₦500', color: '#0284C7' },
+      { label: '₦1000', color: '#0369A1' },
+      { label: '₦2000', color: '#0284C7' }
+    ];
+
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const numSegments = segments.length;
+    const arc = (Math.PI * 2) / numSegments;
+    let currentAngle = 0;
+    let isSpinning = false;
+
+    function drawWheel(angle = 0) {
+      const radius = canvas.width / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.translate(radius, radius);
+      ctx.rotate(angle);
+
+      for (let i = 0; i < numSegments; i++) {
+        const startAngle = i * arc;
+        const endAngle = (i + 1) * arc;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius - 4, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = segments[i].color;
+        ctx.fill();
+        ctx.strokeStyle = '#0B1020';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(startAngle + arc / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(segments[i].label, radius - 25, 6);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    async function fetchGameState() {
+      try {
+        const res = await fetch('/api/game/state');
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('headerBalance').innerText = '₦' + data.balance.toLocaleString();
+          renderHistory(data.spins);
+        }
+      } catch (err) {
+        console.error('Failed to load game state');
+      }
+    }
+
+    function renderHistory(spins) {
+      const list = document.getElementById('historyList');
+      if (!spins || spins.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: #64748B; font-size: 0.85rem; padding: 10px;">Your spins will appear here.</p>';
+        return;
+      }
+
+      list.innerHTML = spins.map(s => {
+        const isWin = s.type === 'Spin Reward' && s.amount > 0;
+        return `
+          <div class="history-item">
+            <div>
+              <div style="font-weight: 600; color: #E2E8F0;">${s.type}</div>
+              <div class="history-time">${s.date}</div>
+            </div>
+            <div class="${isWin ? 'won' : 'zero'}">${isWin ? '+' : ''}₦${s.amount.toLocaleString()}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function startSpin() {
+      if (isSpinning) return;
+
+      const btn = document.getElementById('spinBtn');
+      btn.disabled = true;
+      btn.innerText = 'Processing spin...';
+
+      try {
+        const res = await fetch('/api/game/spin', { method: 'POST' });
+        const data = await res.json();
+
+        if (!data.success) {
+          alert(data.error || 'Failed to process spin.');
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg> SPIN FOR ₦50';
+          return;
+        }
+
+        btn.innerText = 'Spinning...';
+        isSpinning = true;
+
+        const winningIndex = data.prizeIndex;
+        const degreesPerSegment = 360 / numSegments;
+        
+        // Precise angle calculation pointing straight up (270 degrees / 3.14*1.5 rad on standard unit circle, adjusted for canvas layout)
+        const targetSliceCenterAngle = (winningIndex * degreesPerSegment) + (degreesPerSegment / 2);
+        const desiredRotationDeg = (360 * 6) + (270 - targetSliceCenterAngle);
+        const targetRad = desiredRotationDeg * (Math.PI / 180);
+
+        let startTime = null;
+        const duration = 4000;
+
+        function animateSpin(timestamp) {
+          if (!startTime) startTime = timestamp;
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          const currentRotation = easeProgress * targetRad;
+
+          drawWheel(currentRotation);
+
+          if (progress < 1) {
+            requestAnimationFrame(animateSpin);
+          } else {
+            isSpinning = false;
+            currentAngle = targetRad % (2 * Math.PI);
+            
+            document.getElementById('headerBalance').innerText = '₦' + data.newBalance.toLocaleString();
+            renderHistory(data.spins);
+
+            showResultModal(data.prize);
+
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg> SPIN FOR ₦50';
+          }
+        }
+
+        requestAnimationFrame(animateSpin);
+
+      } catch (err) {
+        alert('Network error. Your balance has not been charged.');
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg> SPIN FOR ₦50';
+      }
+    }
+
+    function showResultModal(prize) {
+      const modal = document.getElementById('resultModal');
+      const title = document.getElementById('modalTitle');
+      const desc = document.getElementById('modalDesc');
+
+      if (prize > 0) {
+        title.innerText = 'Congratulations! 🎉';
+        desc.innerText = `You won ₦${prize.toLocaleString()}`;
+      } else {
+        title.innerText = 'Better luck next time!';
+        desc.innerText = 'You won ₦0';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('resultModal').style.display = 'none';
+    }
+
+    drawWheel();
+    fetchGameState();
+  </script>
+</body>
+</html>

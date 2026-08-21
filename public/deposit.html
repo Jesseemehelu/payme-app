@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>PAYME - Deposit Funds</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: #0B1020;
+      color: #F8FAFC;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 50px;
+    }
+
+    header {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: rgba(11, 16, 32, 0.8);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .back-btn {
+      color: #94A3B8;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .logo span {
+      color: #2563EB;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-top: 10px;
+    }
+
+    .page-title h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+    }
+
+    .page-title p {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    /* Account Card */
+
+    .account-card {
+      background: linear-gradient(135deg, #131B31 0%, #0F172A 100%);
+      border: 1px solid #1E293B;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #38BDF8;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .bank-details {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+      background: rgba(255,255,255,0.02);
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .detail-title {
+      font-size: 0.8rem;
+      color: #94A3B8;
+    }
+
+    .detail-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      text-align: right;
+    }
+
+    .acc-number-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      gap: 10px;
+    }
+
+    .acc-number {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #38BDF8;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(37, 99, 235, 0.4);
+      color: #60A5FA;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    .copy-all-btn {
+      width: 100%;
+      margin-top: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #E2E8F0;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    /* Notice */
+
+    .notice-box {
+      background: rgba(37, 99, 235, 0.1);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .notice-icon {
+      font-size: 1.1rem;
+      color: #38BDF8;
+      margin-top: 2px;
+    }
+
+    .notice-text h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .notice-text p {
+      font-size: 0.83rem;
+      color: #94A3B8;
+      line-height: 1.4;
+    }
+
+    /* Form */
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .currency-symbol {
+      position: absolute;
+      left: 16px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #38BDF8;
+      z-index: 2;
+    }
+
+    .amount-input {
+      width: 100%;
+      background: #131B31;
+      border: 1px solid #1E293B;
+      border-radius: 14px;
+      padding: 14px 16px 14px 38px;
+      color: #FFFFFF;
+      font-size: 1.2rem;
+      font-weight: 700;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .amount-input:focus {
+      border-color: #2563EB;
+    }
+
+    /* Upload */
+
+    .upload-box {
+      background: #131B31;
+      border: 2px dashed #1E293B;
+      border-radius: 16px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      position: relative;
+    }
+
+    .upload-box:hover {
+      border-color: #2563EB;
+    }
+
+    .upload-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .upload-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .upload-sub {
+      font-size: 0.75rem;
+      color: #64748B;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .preview-container {
+      display: none;
+      margin-top: 10px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(255,255,255,0.03);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #1E293B;
+    }
+
+    .preview-info {
+      font-size: 0.85rem;
+      color: #38BDF8;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 240px;
+    }
+
+    .remove-file {
+      color: #EF4444;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    /* Submit */
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+      transition: 0.2s;
+      margin-top: 10px;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* History */
+
+    .history-card {
+      background: #131B31;
+      border: 1px solid #1E293B;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .history-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 14px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      background: #0B1020;
+      border: 1px solid #1E293B;
+      padding: 12px 14px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .history-amt {
+      font-weight: 700;
+      color: #FFFFFF;
+      font-size: 0.95rem;
+    }
+
+    .history-ref {
+      font-size: 0.75rem;
+      color: #64748B;
+      margin-top: 2px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge.pending {
+      background: rgba(234, 179, 8, 0.15);
+      color: #EAB308;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+
+    .badge.approved {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22C55E;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .badge.rejected {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Modal */
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 16, 32, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #131B31;
+      border: 1px solid #1E293B;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 24px;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .success-icon-wrap {
+      width: 64px;
+      height: 64px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 2px solid rgba(34, 197, 94, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: #22C55E;
+      font-size: 1.8rem;
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      font-size: 0.88rem;
+      color: #94A3B8;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .ref-box {
+      background: #0B1020;
+      border: 1px solid #1E293B;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #38BDF8;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .modal-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .primary-modal-btn {
+      background: #2563EB;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: block;
+    }
+
+    .secondary-modal-btn {
+      background: rgba(255,255,255,0.06);
+      color: #E2E8F0;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="/dashboard.html" class="back-btn">← Deposit</a>
+
+    <div class="logo">
+      PAYME<span>.</span>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="page-title">
+      <h1>Fund your PAYME wallet</h1>
+
+      <p>
+        Send your deposit to the PAYME account below, then submit
+        your payment details for verification.
+      </p>
+    </div>
+
+    <!-- Deposit Account Card -->
+
+    <div class="account-card">
+
+      <div class="card-label">
+        PAYME Deposit Account
+      </div>
+
+      <div class="bank-details">
+
+        <div class="detail-row">
+          <span class="detail-title">Bank / Wallet</span>
+          <span class="detail-value">PalmPay</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-title">Account Name</span>
+          <span class="detail-value">JESSE CHIDUBEM</span>
+        </div>
+
+        <div style="margin-top: 4px;">
+
+          <span class="detail-title">
+            Account Number
+          </span>
+
+          <div class="acc-number-row">
+
+            <span
+              class="acc-number"
+              id="accountNumText"
+            >
+              9057194716
+            </span>
+
+            <button
+              class="copy-btn"
+              onclick="copyAccountNumber(this)"
+            >
+              Copy
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <button
+        class="copy-all-btn"
+        onclick="copyAllDetails()"
+      >
+        Copy Account Details
+      </button>
+
+    </div>
+
+    <!-- Important Notice -->
+
+    <div class="notice-box">
+
+      <div class="notice-icon">
+        ℹ️
+      </div>
+
+      <div class="notice-text">
+
+        <h4>
+          Before you continue
+        </h4>
+
+        <p>
+          Send the exact amount you enter below to the PalmPay
+          account shown above. Your PAYME balance will only be
+          credited after your payment has been reviewed and approved.
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- Amount Input -->
+
+    <div class="form-group">
+
+      <label class="form-label">
+        How much did you deposit?
+      </label>
+
+      <div class="input-wrapper">
+
+        <span class="currency-symbol">
+          ₦
+        </span>
+
+        <input
+          type="number"
+          id="amountInput"
+          class="amount-input"
+          placeholder="0.00"
+          min="100"
+          step="1"
+          oninput="validateForm()"
+        >
+
+      </div>
+
+    </div>
+
+    <!-- Payment Screenshot Upload -->
+
+    <div class="form-group">
+
+      <label class="form-label">
+        Payment proof
+      </label>
+
+      <div
+        class="upload-box"
+        onclick="document.getElementById('proofInput').click()"
+      >
+
+        <div class="upload-icon">
+          📷
+        </div>
+
+        <div class="upload-title">
+          Upload payment screenshot
+        </div>
+
+        <div class="upload-sub">
+          PNG, JPG or WEBP (Max 5MB)
+        </div>
+
+        <input
+          type="file"
+          id="proofInput"
+          class="file-input"
+          accept="image/png, image/jpeg, image/webp"
+          onchange="handleFileSelect(event)"
+        >
+
+      </div>
+
+      <div
+        class="preview-container"
+        id="previewContainer"
+      >
+
+        <span
+          class="preview-info"
+          id="fileNameDisplay"
+        >
+          screenshot.png
+        </span>
+
+        <button
+          class="remove-file"
+          onclick="removeFile(event)"
+        >
+          Remove
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Submit Button -->
+
+    <button
+      class="submit-btn"
+      id="submitBtn"
+      onclick="submitDeposit()"
+      disabled
+    >
+      Submit Deposit
+    </button>
+
+    <!-- Deposit History -->
+
+    <div class="history-card">
+
+      <div class="history-title">
+        Deposit History
+      </div>
+
+      <div
+        class="history-list"
+        id="depositHistoryList"
+      >
+
+        <p
+          style="
+            text-align:center;
+            color:#64748B;
+            font-size:0.85rem;
+            padding:10px;
+          "
+        >
+          Loading history...
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Success Modal -->
+
+  <div
+    class="modal-overlay"
+    id="successModal"
+  >
+
+    <div class="modal-card">
+
+      <div class="success-icon-wrap">
+        ✓
+      </div>
+
+      <div class="modal-title">
+        Deposit submitted ✓
+      </div>
+
+      <div class="modal-desc">
+        We've received your payment details. Please hold on while
+        your deposit is reviewed. Your PAYME balance will be updated
+        once the payment is verified.
+      </div>
+
+      <div
+        class="ref-box"
+        id="modalRefDisplay"
+      >
+        Reference: PM-XXXXXXXX
+      </div>
+
+      <div class="modal-btns">
+
+        <button
+          class="primary-modal-btn"
+          onclick="closeModalAndRefresh()"
+        >
+          View Deposit Status
+        </button>
+
+        <a
+          href="/dashboard.html"
+          class="secondary-modal-btn"
+        >
+          Back to Dashboard
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    let uploadedImageBase64 = null;
+
+    // Copy account number
+    async function copyAccountNumber(button) {
+
+      try {
+
+        await navigator.clipboard.writeText('9057194716');
+
+        button.innerText = 'Copied ✓';
+
+        setTimeout(() => {
+          button.innerText = 'Copy';
+        }, 2000);
+
+      } catch (err) {
+
+        alert('Could not copy account number.');
+
+      }
+
+    }
+
+    // Copy all account details
+    async function copyAllDetails() {
+
+      const details =
+        "Bank: PalmPay\n" +
+        "Account Number: 9057194716\n" +
+        "Account Name: JESSE CHIDUBEM";
+
+      try {
+
+        await navigator.clipboard.writeText(details);
+
+        alert('Account details copied to clipboard!');
+
+      } catch (err) {
+
+        alert('Could not copy account details.');
+
+      }
+
+    }
+
+    // Handle screenshot selection
+    function handleFileSelect(event) {
+
+      const file = event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      // Check file size
+      if (file.size > 5 * 1024 * 1024) {
+
+        alert('File size exceeds 5MB limit.');
+
+        event.target.value = '';
+
+        return;
+      }
+
+      // Check file type
+      const allowedTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/webp'
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+
+        alert('Please upload a PNG, JPG or WEBP image.');
+
+        event.target.value = '';
+
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+
+        uploadedImageBase64 = e.target.result;
+
+        document.getElementById(
+          'fileNameDisplay'
+        ).innerText = file.name;
+
+        document.getElementById(
+          'previewContainer'
+        ).style.display = 'flex';
+
+        validateForm();
+
+      };
+
+      reader.onerror = function() {
+
+        alert('Could not read the selected image.');
+
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // Remove selected file
+    function removeFile(event) {
+
+      if (event) {
+        event.stopPropagation();
+      }
+
+      uploadedImageBase64 = null;
+
+      document.getElementById(
+        'proofInput'
+      ).value = '';
+
+      document.getElementById(
+        'previewContainer'
+      ).style.display = 'none';
+
+      document.getElementById(
+        'fileNameDisplay'
+      ).innerText = 'screenshot.png';
+
+      validateForm();
+    }
+
+    // Validate form
+    function validateForm() {
+
+      const amount = parseFloat(
+        document.getElementById('amountInput').value
+      );
+
+      const submitBtn =
+        document.getElementById('submitBtn');
+
+      const validAmount =
+        Number.isFinite(amount) &&
+        amount >= 100;
+
+      const validProof =
+        !!uploadedImageBase64;
+
+      submitBtn.disabled =
+        !(validAmount && validProof);
+    }
+
+    // Fetch deposit history
+    async function fetchDeposits() {
+
+      try {
+
+        const res = await fetch('/api/deposits');
+
+        if (!res.ok) {
+
+          if (res.status === 401) {
+            window.location.href = '/';
+            return;
+          }
+
+          throw new Error('Failed to load deposits.');
+
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+
+          renderHistory(data.deposits || []);
+
+        } else {
+
+          renderHistory([]);
+
+        }
+
+      } catch (err) {
+
+        console.error(
+          'Failed to load deposits:',
+          err
+        );
+
+        document.getElementById(
+          'depositHistoryList'
+        ).innerHTML = `
+          <p style="
+            text-align:center;
+            color:#EF4444;
+            font-size:0.85rem;
+            padding:10px;
+          ">
+            Unable to load deposit history.
+          </p>
+        `;
+      }
+    }
+
+    // Render deposit history
+    function renderHistory(deposits) {
+
+      const list =
+        document.getElementById(
+          'depositHistoryList'
+        );
+
+      if (!deposits || deposits.length === 0) {
+
+        list.innerHTML = `
+          <p style="
+            text-align:center;
+            color:#64748B;
+            font-size:0.85rem;
+            padding:10px;
+          ">
+            No deposit history yet.
+          </p>
+        `;
+
+        return;
+      }
+
+      list.innerHTML = deposits.map(d => {
+
+        let badgeClass = 'pending';
+
+        if (d.status === 'Approved') {
+          badgeClass = 'approved';
+        }
+
+        if (d.status === 'Rejected') {
+          badgeClass = 'rejected';
+        }
+
+        const amount =
+          Number(d.amount || 0).toLocaleString();
+
+        const reason =
+          d.reason
+            ? `
+              <div style="
+                font-size:0.75rem;
+                color:#EF4444;
+                margin-top:4px;
+              ">
+                Reason: ${escapeHtml(d.reason)}
+              </div>
+            `
+            : '';
+
+        return `
+          <div class="history-item">
+
+            <div>
+
+              <div class="history-amt">
+                ₦${amount}
+              </div>
+
+              <div class="history-ref">
+                ${escapeHtml(d.reference || 'No reference')}
+                •
+                ${escapeHtml(d.date || '')}
+              </div>
+
+              ${reason}
+
+            </div>
+
+            <div class="badge ${badgeClass}">
+              ${escapeHtml(d.status || 'Pending Verification')}
+            </div>
+
+          </div>
+        `;
+
+      }).join('');
+    }
+
+    // Basic HTML escaping for deposit history
+    function escapeHtml(value) {
+
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    }
+
+    // Submit deposit
+    async function submitDeposit() {
+
+      const amount =
+        parseFloat(
+          document.getElementById('amountInput').value
+        );
+
+      const submitBtn =
+        document.getElementById('submitBtn');
+
+      if (
+        !Number.isFinite(amount) ||
+        amount < 100 ||
+        !uploadedImageBase64
+      ) {
+
+        alert(
+          'Please enter at least ₦100 and upload your payment screenshot.'
+        );
+
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Submitting Deposit...';
+
+      try {
+
+        const res = await fetch(
+          '/api/deposits',
+          {
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+              amount,
+              screenshot: uploadedImageBase64
+            })
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+
+          document.getElementById(
+            'modalRefDisplay'
+          ).innerText =
+            `Reference: ${data.reference}`;
+
+          document.getElementById(
+            'successModal'
+          ).style.display = 'flex';
+
+          await fetchDeposits();
+
+        } else {
+
+          alert(
+            data.error ||
+            data.message ||
+            'Failed to submit deposit.'
+          );
+
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Submit Deposit';
+
+        }
+
+      } catch (err) {
+
+        console.error(
+          'Deposit submission error:',
+          err
+        );
+
+        alert(
+          'Network error. Please check your connection and try again.'
+        );
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Submit Deposit';
+
+      }
+
+    }
+
+    // Close modal and reset form
+    function closeModalAndRefresh() {
+
+      document.getElementById(
+        'successModal'
+      ).style.display = 'none';
+
+      document.getElementById(
+        'amountInput'
+      ).value = '';
+
+      removeFile();
+
+      const submitBtn =
+        document.getElementById('submitBtn');
+
+      submitBtn.innerText = 'Submit Deposit';
+      submitBtn.disabled = true;
+
+      fetchDeposits();
+
+    }
+
+    // Close modal when clicking outside card
+    document.getElementById(
+      'successModal'
+    ).addEventListener('click', function(event) {
+
+      if (event.target === this) {
+        this.style.display = 'none';
+      }
+
+    });
+
+    // Initial load
+    fetchDeposits();
+
+  </script>
+
+</body>
+</html>
