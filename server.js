@@ -37,7 +37,7 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 const SESSION_SECRET =
   process.env.PAYME_SESSION_SECRET ||
-  'CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_2026';
+  'sess_sec_9qW2$vL5%nQ8@wZ3_8f8b2c7d4';
 
 // Session duration: 7 days
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;

@@ -288,7 +288,7 @@
         "weekly_2026-08-16": 2
       },
       "withdrawableBalance": 10,
-      "sessionVersion": 1
+      "sessionVersion": 2
     },
     {
       "id": "usr_1787297085833",
@@ -1776,6 +1776,39 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:09:33.677Z"
+    },
+    {
+      "id": "usr_mt3giary_b52564bad322",
+      "fullName": "Hebwcwg",
+      "email": "hwvwxtrr@gmail.com",
+      "username": "gwvecwccc",
+      "phone": "+234551804333",
+      "password": "gqfwgu8wywv",
+      "balance": 10,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "PHOOTB",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt3gias3_e252fcb1dd",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-21T21:23:44.019Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-21T21:23:44.019Z"
     }
   ],
   "weeklyCompetitions": [
