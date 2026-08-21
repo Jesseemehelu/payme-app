@@ -921,22 +921,20 @@ app.post('/api/auth/signup', async (req, res) => {
     // SAVE USER
     // ==================================================
 
-    users.push(newUser);
+// ==================================================
+// CREATE SESSION + SAVE USER
+// ==================================================
 
-    // Create a brand-new session for this exact user.
-    newUser.sessionVersion =
-      Number(newUser.sessionVersion || 0) + 1;
+newUser.sessionVersion =
+  Number(newUser.sessionVersion || 0) + 1;
 
-    const sessionToken =
-      createSessionToken(newUser);
+users.push(newUser);
 
-    setSessionCookie(
-      res,
-      sessionToken
-    );
+const sessionToken = createSessionToken(newUser);
 
-    saveDatabase();
+setSessionCookie(res, sessionToken);
 
+saveDatabase();
     // ==================================================
     // TELEGRAM SIGNUP NOTIFICATION
     // ==================================================

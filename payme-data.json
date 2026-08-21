@@ -288,7 +288,7 @@
         "weekly_2026-08-16": 2
       },
       "withdrawableBalance": 10,
-      "sessionVersion": 0
+      "sessionVersion": 1
     },
     {
       "id": "usr_1787297085833",
@@ -1677,6 +1677,105 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T19:52:17.530Z"
+    },
+    {
+      "id": "usr_mt3dudp6_6bfb54d66527",
+      "fullName": "Hehebebe",
+      "email": "bsbsgshs@gmail.com",
+      "username": "jesse1212bhha",
+      "phone": "+2349494849494",
+      "password": "jesse1122",
+      "balance": 10,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "53SRAS",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt3dudp7_e38a71c6ed",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-21T20:09:08.827Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-21T20:09:08.827Z"
+    },
+    {
+      "id": "usr_mt3dv6j8_fda0d2b39dca",
+      "fullName": "Gsvshsbsvsh",
+      "email": "hwvsfwygsvs@gmail.com",
+      "username": "jesse1212vahavahayy",
+      "phone": "+234816186181614",
+      "password": "jesse1122",
+      "balance": 10,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "0EDZXE",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt3dv6j9_6d19fc2bd9",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-21T20:09:46.197Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-21T20:09:46.197Z"
+    },
+    {
+      "id": "usr_mt3g02ng_92f1243aec92",
+      "fullName": "Vsvsvs",
+      "email": "hsgshe@gmail.com",
+      "username": "gegecshs",
+      "phone": "+234918848101",
+      "password": "vwgwgwhebvee",
+      "balance": 10,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "NUKGOH",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt3g02nh_f963c3f74c",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-21T21:09:33.677Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-21T21:09:33.677Z"
     }
   ],
   "weeklyCompetitions": [
