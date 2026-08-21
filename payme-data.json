@@ -287,7 +287,8 @@
       "weeklyReferralHistory": {
         "weekly_2026-08-16": 2
       },
-      "withdrawableBalance": 10
+      "withdrawableBalance": 10,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787297085833",
@@ -409,7 +410,8 @@
         }
       ],
       "createdAt": "2026-08-21T07:24:45.833Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787297525543",
@@ -600,7 +602,8 @@
         }
       ],
       "createdAt": "2026-08-21T07:32:05.543Z",
-      "withdrawableBalance": 15
+      "withdrawableBalance": 15,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787300220264",
@@ -630,7 +633,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T08:17:00.264Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787300995730",
@@ -660,7 +664,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T08:29:55.730Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787301042657",
@@ -690,7 +695,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T08:30:42.657Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787301103434",
@@ -720,7 +726,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T08:31:43.434Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787308338870",
@@ -772,7 +779,8 @@
         }
       ],
       "createdAt": "2026-08-21T10:32:18.870Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787311111710",
@@ -802,7 +810,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T11:18:31.710Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787313009533",
@@ -868,7 +877,8 @@
         }
       ],
       "createdAt": "2026-08-21T11:50:09.533Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787313535526",
@@ -898,7 +908,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T11:58:55.526Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787314867982",
@@ -928,7 +939,8 @@
       ],
       "deposits": [],
       "createdAt": "2026-08-21T12:21:07.982Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787319677893",
@@ -1064,7 +1076,8 @@
         }
       ],
       "createdAt": "2026-08-21T13:41:17.893Z",
-      "withdrawableBalance": 0
+      "withdrawableBalance": 0,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787321522338",
@@ -1494,7 +1507,8 @@
         }
       ],
       "createdAt": "2026-08-21T14:12:02.338Z",
-      "withdrawableBalance": 790
+      "withdrawableBalance": 790,
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787323222001",
@@ -1524,7 +1538,8 @@
         }
       ],
       "deposits": [],
-      "createdAt": "2026-08-21T14:40:22.002Z"
+      "createdAt": "2026-08-21T14:40:22.002Z",
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787324634474",
@@ -1554,7 +1569,8 @@
         }
       ],
       "deposits": [],
-      "createdAt": "2026-08-21T15:03:54.474Z"
+      "createdAt": "2026-08-21T15:03:54.474Z",
+      "sessionVersion": 0
     },
     {
       "id": "usr_1787336097111",
@@ -1593,7 +1609,74 @@
           "reason": null
         }
       ],
-      "createdAt": "2026-08-21T18:14:57.111Z"
+      "createdAt": "2026-08-21T18:14:57.111Z",
+      "sessionVersion": 0
+    },
+    {
+      "id": "usr_mt3d5mds_4dee46a103ae",
+      "fullName": "Richard Arinze",
+      "email": "jesseisfresh0ba2@gmail.com",
+      "username": "vavavav",
+      "phone": "+234846846484",
+      "password": "ywgwgwhwbwh",
+      "balance": 10,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "U5RWM0",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt3d5mdt_6ab7f19f5d",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-21T19:49:53.681Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-21T19:49:53.681Z"
+    },
+    {
+      "id": "usr_mt3d8pde_433b4dba90be",
+      "fullName": "Vsvsvs",
+      "email": "gavsvsv@gmail.com",
+      "username": "jesse1212vavsv",
+      "phone": "+23494940494",
+      "password": "jesse1122",
+      "balance": 10,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "H2YIB6",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt3d8pdm_e9642b7c94",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-21T19:52:17.530Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-21T19:52:17.530Z"
     }
   ],
   "weeklyCompetitions": [
