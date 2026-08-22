@@ -363,15 +363,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function handleTelegramAuth() {
 
-    const tg = window.Telegram?.WebApp;
-
-    alert(
-        "Telegram: " + (!!tg) +
-        "\ninitData: " + (!!tg?.initData) +
-        "\nUser: " + (!!tg?.initDataUnsafe?.user) +
-        "\nUser ID: " + (tg?.initDataUnsafe?.user?.id || "NONE")
-    );
-
  
     const errorBox =
         document.getElementById('errorBox');
