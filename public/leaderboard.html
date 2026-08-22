@@ -270,105 +270,106 @@
     <div class="empty-state">No past winners recorded yet.</div>
   </div>
 
-  <script>
-    async function loadLeaderboardData() {
-      try {
-        const [lbRes, userRes] = await Promise.all([
-          fetch('/api/leaderboard'),
-          fetch('/api/user/dashboard')
-        ]);
 
-        const lbData = await lbRes.json();
-        const userData = userRes.ok ? await userRes.json() : null;
-        const currentUser = userData && userData.success ? userData.user : null;
 
-        const listContainer = document.getElementById('topReferrersList');
 
-        if (!lbData.success || !lbData.leaderboard || lbData.leaderboard.length === 0) {
-          listContainer.innerHTML = '<div class="empty-state">No referrals recorded yet for this week. Be the first!</div>';
-          return;
-        }
+<script>
+async function loadLeaderboardData() {
+  try {
+    const [lbRes, userRes] = await Promise.all([
+      fetch('/api/weekly-competition'),
+      fetch('/api/user/dashboard', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    ]);
 
-        const items = lbData.leaderboard;
-        let currentUserRank = -1;
-        let currentUserReferrals = currentUser ? (currentUser.totalReferrals || currentUser.successfulReferrals || 0) : 0;
+    const lbData = await lbRes.json();
+    const userData = userRes.ok ? await userRes.json() : null;
+    const currentUser = userData && userData.success ? userData.user : null;
+    const listContainer = document.getElementById('topReferrersList');
 
-        listContainer.innerHTML = items.map((user, index) => {
-          const rank = index + 1;
-          const name = user.username ? '@' + user.username : (user.fullName || '@User');
-          
-          const refCount = Number(user.totalReferrals ?? user.referrals ?? user.successfulReferrals ?? 0);
-          const earnings = Number(user.referralEarnings ?? user.earnings ?? 0);
-
-          const isMe = currentUser && (
-            (user.id && user.id === currentUser.id) || 
-            (user.username && user.username === currentUser.username)
-          );
-
-          if (isMe) {
-            currentUserRank = rank;
-            currentUserReferrals = refCount;
-          }
-
-          const rankBadges = ['🥇', '🥈', '🥉'];
-          const rankClass = rank <= 3 ? `top-three rank-${rank}` : '';
-          const displayRank = rankBadges[index] || `#${rank}`;
-
-          return `
-            <div class="user-row ${rankClass} ${isMe ? 'is-me' : ''}">
-              <div class="user-row-left">
-                <div class="rank-badge-box">${displayRank}</div>
-                <div class="user-details">
-                  <span class="uname">${name} ${isMe ? '(You)' : ''}</span>
-                  <span class="count">${refCount} Referral${refCount === 1 ? '' : 's'}</span>
-                </div>
-              </div>
-              <span class="reward-val">₦${earnings.toLocaleString()}</span>
-            </div>
-          `;
-        }).join('');
-
-        // Update rank banner for logged-in user
-        const rankValEl = document.getElementById('userCurrentRank');
-        const countEl = document.getElementById('userEligibleCount');
-        const promptEl = document.getElementById('userActionPrompt');
-
-        countEl.innerText = `${currentUserReferrals} Referral${currentUserReferrals === 1 ? '' : 's'}`;
-
-        if (currentUserRank > 0) {
-          rankValEl.innerText = `#${currentUserRank}`;
-          promptEl.innerText = 'Keep inviting to hold your spot!';
-        } else if (currentUserReferrals > 0) {
-          rankValEl.innerText = 'Unranked';
-          promptEl.innerText = 'Top 10 spots are higher up!';
-        } else {
-          rankValEl.innerText = 'Unranked';
-          promptEl.innerText = 'Invite 1 user to rank!';
-        }
-
-      } catch (err) {
-        console.error('Error loading leaderboard:', err);
-        document.getElementById('topReferrersList').innerHTML = 
-          '<div class="empty-state">Unable to load live standings right now.</div>';
+    if (!lbData.success || !lbData.leaderboard || lbData.leaderboard.length === 0) {
+      listContainer.innerHTML = '<div class="empty-state">No referrals recorded yet for this week. Be the first!</div>';
+      
+      if (currentUser) {
+        document.getElementById('userEligibleCount').innerText = `${currentUser.totalReferrals || 0} Referrals`;
       }
+      return;
     }
 
-    // Countdown Timer
+    const items = lbData.leaderboard;
+    let currentUserRank = lbData.user ? lbData.user.position : -1;
+    let currentUserReferrals = lbData.user ? lbData.user.eligibleReferrals : 0;
 
+    listContainer.innerHTML = items.map((user, index) => {
+      const rank = index + 1;
+      const name = user.username ? '@' + user.username : (user.fullName || '@User');
+      const refCount = Number(user.eligibleReferrals ?? user.totalReferrals ?? 0);
+      
+      // Match using user.userId (returned by weekly API) OR user.id OR username
+      const isMe = currentUser && (
+        (user.userId && user.userId === currentUser.id) ||
+        (user.id && user.id === currentUser.id) ||
+        (user.username && user.username === currentUser.username)
+      );
+
+      if (isMe && currentUserRank <= 0) {
+        currentUserRank = rank;
+        currentUserReferrals = refCount;
+      }
+
+      const rankBadges = ['🥇', '🥈', '🥉'];
+      const rankClass = rank <= 3 ? `top-three rank-${rank}` : '';
+      const displayRank = rankBadges[index] || `#${rank}`;
+
+      return `
+        <div class="user-row ${rankClass} ${isMe ? 'is-me' : ''}">
+          <div class="user-row-left">
+            <div class="rank-badge-box">${displayRank}</div>
+            <div class="user-details">
+              <span class="uname">${name} ${isMe ? '(You)' : ''}</span>
+              <span class="count">${refCount} Referral${refCount === 1 ? '' : 's'}</span>
+            </div>
+          </div>
+          <span class="reward-val">${refCount} Refs</span>
+        </div>
+      `;
+    }).join('');
+
+    // Update rank banner for logged-in user
+    const rankValEl = document.getElementById('userCurrentRank');
+    const countEl = document.getElementById('userEligibleCount');
+    const promptEl = document.getElementById('userActionPrompt');
+
+    countEl.innerText = `${currentUserReferrals} Referral${currentUserReferrals === 1 ? '' : 's'}`;
+
+    if (currentUserRank > 0) {
+      rankValEl.innerText = `#${currentUserRank}`;
+      promptEl.innerText = 'Keep inviting to hold your spot!';
+    } else if (currentUserReferrals > 0) {
+      rankValEl.innerText = 'Unranked';
+      promptEl.innerText = 'Top 10 spots are higher up!';
+    } else {
+      rankValEl.innerText = 'Unranked';
+      promptEl.innerText = 'Invite 1 user to rank!';
+    }
+  } catch (err) {
+    console.error('Error loading leaderboard:', err);
+    document.getElementById('topReferrersList').innerHTML =
+      '<div class="empty-state">Unable to load live standings right now.</div>';
+  }
+}
+
+// Countdown Timer
 let countdownInterval = null;
-
 async function syncAndStartTimer() {
   try {
     const res = await fetch('/api/weekly-competition');
     const data = await res.json();
-
     if (!data.success || !data.competition || !data.competition.endTime) {
       document.getElementById('countdownTimer').innerText = 'Ended';
       return;
     }
 
     const targetTime = new Date(data.competition.endTime).getTime();
-
     if (countdownInterval) clearInterval(countdownInterval);
 
     countdownInterval = setInterval(() => {
@@ -386,11 +387,10 @@ async function syncAndStartTimer() {
       const h = Math.floor((totalSeconds % 86400) / 3600);
       const m = Math.floor((totalSeconds % 3600) / 60);
       const s = totalSeconds % 60;
-
       const formattedS = s < 10 ? '0' + s : s;
+
       document.getElementById('countdownTimer').innerText = `${d}d ${h}h ${m}m ${formattedS}s`;
     }, 1000);
-
   } catch (err) {
     console.error('Error fetching competition timer:', err);
   }
@@ -402,8 +402,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 setInterval(loadLeaderboardData, 5000);
+</script>
 
-  
-  </script>
+
+
 </body>
 </html>

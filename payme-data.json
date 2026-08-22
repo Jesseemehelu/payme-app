@@ -7,15 +7,69 @@
       "username": "jesse1212",
       "phone": "+2348034646388",
       "password": "jesse1122",
-      "balance": 25,
+      "balance": 115,
       "hasReceivedWelcomeBonus": true,
       "hasSeenPopup": true,
       "referralCode": "VX1M1R",
       "referredBy": null,
-      "totalReferrals": 7,
-      "successfulReferrals": 7,
-      "referralEarnings": 105,
+      "totalReferrals": 13,
+      "successfulReferrals": 13,
+      "referralEarnings": 195,
       "transactions": [
+        {
+          "id": "tx_ref_mt4p2esc_3ac6d7d9e0",
+          "type": "referral_reward",
+          "description": "Referral Reward (@gwvwssa)",
+          "amount": 15,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:11:05.436Z"
+        },
+        {
+          "id": "tx_ref_mt4p1pxy_9da43f2cf2",
+          "type": "referral_reward",
+          "description": "Referral Reward (@jesse1212tarrg)",
+          "amount": 15,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:10:33.238Z"
+        },
+        {
+          "id": "tx_ref_mt4p0kkd_c8b459218b",
+          "type": "referral_reward",
+          "description": "Referral Reward (@jesse1212gqeees)",
+          "amount": 15,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:09:39.613Z"
+        },
+        {
+          "id": "tx_ref_mt4ozw57_3531f7715f",
+          "type": "referral_reward",
+          "description": "Referral Reward (@jesse1212fayyy)",
+          "amount": 15,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:09:07.963Z"
+        },
+        {
+          "id": "tx_ref_mt4oz882_ea2f2dea93",
+          "type": "referral_reward",
+          "description": "Referral Reward (@jesse1212ofotiss)",
+          "amount": 15,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:08:36.962Z"
+        },
+        {
+          "id": "tx_ref_mt4oyo0t_cd3dce1d16",
+          "type": "referral_reward",
+          "description": "Referral Reward (@jesse1212ojotot)",
+          "amount": 15,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:08:10.781Z"
+        },
         {
           "id": "tx_spin_reward_mt45ef7l_21e9d13431",
           "type": "Spin Reward",
@@ -346,13 +400,55 @@
           "confirmedAt": "2026-08-22T08:59:53.041Z",
           "eligible": true,
           "competitionId": "weekly_2026-08-16"
+        },
+        {
+          "referredUserId": "usr_mt4oyo0r_12a80731c5f3",
+          "referredUsername": "jesse1212ojotot",
+          "confirmedAt": "2026-08-22T18:08:10.781Z",
+          "eligible": true,
+          "competitionId": "weekly_2026-08-16"
+        },
+        {
+          "referredUserId": "usr_mt4oz880_fd76c798e89c",
+          "referredUsername": "jesse1212ofotiss",
+          "confirmedAt": "2026-08-22T18:08:36.962Z",
+          "eligible": true,
+          "competitionId": "weekly_2026-08-16"
+        },
+        {
+          "referredUserId": "usr_mt4ozw57_c14b7f33c750",
+          "referredUsername": "jesse1212fayyy",
+          "confirmedAt": "2026-08-22T18:09:07.963Z",
+          "eligible": true,
+          "competitionId": "weekly_2026-08-16"
+        },
+        {
+          "referredUserId": "usr_mt4p0kkd_0f4575f25b39",
+          "referredUsername": "jesse1212gqeees",
+          "confirmedAt": "2026-08-22T18:09:39.613Z",
+          "eligible": true,
+          "competitionId": "weekly_2026-08-16"
+        },
+        {
+          "referredUserId": "usr_mt4p1pxy_f64058120310",
+          "referredUsername": "jesse1212tarrg",
+          "confirmedAt": "2026-08-22T18:10:33.238Z",
+          "eligible": true,
+          "competitionId": "weekly_2026-08-16"
+        },
+        {
+          "referredUserId": "usr_mt4p2esb_be935a327358",
+          "referredUsername": "gwvwssa",
+          "confirmedAt": "2026-08-22T18:11:05.436Z",
+          "eligible": true,
+          "competitionId": "weekly_2026-08-16"
         }
       ],
       "weeklyReferralHistory": {
-        "weekly_2026-08-16": 5
+        "weekly_2026-08-16": 11
       },
-      "withdrawableBalance": 25,
-      "sessionVersion": 16,
+      "withdrawableBalance": 115,
+      "sessionVersion": 18,
       "depositBalance": 0,
       "telegramId": null
     },
@@ -2588,6 +2684,216 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T13:58:15.168Z"
+    },
+    {
+      "id": "usr_mt4oyo0r_12a80731c5f3",
+      "fullName": "Hwhwvsbsb",
+      "email": "gwgwvwv@gmail.com",
+      "username": "jesse1212ojotot",
+      "phone": "+234919181818",
+      "password": "jesse1122",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "BB699I",
+      "referredBy": "VX1M1R",
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4oyo0s_9f6a2bf3fb",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:08:10.780Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T18:08:10.780Z"
+    },
+    {
+      "id": "usr_mt4oz880_fd76c798e89c",
+      "fullName": "Hwhwvsveve",
+      "email": "hsheveveve@gmail.com",
+      "username": "jesse1212ofotiss",
+      "phone": "+23451881021",
+      "password": "jesse1122",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "1Q8M1P",
+      "referredBy": "VX1M1R",
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4oz880_9def472d4f",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:08:36.962Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T18:08:36.960Z"
+    },
+    {
+      "id": "usr_mt4ozw57_c14b7f33c750",
+      "fullName": "Vsvsvsveh",
+      "email": "whebevwvw@gmail.com",
+      "username": "jesse1212fayyy",
+      "phone": "+2346181818181",
+      "password": "jesse1122",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "ROF5L6",
+      "referredBy": "VX1M1R",
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4ozw57_14a436ec00",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:09:07.963Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T18:09:07.963Z"
+    },
+    {
+      "id": "usr_mt4p0kkd_0f4575f25b39",
+      "fullName": "Hshsjsii",
+      "email": "uish@gmail.com",
+      "username": "jesse1212gqeees",
+      "phone": "+2348181016454",
+      "password": "jesse1122",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "UGAUGS",
+      "referredBy": "VX1M1R",
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4p0kkd_28431def4a",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:09:39.613Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T18:09:39.613Z"
+    },
+    {
+      "id": "usr_mt4p1pxy_f64058120310",
+      "fullName": "Heheuevehe",
+      "email": "gwvevehuu@gmail.com",
+      "username": "jesse1212tarrg",
+      "phone": "+23494818151",
+      "password": "jesse1122",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "2XDI3I",
+      "referredBy": "VX1M1R",
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4p1pxy_977672cbdc",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:10:33.238Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T18:10:33.238Z"
+    },
+    {
+      "id": "usr_mt4p2esb_be935a327358",
+      "fullName": "Hsgavwwgw",
+      "email": "gwvwcwg@gmail.com",
+      "username": "gwvwssa",
+      "phone": "+23461818810015",
+      "password": "tw6ugwcwhe",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "T2WA3C",
+      "referredBy": "VX1M1R",
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4p2esc_1f19475b93",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T18:11:05.436Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T18:11:05.436Z"
     }
   ],
   "weeklyCompetitions": [
@@ -2610,7 +2916,7 @@
       "winners": [],
       "finalizedAt": null,
       "referralCounts": {
-        "usr_1787296920206": 5,
+        "usr_1787296920206": 11,
         "usr_mt44h2bs_6e2156622e74": 2,
         "usr_mt44ln6h_ab5a7530b9f2": 3
       },
@@ -2620,7 +2926,13 @@
           "2": "2026-08-21T14:40:22.002Z",
           "3": "2026-08-22T08:13:23.230Z",
           "4": "2026-08-22T08:59:27.362Z",
-          "5": "2026-08-22T08:59:53.041Z"
+          "5": "2026-08-22T08:59:53.041Z",
+          "6": "2026-08-22T18:08:10.781Z",
+          "7": "2026-08-22T18:08:36.962Z",
+          "8": "2026-08-22T18:09:07.963Z",
+          "9": "2026-08-22T18:09:39.613Z",
+          "10": "2026-08-22T18:10:33.238Z",
+          "11": "2026-08-22T18:11:05.436Z"
         },
         "usr_mt44h2bs_6e2156622e74": {
           "1": "2026-08-22T08:35:28.622Z",

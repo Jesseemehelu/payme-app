@@ -211,7 +211,7 @@
 
     <div class="header-card">
       <div class="balance-title">Withdrawable Earnings</div>
-      <div class="balance-amount" id="withdrawableBalance">₦0.00</div>
+      <div class="balance-amount" id="earningsBalanceText">₦0.00</div>
     </div>
 
     <div class="form-card">
@@ -261,71 +261,116 @@
     </div>
   </div>
 
-  <script>
-    let withdrawableBalance = 0;
 
-    // Load withdrawable earnings balance on startup
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const res = await fetch('/api/user/dashboard');
-        const data = await res.json();
-        if (data.success && data.user) {
-          // Pull withdrawable balance or fallback to earnings fields
-          withdrawableBalance = data.user.withdrawableBalance ?? data.user.referralEarnings ?? data.user.earnings ?? 0;
-          document.getElementById('withdrawableBalance').innerText = `₦${withdrawableBalance.toLocaleString()}`;
-          document.getElementById('amount').max = withdrawableBalance;
-        }
-      } catch (err) {
-        console.error('Error loading earnings balance:', err);
-      }
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* =========================================================
+   WITHDRAWAL PAGE DATA FETCHING (IDENTICAL TO DASHBOARD)
+   ========================================================= */
+
+let withdrawableBalance = 0;
+let currentEarnings = 0;
+
+async function fetchDashboardData() {
+  try {
+    // 1. Extract Telegram Mini App native authentication context
+    const tg = window.Telegram?.WebApp;
+    const initData = tg?.initData || "";
+    const tgUser = tg?.initDataUnsafe?.user;
+
+    // 2. Fetch dashboard data using POST to transmit Telegram session proof
+    const response = await fetch("/api/user/dashboard", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        initData: initData,
+        telegramId: tgUser?.id,
+        username: tgUser?.username,
+        firstName: tgUser?.first_name,
+        lastName: tgUser?.last_name
+      })
     });
 
-    // Handle Form Submission
-    document.getElementById('withdrawForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const data = await response.json();
+    if (!data.success) return;
 
-      const accountName = document.getElementById('accountName').value.trim();
-      const bankName = document.getElementById('bankName').value.trim();
-      const accountNumber = document.getElementById('accountNumber').value.trim();
-      const amount = parseFloat(document.getElementById('amount').value);
+    const user = data.user;
 
-      if (amount < 100) {
-        alert('Minimum withdrawal amount is ₦100');
-        return;
-      }
+    /* WITHDRAWABLE / EARNINGS BALANCE */
+    // withdrawableBalance includes welcome bonus, spin wins, ref earnings, etc.
+    withdrawableBalance = Number(user.withdrawableBalance ?? user.referralEarnings ?? 0);
+    currentEarnings = withdrawableBalance; // Sets guard limit for withdrawals
 
-      if (amount > withdrawableBalance) {
-        alert('You cannot withdraw more than your earned balance. Deposited funds are non-withdrawable.');
-        return;
-      }
+    /* DISPLAY WITHDRAWABLE BALANCE IN "TOTAL EARNINGS" BOX */
+    const balanceTextEl = document.getElementById("earningsBalanceText") || document.getElementById("withdrawable Balance");
+    if (balanceTextEl) {
+      balanceTextEl.innerText = withdrawableBalance.toFixed(2);
+    }
 
-      const btn = document.getElementById('submitBtn');
-      btn.innerText = 'Processing...';
-      btn.disabled = true;
+  } catch (error) {
+    console.error("Failed to load dashboard:", error);
+  }
+}
 
-      try {
-        const response = await fetch('/api/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accountName, bankName, accountNumber, amount })
-        });
+// Automatically fetch balance when page opens
+window.addEventListener("DOMContentLoaded", fetchDashboardData);
 
-        const result = await response.json();
+/* =========================================================
+   WITHDRAWAL FORM SUBMISSION
+   ========================================================= */
 
-        if (result.success) {
-          document.getElementById('successModal').classList.add('show');
-        } else {
-          alert(result.message || 'Withdrawal failed. Try again.');
-          btn.innerText = 'Confirm Withdrawal';
-          btn.disabled = false;
-        }
-      } catch (err) {
-        console.error('Withdrawal error:', err);
-        alert('An error occurred. Please check your network.');
-        btn.innerText = 'Confirm Withdrawal';
-        btn.disabled = false;
-      }
+document.getElementById('withdrawForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const accountName = document.getElementById('accountName').value.trim();
+  const bankName = document.getElementById('bankName').value.trim();
+  const accountNumber = document.getElementById('accountNumber').value.trim();
+  const amount = parseFloat(document.getElementById('amount').value);
+
+  if (amount < 100) {
+    alert('Minimum withdrawal amount is ₦100');
+    return;
+  }
+
+  if (amount > withdrawableBalance) {
+    alert('You cannot withdraw more than your earned balance. Deposited funds are non-withdrawable.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.innerText = 'Processing...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch('/api/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ accountName, bankName, accountNumber, amount })
     });
-  </script>
+
+    const result = await response.json();
+
+    if (result.success) {
+      document.getElementById('successModal').classList.add('show');
+    } else {
+      alert(result.message || 'Withdrawal failed. Try again.');
+    }
+  } catch (err) {
+    console.error('Withdrawal error:', err);
+    alert('An error occurred. Please check your network.');
+  } finally {
+    btn.innerText = 'Confirm Withdrawal';
+    btn.disabled = false;
+  }
+});
+</script>
+
+
+
 </body>
 </html>
