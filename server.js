@@ -2522,366 +2522,124 @@ app.post('/api/user/verify-telegram-join', requireLogin, async (req, res) => {
 
 
 
-// ======================================================
+// ====================
 // SPIN GAME
-// ======================================================
+// ====================
+app.post('/api/game/spin', requireLogin, (req, res) => {
+  try {
+    const user = req.user;
+    syncUserBalance(user);
 
-app.post(
-  '/api/game/spin',
-  requireLogin,
-  (req, res) => {
+    let usedFreeSpin = false;
 
-    try {
+    // 1. USE FREE SPIN FIRST
+    if (user.freeSpins && user.freeSpins > 0) {
+      user.freeSpins -= 1;
+      usedFreeSpin = true;
+    } else {
+      // 2. CHECK BALANCE IF NO FREE SPINS AVAILABLE
+      if (Number(user.balance || 0) < SPIN_COST) {
+        return res.status(400).json({
+          success: false,
+          error: `Insufficient balance. You need at least ₦${SPIN_COST} or a free spin.`
+        });
+      }
 
-      const user =
-        req.user;
+      // DEDUCT SPIN COST (Prefer Deposit Balance -> Earnings Balance)
+      let remainingSpinCost = SPIN_COST;
+      const currentDepositBalance = getDepositBalance(user);
+      const currentEarnings = getWithdrawableBalance(user);
 
-
-      syncUserBalance(
-        user
-      );
-
-
-if (user.freeSpins && user.freeSpins > 0) {
-  user.freeSpins -= 1; // Deduct 1 free spin instead of money
-} else {
-  if (Number(user.balance || 0) < SPIN_COST) {[span_1](start_span)[span_1](end_span)
-    return res.status(400).json({
-      success: false,
-      error: 'Insufficient balance. You need at least ₦50.[span_2](start_span)'[span_2](end_span)
-    });
-  }
-  user.balance -= SPIN_COST; // Deduct ₦50[span_3](start_span)[span_3](end_span)
-}
-
-      const prizes = [
-
-        {
-          amount: 0,
-          weight: 2000,
-          label: '₦0'
-        },
-
-        {
-          amount: 10,
-          weight: 2500,
-          label: '₦10'
-        },
-
-        {
-          amount: 20,
-          weight: 2500,
-          label: '₦20'
-        },
-
-        {
-          amount: 50,
-          weight: 1800,
-          label: '₦50'
-        },
-
-        {
-          amount: 100,
-          weight: 800,
-          label: '₦100'
-        },
-
-        {
-          amount: 250,
-          weight: 250,
-          label: '₦250'
-        },
-
-        {
-          amount: 500,
-          weight: 100,
-          label: '₦500'
-        },
-
-        {
-          amount: 1000,
-          weight: 45,
-          label: '₦1000'
-        },
-
-        {
-          amount: 2000,
-          weight: 5,
-          label: '₦2000'
-        }
-
-      ];
-
-
-      // ==================================================
-      // DEDUCT SPIN COST
-      // ==================================================
-
-      let remainingSpinCost =
-        SPIN_COST;
-
-
-      const currentDepositBalance =
-        getDepositBalance(
-          user
-        );
-
-
-      const currentEarnings =
-        getWithdrawableBalance(
-          user
-        );
-
-
-      if (
-        currentDepositBalance >=
-        remainingSpinCost
-      ) {
-
-        user.depositBalance =
-          currentDepositBalance -
-          remainingSpinCost;
-
-        remainingSpinCost =
-          0;
-
+      if (currentDepositBalance >= remainingSpinCost) {
+        user.depositBalance = currentDepositBalance - remainingSpinCost;
       } else {
-
-        remainingSpinCost =
-          remainingSpinCost -
-          currentDepositBalance;
-
-        user.depositBalance =
-          0;
-
-
-        if (
-          currentEarnings <
-          remainingSpinCost
-        ) {
-
-          user.depositBalance =
-            currentDepositBalance;
-
-          syncUserBalance(
-            user
-          );
-
-          return res.status(400).json({
-
-            success:
-              false,
-
-            error:
-              'Insufficient balance.'
-
-          });
-
-        }
-
-
-        user.withdrawableBalance =
-          currentEarnings -
-          remainingSpinCost;
-
+        remainingSpinCost -= currentDepositBalance;
+        user.depositBalance = 0;
+        user.withdrawableBalance = currentEarnings - remainingSpinCost;
       }
 
-
-      syncUserBalance(
-        user
-      );
-
+      syncUserBalance(user);
 
       user.transactions.unshift({
-
-        id:
-          generateTransactionId(
-            'tx_spin_entry'
-          ),
-
-        type:
-          'Spin Entry',
-
-        bank:
-          'PAYME Wallet',
-
-        amount:
-          SPIN_COST,
-
-        date:
-          new Date().toLocaleString(),
-
-        createdAt:
-          new Date().toISOString()
-
+        id: generateTransactionId('tx_spin_entry'),
+        type: 'Spin Entry',
+        bank: 'PAYME Wallet',
+        amount: SPIN_COST,
+        date: new Date().toLocaleString(),
+        createdAt: new Date().toISOString()
       });
-
-
-      // ==================================================
-      // SELECT PRIZE
-      // ==================================================
-
-      const totalWeight =
-        prizes.reduce(
-          (
-            total,
-            prize
-          ) =>
-            total +
-            prize.weight,
-          0
-        );
-
-
-      const randomWeight =
-        Math.floor(
-          Math.random() *
-          totalWeight
-        );
-
-
-      let cumulativeWeight =
-        0;
-
-
-      let selectedPrize =
-        prizes[0];
-
-
-      for (
-        const prize of prizes
-      ) {
-
-        cumulativeWeight +=
-          prize.weight;
-
-
-        if (
-          randomWeight <
-          cumulativeWeight
-        ) {
-
-          selectedPrize =
-            prize;
-
-          break;
-
-        }
-
-      }
-
-
-      // ==================================================
-      // ADD WINNINGS
-      // ==================================================
-
-      if (
-        selectedPrize.amount >
-        0
-      ) {
-
-        user.withdrawableBalance =
-          Number(
-            user.withdrawableBalance || 0
-          ) +
-          Number(
-            selectedPrize.amount
-          );
-
-      }
-
-
-      syncUserBalance(
-        user
-      );
-
-
-      user.transactions.unshift({
-
-        id:
-          generateTransactionId(
-            'tx_spin_reward'
-          ),
-
-        type:
-          'Spin Reward',
-
-        bank:
-          'PAYME Wallet',
-
-        amount:
-          selectedPrize.amount,
-
-        date:
-          new Date().toLocaleString(),
-
-        createdAt:
-          new Date().toISOString()
-
-      });
-
-
-      saveDatabase();
-
-
-      const recentSpins =
-        user.transactions.filter(
-          t =>
-            t.type &&
-            t.type.includes(
-              'Spin'
-            )
-        );
-
-
-      return res.json({
-
-        success:
-          true,
-
-        prize:
-          selectedPrize.amount,
-
-        prizeIndex:
-          prizes.indexOf(
-            selectedPrize
-          ),
-
-        newBalance:
-          user.balance,
-
-        withdrawableBalance:
-          user.withdrawableBalance,
-
-        depositBalance:
-          user.depositBalance,
-
-        spins:
-          recentSpins
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Spin error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        error:
-          'Server error during spin.'
-
-      });
-
     }
 
+    // PRIZE POOL CONFIGURATION
+    const prizes = [
+      { amount: 0, weight: 2000, label: 'NO' },
+      { amount: 10, weight: 2500, label: '₦10' },
+      { amount: 20, weight: 2500, label: '₦20' },
+      { amount: 50, weight: 1800, label: '₦50' },
+      { amount: 100, weight: 800, label: '₦100' },
+      { amount: 250, weight: 250, label: '₦250' },
+      { amount: 500, weight: 100, label: '₦500' },
+      { amount: 1000, weight: 45, label: '₦1000' },
+      { amount: 2000, weight: 5, label: '₦2000' }
+    ];
+
+    // SELECT PRIZE BASED ON WEIGHT
+    const totalWeight = prizes.reduce((total, prize) => total + prize.weight, 0);
+    const randomWeight = Math.floor(Math.random() * totalWeight);
+    let cumulativeWeight = 0;
+    let selectedPrize = prizes[0];
+
+    for (const prize of prizes) {
+      cumulativeWeight += prize.weight;
+      if (randomWeight < cumulativeWeight) {
+        selectedPrize = prize;
+        break;
+      }
+    }
+
+    // ADD WINNINGS TO WITHDRAWABLE BALANCE
+    if (selectedPrize.amount > 0) {
+      user.withdrawableBalance = Number(user.withdrawableBalance || 0) + Number(selectedPrize.amount);
+    }
+
+    syncUserBalance(user);
+
+    user.transactions.unshift({
+      id: generateTransactionId('tx_spin_reward'),
+      type: usedFreeSpin ? 'Free Spin Reward' : 'Spin Reward',
+      bank: 'PAYME Wallet',
+      amount: selectedPrize.amount,
+      date: new Date().toLocaleString(),
+      createdAt: new Date().toISOString()
+    });
+
+    saveDatabase();
+
+    const recentSpins = user.transactions.filter(t => t.type && t.type.includes('Spin'));
+
+    return res.json({
+      success: true,
+      usedFreeSpin,
+      freeSpins: user.freeSpins || 0,
+      prize: selectedPrize.amount,
+      prizeIndex: prizes.indexOf(selectedPrize),
+      newBalance: user.balance,
+      withdrawableBalance: user.withdrawableBalance,
+      depositBalance: user.depositBalance,
+      spins: recentSpins
+    });
+
+  } catch (err) {
+    console.error('Spin error:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Server error during spin.'
+    });
   }
-);
+});
+
+
+
 
 
 // ======================================================
