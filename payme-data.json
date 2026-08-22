@@ -352,8 +352,9 @@
         "weekly_2026-08-16": 5
       },
       "withdrawableBalance": 25,
-      "sessionVersion": 13,
-      "depositBalance": 0
+      "sessionVersion": 14,
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_1787297085833",
@@ -477,7 +478,10 @@
       "createdAt": "2026-08-21T07:24:45.833Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787297525543",
@@ -670,7 +674,10 @@
       "createdAt": "2026-08-21T07:32:05.543Z",
       "withdrawableBalance": 15,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787300220264",
@@ -702,7 +709,10 @@
       "createdAt": "2026-08-21T08:17:00.264Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787300995730",
@@ -734,7 +744,10 @@
       "createdAt": "2026-08-21T08:29:55.730Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787301042657",
@@ -766,7 +779,10 @@
       "createdAt": "2026-08-21T08:30:42.657Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787301103434",
@@ -798,7 +814,10 @@
       "createdAt": "2026-08-21T08:31:43.434Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787308338870",
@@ -852,7 +871,10 @@
       "createdAt": "2026-08-21T10:32:18.870Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787311111710",
@@ -884,7 +906,10 @@
       "createdAt": "2026-08-21T11:18:31.710Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787313009533",
@@ -952,7 +977,10 @@
       "createdAt": "2026-08-21T11:50:09.533Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787313535526",
@@ -984,7 +1012,10 @@
       "createdAt": "2026-08-21T11:58:55.526Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787314867982",
@@ -1016,7 +1047,10 @@
       "createdAt": "2026-08-21T12:21:07.982Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787319677893",
@@ -1154,7 +1188,10 @@
       "createdAt": "2026-08-21T13:41:17.893Z",
       "withdrawableBalance": 0,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787321522338",
@@ -1586,7 +1623,10 @@
       "createdAt": "2026-08-21T14:12:02.338Z",
       "withdrawableBalance": 790,
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787323222001",
@@ -1618,7 +1658,10 @@
       "deposits": [],
       "createdAt": "2026-08-21T14:40:22.002Z",
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787324634474",
@@ -1650,7 +1693,10 @@
       "deposits": [],
       "createdAt": "2026-08-21T15:03:54.474Z",
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_1787336097111",
@@ -1691,7 +1737,10 @@
       ],
       "createdAt": "2026-08-21T18:14:57.111Z",
       "sessionVersion": 0,
-      "depositBalance": 0
+      "depositBalance": 0,
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "telegramId": null
     },
     {
       "id": "usr_mt3d5mds_4dee46a103ae",
@@ -1725,7 +1774,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T19:49:53.681Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt3d8pde_433b4dba90be",
@@ -1759,7 +1809,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T19:52:17.530Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt3dudp6_6bfb54d66527",
@@ -1793,7 +1844,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T20:09:08.827Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt3dv6j8_fda0d2b39dca",
@@ -1827,7 +1879,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T20:09:46.197Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt3g02ng_92f1243aec92",
@@ -1861,7 +1914,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:09:33.677Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt3giary_b52564bad322",
@@ -1895,7 +1949,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:23:44.019Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt3her2w_6a48574a3502",
@@ -1939,7 +1994,8 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:48:58.136Z",
-      "depositBalance": 0
+      "depositBalance": 0,
+      "telegramId": null
     },
     {
       "id": "usr_mt43prby_555558e13665",
@@ -1973,7 +2029,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
-      "createdAt": "2026-08-22T08:13:23.230Z"
+      "createdAt": "2026-08-22T08:13:23.230Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44h2bs_6e2156622e74",
@@ -2042,7 +2099,8 @@
         "weekly_2026-08-16": 2
       },
       "sessionVersion": 1,
-      "createdAt": "2026-08-22T08:34:37.192Z"
+      "createdAt": "2026-08-22T08:34:37.192Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44i60e_f509570bc176",
@@ -2076,7 +2134,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:35:28.622Z"
+      "createdAt": "2026-08-22T08:35:28.622Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44ius8_8fe2f96279dc",
@@ -2110,7 +2169,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:36:00.729Z"
+      "createdAt": "2026-08-22T08:36:00.729Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44jfrp_72e581a61c46",
@@ -2144,7 +2204,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:36:27.925Z"
+      "createdAt": "2026-08-22T08:36:27.925Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44ln6h_ab5a7530b9f2",
@@ -2245,7 +2306,8 @@
         "weekly_2026-08-16": 3
       },
       "sessionVersion": 4,
-      "createdAt": "2026-08-22T08:38:10.841Z"
+      "createdAt": "2026-08-22T08:38:10.841Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44macw_fe0b0320df56",
@@ -2279,7 +2341,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:38:40.881Z"
+      "createdAt": "2026-08-22T08:38:40.881Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44n1fy_919f4f3ad55d",
@@ -2313,7 +2376,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:39:15.982Z"
+      "createdAt": "2026-08-22T08:39:15.982Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt44nlgp_963b8ee6da13",
@@ -2347,7 +2411,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:39:41.929Z"
+      "createdAt": "2026-08-22T08:39:41.929Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt45d05d_52afe52ab530",
@@ -2381,7 +2446,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T08:59:27.362Z"
+      "createdAt": "2026-08-22T08:59:27.362Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt45djyp_b754d50e48a6",
@@ -2415,7 +2481,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
-      "createdAt": "2026-08-22T08:59:53.041Z"
+      "createdAt": "2026-08-22T08:59:53.041Z",
+      "telegramId": null
     },
     {
       "id": "usr_mt47230u_e2b988dba5ec",
@@ -2449,7 +2516,8 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
-      "createdAt": "2026-08-22T09:46:57.103Z"
+      "createdAt": "2026-08-22T09:46:57.103Z",
+      "telegramId": null
     }
   ],
   "weeklyCompetitions": [
