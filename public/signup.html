@@ -822,858 +822,212 @@
 
   <script>
 
-    /* =====================================================
-       TELEGRAM WEB APP INITIALIZATION
-    ===================================================== */
-
-    let tg = null;
-
-    let telegramUser = null;
 
 
-    function getTelegramWebApp() {
+// INITIALIZE TELEGRAM WEB APP
+let tg = window.Telegram?.WebApp;
 
-      if (
-        window.Telegram &&
-        window.Telegram.WebApp
-      ) {
+window.addEventListener('DOMContentLoaded', () => {
+  // Re-fetch in case WebApp script loaded dynamically
+  if (!tg && window.Telegram) {
+    tg = window.Telegram.WebApp;
+  }
 
-        return window.Telegram.WebApp;
+  const tgBtnText = document.getElementById('telegramBtnText');
 
-      }
+  // Check if running inside Telegram WebApp with valid initData
+  if (tg && tg.initData && tg.initData !== "") {
+    tg.ready();
+    tg.expand();
 
-      return null;
-
+    // Auto-fill username display on button
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      const user = tg.initDataUnsafe.user;
+      const tgUsername = user.username || `user_${user.id}`;
+      tgBtnText.innerText = `Signing in as @${tgUsername}...`;
     }
 
-
-    /* =====================================================
-       INITIAL PAGE LOAD
-    ===================================================== */
-
-    window.addEventListener(
-      "DOMContentLoaded",
-      function() {
-
-        tg = getTelegramWebApp();
-
-
-        /* REFERRAL CODE */
-
-        const urlParams =
-          new URLSearchParams(
-            window.location.search
-          );
-
-        const refParam =
-          urlParams.get("ref");
-
-
-        if (refParam) {
-
-          document.getElementById(
-            "referralCode"
-          ).value =
-            refParam.trim();
-
-        }
-
-
-        /* TELEGRAM */
-
-        if (tg) {
-
-          try {
-
-            tg.ready();
-
-            tg.expand();
-
-          }
-
-          catch (error) {
-
-            console.error(
-              "Telegram initialization error:",
-              error
-            );
-
-          }
-
-        }
-
-
-        /*
-          Only activate Telegram mode when
-          Telegram gives us an actual user.
-        */
-
-        if (
-          tg &&
-          tg.initDataUnsafe &&
-          tg.initDataUnsafe.user
-        ) {
-
-          telegramUser =
-            tg.initDataUnsafe.user;
-
-
-          setupTelegramUser(
-            telegramUser
-          );
-
-        }
-
-      }
-    );
-
-
-    /* =====================================================
-       SETUP TELEGRAM USER
-    ===================================================== */
-
-    function setupTelegramUser(user) {
-
-      if (!user || !user.id) {
-        return;
-      }
-
-
-      document.body.classList.add(
-        "telegram-mode"
-      );
-
-
-      const telegramId =
-        String(user.id);
-
-
-      /*
-        Telegram usernames are normally
-        returned without @.
-      */
-
-      const telegramUsername =
-        user.username
-          ? user.username
-          : `user_${telegramId}`;
-
-
-      const displayUsername =
-        "@" + telegramUsername;
-
-
-      const fullName =
-        `${user.first_name || ""} ${user.last_name || ""}`
-          .trim();
-
-
-      /* SHOW TELEGRAM ACCOUNT */
-
-      const userBox =
-        document.getElementById(
-          "telegramUserBox"
-        );
-
-      userBox.classList.add(
-        "show"
-      );
-
-
-      document.getElementById(
-        "telegramUserName"
-      ).innerText =
-        displayUsername;
-
-
-      const avatar =
-        document.getElementById(
-          "telegramAvatar"
-        );
-
-
-      avatar.innerText =
-        (
-          user.first_name ||
-          telegramUsername ||
-          "TG"
-        )
-        .charAt(0)
-        .toUpperCase();
-
-
-      /*
-        Pre-fill normal fields too.
-        These are hidden while Telegram
-        mode is active.
-      */
-
-      document.getElementById(
-        "username"
-      ).value =
-        telegramUsername;
-
-
-      document.getElementById(
-        "fullname"
-      ).value =
-        fullName ||
-        telegramUsername;
-
-
-      document.getElementById(
-        "email"
-      ).value =
-        `${telegramUsername}@telegram.user`;
-
-
-      /*
-        Change Telegram button text.
-      */
-
-      document.getElementById(
-        "telegramBtnText"
-      ).innerText =
-        `Continue as @${telegramUsername}`;
-
+    // Capture Referral Code from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const refParam = urlParams.get('ref');
+    if (refParam) {
+      document.getElementById('referralCode').value = refParam.trim();
     }
 
+    // AUTOMATIC SIGN-IN / SIGN-UP
+    handleTelegramAuth();
+  } else {
+    // Auto-capture Referral Code for regular browser users
+    const urlParams = new URLSearchParams(window.location.search);
+    const refParam = urlParams.get('ref');
+    if (refParam) {
+      document.getElementById('referralCode').value = refParam.trim();
+    }
+  }
+});
 
-    /* =====================================================
-       TELEGRAM AUTHENTICATION
-    ===================================================== */
+// TELEGRAM AUTHENTICATION HANDLER
+async function handleTelegramAuth() {
+  const errorBox = document.getElementById('errorBox');
+  const tgBtn = document.getElementById('telegramSignUpBtn');
+  const tgBtnText = document.getElementById('telegramBtnText');
 
-    async function handleTelegramAuth() {
+  errorBox.style.display = 'none';
+  const activeTg = window.Telegram?.WebApp;
 
-      const errorBox =
-        document.getElementById(
-          "errorBox"
-        );
+  // 1. Valid Telegram Environment with initData
+  if (activeTg && activeTg.initData && activeTg.initData !== "") {
+    try {
+      tgBtn.disabled = true;
+      tgBtnText.innerText = 'Creating account...';
 
-      const tgBtn =
-        document.getElementById(
-          "telegramSignUpBtn"
-        );
+      const referralCode = document.getElementById('referralCode').value.trim();
+      const userObj = activeTg.initDataUnsafe?.user || {};
 
-      const tgBtnText =
-        document.getElementById(
-          "telegramBtnText"
-        );
+      // Safely resolve telegram ID or fallback to query id
+      const telegramId = userObj.id || activeTg.initDataUnsafe?.query_id;
 
-
-      errorBox.style.display =
-        "none";
-
-
-      /*
-        Get the current Telegram WebApp.
-      */
-
-      const activeTg =
-        getTelegramWebApp();
-
-
-      if (!activeTg) {
-
-        showError(
-          "Please open PAYME from inside Telegram to use Telegram signup."
-        );
-
-        return;
-
+      if (!telegramId) {
+        throw new Error('Telegram account ID could not be identified. Please try again.');
       }
 
+      // FIXED: Key name corrected to telegramId (matching backend)
+      const payload = {
+        initData: activeTg.initData,
+        telegramId: telegramId, 
+        username: userObj.username || `user_${telegramId}`,
+        firstName: userObj.first_name || "",
+        lastName: userObj.last_name || "",
+        referralCode: referralCode
+      };
 
-      /*
-        Telegram must provide initData.
-        The server should verify this data.
-      */
+      const response = await fetch('/api/auth/telegram-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-      if (
-        !activeTg.initData ||
-        activeTg.initData === ""
-      ) {
+      const data = await response.json();
 
-        /*
-          Sometimes initDataUnsafe is available
-          during development even when initData
-          is missing.
-        */
-
-        if (
-          activeTg.initDataUnsafe &&
-          activeTg.initDataUnsafe.user
-        ) {
-
-          showError(
-            "Telegram security data is not available yet. Please close and reopen the Telegram WebApp."
-          );
-
-        }
-
-        else {
-
-          showError(
-            "Could not read your Telegram account. Please reopen PAYME inside Telegram."
-          );
-
-        }
-
-        return;
-
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Telegram authentication failed.');
       }
 
-
-      try {
-
-        tgBtn.disabled = true;
-
-        tgBtnText.innerText =
-          "Signing you in...";
-
-
-        const userObj =
-          activeTg.initDataUnsafe?.user;
-
-
-        if (
-          !userObj ||
-          !userObj.id
-        ) {
-
-          throw new Error(
-            "Your Telegram account could not be identified."
-          );
-
-        }
-
-
-        const telegramId =
-          String(userObj.id);
-
-
-        /*
-          IMPORTANT:
-
-          The username sent to the server is
-          taken directly from Telegram.
-
-          Example:
-
-          Telegram username:
-          paymeuser
-
-          PAYME username:
-          paymeuser
-        */
-
-        const username =
-          userObj.username
-            ? userObj.username
-            : `user_${telegramId}`;
-
-
-        const firstName =
-          userObj.first_name || "";
-
-
-        const lastName =
-          userObj.last_name || "";
-
-
-        const referralCode =
-          document.getElementById(
-            "referralCode"
-          ).value.trim();
-
-
-        const payload = {
-
-          initData:
-            activeTg.initData,
-
-          telegramId:
-            telegramId,
-
-          username:
-            username,
-
-          firstName:
-            firstName,
-
-          lastName:
-            lastName,
-
-          referralCode:
-            referralCode
-
-        };
-
-
-        const response =
-          await fetch(
-            "/api/auth/telegram-signup",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              credentials: "include",
-
-              body:
-                JSON.stringify(payload)
-
-            }
-          );
-
-
-        let data;
-
-        try {
-
-          data =
-            await response.json();
-
-        }
-
-        catch (error) {
-
-          throw new Error(
-            "The server returned an invalid response."
-          );
-
-        }
-
-
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-
-          throw new Error(
-            data.message ||
-            "Telegram authentication failed."
-          );
-
-        }
-
-
-        /*
-          Server successfully created or found
-          the user and issued the login session.
-        */
-
-        triggerOnboardingAnimation();
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Telegram signup error:",
-          error
-        );
-
-
-        tgBtn.disabled = false;
-
-        tgBtnText.innerText =
-          telegramUser &&
-          telegramUser.username
-            ? `Continue as @${telegramUser.username}`
-            : "Sign Up with Telegram";
-
-
-        showError(
-          error.message ||
-          "Telegram authentication failed. Please try again."
-        );
-
-      }
-
+      triggerOnboardingAnimation();
+    } catch (err) {
+      tgBtn.disabled = false;
+      tgBtnText.innerText = 'Sign Up with Telegram';
+      errorBox.innerText = err.message;
+      errorBox.style.display = 'block';
+    }
+  } 
+  // 2. Client Fallback for Development
+  else if (activeTg && activeTg.initDataUnsafe && activeTg.initDataUnsafe.user) {
+    const tgUser = activeTg.initDataUnsafe.user;
+    document.getElementById('username').value = tgUser.username || `user_${tgUser.id}`;
+    if (tgUser.first_name) {
+      document.getElementById('fullname').value = `${tgUser.first_name} ${tgUser.last_name || ""}`.trim();
+    }
+    errorBox.innerText = "Telegram initData missing. Pre-filled details in form below.";
+    errorBox.style.display = 'block';
+  } 
+  // 3. Fallback alert inside error box if opened in regular browser
+  else {
+    errorBox.innerText = "Please open this app inside Telegram to sign up with your Telegram account, or use the email form below.";
+    errorBox.style.display = 'block';
+  }
+}
+
+function togglePasswordVisibility() {
+  const passInput = document.getElementById('password');
+  const toggleBtn = document.querySelector('.toggle-pass');
+  if (passInput.type === 'password') {
+    passInput.type = 'text';
+    toggleBtn.innerText = 'Hide';
+  } else {
+    passInput.type = 'password';
+    toggleBtn.innerText = 'Show';
+  }
+}
+
+function redirectDashboard() {
+  window.location.href = '/dashboard.html';
+}
+
+function triggerOnboardingAnimation() {
+  const modal = document.getElementById('onboardingModal');
+  const walletGlow = document.getElementById('walletGlow');
+  const animBadge = document.getElementById('animBadge');
+  const animHeading = document.getElementById('animHeading');
+  const animSubtext = document.getElementById('animSubtext');
+  const continueBtn = document.getElementById('continueBtn');
+
+  modal.classList.add('active');
+
+  setTimeout(() => { document.getElementById('coin1').style.animation = 'dropCoin 0.8s ease-in forwards'; }, 300);
+  setTimeout(() => { document.getElementById('coin2').style.animation = 'dropCoin 0.8s ease-in 0.2s forwards'; }, 500);
+  setTimeout(() => { document.getElementById('coin3').style.animation = 'dropCoin 0.8s ease-in 0.4s forwards'; }, 700);
+
+  setTimeout(() => {
+    walletGlow.style.opacity = '1';
+    animBadge.style.opacity = '1';
+    animBadge.style.transform = 'translateY(0)';
+  }, 1400);
+
+  setTimeout(() => {
+    animHeading.style.opacity = '1';
+    animHeading.style.transform = 'translateY(0)';
+    animSubtext.style.opacity = '1';
+    animSubtext.style.transform = 'translateY(0)';
+    continueBtn.classList.add('show');
+  }, 2000);
+
+  setTimeout(() => { redirectDashboard(); }, 4500);
+}
+
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorBox = document.getElementById('errorBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  errorBox.style.display = 'none';
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Creating account...';
+
+  const payload = {
+    fullName: document.getElementById('fullname').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    username: document.getElementById('username').value.trim(),
+    countryCode: document.getElementById('countryCode').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    password: document.getElementById('password').value,
+    referralCode: document.getElementById('referralCode').value.trim(),
+    agreeTerms: document.getElementById('terms').checked
+  };
+
+  try {
+    const response = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || `Error ${response.status}: Failed to create account.`);
     }
 
+    triggerOnboardingAnimation();
+  } catch (err) {
+    errorBox.innerText = err.message;
+    errorBox.style.display = 'block';
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Create Account';
+  }
+});
 
-    /* =====================================================
-       ERROR
-    ===================================================== */
 
-    function showError(message) {
-
-      const errorBox =
-        document.getElementById(
-          "errorBox"
-        );
-
-
-      errorBox.innerText =
-        message;
-
-
-      errorBox.style.display =
-        "block";
-
-    }
-
-
-    /* =====================================================
-       PASSWORD VISIBILITY
-    ===================================================== */
-
-    function togglePasswordVisibility() {
-
-      const passInput =
-        document.getElementById(
-          "password"
-        );
-
-
-      const toggleBtn =
-        document.querySelector(
-          ".toggle-pass"
-        );
-
-
-      if (
-        passInput.type ===
-        "password"
-      ) {
-
-        passInput.type =
-          "text";
-
-        toggleBtn.innerText =
-          "Hide";
-
-      }
-
-      else {
-
-        passInput.type =
-          "password";
-
-        toggleBtn.innerText =
-          "Show";
-
-      }
-
-    }
-
-
-    /* =====================================================
-       REDIRECT
-    ===================================================== */
-
-    function redirectDashboard() {
-
-      window.location.href =
-        "/dashboard.html";
-
-    }
-
-
-    /* =====================================================
-       ONBOARDING ANIMATION
-    ===================================================== */
-
-    function triggerOnboardingAnimation() {
-
-      const modal =
-        document.getElementById(
-          "onboardingModal"
-        );
-
-
-      const walletGlow =
-        document.getElementById(
-          "walletGlow"
-        );
-
-
-      const animBadge =
-        document.getElementById(
-          "animBadge"
-        );
-
-
-      const animHeading =
-        document.getElementById(
-          "animHeading"
-        );
-
-
-      const animSubtext =
-        document.getElementById(
-          "animSubtext"
-        );
-
-
-      const continueBtn =
-        document.getElementById(
-          "continueBtn"
-        );
-
-
-      modal.classList.add(
-        "active"
-      );
-
-
-      setTimeout(
-        function() {
-
-          document.getElementById(
-            "coin1"
-          ).style.animation =
-            "dropCoin 0.8s ease-in forwards";
-
-        },
-        300
-      );
-
-
-      setTimeout(
-        function() {
-
-          document.getElementById(
-            "coin2"
-          ).style.animation =
-            "dropCoin 0.8s ease-in 0.2s forwards";
-
-        },
-        500
-      );
-
-
-      setTimeout(
-        function() {
-
-          document.getElementById(
-            "coin3"
-          ).style.animation =
-            "dropCoin 0.8s ease-in 0.4s forwards";
-
-        },
-        700
-      );
-
-
-      setTimeout(
-        function() {
-
-          walletGlow.style.opacity =
-            "1";
-
-          animBadge.style.opacity =
-            "1";
-
-          animBadge.style.transform =
-            "translateY(0)";
-
-        },
-        1400
-      );
-
-
-      setTimeout(
-        function() {
-
-          animHeading.style.opacity =
-            "1";
-
-          animHeading.style.transform =
-            "translateY(0)";
-
-
-          animSubtext.style.opacity =
-            "1";
-
-          animSubtext.style.transform =
-            "translateY(0)";
-
-
-          continueBtn.classList.add(
-            "show"
-          );
-
-        },
-        2000
-      );
-
-
-      /*
-        Automatically enter dashboard
-        after the animation.
-      */
-
-      setTimeout(
-        function() {
-
-          redirectDashboard();
-
-        },
-        4500
-      );
-
-    }
-
-
-    /* =====================================================
-       NORMAL EMAIL SIGNUP
-    ===================================================== */
-
-    document
-      .getElementById("signupForm")
-      .addEventListener(
-        "submit",
-        async function(e) {
-
-          e.preventDefault();
-
-
-          const errorBox =
-            document.getElementById(
-              "errorBox"
-            );
-
-
-          const submitBtn =
-            document.getElementById(
-              "submitBtn"
-            );
-
-
-          errorBox.style.display =
-            "none";
-
-
-          submitBtn.disabled =
-            true;
-
-
-          submitBtn.innerText =
-            "Creating account...";
-
-
-          const payload = {
-
-            fullName:
-              document.getElementById(
-                "fullname"
-              ).value.trim(),
-
-            email:
-              document.getElementById(
-                "email"
-              ).value.trim(),
-
-            username:
-              document.getElementById(
-                "username"
-              ).value.trim(),
-
-            countryCode:
-              document.getElementById(
-                "countryCode"
-              ).value.trim(),
-
-            phone:
-              document.getElementById(
-                "phone"
-              ).value.trim(),
-
-            password:
-              document.getElementById(
-                "password"
-              ).value,
-
-            referralCode:
-              document.getElementById(
-                "referralCode"
-              ).value.trim(),
-
-            agreeTerms:
-              document.getElementById(
-                "terms"
-              ).checked
-
-          };
-
-
-          try {
-
-            const response =
-              await fetch(
-                "/api/auth/signup",
-                {
-                  method: "POST",
-
-                  headers: {
-                    "Content-Type":
-                      "application/json"
-                  },
-
-                  credentials:
-                    "include",
-
-                  body:
-                    JSON.stringify(payload)
-
-                }
-              );
-
-
-            const data =
-              await response.json();
-
-
-            if (
-              !response.ok ||
-              !data.success
-            ) {
-
-              throw new Error(
-                data.message ||
-                `Error ${response.status}: Failed to create account.`
-              );
-
-            }
-
-
-            triggerOnboardingAnimation();
-
-          }
-
-          catch (error) {
-
-            console.error(
-              "Signup error:",
-              error
-            );
-
-
-            errorBox.innerText =
-              error.message;
-
-
-            errorBox.style.display =
-              "block";
-
-
-            submitBtn.disabled =
-              false;
-
-
-            submitBtn.innerText =
-              "Create Account";
-
-          }
-
-        }
-      );
 
   </script>
 

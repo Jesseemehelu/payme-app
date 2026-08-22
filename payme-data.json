@@ -2518,6 +2518,41 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-22T09:46:57.103Z",
       "telegramId": null
+    },
+    {
+      "id": "usr_mt4d6t60_b1db0fdd1edb",
+      "fullName": "Hsbsbs",
+      "email": "bwbwbw@gmail.com",
+      "username": "hevevev",
+      "phone": "+23464840484",
+      "password": "vevegwhevwhw",
+      "telegramId": null,
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "2E79FY",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4d6t61_80f19df44e",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T12:38:35.305Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 2,
+      "createdAt": "2026-08-22T12:38:35.304Z"
     }
   ],
   "weeklyCompetitions": [
