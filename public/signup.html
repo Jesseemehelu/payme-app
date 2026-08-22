@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sign Up - PAYME</title>
+    <title>Start Earning - PAYME</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,17 +13,18 @@
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0B0F19;
+            background: #060911;
             color: #F8FAFC;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 16px;
             overflow-x: hidden;
+            perspective: 1000px;
         }
 
-        /* Modern Mesh Background Effect */
+        /* Ambient Glowing Mesh Background */
         body::before {
             content: '';
             position: fixed;
@@ -31,51 +32,105 @@
             left: -20%;
             width: 140%;
             height: 140%;
-            background: radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.15) 0%, transparent 60%),
-                        radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
+            background: 
+                radial-gradient(circle at 50% 15%, rgba(16, 185, 129, 0.2) 0%, transparent 45%),
+                radial-gradient(circle at 80% 70%, rgba(37, 99, 235, 0.18) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
             z-index: -1;
             pointer-events: none;
         }
 
+        /* Modern 3D Glass Card */
         .signup-card {
-            background: rgba(17, 24, 39, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 40px 32px;
+            background: linear-gradient(145deg, rgba(17, 24, 39, 0.92), rgba(11, 15, 25, 0.96));
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 32px;
+            padding: 32px 24px;
             width: 100%;
-            max-width: 420px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            max-width: 410px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 30px 60px -12px rgba(0, 0, 0, 0.8),
+                0 18px 36px -18px rgba(0, 0, 0, 0.6),
+                inset 0 1px 1px rgba(255, 255, 255, 0.2);
             text-align: center;
         }
 
-        .signup-header { margin-bottom: 28px; }
-        
-        .brand-logo {
+        /* TOP EARNINGS HIGHLIGHT BADGE */
+        .bonus-banner {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #2563EB, #1D4ED8);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34D399;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
         }
 
         .signup-header h1 { 
-            font-size: 1.75rem; 
+            font-size: 1.85rem; 
             font-weight: 800; 
             color: #FFFFFF; 
             margin-bottom: 8px;
-            letter-spacing: -0.02em; 
+            letter-spacing: -0.03em; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .signup-header h1 span {
+            background: linear-gradient(135deg, #38BDF8, #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .signup-header p { 
             color: #94A3B8; 
-            font-size: 0.9rem; 
-            line-height: 1.4;
+            font-size: 0.88rem; 
+            line-height: 1.45;
+            margin-bottom: 24px;
+        }
+
+        /* BENEFIT HIGHLIGHT GRID */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .benefit-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 12px 8px;
+            text-align: center;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
+        }
+
+        .benefit-icon {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .benefit-title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #F1F5F9;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .benefit-sub {
+            font-size: 0.68rem;
+            color: #38BDF8;
+            font-weight: 700;
+            margin-top: 2px;
         }
 
         .alert-error {
@@ -85,86 +140,106 @@
             font-size: 0.85rem; 
             padding: 12px 16px; 
             border-radius: 14px; 
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: none; 
             font-weight: 600; 
             word-break: break-word;
             text-align: left;
         }
 
-        /* TELEGRAM BUTTON */
+        /* MODERN 3D TELEGRAM BUTTON */
         .btn-telegram {
             width: 100%;
-            background: linear-gradient(135deg, #229ED9, #1C8AC2);
+            position: relative;
+            background: linear-gradient(180deg, #28A8E9 0%, #1B87C4 100%);
             color: #FFFFFF;
             border: none;
             padding: 16px;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 0.98rem;
+            border-radius: 18px;
+            font-weight: 800;
+            font-size: 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            transition: all 0.2s ease;
-            box-shadow: 0 8px 24px rgba(34, 158, 217, 0.3);
-            margin-bottom: 24px;
+            transition: all 0.15s ease;
+            box-shadow: 
+                0 6px 0 #126393,
+                0 12px 24px rgba(27, 135, 196, 0.35),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
+            margin-bottom: 20px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .btn-telegram:hover { 
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(34, 158, 217, 0.4);
+            background: linear-gradient(180deg, #30B0F1 0%, #1E91D3 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 0 #126393,
+                0 16px 28px rgba(27, 135, 196, 0.45),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
         }
         
-        .btn-telegram:active { transform: translateY(0); }
-        .btn-telegram:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .btn-telegram svg { width: 22px; height: 22px; fill: currentColor; }
+        .btn-telegram:active { 
+            transform: translateY(4px);
+            box-shadow: 
+                0 2px 0 #126393,
+                0 6px 12px rgba(27, 135, 196, 0.3),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        }
 
-        /* OPTIONAL REFERRAL BOX */
+        .btn-telegram:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-telegram svg { width: 22px; height: 22px; fill: currentColor; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
+
+        /* 3D REFERRAL BOX */
         .referral-section {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 24px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
             text-align: left;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
         }
 
         .referral-label {
             display: block;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #CBD5E1;
+            font-size: 0.73rem;
+            font-weight: 800;
+            color: #94A3B8;
             margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
         }
 
         .form-control {
             width: 100%; 
             padding: 14px 16px; 
-            border-radius: 12px; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(15, 23, 42, 0.6); 
+            border-radius: 14px; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(8, 12, 20, 0.7); 
             color: #FFFFFF;
             font-size: 0.95rem; 
             outline: none; 
             transition: all 0.2s ease;
             font-family: inherit;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        .form-control::placeholder { color: #64748B; }
+        .form-control::placeholder { color: #475569; }
 
         .form-control:focus { 
             border-color: #38BDF8; 
-            background: rgba(15, 23, 42, 0.9); 
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); 
+            background: rgba(8, 12, 20, 0.95); 
+            box-shadow: 
+                inset 0 2px 4px rgba(0,0,0,0.5),
+                0 0 0 3px rgba(56, 189, 248, 0.2); 
         }
 
-        /* FOOTER TERMS & LINK */
+        /* FOOTER TERMS */
         .terms-notice {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             color: #64748B;
             line-height: 1.5;
         }
@@ -172,11 +247,12 @@
         .terms-notice a {
             color: #38BDF8;
             text-decoration: none;
+            font-weight: 600;
         }
 
         /* ONBOARDING ANIMATION OVERLAY */
         #onboardingModal {
-            position: fixed; inset: 0; background: #0B0F19; display: none;
+            position: fixed; inset: 0; background: #060911; display: none;
             flex-direction: column; justify-content: center; align-items: center;
             z-index: 9999; text-align: center; padding: 24px; color: #FFFFFF;
             overflow: hidden; opacity: 0; transition: opacity 0.4s ease;
@@ -245,21 +321,37 @@
 <body>
 
 <div class="signup-card">
+    <div class="bonus-banner">
+        ⚡ INSTANT ₦10 WELCOME BONUS
+    </div>
+
     <div class="signup-header">
-        <div class="brand-logo">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
-                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
-            </svg>
+        <h1>Start Earning on <span>PAYME</span></h1>
+        <p>Join thousands earning daily cash rewards directly to their wallets.</p>
+    </div>
+
+    <!-- EARNING BENEFITS GRID -->
+    <div class="benefits-grid">
+        <div class="benefit-card">
+            <div class="benefit-icon">🎁</div>
+            <div class="benefit-title">Welcome</div>
+            <div class="benefit-sub">₦10 Free</div>
         </div>
-        <h1>Welcome to PAYME</h1>
-        <p>Sign up securely with Telegram to access your account instantly.</p>
+        <div class="benefit-card">
+            <div class="benefit-icon">🎰</div>
+            <div class="benefit-title">Spin & Win</div>
+            <div class="benefit-sub">Daily Cash</div>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">👥</div>
+            <div class="benefit-title">Invite Friends</div>
+            <div class="benefit-sub">₦15/Ref</div>
+        </div>
     </div>
 
     <div class="alert-error" id="errorBox"></div>
 
-    <!-- TELEGRAM SIGN UP BUTTON -->
+    <!-- 3D TELEGRAM SIGN UP BUTTON -->
     <button type="button" class="btn-telegram" id="telegramSignUpBtn" onclick="handleTelegramAuth()">
         <svg viewBox="0 0 24 24">
             <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.161-2.02 9.53c-.15.68-.56.84-1.13.531-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.311.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.121-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.991 12.01-4.63c.56-.21 1.05.13.84.99z"/>
@@ -270,7 +362,7 @@
     <!-- OPTIONAL REFERRAL CODE BOX -->
     <div class="referral-section">
         <label for="referralCode" class="referral-label">Referral Code (Optional)</label>
-        <input type="text" id="referralCode" class="form-control" placeholder="e.g. REF123" uppercase>
+        <input type="text" id="referralCode" class="form-control" placeholder="e.g. REF123">
     </div>
 
     <p class="terms-notice">
@@ -295,6 +387,8 @@
 </div>
 
 <script>
+
+
 let tg = null;
 
 function initializeTelegram() {
@@ -304,15 +398,6 @@ function initializeTelegram() {
         
         if (typeof tg.ready === 'function') tg.ready();
         if (typeof tg.expand === 'function') tg.expand();
-
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            const telegramUsername = user.username || `user_${user.id}`;
-            const telegramBtnText = document.getElementById('telegramBtnText');
-            if (telegramBtnText) {
-                telegramBtnText.innerText = `Continue as @${telegramUsername}`;
-            }
-        }
     } catch (error) {
         console.error('Telegram initialization error:', error);
     }
@@ -321,11 +406,11 @@ function initializeTelegram() {
 window.addEventListener('DOMContentLoaded', () => {
     initializeTelegram();
 
-    // Auto-fill referral code from URL parameter
+    // Auto-fill referral code from URL parameter if present
     const urlParams = new URLSearchParams(window.location.search);
     const refParam = urlParams.get('ref');
     if (refParam) {
-        document.getElementById('referralCode').value = refParam.trim();
+        document.getElementById('referralCode').value = refParam.trim().toUpperCase();
     }
 });
 
