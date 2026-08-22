@@ -352,7 +352,7 @@
         "weekly_2026-08-16": 5
       },
       "withdrawableBalance": 25,
-      "sessionVersion": 11,
+      "sessionVersion": 13,
       "depositBalance": 0
     },
     {
@@ -2416,6 +2416,40 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-22T08:59:53.041Z"
+    },
+    {
+      "id": "usr_mt47230u_e2b988dba5ec",
+      "fullName": "Hagsvbs",
+      "email": "gsvbsbeb@gmail.com",
+      "username": "jesse1212gatt",
+      "phone": "+2349484840484",
+      "password": "jesse1122",
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "7HLMNC",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt47230w_0ae9267d8a",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T09:46:57.104Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 1,
+      "createdAt": "2026-08-22T09:46:57.103Z"
     }
   ],
   "weeklyCompetitions": [

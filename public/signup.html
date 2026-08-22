@@ -264,9 +264,25 @@
         tg = window.Telegram.WebApp;
       }
 
-      if (tg) {
+      const tgBtnText = document.getElementById('telegramBtnText');
+
+      if (tg && tg.initData) {
         tg.ready();
         tg.expand();
+
+        // Pre-fill email/manual fields if user is inside Telegram WebApp
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+          const user = tg.initDataUnsafe.user;
+          const tgUsername = user.username || `tg_${user.id}`;
+          
+          document.getElementById('username').value = tgUsername;
+          if (user.first_name) {
+            document.getElementById('fullname').value = `${user.first_name} ${user.last_name || ''}`.trim();
+          }
+
+          // Update button text to display Telegram Username directly
+          tgBtnText.innerText = `Sign Up as @${tgUsername}`;
+        }
       }
 
       // Auto-capture Referral Code from URL
@@ -274,20 +290,6 @@
       const refParam = urlParams.get('ref');
       if (refParam) {
         document.getElementById('referralCode').value = refParam.trim();
-      }
-
-      // Pre-fill email/manual fields if user is inside Telegram WebApp
-      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const user = tg.initDataUnsafe.user;
-        const tgUsername = user.username || `tg_${user.id}`;
-        
-        document.getElementById('username').value = tgUsername;
-        if (user.first_name) {
-          document.getElementById('fullname').value = `${user.first_name} ${user.last_name || ''}`.trim();
-        }
-
-        // Update button text to display Telegram Username directly
-        document.getElementById('telegramBtnText').innerText = `Sign Up as @${tgUsername}`;
       }
     });
 
@@ -299,10 +301,9 @@
 
       errorBox.style.display = 'none';
 
-      // 1. Get current initialized WebApp reference
       const activeTg = window.Telegram?.WebApp;
       
-      // Ensure WebApp object exists AND initData string is populated
+      // 1. Valid Telegram Environment with initData
       if (activeTg && activeTg.initData && activeTg.initData !== '') {
         try {
           tgBtn.disabled = true;
@@ -340,10 +341,19 @@
           errorBox.innerText = err.message;
           errorBox.style.display = 'block';
         }
-      } else {
-        // Fallback error if opened in normal external browser instead of Telegram
-        errorBox.innerText = "Please open this page inside Telegram WebApp to sign up with Telegram.";
-        errorBox.style.display = 'block';
+      } 
+      // 2. Client Fallback (Matches your previous project logic)
+      else if (activeTg && activeTg.initDataUnsafe && activeTg.initDataUnsafe.user) {
+        const tgUser = activeTg.initDataUnsafe.user;
+        document.getElementById('username').value = tgUser.username || `user_${tgUser.id}`;
+        if (tgUser.first_name) {
+          document.getElementById('fullname').value = `${tgUser.first_name} ${tgUser.last_name || ''}`.trim();
+        }
+        alert("Autofilled details from client object.");
+      } 
+      // 3. Fallback alert if opened in normal external browser instead of Telegram
+      else {
+        alert("Please open this game directly inside Telegram to login with your Telegram account.");
       }
     }
 
