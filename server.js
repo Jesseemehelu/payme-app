@@ -1394,6 +1394,119 @@ app.post(
   }
 );
 
+
+// ======================================================
+// TELEGRAM SIGN UP / AUTHENTICATION
+// ======================================================
+
+app.post('/api/auth/telegram-signup', async (req, res) => {
+  try {
+    const { initData, telegramId, username, firstName, lastName, referralCode } = req.body;
+
+    if (!telegramId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Telegram account data.'
+      });
+    }
+
+    const cleanUsername = (username || `tg_${telegramId}`).toLowerCase();
+    const cleanRefInput = referralCode ? referralCode.trim().toUpperCase() : null;
+
+    // Check if user exists by telegramId or username
+    let user = users.find(u => u.telegramId === telegramId || u.username === cleanUsername);
+
+    if (!user) {
+      const uniqueRefCode = generateUniqueReferralCode();
+
+      user = {
+        id: generateUserId(),
+        telegramId: telegramId,
+        fullName: `${firstName || ''} ${lastName || ''}`.trim() || cleanUsername,
+        email: `${cleanUsername}@telegram.user`,
+        username: cleanUsername,
+        phone: 'N/A',
+        password: crypto.randomBytes(16).toString('hex'),
+        balance: 0,
+        depositBalance: 0,
+        withdrawableBalance: 0,
+        hasReceivedWelcomeBonus: false,
+        hasSeenPopup: false,
+        referralCode: uniqueRefCode,
+        referredBy: cleanRefInput,
+        totalReferrals: 0,
+        successfulReferrals: 0,
+        referralEarnings: 0,
+        transactions: [],
+        deposits: [],
+        weeklyReferralEvents: [],
+        weeklyReferralHistory: {},
+        sessionVersion: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      ensureWelcomeBonus(user);
+
+      // Handle referral rewards
+      if (user.referredBy) {
+        const referrer = users.find(u => u.referralCode === user.referredBy);
+        if (referrer && referrer.id !== user.id) {
+          referrer.withdrawableBalance = Number(referrer.withdrawableBalance || 0) + REFERRAL_REWARD;
+          referrer.totalReferrals = Number(referrer.totalReferrals || 0) + 1;
+          referrer.successfulReferrals = Number(referrer.successfulReferrals || 0) + 1;
+          referrer.referralEarnings = Number(referrer.referralEarnings || 0) + REFERRAL_REWARD;
+          syncUserBalance(referrer);
+
+          referrer.transactions.unshift({
+            id: generateTransactionId('tx_ref'),
+            type: 'referral_reward',
+            description: `Referral Reward (@${user.username})`,
+            amount: REFERRAL_REWARD,
+            currency: 'NGN',
+            status: 'completed',
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
+
+      users.push(user);
+    } else {
+      ensureWelcomeBonus(user);
+    }
+
+    // Authenticate and issue cookie session
+    user.sessionVersion = Number(user.sessionVersion || 0) + 1;
+    syncUserBalance(user);
+
+    const sessionToken = createSessionToken(user);
+    setSessionCookie(res, sessionToken);
+
+    saveDatabase();
+
+    return res.json({
+      success: true,
+      message: 'Telegram authentication successful',
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        balance: user.balance,
+        withdrawableBalance: user.withdrawableBalance,
+        depositBalance: user.depositBalance
+      }
+    });
+
+  } catch (err) {
+    console.error('Telegram signup error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error during Telegram signup.'
+    });
+  }
+});
+
+
+
 // ======================================================
 // LOGIN
 // ======================================================

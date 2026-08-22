@@ -177,7 +177,6 @@
       <svg viewBox="0 0 24 24">
         <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.53l-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.99l12.01-4.63c.56-.21 1.05.13.84.99z"/>
       </svg>
-
       <span id="telegramBtnText">Sign Up with Telegram</span>
     </button>
 
@@ -281,7 +280,7 @@
           }
 
           // Update button text to display Telegram Username directly
-          tgBtnText.innerText = `Sign Up as @${tgUsername}`;
+          tgBtnText.innerText = `Continue as @${tgUsername}`;
         }
       }
 
@@ -312,10 +311,17 @@
           const referralCode = document.getElementById('referralCode').value.trim();
           const userObj = activeTg.initDataUnsafe?.user || {};
 
+          // Safely resolve telegram ID or fallback to query id
+          const telegramId = userObj.id || activeTg.initDataUnsafe?.query_id;
+
+          if (!telegramId) {
+            throw new Error('Telegram account ID could not be identified. Please try again.');
+          }
+
           const payload = {
             initData: activeTg.initData,
-            telegramId: userObj.id,
-            username: userObj.username || `user_${userObj.id}`,
+            telegramId: telegramId,
+            username: userObj.username || `user_${telegramId}`,
             firstName: userObj.first_name || '',
             lastName: userObj.last_name || '',
             referralCode: referralCode
@@ -342,18 +348,20 @@
           errorBox.style.display = 'block';
         }
       } 
-      // 2. Client Fallback (Matches your previous project logic)
+      // 2. Client Fallback for Development
       else if (activeTg && activeTg.initDataUnsafe && activeTg.initDataUnsafe.user) {
         const tgUser = activeTg.initDataUnsafe.user;
         document.getElementById('username').value = tgUser.username || `user_${tgUser.id}`;
         if (tgUser.first_name) {
           document.getElementById('fullname').value = `${tgUser.first_name} ${tgUser.last_name || ''}`.trim();
         }
-        alert("Autofilled details from client object.");
+        errorBox.innerText = "Telegram initData missing. Pre-filled details in form below.";
+        errorBox.style.display = 'block';
       } 
-      // 3. Fallback alert if opened in normal external browser instead of Telegram
+      // 3. Fallback alert inside error box if opened in regular browser
       else {
-        alert("Please open this game directly inside Telegram to login with your Telegram account.");
+        errorBox.innerText = "Please open this app inside Telegram to sign up with your Telegram account, or use the email form below.";
+        errorBox.style.display = 'block';
       }
     }
 
