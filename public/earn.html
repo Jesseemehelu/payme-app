@@ -32,11 +32,7 @@
       background-color: var(--bg-light);
       color: var(--text-main);
       line-height: 1.5;
-      padding-bottom: 90px;
-    }
-
-    @media (min-width: 1024px) {
-      body { padding-bottom: 40px; }
+      padding-bottom: 40px;
     }
 
     /* TOP HEADER */
@@ -89,8 +85,24 @@
     .earn-container {
       max-width: 1000px;
       margin: 0 auto;
-      padding: 32px 20px;
+      padding: 24px 20px 32px;
       animation: fadeIn 0.5s ease-out;
+    }
+
+    /* BACK BUTTON */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      transition: color 0.2s ease;
+    }
+    .back-link:hover {
+      color: var(--accent-blue);
     }
 
     .earn-header-section {
@@ -244,36 +256,7 @@
       .desktop-nav { display: flex; gap: 32px; list-style: none; }
       .desktop-nav a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.92rem; transition: color 0.2s; }
       .desktop-nav a.active, .desktop-nav a:hover { color: var(--accent-blue); }
-      .mobile-bottom-nav { display: none; }
     }
-
-    /* MOBILE BOTTOM NAV */
-    .mobile-bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 70px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      z-index: 1000;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 0.68rem;
-      font-weight: 700;
-      width: 20%;
-    }
-    .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
-    .nav-item.active { color: var(--accent-blue); }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -304,6 +287,11 @@
 
   <!-- MAIN EARN CONTENT -->
   <main class="earn-container">
+    <!-- BACK TO DASHBOARD LINK -->
+    <a href="/dashboard.html" class="back-link">
+      &larr; Back to Dashboard
+    </a>
+
     <div class="earn-header-section">
       <h1 class="earn-title">Earn</h1>
       <p class="earn-sub">Choose how you want to earn with PAYME.</p>
@@ -330,19 +318,18 @@
       </a>
 
       <!-- CARD 2: GAMES (ACTIVE) -->
-<a href="/game" class="earn-card-item" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
-  <div>
-    <div class="card-top-row">
-      <div class="icon-wrapper">🎮</div>
-      <span class="status-badge" style="background: rgba(37, 99, 235, 0.1); color: #2563EB;">PLAY</span>
-    </div>
-    <div class="card-body">
-      <h3>PAYME Spin</h3>
-      <p>Spin the wheel for ₦50 and win exciting rewards.</p>
-    </div>
-  </div>
-</a>
-
+      <a href="/game" class="earn-card-item" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
+        <div>
+          <div class="card-top-row">
+            <div class="icon-wrapper">🎮</div>
+            <span class="status-badge" style="background: rgba(37, 99, 235, 0.1); color: #2563EB;">PLAY</span>
+          </div>
+          <div class="card-body">
+            <h3>PAYME Spin</h3>
+            <p>Spin the wheel for ₦50 and win exciting rewards.</p>
+          </div>
+        </div>
+      </a>
 
       <!-- CARD 3: TASKS (COMING SOON) -->
       <div class="earn-card-item disabled-option">
@@ -374,30 +361,6 @@
 
     </div>
   </main>
-
-  <!-- MOBILE BOTTOM NAV -->
-  <nav class="mobile-bottom-nav">
-    <a href="/dashboard.html" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      Home
-    </a>
-    <a href="/earn" class="nav-item active">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
-      Earn
-    </a>
-    <a href="/dashboard.html#referrals" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-      Referrals
-    </a>
-    <a href="/dashboard.html#leaderboard" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-      Leaderboard
-    </a>
-    <a href="https://wa.me/+2348034399095" target="_blank" class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-      Support
-    </a>
-  </nav>
 
 </body>
 </html>

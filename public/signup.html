@@ -58,6 +58,7 @@
       margin-bottom: 20px;
     }
     .btn-telegram:hover { background: #1CA0E3; }
+    .btn-telegram:disabled { background: #94A3B8; cursor: not-allowed; }
     .btn-telegram svg { width: 20px; height: 20px; fill: currentColor; }
 
     .divider {
@@ -176,7 +177,8 @@
       <svg viewBox="0 0 24 24">
         <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.53l-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.99l12.01-4.63c.56-.21 1.05.13.84.99z"/>
       </svg>
-      Sign Up with Telegram
+
+      <span id="telegramBtnText">Sign Up with Telegram</span>
     </button>
 
     <div class="divider">
@@ -253,13 +255,18 @@
   </div>
 
   <script>
-    const tg = window.Telegram?.WebApp;
+    // INITIALIZE TELEGRAM WEB APP
+    let tg = window.Telegram?.WebApp;
 
-    // AUTO-INITIALIZE TELEGRAM WEB APP
     window.addEventListener('DOMContentLoaded', () => {
+      // Re-fetch in case WebApp script loaded dynamically
+      if (!tg && window.Telegram) {
+        tg = window.Telegram.WebApp;
+      }
+
       if (tg) {
         tg.ready();
-        tg.expand(); // Expands the Mini App to full height inside Telegram
+        tg.expand();
       }
 
       // Auto-capture Referral Code from URL
@@ -269,33 +276,54 @@
         document.getElementById('referralCode').value = refParam.trim();
       }
 
-      // If user is inside Telegram WebApp, attempt auto fill or quick-login
+      // Pre-fill email/manual fields if user is inside Telegram WebApp
       if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const user = tg.initDataUnsafe.user;
+        const tgUsername = user.username || `tg_${user.id}`;
+        
+        document.getElementById('username').value = tgUsername;
         if (user.first_name) {
           document.getElementById('fullname').value = `${user.first_name} ${user.last_name || ''}`.trim();
         }
-        if (user.username) {
-          document.getElementById('username').value = user.username;
-        }
+
+        // Update button text to display Telegram Username directly
+        document.getElementById('telegramBtnText').innerText = `Sign Up as @${tgUsername}`;
       }
     });
 
     // TELEGRAM AUTHENTICATION HANDLER
     async function handleTelegramAuth() {
       const errorBox = document.getElementById('errorBox');
+      const tgBtn = document.getElementById('telegramSignUpBtn');
+      const tgBtnText = document.getElementById('telegramBtnText');
+
       errorBox.style.display = 'none';
 
-      // 1. Check if user is inside Telegram App
-      if (tg && tg.initData) {
+      // 1. Get current initialized WebApp reference
+      const activeTg = window.Telegram?.WebApp;
+      
+      // Ensure WebApp object exists AND initData string is populated
+      if (activeTg && activeTg.initData && activeTg.initData !== '') {
         try {
+          tgBtn.disabled = true;
+          tgBtnText.innerText = 'Creating account...';
+
+          const referralCode = document.getElementById('referralCode').value.trim();
+          const userObj = activeTg.initDataUnsafe?.user || {};
+
+          const payload = {
+            initData: activeTg.initData,
+            telegramId: userObj.id,
+            username: userObj.username || `user_${userObj.id}`,
+            firstName: userObj.first_name || '',
+            lastName: userObj.last_name || '',
+            referralCode: referralCode
+          };
+
           const response = await fetch('/api/auth/telegram-signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              initData: tg.initData, // Send raw initData to backend for HMAC verification
-              referralCode: document.getElementById('referralCode').value.trim()
-            })
+            body: JSON.stringify(payload)
           });
 
           const data = await response.json();
@@ -305,12 +333,15 @@
           }
 
           triggerOnboardingAnimation();
+
         } catch (err) {
+          tgBtn.disabled = false;
+          tgBtnText.innerText = 'Sign Up with Telegram';
           errorBox.innerText = err.message;
           errorBox.style.display = 'block';
         }
       } else {
-        // 2. Browser Fallback if accessed outside Telegram
+        // Fallback error if opened in normal external browser instead of Telegram
         errorBox.innerText = "Please open this page inside Telegram WebApp to sign up with Telegram.";
         errorBox.style.display = 'block';
       }

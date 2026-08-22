@@ -29,26 +29,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 // CONFIGURATION
 // ======================================================
 
-// IMPORTANT:
-// Put these in Render Environment Variables.
-// Do NOT hard-code your Telegram bot token.
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
+const TELEGRAM_BOT_TOKEN =
+  process.env.TELEGRAM_BOT_TOKEN || '';
+
+const TELEGRAM_CHAT_ID =
+  process.env.TELEGRAM_CHAT_ID || '';
 
 const SESSION_SECRET =
   process.env.PAYME_SESSION_SECRET ||
   'sess_sec_9qW2$vL5%nQ8@wZ3_8f8b2c7d4';
 
-// Session duration: 7 days
-const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+const SESSION_MAX_AGE =
+  7 * 24 * 60 * 60 * 1000;
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction =
+  process.env.NODE_ENV === 'production';
 
 // ======================================================
 // PERSISTENT DATABASE
 // ======================================================
 
-const DATABASE_FILE = path.join(__dirname, 'payme-data.json');
+const DATABASE_FILE =
+  path.join(__dirname, 'payme-data.json');
 
 let users = [];
 let weeklyCompetitions = [];
@@ -60,7 +62,11 @@ let weeklyCompetitions = [];
 function loadDatabase() {
   try {
     if (fs.existsSync(DATABASE_FILE)) {
-      const data = fs.readFileSync(DATABASE_FILE, 'utf8');
+      const data =
+        fs.readFileSync(
+          DATABASE_FILE,
+          'utf8'
+        );
 
       if (!data.trim()) {
         users = [];
@@ -69,49 +75,114 @@ function loadDatabase() {
         return;
       }
 
-      const database = JSON.parse(data);
+      const database =
+        JSON.parse(data);
 
-      users = Array.isArray(database.users)
-        ? database.users
-        : [];
+      users =
+        Array.isArray(database.users)
+          ? database.users
+          : [];
 
-      weeklyCompetitions = Array.isArray(database.weeklyCompetitions)
-        ? database.weeklyCompetitions
-        : [];
+      weeklyCompetitions =
+        Array.isArray(
+          database.weeklyCompetitions
+        )
+          ? database.weeklyCompetitions
+          : [];
 
-      // Upgrade existing users safely
+      // ==================================================
+      // UPGRADE EXISTING USERS SAFELY
+      // ==================================================
+
       users.forEach(user => {
-        if (typeof user.withdrawableBalance === 'undefined') {
-          user.withdrawableBalance = Number(user.referralEarnings || 0);
+        if (
+          typeof user.withdrawableBalance ===
+          'undefined'
+        ) {
+          user.withdrawableBalance =
+            Number(
+              user.referralEarnings || 0
+            );
         }
 
-        if (typeof user.sessionVersion !== 'number') {
+        if (
+          typeof user.depositBalance !==
+          'number'
+        ) {
+          user.depositBalance = 0;
+        }
+
+        if (
+          typeof user.sessionVersion !==
+          'number'
+        ) {
           user.sessionVersion = 0;
         }
 
-        if (!Array.isArray(user.transactions)) {
+        if (
+          !Array.isArray(
+            user.transactions
+          )
+        ) {
           user.transactions = [];
         }
 
-        if (!Array.isArray(user.deposits)) {
+        if (
+          !Array.isArray(
+            user.deposits
+          )
+        ) {
           user.deposits = [];
         }
 
-        if (typeof user.totalReferrals !== 'number') {
-          user.totalReferrals = Number(user.totalReferrals || 0);
+        if (
+          typeof user.totalReferrals !==
+          'number'
+        ) {
+          user.totalReferrals =
+            Number(
+              user.totalReferrals || 0
+            );
         }
 
-        if (typeof user.successfulReferrals !== 'number') {
-          user.successfulReferrals = Number(user.successfulReferrals || 0);
+        if (
+          typeof user.successfulReferrals !==
+          'number'
+        ) {
+          user.successfulReferrals =
+            Number(
+              user.successfulReferrals || 0
+            );
         }
 
-        if (typeof user.referralEarnings !== 'number') {
-          user.referralEarnings = Number(user.referralEarnings || 0);
+        if (
+          typeof user.referralEarnings !==
+          'number'
+        ) {
+          user.referralEarnings =
+            Number(
+              user.referralEarnings || 0
+            );
         }
 
-        if (typeof user.balance !== 'number') {
-          user.balance = Number(user.balance || 0);
+        if (
+          typeof user.balance !==
+          'number'
+        ) {
+          user.balance =
+            Number(
+              user.balance || 0
+            );
         }
+
+        // Make sure depositBalance is never negative.
+        user.depositBalance =
+          Math.max(
+            0,
+            Number(
+              user.depositBalance || 0
+            )
+          );
       });
 
       console.log(
@@ -120,6 +191,7 @@ function loadDatabase() {
     } else {
       users = [];
       weeklyCompetitions = [];
+
       saveDatabase();
 
       console.log(
@@ -127,7 +199,10 @@ function loadDatabase() {
       );
     }
   } catch (err) {
-    console.error('Database loading error:', err);
+    console.error(
+      'Database loading error:',
+      err
+    );
 
     users = [];
     weeklyCompetitions = [];
@@ -145,17 +220,28 @@ function saveDatabase() {
       weeklyCompetitions
     };
 
-    const tempFile = DATABASE_FILE + '.tmp';
+    const tempFile =
+      DATABASE_FILE + '.tmp';
 
     fs.writeFileSync(
       tempFile,
-      JSON.stringify(database, null, 2),
+      JSON.stringify(
+        database,
+        null,
+        2
+      ),
       'utf8'
     );
 
-    fs.renameSync(tempFile, DATABASE_FILE);
+    fs.renameSync(
+      tempFile,
+      DATABASE_FILE
+    );
   } catch (err) {
-    console.error('Database saving error:', err);
+    console.error(
+      'Database saving error:',
+      err
+    );
   }
 }
 
@@ -170,28 +256,38 @@ function generateUserId() {
     'usr_' +
     Date.now().toString(36) +
     '_' +
-    crypto.randomBytes(6).toString('hex')
+    crypto
+      .randomBytes(6)
+      .toString('hex')
   );
 }
 
-function generateTransactionId(prefix) {
+function generateTransactionId(
+  prefix
+) {
   return (
     prefix +
     '_' +
     Date.now().toString(36) +
     '_' +
-    crypto.randomBytes(5).toString('hex')
+    crypto
+      .randomBytes(5)
+      .toString('hex')
   );
 }
 
 function generateReferralCode() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
   let code = '';
 
   for (let i = 0; i < 6; i++) {
     code += chars.charAt(
-      Math.floor(Math.random() * chars.length)
+      Math.floor(
+        Math.random() *
+        chars.length
+      )
     );
   }
 
@@ -199,10 +295,17 @@ function generateReferralCode() {
 }
 
 function generateUniqueReferralCode() {
-  let code = generateReferralCode();
+  let code =
+    generateReferralCode();
 
-  while (users.some(u => u.referralCode === code)) {
-    code = generateReferralCode();
+  while (
+    users.some(
+      u =>
+        u.referralCode === code
+    )
+  ) {
+    code =
+      generateReferralCode();
   }
 
   return code;
@@ -217,21 +320,55 @@ const REFERRAL_REWARD = 15;
 const MIN_WITHDRAWAL_LIMIT = 100;
 
 // ======================================================
-// SECURE COOKIE SESSION SYSTEM
+// BALANCE HELPERS
 // ======================================================
 //
-// Instead of Express MemoryStore, the logged-in user is
-// identified by a signed cookie.
+// balance = depositBalance + withdrawableBalance
 //
-// Cookie contains:
-// user ID
-// session version
-// expiry time
+// depositBalance:
+//   Money deposited by the user.
+//   NOT directly withdrawable.
 //
-// The signature prevents users from changing the user ID.
+// withdrawableBalance:
+//   Referral rewards, bonuses, game winnings,
+//   weekly prizes, etc.
 //
-// This works correctly on Render because the authentication
-// information does not depend on one Node.js process's RAM.
+// ======================================================
+
+function getDepositBalance(user) {
+  return Math.max(
+    0,
+    Number(
+      user.depositBalance || 0
+    )
+  );
+}
+
+function getWithdrawableBalance(user) {
+  return Math.max(
+    0,
+    Number(
+      user.withdrawableBalance || 0
+    )
+  );
+}
+
+function syncUserBalance(user) {
+  user.depositBalance =
+    getDepositBalance(user);
+
+  user.withdrawableBalance =
+    getWithdrawableBalance(user);
+
+  user.balance =
+    user.depositBalance +
+    user.withdrawableBalance;
+
+  return user.balance;
+}
+
+// ======================================================
+// SECURE COOKIE SESSION SYSTEM
 // ======================================================
 
 function base64UrlEncode(value) {
@@ -243,20 +380,31 @@ function base64UrlEncode(value) {
 }
 
 function base64UrlDecode(value) {
-  value = value
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  value =
+    value
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
 
-  while (value.length % 4) {
+  while (
+    value.length % 4
+  ) {
     value += '=';
   }
 
-  return Buffer.from(value, 'base64').toString('utf8');
+  return Buffer.from(
+    value,
+    'base64'
+  ).toString('utf8');
 }
 
-function createSignature(payload) {
+function createSignature(
+  payload
+) {
   return crypto
-    .createHmac('sha256', SESSION_SECRET)
+    .createHmac(
+      'sha256',
+      SESSION_SECRET
+    )
     .update(payload)
     .digest('base64')
     .replace(/\+/g, '-')
@@ -267,46 +415,74 @@ function createSignature(payload) {
 function createSessionToken(user) {
   const payloadObject = {
     userId: user.id,
-    sessionVersion: Number(user.sessionVersion || 0),
-    expiresAt: Date.now() + SESSION_MAX_AGE
+
+    sessionVersion:
+      Number(
+        user.sessionVersion || 0
+      ),
+
+    expiresAt:
+      Date.now() +
+      SESSION_MAX_AGE
   };
 
-  const payload = base64UrlEncode(
-    JSON.stringify(payloadObject)
+  const payload =
+    base64UrlEncode(
+      JSON.stringify(
+        payloadObject
+      )
+    );
+
+  const signature =
+    createSignature(payload);
+
+  return (
+    `${payload}.${signature}`
   );
-
-  const signature = createSignature(payload);
-
-  return `${payload}.${signature}`;
 }
 
-function verifySessionToken(token) {
+function verifySessionToken(
+  token
+) {
   try {
-    if (!token || typeof token !== 'string') {
+    if (
+      !token ||
+      typeof token !== 'string'
+    ) {
       return null;
     }
 
-    const parts = token.split('.');
+    const parts =
+      token.split('.');
 
     if (parts.length !== 2) {
       return null;
     }
 
-    const payload = parts[0];
-    const providedSignature = parts[1];
+    const payload =
+      parts[0];
 
-    const expectedSignature = createSignature(payload);
+    const providedSignature =
+      parts[1];
 
-    const providedBuffer = Buffer.from(
-      providedSignature
-    );
+    const expectedSignature =
+      createSignature(
+        payload
+      );
 
-    const expectedBuffer = Buffer.from(
-      expectedSignature
-    );
+    const providedBuffer =
+      Buffer.from(
+        providedSignature
+      );
+
+    const expectedBuffer =
+      Buffer.from(
+        expectedSignature
+      );
 
     if (
-      providedBuffer.length !== expectedBuffer.length ||
+      providedBuffer.length !==
+      expectedBuffer.length ||
       !crypto.timingSafeEqual(
         providedBuffer,
         expectedBuffer
@@ -315,9 +491,12 @@ function verifySessionToken(token) {
       return null;
     }
 
-    const decoded = JSON.parse(
-      base64UrlDecode(payload)
-    );
+    const decoded =
+      JSON.parse(
+        base64UrlDecode(
+          payload
+        )
+      );
 
     if (!decoded.userId) {
       return null;
@@ -327,7 +506,10 @@ function verifySessionToken(token) {
       return null;
     }
 
-    if (Date.now() > Number(decoded.expiresAt)) {
+    if (
+      Date.now() >
+      Number(decoded.expiresAt)
+    ) {
       return null;
     }
 
@@ -337,36 +519,55 @@ function verifySessionToken(token) {
   }
 }
 
-function getCookie(req, name) {
-  const cookieHeader = req.headers.cookie;
+function getCookie(
+  req,
+  name
+) {
+  const cookieHeader =
+    req.headers.cookie;
 
   if (!cookieHeader) {
     return null;
   }
 
-  const cookies = cookieHeader.split(';');
+  const cookies =
+    cookieHeader.split(';');
 
-  for (const cookie of cookies) {
-    const separatorIndex = cookie.indexOf('=');
+  for (
+    const cookie of cookies
+  ) {
+    const separatorIndex =
+      cookie.indexOf('=');
 
-    if (separatorIndex === -1) {
+    if (
+      separatorIndex === -1
+    ) {
       continue;
     }
 
-    const key = cookie
-      .slice(0, separatorIndex)
-      .trim();
+    const key =
+      cookie
+        .slice(
+          0,
+          separatorIndex
+        )
+        .trim();
 
     if (key !== name) {
       continue;
     }
 
-    const value = cookie
-      .slice(separatorIndex + 1)
-      .trim();
+    const value =
+      cookie
+        .slice(
+          separatorIndex + 1
+        )
+        .trim();
 
     try {
-      return decodeURIComponent(value);
+      return decodeURIComponent(
+        value
+      );
     } catch {
       return value;
     }
@@ -375,17 +576,24 @@ function getCookie(req, name) {
   return null;
 }
 
-function setSessionCookie(res, token) {
+function setSessionCookie(
+  res,
+  token
+) {
   const cookieParts = [
     `payme_session=${encodeURIComponent(token)}`,
     'Path=/',
-    `Max-Age=${Math.floor(SESSION_MAX_AGE / 1000)}`,
+    `Max-Age=${Math.floor(
+      SESSION_MAX_AGE / 1000
+    )}`,
     'HttpOnly',
     'SameSite=Lax'
   ];
 
   if (isProduction) {
-    cookieParts.push('Secure');
+    cookieParts.push(
+      'Secure'
+    );
   }
 
   res.setHeader(
@@ -404,7 +612,9 @@ function clearSessionCookie(res) {
   ];
 
   if (isProduction) {
-    cookieParts.push('Secure');
+    cookieParts.push(
+      'Secure'
+    );
   }
 
   res.setHeader(
@@ -417,28 +627,39 @@ function clearSessionCookie(res) {
 // AUTHENTICATION MIDDLEWARE
 // ======================================================
 
-function authenticateRequest(req, res, next) {
+function authenticateRequest(
+  req,
+  res,
+  next
+) {
   req.session = null;
 
-  const token = getCookie(
-    req,
-    'payme_session'
-  );
+  const token =
+    getCookie(
+      req,
+      'payme_session'
+    );
 
   if (!token) {
     return next();
   }
 
-  const sessionData = verifySessionToken(token);
+  const sessionData =
+    verifySessionToken(
+      token
+    );
 
   if (!sessionData) {
     clearSessionCookie(res);
     return next();
   }
 
-  const user = users.find(
-    u => u.id === sessionData.userId
-  );
+  const user =
+    users.find(
+      u =>
+        u.id ===
+        sessionData.userId
+    );
 
   if (!user) {
     clearSessionCookie(res);
@@ -446,8 +667,12 @@ function authenticateRequest(req, res, next) {
   }
 
   if (
-    Number(user.sessionVersion || 0) !==
-    Number(sessionData.sessionVersion || 0)
+    Number(
+      user.sessionVersion || 0
+    ) !==
+    Number(
+      sessionData.sessionVersion || 0
+    )
   ) {
     clearSessionCookie(res);
     return next();
@@ -462,32 +687,66 @@ function authenticateRequest(req, res, next) {
   next();
 }
 
-app.use(authenticateRequest);
+app.use(
+  authenticateRequest
+);
 
 // ======================================================
 // HELPER: REQUIRE LOGIN
 // ======================================================
 
-function requireLogin(req, res, next) {
-  if (!req.session || !req.session.userId) {
+function requireLogin(
+  req,
+  res,
+  next
+) {
+  if (
+    !req.session ||
+    !req.session.userId
+  ) {
     return res.status(401).json({
       success: false,
-      message: 'Unauthorized session.'
+      message:
+        'Unauthorized session.'
     });
   }
 
-  const user = users.find(
-    u => u.id === req.session.userId
-  );
+  const user =
+    users.find(
+      u =>
+        u.id ===
+        req.session.userId
+    );
 
   if (!user) {
     clearSessionCookie(res);
 
     return res.status(401).json({
       success: false,
-      message: 'User session not found.'
+      message:
+        'User session not found.'
     });
   }
+
+  // Keep old accounts safe.
+  if (
+    typeof user.depositBalance !==
+    'number'
+  ) {
+    user.depositBalance = 0;
+  }
+
+  if (
+    typeof user.withdrawableBalance !==
+    'number'
+  ) {
+    user.withdrawableBalance =
+      Number(
+        user.referralEarnings || 0
+      );
+  }
+
+  syncUserBalance(user);
 
   req.user = user;
 
@@ -498,7 +757,9 @@ function requireLogin(req, res, next) {
 // TELEGRAM
 // ======================================================
 
-async function sendTelegramNotification(message) {
+async function sendTelegramNotification(
+  message
+) {
   if (
     !TELEGRAM_BOT_TOKEN ||
     !TELEGRAM_CHAT_ID
@@ -511,22 +772,30 @@ async function sendTelegramNotification(message) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'HTML'
-        })
-      }
-    );
+    const response =
+      await fetch(
+        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
 
-    const data = await response.json();
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+
+          body: JSON.stringify({
+            chat_id:
+              TELEGRAM_CHAT_ID,
+
+            text: message,
+
+            parse_mode: 'HTML'
+          })
+        }
+      );
+
+    const data =
+      await response.json();
 
     if (!data.ok) {
       console.error(
@@ -552,594 +821,781 @@ function ensureWelcomeBonus(user) {
     'undefined'
   ) {
     user.withdrawableBalance =
-      Number(user.referralEarnings || 0);
+      Number(
+        user.referralEarnings || 0
+      );
   }
 
-  if (!user.hasReceivedWelcomeBonus) {
-    user.balance =
-      Number(user.balance || 0) +
-      WELCOME_BONUS;
+  if (
+    typeof user.depositBalance !==
+    'number'
+  ) {
+    user.depositBalance = 0;
+  }
 
+  if (
+    !user.hasReceivedWelcomeBonus
+  ) {
     user.withdrawableBalance =
-      Number(user.withdrawableBalance || 0) +
+      Number(
+        user.withdrawableBalance || 0
+      ) +
       WELCOME_BONUS;
 
-    user.hasReceivedWelcomeBonus = true;
+    user.hasReceivedWelcomeBonus =
+      true;
 
-    if (!Array.isArray(user.transactions)) {
+    if (
+      !Array.isArray(
+        user.transactions
+      )
+    ) {
       user.transactions = [];
     }
 
     user.transactions.unshift({
-      id: generateTransactionId('tx_welcome'),
-      type: 'welcome_bonus',
-      description: 'Welcome Bonus',
-      amount: WELCOME_BONUS,
-      currency: 'NGN',
-      status: 'completed',
-      createdAt: new Date().toISOString()
+      id:
+        generateTransactionId(
+          'tx_welcome'
+        ),
+
+      type:
+        'welcome_bonus',
+
+      description:
+        'Welcome Bonus',
+
+      amount:
+        WELCOME_BONUS,
+
+      currency:
+        'NGN',
+
+      status:
+        'completed',
+
+      createdAt:
+        new Date().toISOString()
     });
   }
+
+  syncUserBalance(user);
 }
 
 // ======================================================
 // HTML PAGE ROUTES
 // ======================================================
 
-app.get('/earn', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, 'public', 'earn.html')
-  );
-});
+app.get(
+  '/earn',
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        'public',
+        'earn.html'
+      )
+    );
+  }
+);
 
-app.get('/leaderboard.html', (req, res) => {
-  res.sendFile(
-    path.join(
-      __dirname,
-      'public',
-      'leaderboard.html'
-    )
-  );
-});
+app.get(
+  '/leaderboard.html',
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        'public',
+        'leaderboard.html'
+      )
+    );
+  }
+);
 
 // ======================================================
 // SIGN UP
 // ======================================================
 
-app.post('/api/auth/signup', async (req, res) => {
-  try {
-    const {
-      fullName,
-      email,
-      username,
-      phone,
-      countryCode,
-      password,
-      referralCode,
-      agreeTerms
-    } = req.body;
-
-    if (
-      !fullName ||
-      fullName.trim().length < 2
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter your full name.'
-      });
-    }
-
-    if (
-      !email ||
-      !email.includes('@')
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid email address.'
-      });
-    }
-
-    if (
-      !username ||
-      username.trim().length < 3
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Username must be at least 3 characters.'
-      });
-    }
-
-    if (
-      !phone ||
-      phone.trim().length < 7
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Please enter a valid phone number.'
-      });
-    }
-
-    if (
-      !password ||
-      password.length < 8
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Password must be at least 8 characters.'
-      });
-    }
-
-    if (!agreeTerms) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Please accept the Terms of Service.'
-      });
-    }
-
-    const cleanUsername =
-      username.trim().toLowerCase();
-
-    const cleanEmail =
-      email.trim().toLowerCase();
-
-    const cleanPhone =
-      `${countryCode || '+234'}${phone.trim()}`;
-
-    const cleanRefInput =
-      referralCode
-        ? referralCode.trim().toUpperCase()
-        : null;
-
-    if (
-      users.find(
-        u => u.username === cleanUsername
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username is already taken.'
-      });
-    }
-
-    if (
-      users.find(
-        u => u.email === cleanEmail
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Email address is already registered.'
-      });
-    }
-
-    const uniqueRefCode =
-      generateUniqueReferralCode();
-
-    const newUser = {
-      id: generateUserId(),
-
-      fullName: fullName.trim(),
-
-      email: cleanEmail,
-
-      username: cleanUsername,
-
-      phone: cleanPhone,
-
-      password,
-
-      balance: 0,
-
-      withdrawableBalance: 0,
-
-      hasReceivedWelcomeBonus: false,
-
-      hasSeenPopup: false,
-
-      referralCode: uniqueRefCode,
-
-      referredBy: cleanRefInput,
-
-      totalReferrals: 0,
-
-      successfulReferrals: 0,
-
-      referralEarnings: 0,
-
-      transactions: [],
-
-      deposits: [],
-
-      weeklyReferralEvents: [],
-
-      weeklyReferralHistory: {},
-
-      sessionVersion: 0,
-
-      createdAt:
-        new Date().toISOString()
-    };
-
-    ensureWelcomeBonus(newUser);
-
-    // ==================================================
-    // REFERRAL
-    // ==================================================
-
-    if (newUser.referredBy) {
-      const referrer = users.find(
-        u =>
-          u.referralCode ===
-          newUser.referredBy
-      );
+app.post(
+  '/api/auth/signup',
+  async (req, res) => {
+    try {
+      const {
+        fullName,
+        email,
+        username,
+        phone,
+        countryCode,
+        password,
+        referralCode,
+        agreeTerms
+      } = req.body;
 
       if (
-        referrer &&
-        referrer.id !== newUser.id
+        !fullName ||
+        fullName.trim().length < 2
       ) {
-        const competition =
-          ensureWeeklyCompetition();
-
-        const referralConfirmedAt =
-          new Date().toISOString();
-
-        referrer.balance =
-          Number(referrer.balance || 0) +
-          REFERRAL_REWARD;
-
-        referrer.withdrawableBalance =
-          Number(
-            referrer.withdrawableBalance || 0
-          ) + REFERRAL_REWARD;
-
-        referrer.totalReferrals =
-          Number(referrer.totalReferrals || 0) +
-          1;
-
-        referrer.successfulReferrals =
-          Number(
-            referrer.successfulReferrals || 0
-          ) + 1;
-
-        referrer.referralEarnings =
-          Number(
-            referrer.referralEarnings || 0
-          ) + REFERRAL_REWARD;
-
-        if (
-          !Array.isArray(referrer.transactions)
-        ) {
-          referrer.transactions = [];
-        }
-
-        referrer.transactions.unshift({
-          id: generateTransactionId('tx_ref'),
-
-          type: 'referral_reward',
-
-          description:
-            `Referral Reward (@${newUser.username})`,
-
-          amount: REFERRAL_REWARD,
-
-          currency: 'NGN',
-
-          status: 'completed',
-
-          createdAt:
-            referralConfirmedAt
+        return res.status(400).json({
+          success: false,
+          message:
+            'Please enter your full name.'
         });
+      }
 
-        if (!competition.referralCounts) {
-          competition.referralCounts = {};
-        }
+      if (
+        !email ||
+        !email.includes('@')
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Please enter a valid email address.'
+        });
+      }
 
-        if (
-          !competition.referralFirstReachedAt
-        ) {
-          competition.referralFirstReachedAt = {};
-        }
+      if (
+        !username ||
+        username.trim().length < 3
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Username must be at least 3 characters.'
+        });
+      }
 
-        const currentWeeklyCount =
-          Number(
-            competition.referralCounts[
-              referrer.id
-            ] || 0
+      if (
+        !phone ||
+        phone.trim().length < 7
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Please enter a valid phone number.'
+        });
+      }
+
+      if (
+        !password ||
+        password.length < 8
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Password must be at least 8 characters.'
+        });
+      }
+
+      if (!agreeTerms) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Please accept the Terms of Service.'
+        });
+      }
+
+      const cleanUsername =
+        username
+          .trim()
+          .toLowerCase();
+
+      const cleanEmail =
+        email
+          .trim()
+          .toLowerCase();
+
+      const cleanPhone =
+        `${countryCode || '+234'}${phone.trim()}`;
+
+      const cleanRefInput =
+        referralCode
+          ? referralCode
+              .trim()
+              .toUpperCase()
+          : null;
+
+      if (
+        users.find(
+          u =>
+            u.username ===
+            cleanUsername
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Username is already taken.'
+        });
+      }
+
+      if (
+        users.find(
+          u =>
+            u.email ===
+            cleanEmail
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Email address is already registered.'
+        });
+      }
+
+      const uniqueRefCode =
+        generateUniqueReferralCode();
+
+      const newUser = {
+        id:
+          generateUserId(),
+
+        fullName:
+          fullName.trim(),
+
+        email:
+          cleanEmail,
+
+        username:
+          cleanUsername,
+
+        phone:
+          cleanPhone,
+
+        password,
+
+        // Total balance.
+        balance: 0,
+
+        // Deposited money.
+        // NOT withdrawable earnings.
+        depositBalance: 0,
+
+        // Earnings from rewards,
+        // referrals, games, bonuses, etc.
+        withdrawableBalance: 0,
+
+        hasReceivedWelcomeBonus:
+          false,
+
+        hasSeenPopup:
+          false,
+
+        referralCode:
+          uniqueRefCode,
+
+        referredBy:
+          cleanRefInput,
+
+        totalReferrals:
+          0,
+
+        successfulReferrals:
+          0,
+
+        referralEarnings:
+          0,
+
+        transactions: [],
+
+        deposits: [],
+
+        weeklyReferralEvents: [],
+
+        weeklyReferralHistory: {},
+
+        sessionVersion:
+          0,
+
+        createdAt:
+          new Date().toISOString()
+      };
+
+      ensureWelcomeBonus(
+        newUser
+      );
+
+      // ==================================================
+      // REFERRAL
+      // ==================================================
+
+      if (newUser.referredBy) {
+        const referrer =
+          users.find(
+            u =>
+              u.referralCode ===
+              newUser.referredBy
           );
 
-        const newWeeklyCount =
-          currentWeeklyCount + 1;
-
-        competition.referralCounts[
-          referrer.id
-        ] = newWeeklyCount;
-
         if (
-          !competition.referralFirstReachedAt[
-            referrer.id
-          ]
+          referrer &&
+          referrer.id !==
+            newUser.id
         ) {
-          competition.referralFirstReachedAt[
-            referrer.id
-          ] = {};
-        }
+          const competition =
+            ensureWeeklyCompetition();
 
-        if (
-          !competition
-            .referralFirstReachedAt[
+          const referralConfirmedAt =
+            new Date().toISOString();
+
+          // Referral rewards are earnings.
+          referrer.withdrawableBalance =
+            Number(
+              referrer.withdrawableBalance ||
+                0
+            ) +
+            REFERRAL_REWARD;
+
+          referrer.totalReferrals =
+            Number(
+              referrer.totalReferrals ||
+                0
+            ) +
+            1;
+
+          referrer.successfulReferrals =
+            Number(
+              referrer.successfulReferrals ||
+                0
+            ) +
+            1;
+
+          referrer.referralEarnings =
+            Number(
+              referrer.referralEarnings ||
+                0
+            ) +
+            REFERRAL_REWARD;
+
+          syncUserBalance(
+            referrer
+          );
+
+          if (
+            !Array.isArray(
+              referrer.transactions
+            )
+          ) {
+            referrer.transactions =
+              [];
+          }
+
+          referrer.transactions.unshift({
+            id:
+              generateTransactionId(
+                'tx_ref'
+              ),
+
+            type:
+              'referral_reward',
+
+            description:
+              `Referral Reward (@${newUser.username})`,
+
+            amount:
+              REFERRAL_REWARD,
+
+            currency:
+              'NGN',
+
+            status:
+              'completed',
+
+            createdAt:
+              referralConfirmedAt
+          });
+
+          if (
+            !competition.referralCounts
+          ) {
+            competition.referralCounts =
+              {};
+          }
+
+          if (
+            !competition.referralFirstReachedAt
+          ) {
+            competition.referralFirstReachedAt =
+              {};
+          }
+
+          const currentWeeklyCount =
+            Number(
+              competition
+                .referralCounts[
+                referrer.id
+              ] || 0
+            );
+
+          const newWeeklyCount =
+            currentWeeklyCount +
+            1;
+
+          competition.referralCounts[
+            referrer.id
+          ] =
+            newWeeklyCount;
+
+          if (
+            !competition
+              .referralFirstReachedAt[
+              referrer.id
+            ]
+          ) {
+            competition
+              .referralFirstReachedAt[
+              referrer.id
+            ] = {};
+          }
+
+          if (
+            !competition
+              .referralFirstReachedAt[
               referrer.id
             ][newWeeklyCount]
-        ) {
-          competition
-            .referralFirstReachedAt[
+          ) {
+            competition
+              .referralFirstReachedAt[
               referrer.id
             ][newWeeklyCount] =
-            referralConfirmedAt;
+              referralConfirmedAt;
+          }
+
+          if (
+            !Array.isArray(
+              referrer.weeklyReferralEvents
+            )
+          ) {
+            referrer.weeklyReferralEvents =
+              [];
+          }
+
+          referrer.weeklyReferralEvents.push({
+            referredUserId:
+              newUser.id,
+
+            referredUsername:
+              newUser.username,
+
+            confirmedAt:
+              referralConfirmedAt,
+
+            eligible:
+              true,
+
+            competitionId:
+              competition.competitionId
+          });
+
+          if (
+            !referrer.weeklyReferralHistory
+          ) {
+            referrer.weeklyReferralHistory =
+              {};
+          }
+
+          referrer.weeklyReferralHistory[
+            competition.competitionId
+          ] =
+            newWeeklyCount;
         }
+      }
 
-        if (
-          !Array.isArray(
-            referrer.weeklyReferralEvents
-          )
-        ) {
-          referrer.weeklyReferralEvents = [];
-        }
+      // ==================================================
+      // CREATE SESSION + SAVE USER
+      // ==================================================
 
-        referrer.weeklyReferralEvents.push({
-          referredUserId: newUser.id,
+      newUser.sessionVersion =
+        Number(
+          newUser.sessionVersion || 0
+        ) + 1;
 
-          referredUsername:
+      syncUserBalance(
+        newUser
+      );
+
+      users.push(
+        newUser
+      );
+
+      const sessionToken =
+        createSessionToken(
+          newUser
+        );
+
+      setSessionCookie(
+        res,
+        sessionToken
+      );
+
+      saveDatabase();
+
+      // ==================================================
+      // TELEGRAM SIGNUP NOTIFICATION
+      // ==================================================
+
+      const signupMsg =
+        `🆕 <b>NEW USER REGISTERED</b>\n\n` +
+        `👤 <b>Name:</b> ${newUser.fullName}\n` +
+        `🆔 <b>Username:</b> @${newUser.username}\n` +
+        `📧 <b>Email:</b> ${newUser.email}\n` +
+        `📱 <b>Phone:</b> ${newUser.phone}\n` +
+        `🎁 <b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
+        `🔗 <b>Referral Code:</b> ${newUser.referralCode}\n` +
+        `👥 <b>Referred By:</b> ${newUser.referredBy || 'None'}\n` +
+        `💰 <b>Balance:</b> ₦${Number(newUser.balance).toFixed(2)}\n` +
+        `💵 <b>Earnings:</b> ₦${Number(newUser.withdrawableBalance).toFixed(2)}\n` +
+        `💳 <b>Deposit Balance:</b> ₦${Number(newUser.depositBalance).toFixed(2)}`;
+
+      await sendTelegramNotification(
+        signupMsg
+      );
+
+      return res.json({
+        success:
+          true,
+
+        message:
+          'Signup successful',
+
+        user: {
+          id:
+            newUser.id,
+
+          fullName:
+            newUser.fullName,
+
+          username:
             newUser.username,
 
-          confirmedAt:
-            referralConfirmedAt,
+          balance:
+            newUser.balance,
 
-          eligible: true,
+          withdrawableBalance:
+            newUser.withdrawableBalance,
 
-          competitionId:
-            competition.competitionId
-        });
-
-        if (
-          !referrer.weeklyReferralHistory
-        ) {
-          referrer.weeklyReferralHistory = {};
+          depositBalance:
+            newUser.depositBalance
         }
+      });
+    } catch (err) {
+      console.error(
+        'Signup error:',
+        err
+      );
 
-        referrer.weeklyReferralHistory[
-          competition.competitionId
-        ] = newWeeklyCount;
-      }
+      return res.status(500).json({
+        success:
+          false,
+
+        message:
+          'Server error during signup.'
+      });
     }
-
-    // ==================================================
-    // SAVE USER
-    // ==================================================
-
-// ==================================================
-// CREATE SESSION + SAVE USER
-// ==================================================
-
-newUser.sessionVersion =
-  Number(newUser.sessionVersion || 0) + 1;
-
-users.push(newUser);
-
-const sessionToken = createSessionToken(newUser);
-
-setSessionCookie(res, sessionToken);
-
-saveDatabase();
-    // ==================================================
-    // TELEGRAM SIGNUP NOTIFICATION
-    // ==================================================
-
-    const signupMsg =
-      `🆕 <b>NEW USER REGISTERED</b>\n\n` +
-      `👤 <b>Name:</b> ${newUser.fullName}\n` +
-      `🆔 <b>Username:</b> @${newUser.username}\n` +
-      `📧 <b>Email:</b> ${newUser.email}\n` +
-      `📱 <b>Phone:</b> ${newUser.phone}\n` +
-      `🎁 <b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
-      `🔗 <b>Referral Code:</b> ${newUser.referralCode}\n` +
-      `👥 <b>Referred By:</b> ${newUser.referredBy || 'None'}\n` +
-      `💰 <b>Balance:</b> ₦${Number(newUser.balance).toFixed(2)}`;
-
-    await sendTelegramNotification(
-      signupMsg
-    );
-
-    return res.json({
-      success: true,
-
-      message: 'Signup successful',
-
-      user: {
-        id: newUser.id,
-
-        fullName: newUser.fullName,
-
-        username: newUser.username,
-
-        balance: newUser.balance,
-
-        withdrawableBalance:
-          newUser.withdrawableBalance
-      }
-    });
-  } catch (err) {
-    console.error(
-      'Signup error:',
-      err
-    );
-
-    return res.status(500).json({
-      success: false,
-      message:
-        'Server error during signup.'
-    });
   }
-});
+);
 
 // ======================================================
 // LOGIN
 // ======================================================
 
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const {
-      loginIdentifier,
-      password
-    } = req.body;
+app.post(
+  '/api/auth/login',
+  async (req, res) => {
+    try {
+      const {
+        loginIdentifier,
+        password
+      } = req.body;
 
-    if (
-      !loginIdentifier ||
-      !password
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing fields.'
-      });
-    }
+      if (
+        !loginIdentifier ||
+        !password
+      ) {
+        return res.status(400).json({
+          success:
+            false,
 
-    const cleanId =
-      loginIdentifier
-        .trim()
-        .toLowerCase();
-
-    const user = users.find(
-      u =>
-        u.username === cleanId ||
-        u.email === cleanId
-    );
-
-    if (
-      !user ||
-      user.password !== password
-    ) {
-      return res.status(401).json({
-        success: false,
-        message:
-          'Invalid credentials.'
-      });
-    }
-
-    ensureWelcomeBonus(user);
-
-    // Increment session version.
-    // This invalidates old login sessions.
-    user.sessionVersion =
-      Number(user.sessionVersion || 0) + 1;
-
-    const sessionToken =
-      createSessionToken(user);
-
-    setSessionCookie(
-      res,
-      sessionToken
-    );
-
-    saveDatabase();
-
-    const loginMsg =
-      `🔐 <b>USER LOGIN ALERT</b>\n\n` +
-      `👤 <b>Name:</b> ${user.fullName}\n` +
-      `🆔 <b>Username:</b> @${user.username}\n` +
-      `💰 <b>Current Balance:</b> ₦${Number(user.balance).toFixed(2)}`;
-
-    sendTelegramNotification(
-      loginMsg
-    ).catch(err =>
-      console.error(
-        'Telegram error:',
-        err.message
-      )
-    );
-
-    return res.json({
-      success: true,
-
-      message: 'Login successful',
-
-      user: {
-        id: user.id,
-
-        fullName: user.fullName,
-
-        username: user.username,
-
-        balance: user.balance,
-
-        withdrawableBalance:
-          user.withdrawableBalance
+          message:
+            'Missing fields.'
+        });
       }
-    });
-  } catch (err) {
-    console.error(
-      'Login error:',
-      err
-    );
 
-    return res.status(500).json({
-      success: false,
-      message:
-        'Server error during login.'
-    });
+      const cleanId =
+        loginIdentifier
+          .trim()
+          .toLowerCase();
+
+      const user =
+        users.find(
+          u =>
+            u.username ===
+              cleanId ||
+            u.email ===
+              cleanId
+        );
+
+      if (
+        !user ||
+        user.password !==
+          password
+      ) {
+        return res.status(401).json({
+          success:
+            false,
+
+          message:
+            'Invalid credentials.'
+        });
+      }
+
+      ensureWelcomeBonus(
+        user
+      );
+
+      // Increment session version.
+      user.sessionVersion =
+        Number(
+          user.sessionVersion || 0
+        ) + 1;
+
+      syncUserBalance(
+        user
+      );
+
+      const sessionToken =
+        createSessionToken(
+          user
+        );
+
+      setSessionCookie(
+        res,
+        sessionToken
+      );
+
+      saveDatabase();
+
+      const loginMsg =
+        `🔐 <b>USER LOGIN ALERT</b>\n\n` +
+        `👤 <b>Name:</b> ${user.fullName}\n` +
+        `🆔 <b>Username:</b> @${user.username}\n` +
+        `💰 <b>Current Balance:</b> ₦${Number(user.balance).toFixed(2)}\n` +
+        `💵 <b>Earnings:</b> ₦${Number(user.withdrawableBalance).toFixed(2)}\n` +
+        `💳 <b>Deposit Balance:</b> ₦${Number(user.depositBalance).toFixed(2)}`;
+
+      sendTelegramNotification(
+        loginMsg
+      ).catch(err =>
+        console.error(
+          'Telegram error:',
+          err.message
+        )
+      );
+
+      return res.json({
+        success:
+          true,
+
+        message:
+          'Login successful',
+
+        user: {
+          id:
+            user.id,
+
+          fullName:
+            user.fullName,
+
+          username:
+            user.username,
+
+          balance:
+            user.balance,
+
+          withdrawableBalance:
+            user.withdrawableBalance,
+
+          depositBalance:
+            user.depositBalance
+        }
+      });
+    } catch (err) {
+      console.error(
+        'Login error:',
+        err
+      );
+
+      return res.status(500).json({
+        success:
+          false,
+
+        message:
+          'Server error during login.'
+      });
+    }
   }
-});
+);
 
 // ======================================================
 // LOGOUT
 // ======================================================
 
-app.post('/api/auth/logout', (req, res) => {
-  try {
-    if (
-      req.session &&
-      req.session.userId
-    ) {
-      const user = users.find(
-        u =>
-          u.id ===
-          req.session.userId
+app.post(
+  '/api/auth/logout',
+  (req, res) => {
+    try {
+      if (
+        req.session &&
+        req.session.userId
+      ) {
+        const user =
+          users.find(
+            u =>
+              u.id ===
+              req.session.userId
+          );
+
+        if (user) {
+          user.sessionVersion =
+            Number(
+              user.sessionVersion ||
+                0
+            ) + 1;
+
+          saveDatabase();
+        }
+      }
+
+      clearSessionCookie(
+        res
       );
 
-      if (user) {
-        // Invalidate the current session.
-        user.sessionVersion =
-          Number(user.sessionVersion || 0) + 1;
+      return res.json({
+        success:
+          true,
 
-        saveDatabase();
-      }
+        message:
+          'Logged out successfully.'
+      });
+    } catch (err) {
+      console.error(
+        'Logout error:',
+        err
+      );
+
+      clearSessionCookie(
+        res
+      );
+
+      return res.json({
+        success:
+          true,
+
+        message:
+          'Logged out successfully.'
+      });
     }
-
-    clearSessionCookie(res);
-
-    return res.json({
-      success: true,
-      message:
-        'Logged out successfully.'
-    });
-  } catch (err) {
-    console.error(
-      'Logout error:',
-      err
-    );
-
-    clearSessionCookie(res);
-
-    return res.json({
-      success: true,
-      message:
-        'Logged out successfully.'
-    });
   }
-});
+);
 
 // ======================================================
 // WITHDRAWAL
@@ -1157,11 +1613,12 @@ app.post(
         amount
       } = req.body;
 
-      const user = req.user;
+      const user =
+        req.user;
 
       const withdrawable =
-        Number(
-          user.withdrawableBalance || 0
+        getWithdrawableBalance(
+          user
         );
 
       const withdrawnAmount =
@@ -1175,7 +1632,9 @@ app.post(
           MIN_WITHDRAWAL_LIMIT
       ) {
         return res.status(400).json({
-          success: false,
+          success:
+            false,
+
           message:
             `Minimum withdrawal amount is ₦${MIN_WITHDRAWAL_LIMIT}.`
         });
@@ -1186,13 +1645,11 @@ app.post(
         withdrawable
       ) {
         return res.status(400).json({
-          success: false,
+          success:
+            false,
+
           message:
-            `Insufficient withdrawable earnings. Deposited funds cannot be withdrawn directly (Non-withdrawable balance: ₦${Math.max(
-              0,
-              Number(user.balance || 0) -
-              withdrawable
-            ).toLocaleString()}).`
+            `Insufficient withdrawable earnings. Deposited funds cannot be withdrawn directly (Deposit Balance: ₦${getDepositBalance(user).toLocaleString()}).`
         });
       }
 
@@ -1202,22 +1659,27 @@ app.post(
         !accountNumber
       ) {
         return res.status(400).json({
-          success: false,
+          success:
+            false,
+
           message:
             'Please provide complete bank details.'
         });
       }
 
       const oldBalance =
-        Number(user.balance || 0);
-
-      user.balance =
-        oldBalance -
-        withdrawnAmount;
+        Number(
+          user.balance || 0
+        );
 
       user.withdrawableBalance =
         withdrawable -
         withdrawnAmount;
+
+      // Deposit balance remains untouched.
+      syncUserBalance(
+        user
+      );
 
       if (
         !Array.isArray(
@@ -1228,21 +1690,26 @@ app.post(
       }
 
       user.transactions.unshift({
-        id: generateTransactionId(
-          'tx_withdraw'
-        ),
+        id:
+          generateTransactionId(
+            'tx_withdraw'
+          ),
 
-        type: 'Withdrawal',
+        type:
+          'Withdrawal',
 
-        amount: withdrawnAmount,
+        amount:
+          withdrawnAmount,
 
-        bank: bankName,
+        bank:
+          bankName,
 
         accountName,
 
         accountNumber,
 
-        status: 'Pending',
+        status:
+          'Pending',
 
         date:
           new Date().toLocaleString(),
@@ -1256,7 +1723,9 @@ app.post(
         `👤 <b>User:</b> @${user.username || 'User'}\n` +
         `💰 <b>Amount:</b> ₦${withdrawnAmount.toLocaleString()}\n` +
         `📉 <b>Old Balance:</b> ₦${oldBalance.toLocaleString()}\n` +
-        `🔄 <b>New Balance:</b> ₦${Number(user.balance).toLocaleString()}\n\n` +
+        `🔄 <b>New Balance:</b> ₦${Number(user.balance).toLocaleString()}\n` +
+        `💵 <b>Earnings Remaining:</b> ₦${Number(user.withdrawableBalance).toLocaleString()}\n` +
+        `💳 <b>Deposit Balance:</b> ₦${Number(user.depositBalance).toLocaleString()}\n\n` +
         `🏦 <b>BANK DETAILS</b>\n` +
         `• <b>Account Name:</b> ${accountName}\n` +
         `• <b>Bank:</b> ${bankName}\n` +
@@ -1269,15 +1738,20 @@ app.post(
       saveDatabase();
 
       return res.json({
-        success: true,
+        success:
+          true,
 
         message:
           'Withdrawal request submitted successfully.',
 
-        balance: user.balance,
+        balance:
+          user.balance,
 
         withdrawableBalance:
-          user.withdrawableBalance
+          user.withdrawableBalance,
+
+        depositBalance:
+          user.depositBalance
       });
     } catch (err) {
       console.error(
@@ -1286,7 +1760,9 @@ app.post(
       );
 
       return res.status(500).json({
-        success: false,
+        success:
+          false,
+
         message:
           'Server error during withdrawal.'
       });
@@ -1302,12 +1778,16 @@ app.get(
   '/api/user/transactions',
   requireLogin,
   (req, res) => {
-    const user = req.user;
+    const user =
+      req.user;
 
     return res.json({
-      success: true,
+      success:
+        true,
+
       transactions:
-        user.transactions || []
+        user.transactions ||
+        []
     });
   }
 );
@@ -1316,22 +1796,25 @@ app.get(
 // GAME PAGE
 // ======================================================
 
-app.get('/game', (req, res) => {
-  if (
-    !req.session ||
-    !req.session.userId
-  ) {
-    return res.redirect('/');
-  }
+app.get(
+  '/game',
+  (req, res) => {
+    if (
+      !req.session ||
+      !req.session.userId
+    ) {
+      return res.redirect('/');
+    }
 
-  res.sendFile(
-    path.join(
-      __dirname,
-      'public',
-      'game.html'
-    )
-  );
-});
+    res.sendFile(
+      path.join(
+        __dirname,
+        'public',
+        'game.html'
+      )
+    );
+  }
+);
 
 // ======================================================
 // GAME STATE
@@ -1341,26 +1824,43 @@ app.get(
   '/api/game/state',
   requireLogin,
   (req, res) => {
-    const user = req.user;
+    const user =
+      req.user;
 
     const spins =
       user.transactions
         ? user.transactions.filter(
             t =>
               t.type &&
-              t.type.includes('Spin')
+              t.type.includes(
+                'Spin'
+              )
           )
         : [];
 
+    syncUserBalance(
+      user
+    );
+
     return res.json({
-      success: true,
+      success:
+        true,
 
       balance:
-        Number(user.balance || 0),
+        Number(
+          user.balance || 0
+        ),
 
       withdrawableBalance:
         Number(
-          user.withdrawableBalance || 0
+          user.withdrawableBalance ||
+            0
+        ),
+
+      depositBalance:
+        Number(
+          user.depositBalance ||
+            0
         ),
 
       spins
@@ -1377,16 +1877,26 @@ app.post(
   requireLogin,
   (req, res) => {
     try {
-      const user = req.user;
+      const user =
+        req.user;
 
-      const spinCost = 50;
+      const spinCost =
+        50;
+
+      syncUserBalance(
+        user
+      );
 
       if (
-        Number(user.balance || 0) <
+        Number(
+          user.balance || 0
+        ) <
         spinCost
       ) {
         return res.status(400).json({
-          success: false,
+          success:
+            false,
+
           error:
             'Insufficient balance. You need at least ₦50.'
         });
@@ -1398,41 +1908,49 @@ app.post(
           weight: 2000,
           label: '₦0'
         },
+
         {
           amount: 10,
           weight: 2500,
           label: '₦10'
         },
+
         {
           amount: 20,
           weight: 2500,
           label: '₦20'
         },
+
         {
           amount: 50,
           weight: 1800,
           label: '₦50'
         },
+
         {
           amount: 100,
           weight: 800,
           label: '₦100'
         },
+
         {
           amount: 250,
           weight: 250,
           label: '₦250'
         },
+
         {
           amount: 500,
           weight: 100,
           label: '₦500'
         },
+
         {
           amount: 1000,
           weight: 45,
           label: '₦1000'
         },
+
         {
           amount: 2000,
           weight: 5,
@@ -1440,22 +1958,86 @@ app.post(
         }
       ];
 
-      user.balance =
-        Number(user.balance || 0) -
+      // ==================================================
+      // DEDUCT SPIN COST
+      // ==================================================
+      //
+      // Deposit money is used FIRST.
+      //
+      // Example:
+      //
+      // Deposit Balance = ₦1,000
+      // Earnings        = ₦100
+      //
+      // Spin ₦50
+      //
+      // Result:
+      //
+      // Deposit Balance = ₦950
+      // Earnings        = ₦100
+      //
+      // ==================================================
+
+      let remainingSpinCost =
         spinCost;
 
+      const currentDepositBalance =
+        getDepositBalance(
+          user
+        );
+
+      const currentEarnings =
+        getWithdrawableBalance(
+          user
+        );
+
       if (
-        Number(
-          user.withdrawableBalance || 0
-        ) >= spinCost
+        currentDepositBalance >=
+        remainingSpinCost
       ) {
-        user.withdrawableBalance =
-          Number(
-            user.withdrawableBalance
-          ) - spinCost;
+        user.depositBalance =
+          currentDepositBalance -
+          remainingSpinCost;
+
+        remainingSpinCost =
+          0;
       } else {
-        user.withdrawableBalance = 0;
+        remainingSpinCost =
+          remainingSpinCost -
+          currentDepositBalance;
+
+        user.depositBalance =
+          0;
+
+        if (
+          currentEarnings <
+          remainingSpinCost
+        ) {
+          // Safety check.
+          user.depositBalance =
+            currentDepositBalance;
+
+          syncUserBalance(
+            user
+          );
+
+          return res.status(400).json({
+            success:
+              false,
+
+            error:
+              'Insufficient balance.'
+          });
+        }
+
+        user.withdrawableBalance =
+          currentEarnings -
+          remainingSpinCost;
       }
+
+      syncUserBalance(
+        user
+      );
 
       if (
         !Array.isArray(
@@ -1466,15 +2048,19 @@ app.post(
       }
 
       user.transactions.unshift({
-        id: generateTransactionId(
-          'tx_spin_entry'
-        ),
+        id:
+          generateTransactionId(
+            'tx_spin_entry'
+          ),
 
-        type: 'Spin Entry',
+        type:
+          'Spin Entry',
 
-        bank: 'PAYME Wallet',
+        bank:
+          'PAYME Wallet',
 
-        amount: spinCost,
+        amount:
+          spinCost,
 
         date:
           new Date().toLocaleString(),
@@ -1483,10 +2069,18 @@ app.post(
           new Date().toISOString()
       });
 
+      // ==================================================
+      // SELECT PRIZE
+      // ==================================================
+
       const totalWeight =
         prizes.reduce(
-          (total, prize) =>
-            total + prize.weight,
+          (
+            total,
+            prize
+          ) =>
+            total +
+            prize.weight,
           0
         );
 
@@ -1496,7 +2090,8 @@ app.post(
           totalWeight
         );
 
-      let cumulativeWeight = 0;
+      let cumulativeWeight =
+        0;
 
       let selectedPrize =
         prizes[0];
@@ -1511,33 +2106,51 @@ app.post(
           randomWeight <
           cumulativeWeight
         ) {
-          selectedPrize = prize;
+          selectedPrize =
+            prize;
+
           break;
         }
       }
 
-      if (
-        selectedPrize.amount > 0
-      ) {
-        user.balance =
-          Number(user.balance || 0) +
-          selectedPrize.amount;
+      // ==================================================
+      // GAME WINNINGS
+      // ==================================================
+      //
+      // Game winnings are earnings.
+      // They NEVER go into depositBalance.
+      //
+      // ==================================================
 
+      if (
+        selectedPrize.amount >
+        0
+      ) {
         user.withdrawableBalance =
           Number(
-            user.withdrawableBalance || 0
+            user.withdrawableBalance ||
+              0
           ) +
-          selectedPrize.amount;
+          Number(
+            selectedPrize.amount
+          );
       }
 
+      syncUserBalance(
+        user
+      );
+
       user.transactions.unshift({
-        id: generateTransactionId(
-          'tx_spin_reward'
-        ),
+        id:
+          generateTransactionId(
+            'tx_spin_reward'
+          ),
 
-        type: 'Spin Reward',
+        type:
+          'Spin Reward',
 
-        bank: 'PAYME Wallet',
+        bank:
+          'PAYME Wallet',
 
         amount:
           selectedPrize.amount,
@@ -1555,11 +2168,14 @@ app.post(
         user.transactions.filter(
           t =>
             t.type &&
-            t.type.includes('Spin')
+            t.type.includes(
+              'Spin'
+            )
         );
 
       return res.json({
-        success: true,
+        success:
+          true,
 
         prize:
           selectedPrize.amount,
@@ -1575,7 +2191,11 @@ app.post(
         withdrawableBalance:
           user.withdrawableBalance,
 
-        spins: recentSpins
+        depositBalance:
+          user.depositBalance,
+
+        spins:
+          recentSpins
       });
     } catch (err) {
       console.error(
@@ -1584,7 +2204,9 @@ app.post(
       );
 
       return res.status(500).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Server error during spin.'
       });
@@ -1624,17 +2246,23 @@ app.get(
   '/api/deposits',
   requireLogin,
   (req, res) => {
-    const user = req.user;
+    const user =
+      req.user;
 
     if (
-      !Array.isArray(user.deposits)
+      !Array.isArray(
+        user.deposits
+      )
     ) {
       user.deposits = [];
     }
 
     return res.json({
-      success: true,
-      deposits: user.deposits
+      success:
+        true,
+
+      deposits:
+        user.deposits
     });
   }
 );
@@ -1663,7 +2291,9 @@ app.post(
         depositAmount <= 0
       ) {
         return res.status(400).json({
-          success: false,
+          success:
+            false,
+
           error:
             'Invalid deposit amount.'
         });
@@ -1671,13 +2301,32 @@ app.post(
 
       if (!screenshot) {
         return res.status(400).json({
-          success: false,
+          success:
+            false,
+
           error:
             'Payment screenshot is required.'
         });
       }
 
-      const user = req.user;
+      // Validate screenshot BEFORE saving deposit.
+      const matches =
+        screenshot.match(
+          /^data:image\/([a-zA-Z0-9.+-]+);base64,(.+)$/
+        );
+
+      if (!matches) {
+        return res.status(400).json({
+          success:
+            false,
+
+          error:
+            'Invalid screenshot format.'
+        });
+      }
+
+      const user =
+        req.user;
 
       const reference =
         'PM-' +
@@ -1689,7 +2338,8 @@ app.post(
       const newDeposit = {
         reference,
 
-        amount: depositAmount,
+        amount:
+          depositAmount,
 
         status:
           'Pending Verification',
@@ -1699,14 +2349,17 @@ app.post(
 
         screenshot,
 
-        reason: null,
+        reason:
+          null,
 
         createdAt:
           new Date().toISOString()
       };
 
       if (
-        !Array.isArray(user.deposits)
+        !Array.isArray(
+          user.deposits
+        )
       ) {
         user.deposits = [];
       }
@@ -1716,19 +2369,6 @@ app.post(
       );
 
       saveDatabase();
-
-      const matches =
-        screenshot.match(
-          /^data:image\/([a-zA-Z0-9.+-]+);base64,(.+)$/
-        );
-
-      if (!matches) {
-        return res.status(400).json({
-          success: false,
-          error:
-            'Invalid screenshot format.'
-        });
-      }
 
       const imageType =
         matches[1];
@@ -1756,7 +2396,9 @@ app.post(
         !TELEGRAM_CHAT_ID
       ) {
         return res.status(500).json({
-          success: false,
+          success:
+            false,
+
           error:
             'Deposit saved, but Telegram is not configured.'
         });
@@ -1819,8 +2461,11 @@ app.post(
         await fetch(
           `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
           {
-            method: 'POST',
-            body: formData
+            method:
+              'POST',
+
+            body:
+              formData
           }
         );
 
@@ -1836,14 +2481,17 @@ app.post(
         );
 
         return res.status(500).json({
-          success: false,
+          success:
+            false,
+
           error:
             'Deposit saved, but Telegram notification failed.'
         });
       }
 
       return res.json({
-        success: true,
+        success:
+          true,
 
         reference,
 
@@ -1857,7 +2505,9 @@ app.post(
       );
 
       return res.status(500).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Deposit saved, but Telegram notification failed.'
       });
@@ -1882,18 +2532,25 @@ app.post(
 
     if (
       adminSecret !==
-      (process.env.PAYME_ADMIN_SECRET ||
-        'payme_admin_secret_2026')
+      (
+        process.env.PAYME_ADMIN_SECRET ||
+        'payme_admin_secret_2026'
+      )
     ) {
       return res.status(403).json({
-        success: false,
-        error: 'Forbidden'
+        success:
+          false,
+
+        error:
+          'Forbidden'
       });
     }
 
     const targetUser =
       users.find(
-        u => u.id === userId
+        u =>
+          u.id ===
+          userId
       );
 
     if (
@@ -1903,7 +2560,9 @@ app.post(
       )
     ) {
       return res.status(404).json({
-        success: false,
+        success:
+          false,
+
         error:
           'User or deposits not found'
       });
@@ -1922,43 +2581,86 @@ app.post(
         'Pending Verification'
     ) {
       return res.status(400).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Deposit not found or already verified'
       });
     }
 
-    if (action === 'approve') {
-      deposit.status = 'Approved';
+    if (
+      action ===
+      'approve'
+    ) {
+      deposit.status =
+        'Approved';
 
-      targetUser.balance =
-        Number(
-          targetUser.balance || 0
-        ) +
+      deposit.reason =
+        null;
+
+      deposit.verifiedAt =
+        new Date().toISOString();
+
+      const approvedDepositAmount =
         Number(
           deposit.amount || 0
         );
+
+      // ==================================================
+      // IMPORTANT
+      // ==================================================
+      //
+      // Deposit goes into:
+      //
+      // 1. Total balance
+      // 2. Deposit balance
+      //
+      // Deposit does NOT go into
+      // withdrawableBalance.
+      //
+      // ==================================================
+
+      targetUser.depositBalance =
+        Number(
+          targetUser.depositBalance ||
+            0
+        ) +
+        approvedDepositAmount;
+
+      syncUserBalance(
+        targetUser
+      );
 
       if (
         !Array.isArray(
           targetUser.transactions
         )
       ) {
-        targetUser.transactions = [];
+        targetUser.transactions =
+          [];
       }
 
       targetUser.transactions.unshift({
-        id: generateTransactionId(
-          'tx_deposit'
-        ),
+        id:
+          generateTransactionId(
+            'tx_deposit'
+          ),
 
         type:
           'Deposit Approved',
 
-        bank: 'PalmPay',
+        description:
+          `Deposit ${deposit.reference}`,
 
         amount:
-          Number(deposit.amount),
+          approvedDepositAmount,
+
+        currency:
+          'NGN',
+
+        bank:
+          'PalmPay',
 
         reference:
           deposit.reference,
@@ -1975,7 +2677,8 @@ app.post(
 
       saveDatabase();
     } else if (
-      action === 'reject'
+      action ===
+      'reject'
     ) {
       deposit.status =
         'Rejected';
@@ -1987,14 +2690,17 @@ app.post(
       saveDatabase();
     } else {
       return res.status(400).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Invalid action. Use approve or reject.'
       });
     }
 
     return res.json({
-      success: true,
+      success:
+        true,
 
       message:
         `Deposit ${deposit.status.toLowerCase()} successfully.`,
@@ -2005,7 +2711,10 @@ app.post(
         targetUser.balance,
 
       withdrawableBalance:
-        targetUser.withdrawableBalance
+        targetUser.withdrawableBalance,
+
+      depositBalance:
+        targetUser.depositBalance
     });
   }
 );
@@ -2018,24 +2727,35 @@ app.get(
   '/api/user/dashboard',
   requireLogin,
   (req, res) => {
-    const user = req.user;
+    const user =
+      req.user;
 
-    ensureWelcomeBonus(user);
+    ensureWelcomeBonus(
+      user
+    );
 
     const isNewUser =
       user.hasReceivedWelcomeBonus &&
       !user.hasSeenPopup;
 
     if (isNewUser) {
-      user.hasSeenPopup = true;
+      user.hasSeenPopup =
+        true;
+
       saveDatabase();
     }
 
+    syncUserBalance(
+      user
+    );
+
     return res.json({
-      success: true,
+      success:
+        true,
 
       user: {
-        id: user.id,
+        id:
+          user.id,
 
         fullName:
           user.fullName,
@@ -2043,12 +2763,24 @@ app.get(
         username:
           user.username,
 
+        // Total wallet balance.
         balance:
-          Number(user.balance || 0),
+          Number(
+            user.balance || 0
+          ),
 
+        // Withdrawable earnings.
         withdrawableBalance:
           Number(
-            user.withdrawableBalance || 0
+            user.withdrawableBalance ||
+              0
+          ),
+
+        // Deposited funds.
+        depositBalance:
+          Number(
+            user.depositBalance ||
+              0
           ),
 
         isNewUser,
@@ -2058,17 +2790,20 @@ app.get(
 
         totalReferrals:
           Number(
-            user.totalReferrals || 0
+            user.totalReferrals ||
+              0
           ),
 
         successfulReferrals:
           Number(
-            user.successfulReferrals || 0
+            user.successfulReferrals ||
+              0
           ),
 
         referralEarnings:
           Number(
-            user.referralEarnings || 0
+            user.referralEarnings ||
+              0
           ),
 
         minWithdrawalLimit:
@@ -2076,15 +2811,18 @@ app.get(
 
         canWithdraw:
           Number(
-            user.withdrawableBalance || 0
+            user.withdrawableBalance ||
+              0
           ) >=
           MIN_WITHDRAWAL_LIMIT,
 
         transactions:
-          user.transactions || [],
+          user.transactions ||
+          [],
 
         deposits:
-          user.deposits || []
+          user.deposits ||
+          []
       }
     });
   }
@@ -2094,7 +2832,8 @@ app.get(
 // TELEGRAM CALLBACK HANDLER
 // ======================================================
 
-let telegramUpdateOffset = 0;
+let telegramUpdateOffset =
+  0;
 
 async function handleTelegramCallback(
   callbackQuery
@@ -2104,13 +2843,16 @@ async function handleTelegramCallback(
       String(
         callbackQuery.message?.chat?.id
       ) !==
-      String(TELEGRAM_CHAT_ID)
+      String(
+        TELEGRAM_CHAT_ID
+      )
     ) {
       return;
     }
 
     const data =
-      callbackQuery.data || '';
+      callbackQuery.data ||
+      '';
 
     if (
       !data.startsWith(
@@ -2137,7 +2879,9 @@ async function handleTelegramCallback(
 
     const targetUser =
       users.find(
-        u => u.id === userId
+        u =>
+          u.id ===
+          userId
       );
 
     if (
@@ -2182,6 +2926,10 @@ async function handleTelegramCallback(
       return;
     }
 
+    // ==================================================
+    // APPROVE DEPOSIT
+    // ==================================================
+
     if (
       action ===
       'approve_deposit'
@@ -2189,31 +2937,54 @@ async function handleTelegramCallback(
       deposit.status =
         'Approved';
 
-      deposit.reason = null;
+      deposit.reason =
+        null;
 
       deposit.verifiedAt =
         new Date().toISOString();
 
-      targetUser.balance =
-        Number(
-          targetUser.balance || 0
-        ) +
+      const approvedDepositAmount =
         Number(
           deposit.amount || 0
         );
+
+      // ==================================================
+      // DEPOSIT ACCOUNTING
+      // ==================================================
+      //
+      // Deposit money:
+      //
+      // + depositBalance
+      // + total balance
+      // - withdrawableBalance
+      //
+      // ==================================================
+
+      targetUser.depositBalance =
+        Number(
+          targetUser.depositBalance ||
+            0
+        ) +
+        approvedDepositAmount;
+
+      syncUserBalance(
+        targetUser
+      );
 
       if (
         !Array.isArray(
           targetUser.transactions
         )
       ) {
-        targetUser.transactions = [];
+        targetUser.transactions =
+          [];
       }
 
       targetUser.transactions.unshift({
-        id: generateTransactionId(
-          'tx_deposit'
-        ),
+        id:
+          generateTransactionId(
+            'tx_deposit'
+          ),
 
         type:
           'Deposit Approved',
@@ -2222,11 +2993,13 @@ async function handleTelegramCallback(
           `Deposit ${deposit.reference}`,
 
         amount:
-          Number(deposit.amount),
+          approvedDepositAmount,
 
-        currency: 'NGN',
+        currency:
+          'NGN',
 
-        bank: 'PalmPay',
+        bank:
+          'PalmPay',
 
         reference:
           deposit.reference,
@@ -2261,11 +3034,21 @@ async function handleTelegramCallback(
           `💳 New Balance: ₦${Number(
             targetUser.balance
           ).toLocaleString()}\n` +
+          `💵 Earnings: ₦${Number(
+            targetUser.withdrawableBalance
+          ).toLocaleString()}\n` +
+          `💳 Deposit Balance: ₦${Number(
+            targetUser.depositBalance
+          ).toLocaleString()}\n` +
           `✅ Status: Approved`
       );
 
       return;
     }
+
+    // ==================================================
+    // REJECT DEPOSIT
+    // ==================================================
 
     if (
       action ===
@@ -2327,19 +3110,21 @@ async function answerTelegramCallback(
     await fetch(
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`,
       {
-        method: 'POST',
+        method:
+          'POST',
 
         headers: {
           'Content-Type':
             'application/json'
         },
 
-        body: JSON.stringify({
-          callback_query_id:
-            callbackId,
+        body:
+          JSON.stringify({
+            callback_query_id:
+              callbackId,
 
-          text
-        })
+            text
+          })
       }
     );
   } catch (err) {
@@ -2369,25 +3154,31 @@ async function editTelegramMessage(
     await fetch(
       `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageCaption`,
       {
-        method: 'POST',
+        method:
+          'POST',
 
         headers: {
           'Content-Type':
             'application/json'
         },
 
-        body: JSON.stringify({
-          chat_id: chatId,
+        body:
+          JSON.stringify({
+            chat_id:
+              chatId,
 
-          message_id: messageId,
+            message_id:
+              messageId,
 
-          caption: text,
+            caption:
+              text,
 
-          reply_markup:
-            JSON.stringify({
-              inline_keyboard: []
-            })
-        })
+            reply_markup:
+              JSON.stringify({
+                inline_keyboard:
+                  []
+              })
+          })
       }
     );
   } catch (err) {
@@ -2408,23 +3199,28 @@ app.get(
     try {
       const leaderboard =
         users
-          .map(user => ({
-            username:
-              user.username,
+          .map(
+            user => ({
+              username:
+                user.username,
 
-            totalReferrals:
-              Number(
-                user.totalReferrals || 0
-              ),
+              totalReferrals:
+                Number(
+                  user.totalReferrals ||
+                    0
+                ),
 
-            referralEarnings:
-              Number(
-                user.referralEarnings || 0
-              )
-          }))
+              referralEarnings:
+                Number(
+                  user.referralEarnings ||
+                    0
+                )
+            })
+          )
           .filter(
             user =>
-              user.totalReferrals > 0
+              user.totalReferrals >
+              0
           )
           .sort(
             (a, b) =>
@@ -2434,7 +3230,9 @@ app.get(
           .slice(0, 10);
 
       return res.json({
-        success: true,
+        success:
+          true,
+
         leaderboard
       });
     } catch (err) {
@@ -2444,7 +3242,9 @@ app.get(
       );
 
       return res.status(500).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Failed to load leaderboard.'
       });
@@ -2458,22 +3258,34 @@ app.get(
 
 const WEEKLY_PRIZES = [
   {
-    position: 1,
-    amount: 500,
+    position:
+      1,
+
+    amount:
+      500,
+
     description:
       'Weekly Referral Challenge — 1st Place'
   },
 
   {
-    position: 2,
-    amount: 200,
+    position:
+      2,
+
+    amount:
+      200,
+
     description:
       'Weekly Referral Challenge — 2nd Place'
   },
 
   {
-    position: 3,
-    amount: 50,
+    position:
+      3,
+
+    amount:
+      50,
+
     description:
       'Weekly Referral Challenge — 3rd Place'
   }
@@ -2528,10 +3340,13 @@ function getCompetitionEnd(
   startDate
 ) {
   const end =
-    new Date(startDate);
+    new Date(
+      startDate
+    );
 
   end.setUTCDate(
-    end.getUTCDate() + 7
+    end.getUTCDate() +
+      7
   );
 
   return end;
@@ -2542,7 +3357,9 @@ function getCurrentCompetition() {
     getCompetitionStart();
 
   const end =
-    getCompetitionEnd(start);
+    getCompetitionEnd(
+      start
+    );
 
   return {
     competitionId:
@@ -2556,7 +3373,8 @@ function getCurrentCompetition() {
     endTime:
       end.toISOString(),
 
-    status: 'active'
+    status:
+      'active'
   };
 }
 
@@ -2574,7 +3392,8 @@ function ensureCompetitionDatabase() {
       weeklyCompetitions
     )
   ) {
-    weeklyCompetitions = [];
+    weeklyCompetitions =
+      [];
   }
 
   const current =
@@ -2598,15 +3417,20 @@ function ensureCompetitionDatabase() {
       endTime:
         current.endTime,
 
-      status: 'active',
+      status:
+        'active',
 
-      winners: [],
+      winners:
+        [],
 
-      finalizedAt: null,
+      finalizedAt:
+        null,
 
-      referralCounts: {},
+      referralCounts:
+        {},
 
-      referralFirstReachedAt: {}
+      referralFirstReachedAt:
+        {}
     };
 
     weeklyCompetitions.push(
@@ -2657,9 +3481,12 @@ function getWeeklyEligibleReferrals(
         ).getTime();
 
       return (
-        event.eligible === true &&
-        eventTime >= start &&
-        eventTime < end
+        event.eligible ===
+          true &&
+        eventTime >=
+          start &&
+        eventTime <
+          end
       );
     }
   );
@@ -2673,50 +3500,58 @@ function buildWeeklyLeaderboard(
   competition
 ) {
   return users
-    .map(user => {
-      const events =
-        getWeeklyEligibleReferrals(
-          user,
-          competition
-        );
-
-      let lastReferralAt =
-        null;
-
-      if (events.length > 0) {
-        const sorted =
-          [...events].sort(
-            (a, b) =>
-              new Date(
-                a.confirmedAt
-              ).getTime() -
-              new Date(
-                b.confirmedAt
-              ).getTime()
+    .map(
+      user => {
+        const events =
+          getWeeklyEligibleReferrals(
+            user,
+            competition
           );
 
-        lastReferralAt =
-          sorted[
-            sorted.length - 1
-          ].confirmedAt;
+        let lastReferralAt =
+          null;
+
+        if (
+          events.length >
+          0
+        ) {
+          const sorted =
+            [
+              ...events
+            ].sort(
+              (a, b) =>
+                new Date(
+                  a.confirmedAt
+                ).getTime() -
+                new Date(
+                  b.confirmedAt
+                ).getTime()
+            );
+
+          lastReferralAt =
+            sorted[
+              sorted.length -
+                1
+            ].confirmedAt;
+        }
+
+        return {
+          userId:
+            user.id,
+
+          username:
+            user.username,
+
+          fullName:
+            user.fullName,
+
+          eligibleReferrals:
+            events.length,
+
+          lastReferralAt
+        };
       }
-
-      return {
-        userId:
-          user.id,
-
-        username:
-          user.username,
-
-        fullName:
-          user.fullName,
-
-        eligibleReferrals:
-          events.length,
-
-        lastReferralAt
-      };
-    })
+    )
     .filter(
       user =>
         user.eligibleReferrals >
@@ -2753,7 +3588,10 @@ function buildWeeklyLeaderboard(
       }
     )
     .map(
-      (user, index) => {
+      (
+        user,
+        index
+      ) => {
         const position =
           index + 1;
 
@@ -2802,7 +3640,8 @@ function finalizeWeeklyCompetition(
       competition
     );
 
-  const winners = [];
+  const winners =
+    [];
 
   for (
     const prize of WEEKLY_PRIZES
@@ -2834,7 +3673,8 @@ function finalizeWeeklyCompetition(
         targetUser.transactions
       )
     ) {
-      targetUser.transactions = [];
+      targetUser.transactions =
+        [];
     }
 
     const alreadyPaid =
@@ -2849,18 +3689,17 @@ function finalizeWeeklyCompetition(
       );
 
     if (!alreadyPaid) {
-      targetUser.balance =
-        Number(
-          targetUser.balance || 0
-        ) +
-        prize.amount;
-
+      // Weekly prize is earnings.
       targetUser.withdrawableBalance =
         Number(
           targetUser.withdrawableBalance ||
             0
         ) +
         prize.amount;
+
+      syncUserBalance(
+        targetUser
+      );
 
       targetUser.transactions.unshift({
         id:
@@ -2875,9 +3714,11 @@ function finalizeWeeklyCompetition(
         amount:
           prize.amount,
 
-        currency: 'NGN',
+        currency:
+          'NGN',
 
-        status: 'completed',
+        status:
+          'completed',
 
         description:
           prize.description,
@@ -3000,7 +3841,9 @@ app.get(
           ? req.session.userId
           : null;
 
-      if (currentUserId) {
+      if (
+        currentUserId
+      ) {
         const index =
           leaderboard.findIndex(
             user =>
@@ -3008,7 +3851,9 @@ app.get(
               currentUserId
           );
 
-        if (index !== -1) {
+        if (
+          index !== -1
+        ) {
           userPosition =
             index + 1;
 
@@ -3023,7 +3868,9 @@ app.get(
                 currentUserId
             );
 
-          if (currentUser) {
+          if (
+            currentUser
+          ) {
             userEligibleReferrals =
               getWeeklyEligibleReferrals(
                 currentUser,
@@ -3044,11 +3891,13 @@ app.get(
       const remainingMs =
         Math.max(
           0,
-          endTime - now
+          endTime -
+            now
         );
 
       return res.json({
-        success: true,
+        success:
+          true,
 
         competition: {
           competitionId:
@@ -3073,7 +3922,10 @@ app.get(
           WEEKLY_PRIZES,
 
         leaderboard:
-          leaderboard.slice(0, 10),
+          leaderboard.slice(
+            0,
+            10
+          ),
 
         user: {
           position:
@@ -3098,7 +3950,9 @@ app.get(
       );
 
       return res.status(500).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Failed to load weekly competition.'
       });
@@ -3148,7 +4002,9 @@ app.get(
           );
 
       return res.json({
-        success: true,
+        success:
+          true,
+
         history
       });
     } catch (err) {
@@ -3158,7 +4014,9 @@ app.get(
       );
 
       return res.status(500).json({
-        success: false,
+        success:
+          false,
+
         error:
           'Failed to load competition history.'
       });
@@ -3252,8 +4110,12 @@ app.get(
   '/api/health',
   (req, res) => {
     res.json({
-      success: true,
-      users: users.length,
+      success:
+        true,
+
+      users:
+        users.length,
+
       authenticated:
         !!(
           req.session &&
@@ -3268,7 +4130,8 @@ app.get(
 // ======================================================
 
 const PORT =
-  process.env.PORT || 3000;
+  process.env.PORT ||
+  3000;
 
 app.listen(
   PORT,
@@ -3292,6 +4155,10 @@ app.listen(
 
     console.log(
       'User authentication: signed cookie sessions'
+    );
+
+    console.log(
+      'Balance system: Deposit Balance + Withdrawable Earnings'
     );
   }
 );
