@@ -3,28 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <title>Sign Up — PAYME</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
-
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: #F6F8FC;
@@ -35,7 +21,6 @@
       min-height: 100vh;
       padding: 20px;
     }
-
     .signup-card {
       background: #FFFFFF;
       border-radius: 24px;
@@ -45,40 +30,16 @@
       border: 1px solid #E2E8F0;
       box-shadow: 0 10px 30px rgba(11, 16, 32, 0.05);
     }
-
-    .signup-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .signup-header h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #0B1020;
-      margin-bottom: 6px;
-      letter-spacing: -0.02em;
-    }
-
-    .signup-header p {
-      color: #64748B;
-      font-size: 0.95rem;
-    }
-
+    .signup-header { text-align: center; margin-bottom: 24px; }
+    .signup-header h1 { font-size: 2rem; font-weight: 800; color: #0B1020; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .signup-header p { color: #64748B; font-size: 0.95rem; }
     .alert-error {
-      background: #FEF2F2;
-      border: 1px solid #FCA5A5;
-      color: #991B1B;
-      font-size: 0.85rem;
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      display: none;
-      font-weight: 600;
-      word-break: break-word;
+      background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B;
+      font-size: 0.85rem; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px;
+      display: none; font-weight: 600; word-break: break-word;
     }
 
-    /* TELEGRAM BUTTON */
-
+    /* TELEGRAM BUTTON & DIVIDER STYLES */
     .btn-telegram {
       width: 100%;
       background: #229ED9;
@@ -93,24 +54,12 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: all 0.2s;
+      transition: background 0.2s;
       margin-bottom: 20px;
     }
-
-    .btn-telegram:hover {
-      background: #1CA0E3;
-    }
-
-    .btn-telegram:disabled {
-      background: #94A3B8;
-      cursor: not-allowed;
-    }
-
-    .btn-telegram svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
+    .btn-telegram:hover { background: #1CA0E3; }
+    .btn-telegram:disabled { background: #94A3B8; cursor: not-allowed; }
+    .btn-telegram svg { width: 20px; height: 20px; fill: currentColor; }
 
     .divider {
       display: flex;
@@ -121,915 +70,586 @@
       font-weight: 600;
       margin-bottom: 20px;
     }
-
-    .divider::before,
-    .divider::after {
+    .divider::before, .divider::after {
       content: '';
       flex: 1;
       border-bottom: 1px solid #E2E8F0;
     }
+    .divider span { padding: 0 10px; }
 
-    .divider span {
-      padding: 0 10px;
-    }
-
-    /* FORM */
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #0F172A;
-      margin-bottom: 6px;
-    }
-
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
     .form-control {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: 1px solid #E2E8F0;
-      background: #F8FAFC;
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s ease;
-      font-family: inherit;
+      width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #E2E8F0;
+      background: #F8FAFC; font-size: 0.95rem; outline: none; transition: all 0.2s ease; font-family: inherit;
     }
-
-    .form-control:focus {
-      border-color: #2563EB;
-      background: #FFFFFF;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-    }
-
-    .phone-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .country-code {
-      width: 95px;
-      background: #F1F5F9;
-      font-weight: 700;
-      text-align: center;
-      color: #334155;
-    }
-
-    .password-wrap {
-      position: relative;
-    }
-
+    .form-control:focus { border-color: #2563EB; background: #FFFFFF; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    .phone-row { display: flex; gap: 8px; }
+    .country-code { width: 95px; background: #F1F5F9; font-weight: 700; text-align: center; color: #334155; }
+    .password-wrap { position: relative; }
     .toggle-pass {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #64748B;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #64748B; font-size: 0.8rem; font-weight: 700; cursor: pointer;
     }
-
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-      font-size: 0.82rem;
-      color: #64748B;
-    }
-
-    .checkbox-group input {
-      width: 16px;
-      height: 16px;
-      accent-color: #2563EB;
-      cursor: pointer;
-    }
-
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 0.82rem; color: #64748B; }
+    .checkbox-group input { width: 16px; height: 16px; accent-color: #2563EB; cursor: pointer; }
     .btn-submit {
-      width: 100%;
-      background: #2563EB;
-      color: #FFFFFF;
-      border: none;
-      padding: 16px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
+      width: 100%; background: #2563EB; color: #FFFFFF; border: none; padding: 16px;
+      border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s;
     }
+    .btn-submit:hover { background: #1D4ED8; }
+    .btn-submit:disabled { background: #94A3B8; cursor: not-allowed; }
+    .login-link { text-align: center; margin-top: 20px; font-size: 0.85rem; color: #64748B; }
+    .login-link a { color: #2563EB; font-weight: 700; text-decoration: none; }
 
-    .btn-submit:hover {
-      background: #1D4ED8;
-    }
-
-    .btn-submit:disabled {
-      background: #94A3B8;
-      cursor: not-allowed;
-    }
-
-    .login-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.85rem;
-      color: #64748B;
-    }
-
-    .login-link a {
-      color: #2563EB;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    /* TELEGRAM USER INFO */
-
-    .telegram-user {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      background: #F0F9FF;
-      border: 1px solid #BAE6FD;
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 16px;
-    }
-
-    .telegram-user.show {
-      display: flex;
-    }
-
-    .telegram-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #229ED9;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    .telegram-user-info {
-      min-width: 0;
-    }
-
-    .telegram-user-label {
-      font-size: 0.68rem;
-      color: #64748B;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    .telegram-user-name {
-      font-size: 0.88rem;
-      font-weight: 800;
-      color: #0F172A;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /* ONBOARDING */
-
+    /* ONBOARDING ANIMATION OVERLAY */
     #onboardingModal {
-      position: fixed;
-      inset: 0;
-      background: #0B1020;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      text-align: center;
-      padding: 24px;
-      color: #FFFFFF;
-      overflow: hidden;
-      opacity: 0;
-      transition: opacity 0.4s ease;
+      position: fixed; inset: 0; background: #0B1020; display: none;
+      flex-direction: column; justify-content: center; align-items: center;
+      z-index: 9999; text-align: center; padding: 24px; color: #FFFFFF;
+      overflow: hidden; opacity: 0; transition: opacity 0.4s ease;
     }
+    #onboardingModal.active { display: flex; opacity: 1; }
 
-    #onboardingModal.active {
-      display: flex;
-      opacity: 1;
-    }
+    .brand-title { font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 24px; letter-spacing: -0.02em; }
+    .brand-title span { color: #2563EB; }
 
-    .brand-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #FFFFFF;
-      margin-bottom: 24px;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-title span {
-      color: #2563EB;
-    }
-
-    .wallet-stage {
-      position: relative;
-      width: 140px;
-      height: 140px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
+    .wallet-stage { position: relative; width: 140px; height: 140px; margin-bottom: 24px; display: flex; justify-content: center; align-items: center; }
     .digital-wallet {
-      width: 100px;
-      height: 80px;
-      background: linear-gradient(135deg, #2563EB, #1D4ED8);
-      border-radius: 16px;
-      position: relative;
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 12px;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255,255,255,0.2);
+      width: 100px; height: 80px; background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      border-radius: 16px; position: relative; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
+      transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.2);
     }
-
     .digital-wallet::after {
-      content: '';
-      width: 14px;
-      height: 14px;
-      background: #38BDF8;
-      border-radius: 50%;
+      content: ''; width: 14px; height: 14px; background: #38BDF8; border-radius: 50%;
       box-shadow: 0 0 10px #38BDF8;
     }
-
     .wallet-glow {
-      position: absolute;
-      inset: -15px;
-      border-radius: 50%;
-      background: radial-gradient(
-        circle,
-        rgba(56, 189, 248, 0.35) 0%,
-        rgba(11, 16, 32, 0) 70%
-      );
-      opacity: 0;
-      transition: opacity 0.4s ease;
+      position: absolute; inset: -15px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(11, 16, 32, 0) 70%);
+      opacity: 0; transition: opacity 0.4s ease;
     }
 
     .coin {
-      position: absolute;
-      font-weight: 800;
-      font-size: 1.2rem;
-      color: #38BDF8;
-      opacity: 0;
-      transform: translateY(-60px) scale(0.5);
+      position: absolute; font-weight: 800; font-size: 1.2rem; color: #38BDF8;
+      opacity: 0; transform: translateY(-60px) scale(0.5);
     }
-
     @keyframes dropCoin {
-      0% {
-        opacity: 0;
-        transform: translateY(-70px) scale(0.5);
-      }
-
-      50% {
-        opacity: 1;
-        transform: translateY(-10px) scale(1.1);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.2);
-      }
+      0% { opacity: 0; transform: translateY(-70px) scale(0.5); }
+      50% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(10px) scale(0.2); }
     }
 
     .anim-badge {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #38BDF8;
-      margin-bottom: 8px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
+      font-size: 1.6rem; font-weight: 800; color: #38BDF8; margin-bottom: 8px;
+      opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
     }
-
     .anim-heading {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #FFFFFF;
-      margin-bottom: 8px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
+      font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 8px;
+      opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
     }
-
     .anim-subtext {
-      font-size: 0.9rem;
-      color: #94A3B8;
-      max-width: 280px;
-      line-height: 1.5;
-      margin-bottom: 24px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
+      font-size: 0.9rem; color: #94A3B8; max-width: 280px; line-height: 1.5; margin-bottom: 24px;
+      opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
     }
 
     .btn-continue {
-      background: #2563EB;
-      color: #FFFFFF;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
-      pointer-events: none;
+      background: #2563EB; color: #FFFFFF; border: none; padding: 14px 28px;
+      border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      opacity: 0; transform: translateY(10px); transition: all 0.4s ease; pointer-events: none;
     }
-
-    .btn-continue.show {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    /* TELEGRAM MODE */
-
-    body.telegram-mode .signup-card .divider,
-    body.telegram-mode .signup-card form,
-    body.telegram-mode .signup-card .login-link {
-      display: none;
-    }
-
-    body.telegram-mode .signup-card {
-      max-width: 420px;
-    }
-
-    body.telegram-mode .signup-header h1 {
-      font-size: 1.7rem;
-    }
-
-    body.telegram-mode .signup-header p {
-      font-size: 0.82rem;
-    }
-
-    body.telegram-mode .btn-telegram {
-      margin-bottom: 0;
-    }
+    .btn-continue.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
   </style>
 </head>
-
 <body>
 
   <div class="signup-card">
-
     <div class="signup-header">
-
       <h1>Create your account</h1>
-
-      <p>
-        Join PAYME today. It's free to get started.
-      </p>
-
+      <p>Join PAYME today. It's free to get started.</p>
     </div>
 
-    <div
-      class="alert-error"
-      id="errorBox"
-    ></div>
+    <div class="alert-error" id="errorBox"></div>
 
-
-    <!-- TELEGRAM USER INFORMATION -->
-
-    <div
-      class="telegram-user"
-      id="telegramUserBox"
-    >
-
-      <div
-        class="telegram-avatar"
-        id="telegramAvatar"
-      >
-        TG
-      </div>
-
-      <div class="telegram-user-info">
-
-        <div class="telegram-user-label">
-          TELEGRAM ACCOUNT
-        </div>
-
-        <div
-          class="telegram-user-name"
-          id="telegramUserName"
-        >
-          Loading...
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- TELEGRAM SIGN UP -->
-
-    <button
-      type="button"
-      class="btn-telegram"
-      id="telegramSignUpBtn"
-      onclick="handleTelegramAuth()"
-    >
-
+    <!-- TELEGRAM SIGN UP BUTTON -->
+    <button type="button" class="btn-telegram" id="telegramSignUpBtn" onclick="handleTelegramAuth()">
       <svg viewBox="0 0 24 24">
-
         <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.53l-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.99l12.01-4.63c.56-.21 1.05.13.84.99z"/>
-
       </svg>
-
-      <span id="telegramBtnText">
-        Sign Up with Telegram
-      </span>
-
+      <span id="telegramBtnText">Sign Up with Telegram</span>
     </button>
-
 
     <div class="divider">
       <span>OR WITH EMAIL</span>
     </div>
 
-
-    <!-- NORMAL SIGNUP -->
-
     <form id="signupForm">
-
       <div class="form-group">
-
-        <label for="fullname">
-          Full Name
-        </label>
-
-        <input
-          type="text"
-          id="fullname"
-          class="form-control"
-          placeholder="John Doe"
-          required
-        >
-
+        <label for="fullname">Full Name</label>
+        <input type="text" id="fullname" class="form-control" placeholder="John Doe" required>
       </div>
 
-
       <div class="form-group">
-
-        <label for="email">
-          Email Address
-        </label>
-
-        <input
-          type="email"
-          id="email"
-          class="form-control"
-          placeholder="name@example.com"
-          required
-        >
-
+        <label for="email">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
       </div>
 
-
       <div class="form-group">
-
-        <label for="username">
-          Username
-        </label>
-
-        <input
-          type="text"
-          id="username"
-          class="form-control"
-          placeholder="username"
-          required
-        >
-
+        <label for="username">Username</label>
+        <input type="text" id="username" class="form-control" placeholder="username" required>
       </div>
 
-
       <div class="form-group">
-
-        <label for="phone">
-          Phone Number
-        </label>
-
+        <label for="phone">Phone Number</label>
         <div class="phone-row">
-
-          <input
-            type="text"
-            id="countryCode"
-            value="+234"
-            class="form-control country-code"
-            readonly
-          >
-
-          <input
-            type="tel"
-            id="phone"
-            class="form-control"
-            placeholder="8012345678"
-            required
-          >
-
+          <input type="text" id="countryCode" value="+234" class="form-control country-code" readonly>
+          <input type="tel" id="phone" class="form-control" placeholder="8012345678" required>
         </div>
-
       </div>
 
-
       <div class="form-group">
-
-        <label for="password">
-          Password
-        </label>
-
+        <label for="password">Password</label>
         <div class="password-wrap">
-
-          <input
-            type="password"
-            id="password"
-            class="form-control"
-            placeholder="••••••••••••"
-            required
-          >
-
-          <button
-            type="button"
-            class="toggle-pass"
-            onclick="togglePasswordVisibility()"
-          >
-            Show
-          </button>
-
+          <input type="password" id="password" class="form-control" placeholder="••••••••••••" required>
+          <button type="button" class="toggle-pass" onclick="togglePasswordVisibility()">Show</button>
         </div>
-
       </div>
-
 
       <div class="form-group">
-
-        <label for="referralCode">
-          Referral Code (Optional)
-        </label>
-
-        <input
-          type="text"
-          id="referralCode"
-          class="form-control"
-          placeholder="Enter referral code"
-        >
-
+        <label for="referralCode">Referral Code (Optional)</label>
+        <input type="text" id="referralCode" class="form-control" placeholder="Enter referral code">
       </div>
-
 
       <div class="checkbox-group">
-
-        <input
-          type="checkbox"
-          id="terms"
-          required
-          checked
-        >
-
-        <label for="terms">
-          I agree to the Terms of Service and Privacy Policy.
-        </label>
-
+        <input type="checkbox" id="terms" required checked>
+        <label for="terms">I agree to the Terms of Service and Privacy Policy.</label>
       </div>
 
-
-      <button
-        type="submit"
-        class="btn-submit"
-        id="submitBtn"
-      >
-        Create Account
-      </button>
-
+      <button type="submit" class="btn-submit" id="submitBtn">Create Account</button>
     </form>
 
-
     <div class="login-link">
-
-      Already have an account?
-
-      <a href="/login.html">
-        Sign In
-      </a>
-
+      Already have an account? <a href="/login.html">Sign In</a>
     </div>
-
   </div>
 
-
-  <!-- ONBOARDING ANIMATION -->
-
+  <!-- FULLSCREEN ANIMATION OVERLAY -->
   <div id="onboardingModal">
-
-    <div class="brand-title">
-      Welcome to <span>PAYME</span>
-    </div>
-
+    <div class="brand-title">Welcome to <span>PAYME</span></div>
 
     <div class="wallet-stage">
-
-      <div
-        class="wallet-glow"
-        id="walletGlow"
-      ></div>
-
-
-      <div
-        class="coin"
-        id="coin1"
-        style="left:30%;"
-      >
-        ₦
-      </div>
-
-
-      <div
-        class="coin"
-        id="coin2"
-        style="left:50%;"
-      >
-        ₦
-      </div>
-
-
-      <div
-        class="coin"
-        id="coin3"
-        style="left:70%;"
-      >
-        ₦
-      </div>
-
-
-      <div
-        class="digital-wallet"
-        id="wallet"
-      ></div>
-
+      <div class="wallet-glow" id="walletGlow"></div>
+      <div class="coin" id="coin1" style="left: 30%;">₦</div>
+      <div class="coin" id="coin2" style="left: 50%;">₦</div>
+      <div class="coin" id="coin3" style="left: 70%;">₦</div>
+      <div class="digital-wallet" id="wallet"></div>
     </div>
 
+    <div class="anim-badge" id="animBadge">+₦10.00</div>
+    <div class="anim-heading" id="animHeading">Congratulations! 🎉</div>
+    <div class="anim-subtext" id="animSubtext">You've received your ₦10 welcome bonus. Your PAYME journey starts now.</div>
 
-    <div
-      class="anim-badge"
-      id="animBadge"
-    >
-      +₦10.00
-    </div>
-
-
-    <div
-      class="anim-heading"
-      id="animHeading"
-    >
-      Congratulations! 🎉
-    </div>
-
-
-    <div
-      class="anim-subtext"
-      id="animSubtext"
-    >
-      You've received your ₦10 welcome bonus.
-      Your PAYME journey starts now.
-    </div>
-
-
-    <button
-      class="btn-continue"
-      id="continueBtn"
-      onclick="redirectDashboard()"
-    >
-      Continue to PAYME
-    </button>
-
+    <button class="btn-continue" id="continueBtn" onclick="redirectDashboard()">Continue to PAYME</button>
   </div>
-
 
   <script>
 
 
 
-// INITIALIZE TELEGRAM WEB APP
-let tg = window.Telegram?.WebApp;
+// ======================================================
+// TELEGRAM WEB APP INITIALIZATION
+// ======================================================
+
+let tg = null;
+
+function initializeTelegram() {
+    try {
+        tg = window.Telegram?.WebApp || null;
+
+        if (!tg) {
+            console.warn('Telegram WebApp SDK not available.');
+            return;
+        }
+
+        // Tell Telegram the WebApp is ready.
+        if (typeof tg.ready === 'function') {
+            tg.ready();
+        }
+
+        // Expand the WebApp.
+        if (typeof tg.expand === 'function') {
+            tg.expand();
+        }
+
+        console.log('Telegram WebApp detected.');
+        console.log('initData:', tg.initData);
+        console.log('initDataUnsafe:', tg.initDataUnsafe);
+
+        const user = tg.initDataUnsafe?.user;
+
+        if (user) {
+            const telegramUsername =
+                user.username || `user_${user.id}`;
+
+            const fullName =
+                `${user.first_name || ''} ${user.last_name || ''}`
+                    .trim();
+
+            const usernameInput =
+                document.getElementById('username');
+
+            const fullnameInput =
+                document.getElementById('fullname');
+
+            const telegramBtnText =
+                document.getElementById('telegramBtnText');
+
+            if (usernameInput) {
+                usernameInput.value = telegramUsername;
+            }
+
+            if (fullnameInput && fullName) {
+                fullnameInput.value = fullName;
+            }
+
+            if (telegramBtnText) {
+                telegramBtnText.innerText =
+                    `Continue as @${telegramUsername}`;
+            }
+
+            console.log(
+                'Telegram user detected:',
+                user
+            );
+        }
+
+    } catch (error) {
+        console.error(
+            'Telegram initialization error:',
+            error
+        );
+    }
+}
+
+
+// ======================================================
+// PAGE INITIALIZATION
+// ======================================================
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Re-fetch in case WebApp script loaded dynamically
-  if (!tg && window.Telegram) {
-    tg = window.Telegram.WebApp;
-  }
 
-  const tgBtnText = document.getElementById('telegramBtnText');
+    initializeTelegram();
 
-  // Check if running inside Telegram WebApp with valid initData
-  if (tg && tg.initData && tg.initData !== "") {
-    tg.ready();
-    tg.expand();
+    // Capture referral code from URL.
+    const urlParams =
+        new URLSearchParams(window.location.search);
 
-    // Auto-fill username display on button
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      const user = tg.initDataUnsafe.user;
-      const tgUsername = user.username || `user_${user.id}`;
-      tgBtnText.innerText = `Signing in as @${tgUsername}...`;
-    }
+    const refParam =
+        urlParams.get('ref');
 
-    // Capture Referral Code from URL if present
-    const urlParams = new URLSearchParams(window.location.search);
-    const refParam = urlParams.get('ref');
     if (refParam) {
-      document.getElementById('referralCode').value = refParam.trim();
+        document.getElementById(
+            'referralCode'
+        ).value = refParam.trim();
     }
 
-    // AUTOMATIC SIGN-IN / SIGN-UP
-    handleTelegramAuth();
-  } else {
-    // Auto-capture Referral Code for regular browser users
-    const urlParams = new URLSearchParams(window.location.search);
-    const refParam = urlParams.get('ref');
-    if (refParam) {
-      document.getElementById('referralCode').value = refParam.trim();
-    }
-  }
 });
 
-// TELEGRAM AUTHENTICATION HANDLER
+
+// ======================================================
+// TELEGRAM SIGN UP
+// ======================================================
+
 async function handleTelegramAuth() {
-  const errorBox = document.getElementById('errorBox');
-  const tgBtn = document.getElementById('telegramSignUpBtn');
-  const tgBtnText = document.getElementById('telegramBtnText');
 
-  errorBox.style.display = 'none';
-  const activeTg = window.Telegram?.WebApp;
+    const errorBox =
+        document.getElementById('errorBox');
 
-  // 1. Valid Telegram Environment with initData
-  if (activeTg && activeTg.initData && activeTg.initData !== "") {
+    const tgBtn =
+        document.getElementById('telegramSignUpBtn');
+
+    const tgBtnText =
+        document.getElementById('telegramBtnText');
+
+    errorBox.style.display = 'none';
+
+    // Get Telegram WebApp again in case it wasn't
+    // available when the page first loaded.
+    const activeTg =
+        window.Telegram?.WebApp || tg;
+
+    if (!activeTg) {
+
+        errorBox.innerText =
+            'Telegram WebApp could not be detected. Please open this page from your Telegram bot.';
+
+        errorBox.style.display = 'block';
+
+        return;
+    }
+
     try {
-      tgBtn.disabled = true;
-      tgBtnText.innerText = 'Creating account...';
 
-      const referralCode = document.getElementById('referralCode').value.trim();
-      const userObj = activeTg.initDataUnsafe?.user || {};
+        // Make sure Telegram is ready.
+        if (typeof activeTg.ready === 'function') {
+            activeTg.ready();
+        }
 
-      // Safely resolve telegram ID or fallback to query id
-      const telegramId = userObj.id || activeTg.initDataUnsafe?.query_id;
+        if (typeof activeTg.expand === 'function') {
+            activeTg.expand();
+        }
 
-      if (!telegramId) {
-        throw new Error('Telegram account ID could not be identified. Please try again.');
+        /*
+         * IMPORTANT:
+         *
+         * We do NOT require initData to be non-empty here.
+         *
+         * Telegram may still provide the user through:
+         *
+         * activeTg.initDataUnsafe.user
+         *
+         * This makes the signup behave much more like
+         * your previous working project.
+         */
+
+        const telegramUser =
+            activeTg.initDataUnsafe?.user;
+
+        if (!telegramUser || !telegramUser.id) {
+
+            errorBox.innerText =
+                'Telegram account information could not be detected. Please close this page and open the Web App directly from your Telegram bot.';
+
+            errorBox.style.display = 'block';
+
+            return;
+        }
+
+        tgBtn.disabled = true;
+
+        tgBtnText.innerText =
+            'Creating account...';
+
+        const telegramId =
+            String(telegramUser.id);
+
+        const username =
+            telegramUser.username ||
+            `user_${telegramId}`;
+
+        const firstName =
+            telegramUser.first_name || '';
+
+        const lastName =
+            telegramUser.last_name || '';
+
+        const referralCode =
+            document.getElementById(
+                'referralCode'
+            ).value.trim();
+
+        /*
+         * Send both initData and the Telegram user
+         * information to the server.
+         *
+         * initData may be empty in some Telegram
+         * launch situations, so we allow that.
+         */
+
+        const payload = {
+
+            initData:
+                activeTg.initData || '',
+
+            telegramId:
+                telegramId,
+
+            username:
+                username,
+
+            firstName:
+                firstName,
+
+            lastName:
+                lastName,
+
+            referralCode:
+                referralCode
+        };
+
+        console.log(
+            'Sending Telegram signup:',
+            payload
+        );
+
+        const response =
+            await fetch(
+                '/api/auth/telegram-signup',
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+
+                    credentials: 'include',
+
+                    body:
+                        JSON.stringify(payload)
+                }
+            );
+
+        let data;
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch {
+
+            throw new Error(
+                `Server returned an invalid response (${response.status}).`
+            );
+        }
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                'Telegram signup failed.'
+            );
+        }
+
+        console.log(
+            'Telegram signup successful:',
+            data
+        );
+
+        /*
+         * Account successfully created/logged in.
+         * The server has already created the session
+         * cookie.
+         */
+
+        triggerOnboardingAnimation();
+
+    } catch (error) {
+
+        console.error(
+            'Telegram signup error:',
+            error
+        );
+
+        tgBtn.disabled = false;
+
+        tgBtnText.innerText =
+            'Sign Up with Telegram';
+
+        errorBox.innerText =
+            error.message ||
+            'Telegram signup failed.';
+
+        errorBox.style.display =
+            'block';
+    }
+}
+
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('password');
+      const toggleBtn = document.querySelector('.toggle-pass');
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        toggleBtn.innerText = 'Hide';
+      } else {
+        passInput.type = 'password';
+        toggleBtn.innerText = 'Show';
       }
+    }
 
-      // FIXED: Key name corrected to telegramId (matching backend)
+    function redirectDashboard() {
+      window.location.href = '/dashboard.html';
+    }
+
+    function triggerOnboardingAnimation() {
+      const modal = document.getElementById('onboardingModal');
+      const walletGlow = document.getElementById('walletGlow');
+      const animBadge = document.getElementById('animBadge');
+      const animHeading = document.getElementById('animHeading');
+      const animSubtext = document.getElementById('animSubtext');
+      const continueBtn = document.getElementById('continueBtn');
+
+      modal.classList.add('active');
+
+      setTimeout(() => { document.getElementById('coin1').style.animation = 'dropCoin 0.8s ease-in forwards'; }, 300);
+      setTimeout(() => { document.getElementById('coin2').style.animation = 'dropCoin 0.8s ease-in 0.2s forwards'; }, 500);
+      setTimeout(() => { document.getElementById('coin3').style.animation = 'dropCoin 0.8s ease-in 0.4s forwards'; }, 700);
+
+      setTimeout(() => {
+        walletGlow.style.opacity = '1';
+        animBadge.style.opacity = '1';
+        animBadge.style.transform = 'translateY(0)';
+      }, 1400);
+
+      setTimeout(() => {
+        animHeading.style.opacity = '1';
+        animHeading.style.transform = 'translateY(0)';
+        animSubtext.style.opacity = '1';
+        animSubtext.style.transform = 'translateY(0)';
+        continueBtn.classList.add('show');
+      }, 2000);
+
+      setTimeout(() => { redirectDashboard(); }, 4500);
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const errorBox = document.getElementById('errorBox');
+      const submitBtn = document.getElementById('submitBtn');
+
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Creating account...';
+
       const payload = {
-        initData: activeTg.initData,
-        telegramId: telegramId, 
-        username: userObj.username || `user_${telegramId}`,
-        firstName: userObj.first_name || "",
-        lastName: userObj.last_name || "",
-        referralCode: referralCode
+        fullName: document.getElementById('fullname').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        username: document.getElementById('username').value.trim(),
+        countryCode: document.getElementById('countryCode').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        password: document.getElementById('password').value,
+        referralCode: document.getElementById('referralCode').value.trim(),
+        agreeTerms: document.getElementById('terms').checked
       };
 
-      const response = await fetch('/api/auth/telegram-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Telegram authentication failed.');
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || `Error ${response.status}: Failed to create account.`);
+        }
+
+        triggerOnboardingAnimation();
+
+      } catch (err) {
+        errorBox.innerText = err.message;
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Create Account';
       }
-
-      triggerOnboardingAnimation();
-    } catch (err) {
-      tgBtn.disabled = false;
-      tgBtnText.innerText = 'Sign Up with Telegram';
-      errorBox.innerText = err.message;
-      errorBox.style.display = 'block';
-    }
-  } 
-  // 2. Client Fallback for Development
-  else if (activeTg && activeTg.initDataUnsafe && activeTg.initDataUnsafe.user) {
-    const tgUser = activeTg.initDataUnsafe.user;
-    document.getElementById('username').value = tgUser.username || `user_${tgUser.id}`;
-    if (tgUser.first_name) {
-      document.getElementById('fullname').value = `${tgUser.first_name} ${tgUser.last_name || ""}`.trim();
-    }
-    errorBox.innerText = "Telegram initData missing. Pre-filled details in form below.";
-    errorBox.style.display = 'block';
-  } 
-  // 3. Fallback alert inside error box if opened in regular browser
-  else {
-    errorBox.innerText = "Please open this app inside Telegram to sign up with your Telegram account, or use the email form below.";
-    errorBox.style.display = 'block';
-  }
-}
-
-function togglePasswordVisibility() {
-  const passInput = document.getElementById('password');
-  const toggleBtn = document.querySelector('.toggle-pass');
-  if (passInput.type === 'password') {
-    passInput.type = 'text';
-    toggleBtn.innerText = 'Hide';
-  } else {
-    passInput.type = 'password';
-    toggleBtn.innerText = 'Show';
-  }
-}
-
-function redirectDashboard() {
-  window.location.href = '/dashboard.html';
-}
-
-function triggerOnboardingAnimation() {
-  const modal = document.getElementById('onboardingModal');
-  const walletGlow = document.getElementById('walletGlow');
-  const animBadge = document.getElementById('animBadge');
-  const animHeading = document.getElementById('animHeading');
-  const animSubtext = document.getElementById('animSubtext');
-  const continueBtn = document.getElementById('continueBtn');
-
-  modal.classList.add('active');
-
-  setTimeout(() => { document.getElementById('coin1').style.animation = 'dropCoin 0.8s ease-in forwards'; }, 300);
-  setTimeout(() => { document.getElementById('coin2').style.animation = 'dropCoin 0.8s ease-in 0.2s forwards'; }, 500);
-  setTimeout(() => { document.getElementById('coin3').style.animation = 'dropCoin 0.8s ease-in 0.4s forwards'; }, 700);
-
-  setTimeout(() => {
-    walletGlow.style.opacity = '1';
-    animBadge.style.opacity = '1';
-    animBadge.style.transform = 'translateY(0)';
-  }, 1400);
-
-  setTimeout(() => {
-    animHeading.style.opacity = '1';
-    animHeading.style.transform = 'translateY(0)';
-    animSubtext.style.opacity = '1';
-    animSubtext.style.transform = 'translateY(0)';
-    continueBtn.classList.add('show');
-  }, 2000);
-
-  setTimeout(() => { redirectDashboard(); }, 4500);
-}
-
-document.getElementById('signupForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const errorBox = document.getElementById('errorBox');
-  const submitBtn = document.getElementById('submitBtn');
-
-  errorBox.style.display = 'none';
-  submitBtn.disabled = true;
-  submitBtn.innerText = 'Creating account...';
-
-  const payload = {
-    fullName: document.getElementById('fullname').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    username: document.getElementById('username').value.trim(),
-    countryCode: document.getElementById('countryCode').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    password: document.getElementById('password').value,
-    referralCode: document.getElementById('referralCode').value.trim(),
-    agreeTerms: document.getElementById('terms').checked
-  };
-
-  try {
-    const response = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
     });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || `Error ${response.status}: Failed to create account.`);
-    }
-
-    triggerOnboardingAnimation();
-  } catch (err) {
-    errorBox.innerText = err.message;
-    errorBox.style.display = 'block';
-    submitBtn.disabled = false;
-    submitBtn.innerText = 'Create Account';
-  }
-});
-
-
-
   </script>
 
 </body>
 </html>
+
