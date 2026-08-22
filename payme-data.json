@@ -450,7 +450,9 @@
       "withdrawableBalance": 115,
       "sessionVersion": 19,
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787297085833",
@@ -577,7 +579,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787297525543",
@@ -773,7 +777,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787300220264",
@@ -808,7 +814,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787300995730",
@@ -843,7 +851,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787301042657",
@@ -878,7 +888,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787301103434",
@@ -913,7 +925,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787308338870",
@@ -970,7 +984,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787311111710",
@@ -1005,7 +1021,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787313009533",
@@ -1076,7 +1094,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787313535526",
@@ -1111,7 +1131,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787314867982",
@@ -1146,7 +1168,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787319677893",
@@ -1287,7 +1311,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787321522338",
@@ -1722,7 +1748,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787323222001",
@@ -1757,7 +1785,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787324634474",
@@ -1792,7 +1822,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_1787336097111",
@@ -1836,7 +1868,9 @@
       "depositBalance": 0,
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3d5mds_4dee46a103ae",
@@ -1871,7 +1905,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T19:49:53.681Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3d8pde_433b4dba90be",
@@ -1906,7 +1942,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T19:52:17.530Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3dudp6_6bfb54d66527",
@@ -1941,7 +1979,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T20:09:08.827Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3dv6j8_fda0d2b39dca",
@@ -1976,7 +2016,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T20:09:46.197Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3g02ng_92f1243aec92",
@@ -2011,7 +2053,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:09:33.677Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3giary_b52564bad322",
@@ -2046,7 +2090,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:23:44.019Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt3her2w_6a48574a3502",
@@ -2091,7 +2137,9 @@
       "sessionVersion": 1,
       "createdAt": "2026-08-21T21:48:58.136Z",
       "depositBalance": 0,
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt43prby_555558e13665",
@@ -2126,7 +2174,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-22T08:13:23.230Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44h2bs_6e2156622e74",
@@ -2196,7 +2246,9 @@
       },
       "sessionVersion": 1,
       "createdAt": "2026-08-22T08:34:37.192Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44i60e_f509570bc176",
@@ -2231,7 +2283,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:35:28.622Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44ius8_8fe2f96279dc",
@@ -2266,7 +2320,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:36:00.729Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44jfrp_72e581a61c46",
@@ -2301,7 +2357,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:36:27.925Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44ln6h_ab5a7530b9f2",
@@ -2403,7 +2461,9 @@
       },
       "sessionVersion": 4,
       "createdAt": "2026-08-22T08:38:10.841Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44macw_fe0b0320df56",
@@ -2438,7 +2498,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:38:40.881Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44n1fy_919f4f3ad55d",
@@ -2473,7 +2535,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:39:15.982Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt44nlgp_963b8ee6da13",
@@ -2508,7 +2572,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:39:41.929Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt45d05d_52afe52ab530",
@@ -2543,7 +2609,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
       "createdAt": "2026-08-22T08:59:27.362Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt45djyp_b754d50e48a6",
@@ -2578,7 +2646,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-22T08:59:53.041Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt47230u_e2b988dba5ec",
@@ -2613,7 +2683,9 @@
       "weeklyReferralHistory": {},
       "sessionVersion": 1,
       "createdAt": "2026-08-22T09:46:57.103Z",
-      "telegramId": null
+      "telegramId": null,
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4d6t60_b1db0fdd1edb",
@@ -2648,7 +2720,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T12:38:35.304Z"
+      "createdAt": "2026-08-22T12:38:35.304Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4g19bz_70552d56b594",
@@ -2683,7 +2757,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T13:58:15.168Z"
+      "createdAt": "2026-08-22T13:58:15.168Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4oyo0r_12a80731c5f3",
@@ -2718,7 +2794,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T18:08:10.780Z"
+      "createdAt": "2026-08-22T18:08:10.780Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4oz880_fd76c798e89c",
@@ -2753,7 +2831,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T18:08:36.960Z"
+      "createdAt": "2026-08-22T18:08:36.960Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4ozw57_c14b7f33c750",
@@ -2788,7 +2868,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T18:09:07.963Z"
+      "createdAt": "2026-08-22T18:09:07.963Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4p0kkd_0f4575f25b39",
@@ -2823,7 +2905,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T18:09:39.613Z"
+      "createdAt": "2026-08-22T18:09:39.613Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4p1pxy_f64058120310",
@@ -2858,7 +2942,9 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T18:10:33.238Z"
+      "createdAt": "2026-08-22T18:10:33.238Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     },
     {
       "id": "usr_mt4p2esb_be935a327358",
@@ -2893,7 +2979,46 @@
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
       "sessionVersion": 2,
-      "createdAt": "2026-08-22T18:11:05.436Z"
+      "createdAt": "2026-08-22T18:11:05.436Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
+    },
+    {
+      "id": "usr_mt4ut9qf_c0a54dda67f7",
+      "telegramId": "999888777",
+      "fullName": "Local Tester",
+      "email": "local_tester@telegram.user",
+      "username": "local_tester",
+      "phone": "N/A",
+      "password": "0dcb75eb0f98204a16ad7cd0998e2d7a",
+      "balance": 10,
+      "depositBalance": 0,
+      "withdrawableBalance": 10,
+      "hasReceivedWelcomeBonus": true,
+      "hasSeenPopup": true,
+      "referralCode": "7X8UI0",
+      "referredBy": null,
+      "totalReferrals": 0,
+      "successfulReferrals": 0,
+      "referralEarnings": 0,
+      "transactions": [
+        {
+          "id": "tx_welcome_mt4ut9qh_5da4cb5c01",
+          "type": "welcome_bonus",
+          "description": "Welcome Bonus",
+          "amount": 10,
+          "currency": "NGN",
+          "status": "completed",
+          "createdAt": "2026-08-22T20:51:56.681Z"
+        }
+      ],
+      "deposits": [],
+      "weeklyReferralEvents": [],
+      "weeklyReferralHistory": {},
+      "sessionVersion": 12,
+      "createdAt": "2026-08-22T20:51:56.680Z",
+      "freeSpins": 0,
+      "hasClaimedGiftBox": false
     }
   ],
   "weeklyCompetitions": [

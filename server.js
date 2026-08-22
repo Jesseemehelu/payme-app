@@ -84,6 +84,8 @@ function loadDatabase() {
 
   try {
 
+
+
     if (!fs.existsSync(DATABASE_FILE)) {
 
       users = [];
@@ -143,6 +145,10 @@ function loadDatabase() {
             user.referralEarnings || 0
           );
       }
+
+if (typeof user.freeSpins === 'undefined') { user.freeSpins = 0; }
+if (typeof user.hasClaimedGiftBox === 'undefined') { user.hasClaimedGiftBox = false; }
+
 
       if (
         typeof user.depositBalance !==
@@ -2458,56 +2464,62 @@ app.get(
 );
 
 
+
+app.post('/api/user/verify-telegram-join', requireLogin, async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user.telegramId) {
+      return res.status(400).json({ success: false, message: 'Please open this app via Telegram or connect your Telegram ID.' });
+    }
+    
+    // Check membership via Telegram Bot API
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getChatMember?chat_id=@paymechannel&user_id=${user.telegramId}`);
+    const data = await response.json();
+    
+    if (data.ok && ['creator', 'administrator', 'member'].includes(data.result?.status)) {
+      if (!user.hasClaimedGiftBox) {
+        user.hasClaimedGiftBox = true;
+        user.freeSpins = (user.freeSpins || 0) + 1;
+        saveDatabase();
+      }
+      return res.json({ success: true, message: 'Telegram channel verified successfully!', freeSpins: user.freeSpins });
+    } else {
+      return res.json({ success: false, message: 'You have not joined the channel yet. Please join to claim your free spin!' });
+    }
+  } catch (err) {
+    console.error('Telegram join verification error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to verify Telegram channel membership.' });
+  }
+});
+
+
+
+
 // ======================================================
 // GAME STATE
 // ======================================================
 
-app.get(
-  '/api/game/state',
-  requireLogin,
-  (req, res) => {
+  app.get('/api/game/state', requireLogin, (req, res) => {
+  const user = req.user;
+  const spins = user.transactions
+    ? user.transactions.filter(t => t.type && t.type.includes('Spin'))
+    : [];
 
-    const user =
-      req.user;
+  syncUserBalance(user);
 
-
-    const spins =
-      user.transactions
-        ? user.transactions.filter(
-            t =>
-              t.type &&
-              t.type.includes(
-                'Spin'
-              )
-          )
-        : [];
-
-
-    syncUserBalance(
-      user
-    );
+  return res.json({
+    success: true,
+    balance: user.balance,
+    withdrawableBalance: user.withdrawableBalance,
+    depositBalance: user.depositBalance,
+    spins,
+    freeSpins: user.freeSpins || 0,
+    hasClaimedGiftBox: !!user.hasClaimedGiftBox // Explicitly send gift box status
+  });
+});
 
 
-    return res.json({
 
-      success:
-        true,
-
-      balance:
-        user.balance,
-
-      withdrawableBalance:
-        user.withdrawableBalance,
-
-      depositBalance:
-        user.depositBalance,
-
-      spins
-
-    });
-
-  }
-);
 
 
 // ======================================================
@@ -2530,25 +2542,17 @@ app.post(
       );
 
 
-      if (
-        Number(
-          user.balance || 0
-        ) <
-        SPIN_COST
-      ) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          error:
-            'Insufficient balance. You need at least ₦50.'
-
-        });
-
-      }
-
+if (user.freeSpins && user.freeSpins > 0) {
+  user.freeSpins -= 1; // Deduct 1 free spin instead of money
+} else {
+  if (Number(user.balance || 0) < SPIN_COST) {[span_1](start_span)[span_1](end_span)
+    return res.status(400).json({
+      success: false,
+      error: 'Insufficient balance. You need at least ₦50.[span_2](start_span)'[span_2](end_span)
+    });
+  }
+  user.balance -= SPIN_COST; // Deduct ₦50[span_3](start_span)[span_3](end_span)
+}
 
       const prizes = [
 
@@ -3490,63 +3494,65 @@ app.post(
 
 // DASHBOARD API
 app.post('/api/user/dashboard', async (req, res) => {
-    try {
-        let user = null;
-        if (req.session && req.session.userId) {
-            user = users.find(u => u.id === req.session.userId);
-        }
-
-        const { telegramId, username } = req.body;
-        if (!user && telegramId) {
-            const cleanTelegramId = String(telegramId);
-            user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
-            if (!user && username) {
-                user = users.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
-                if (user) user.telegramId = cleanTelegramId;
-            }
-        }
-
-        if (!user) {
-            return res.status(401).json({ success: false, message: 'Unauthorized session.' });
-        }
-
-        req.session = { userId: user.id };
-        const sessionToken = createSessionToken(user);
-        setSessionCookie(res, sessionToken);
-
-        ensureWelcomeBonus(user);
-        const isNewUser = user.hasReceivedWelcomeBonus && !user.hasSeenPopup;
-        if (isNewUser) {
-            user.hasSeenPopup = true;
-            saveDatabase();
-        }
-
-        syncUserBalance(user);
-
-        return res.json({
-            success: true,
-            user: {
-                id: user.id,
-                fullName: user.fullName,
-                username: user.username,
-                balance: Number(user.balance || 0),
-                withdrawableBalance: Number(user.withdrawableBalance || 0),
-                depositBalance: Number(user.depositBalance || 0),
-                isNewUser,
-                referralCode: user.referralCode,
-                totalReferrals: Number(user.totalReferrals || 0),
-                successfulReferrals: Number(user.successfulReferrals || 0),
-                referralEarnings: Number(user.referralEarnings || 0),
-                minWithdrawalLimit: MIN_WITHDRAWAL_LIMIT,
-                canWithdraw: Number(user.withdrawableBalance || 0) >= MIN_WITHDRAWAL_LIMIT,
-                transactions: user.transactions || [],
-                deposits: user.deposits || []
-            }
-        });
-    } catch (err) {
-        console.error('Dashboard error:', err);
-        return res.status(500).json({ success: false, message: 'Server error loading dashboard.' });
+  try {
+    let user = null;
+    if (req.session && req.session.userId) {
+      user = users.find(u => u.id === req.session.userId);
     }
+    const { telegramId, username } = req.body;
+    if (!user && telegramId) {
+      const cleanTelegramId = String(telegramId);
+      user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
+      if (!user && username) {
+        user = users.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+      }
+      if (user) user.telegramId = cleanTelegramId;
+    }
+    
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized session.' });
+    }
+
+    req.session = { userId: user.id };
+    const sessionToken = createSessionToken(user);
+    setSessionCookie(res, sessionToken);
+
+    ensureWelcomeBonus(user);
+
+    // Show popup if they have received the bonus but haven't seen the popup yet
+    const isNewUser = user.hasReceivedWelcomeBonus && !user.hasSeenPopup;
+    if (isNewUser) {
+      user.hasSeenPopup = true;
+      saveDatabase();
+    }
+    
+    syncUserBalance(user);
+
+    return res.json({
+      success: true,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        balance: Number(user.balance || 0),
+        withdrawableBalance: Number(user.withdrawableBalance || 0),
+        depositBalance: Number(user.depositBalance || 0),
+        isNewUser, // Frontend relies on this being true to show the N10 popup
+        hasClaimedGiftBox: !!user.hasClaimedGiftBox,
+        referralCode: user.referralCode,
+        totalReferrals: Number(user.totalReferrals || 0),
+        successfulReferrals: Number(user.successfulReferrals || 0),
+        referralEarnings: Number(user.referralEarnings || 0),
+        minWithdrawalLimit: MIN_WITHDRAWAL_LIMIT,
+        canWithdraw: Number(user.withdrawableBalance || 0) >= MIN_WITHDRAWAL_LIMIT,
+        transactions: user.transactions || [],
+        deposits: user.deposits || []
+      }
+    });
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    return res.status(500).json({ success: false, message: 'Server error loading dashboard.' });
+  }
 });
 
 

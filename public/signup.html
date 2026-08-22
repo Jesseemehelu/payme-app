@@ -414,6 +414,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
 async function handleTelegramAuth() {
     const errorBox = document.getElementById('errorBox');
     const tgBtn = document.getElementById('telegramSignUpBtn');
@@ -421,34 +422,41 @@ async function handleTelegramAuth() {
     errorBox.style.display = 'none';
 
     const activeTg = window.Telegram?.WebApp || tg;
+    
+    // CHECK IF RUNNING LOCALLY OUTSIDE TELEGRAM
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    let telegramUser = activeTg?.initDataUnsafe?.user;
 
-    if (!activeTg) {
-        errorBox.innerText = 'Telegram WebApp could not be detected. Please open this page from inside your Telegram Mini App.';
+    // IF TESTING LOCALLY, GENERATE A MOCK USER
+    if (!telegramUser && isLocalhost) {
+        console.warn('⚠️ Localhost detected: Using mock Telegram user for testing.');
+        telegramUser = {
+            id: '999888777', // Test Telegram ID
+            username: 'local_tester',
+            first_name: 'Local',
+            last_name: 'Tester'
+        };
+    }
+
+    if (!telegramUser || !telegramUser.id) {
+        errorBox.innerText = 'Telegram account information could not be detected. Please relaunch the Web App directly from Telegram.';
         errorBox.style.display = 'block';
         return;
     }
 
     try {
-        if (typeof activeTg.ready === 'function') activeTg.ready();
-        if (typeof activeTg.expand === 'function') activeTg.expand();
-
-        const telegramUser = activeTg.initDataUnsafe?.user;
-
-        if (!telegramUser || !telegramUser.id) {
-            errorBox.innerText = 'Telegram account information could not be detected. Please relaunch the Web App directly from Telegram.';
-            errorBox.style.display = 'block';
-            return;
-        }
+        if (typeof activeTg?.ready === 'function') activeTg.ready();
+        if (typeof activeTg?.expand === 'function') activeTg.expand();
 
         tgBtn.disabled = true;
         tgBtnText.innerText = 'Creating account...';
 
         const payload = {
-            initData: activeTg.initData || "",
+            initData: activeTg?.initData || "mock_local_init_data",
             telegramId: String(telegramUser.id),
-            username: telegramUser.username || `user_${telegramUser.id}`,
-            firstName: telegramUser.first_name || "",
-            lastName: telegramUser.last_name || "",
+            username: telegramUser.username,
+            firstName: telegramUser.first_name,
+            lastName: telegramUser.last_name,
             referralCode: document.getElementById('referralCode').value.trim()
         };
 
@@ -474,6 +482,7 @@ async function handleTelegramAuth() {
         errorBox.style.display = 'block';
     }
 }
+
 
 function redirectDashboard() {
     window.location.href = '/dashboard.html';
