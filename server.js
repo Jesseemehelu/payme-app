@@ -1827,453 +1827,125 @@ app.post(
 // TELEGRAM SIGN UP / AUTHENTICATION
 // ======================================================
 
+// TELEGRAM SIGN UP / AUTHENTICATION
 app.post('/api/auth/telegram-signup', async (req, res) => {
-
     try {
-
-        const {
-            initData,
-            telegramId,
-            username,
-            firstName,
-            lastName,
-            referralCode
-        } = req.body;
-
-
-        // ==================================================
-        // VALIDATE TELEGRAM USER
-        // ==================================================
+        const { telegramId, username, firstName, lastName, referralCode } = req.body;
 
         if (!telegramId) {
-
-            return res.status(400).json({
-                success: false,
-                message:
-                    'Telegram account information could not be detected.'
-            });
+            return res.status(400).json({ success: false, message: 'Telegram account information could not be detected.' });
         }
 
+        const cleanTelegramId = String(telegramId);
+        const cleanUsername = String(username || `user_${cleanTelegramId}`).trim().replace(/^@/, '').toLowerCase();
+        const cleanFirstName = String(firstName || '').trim();
+        const cleanLastName = String(lastName || '').trim();
+        const cleanRefInput = referralCode ? String(referralCode).trim().toUpperCase() : null;
+        const fullName = `${cleanFirstName} ${cleanLastName}`.trim() || cleanUsername;
 
-        // Always store Telegram IDs as strings.
-        const cleanTelegramId =
-            String(telegramId);
-
-
-        // ==================================================
-        // CLEAN USER DATA
-        // ==================================================
-
-        const cleanUsername =
-            String(
-                username ||
-                `user_${cleanTelegramId}`
-            )
-            .trim()
-            .replace(/^@/, '')
-            .toLowerCase();
-
-
-        const cleanFirstName =
-            String(firstName || '').trim();
-
-
-        const cleanLastName =
-            String(lastName || '').trim();
-
-
-        const cleanRefInput =
-            referralCode
-                ? String(referralCode)
-                    .trim()
-                    .toUpperCase()
-                : null;
-
-
-        const fullName =
-            `${cleanFirstName} ${cleanLastName}`
-                .trim() ||
-            cleanUsername;
-
-
-        // ==================================================
-        // FIND EXISTING TELEGRAM USER
-        // ==================================================
-
-        let user =
-            users.find(
-                u =>
-                    String(u.telegramId || '') ===
-                        cleanTelegramId
-            );
-
-
-        // ==================================================
-        // ALSO CHECK USERNAME
-        // ==================================================
+        let user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
 
         if (!user) {
-
-            user =
-                users.find(
-                    u =>
-                        String(
-                            u.username || ''
-                        ).toLowerCase() ===
-                        cleanUsername
-                );
+            user = users.find(u => String(u.username || '').toLowerCase() === cleanUsername);
         }
 
-
-        // ==================================================
-        // CREATE NEW USER
-        // ==================================================
-
         if (!user) {
-
-            const uniqueRefCode =
-                generateUniqueReferralCode();
-
-
+            const uniqueRefCode = generateUniqueReferralCode();
             user = {
-
-                id:
-                    generateUserId(),
-
-                telegramId:
-                    cleanTelegramId,
-
-                fullName:
-                    fullName,
-
-                email:
-                    `${cleanUsername}@telegram.user`,
-
-                username:
-                    cleanUsername,
-
-                phone:
-                    'N/A',
-
-                password:
-                    crypto
-                        .randomBytes(16)
-                        .toString('hex'),
-
-                balance:
-                    0,
-
-                depositBalance:
-                    0,
-
-                withdrawableBalance:
-                    0,
-
-                hasReceivedWelcomeBonus:
-                    false,
-
-                hasSeenPopup:
-                    false,
-
-                referralCode:
-                    uniqueRefCode,
-
-                referredBy:
-                    cleanRefInput,
-
-                totalReferrals:
-                    0,
-
-                successfulReferrals:
-                    0,
-
-                referralEarnings:
-                    0,
-
-                transactions:
-                    [],
-
-                deposits:
-                    [],
-
-                weeklyReferralEvents:
-                    [],
-
-                weeklyReferralHistory:
-                    {},
-
-                sessionVersion:
-                    0,
-
-                createdAt:
-                    new Date().toISOString()
+                id: generateUserId(),
+                telegramId: cleanTelegramId,
+                fullName: fullName,
+                email: `${cleanUsername}@telegram.user`,
+                username: cleanUsername,
+                phone: 'N/A',
+                password: crypto.randomBytes(16).toString('hex'),
+                balance: 0,
+                depositBalance: 0,
+                withdrawableBalance: 0,
+                hasReceivedWelcomeBonus: false,
+                hasSeenPopup: false,
+                referralCode: uniqueRefCode,
+                referredBy: cleanRefInput,
+                totalReferrals: 0,
+                successfulReferrals: 0,
+                referralEarnings: 0,
+                transactions: [],
+                deposits: [],
+                weeklyReferralEvents: [],
+                weeklyReferralHistory: {},
+                sessionVersion: 0,
+                createdAt: new Date().toISOString()
             };
-
-
-            // ==================================================
-            // WELCOME BONUS
-            // ==================================================
 
             ensureWelcomeBonus(user);
 
-
-            // ==================================================
-            // REFERRAL REWARD
-            // ==================================================
-
+            // PROCESS REFERRAL IF PROVIDED
             if (user.referredBy) {
+                const referrer = users.find(u => u.referralCode === user.referredBy);
+                if (referrer && referrer.id !== user.id) {
+                    referrer.withdrawableBalance = Number(referrer.withdrawableBalance || 0) + REFERRAL_REWARD;
+                    referrer.totalReferrals = Number(referrer.totalReferrals || 0) + 1;
+                    referrer.successfulReferrals = Number(referrer.successfulReferrals || 0) + 1;
+                    referrer.referralEarnings = Number(referrer.referralEarnings || 0) + REFERRAL_REWARD;
 
-                const referrer =
-                    users.find(
-                        u =>
-                            u.referralCode ===
-                            user.referredBy
-                    );
-
-
-                if (
-                    referrer &&
-                    referrer.id !== user.id
-                ) {
-
-                    referrer.withdrawableBalance =
-                        Number(
-                            referrer.withdrawableBalance ||
-                            0
-                        ) +
-                        REFERRAL_REWARD;
-
-
-                    referrer.totalReferrals =
-                        Number(
-                            referrer.totalReferrals ||
-                            0
-                        ) + 1;
-
-
-                    referrer.successfulReferrals =
-                        Number(
-                            referrer.successfulReferrals ||
-                            0
-                        ) + 1;
-
-
-                    referrer.referralEarnings =
-                        Number(
-                            referrer.referralEarnings ||
-                            0
-                        ) +
-                        REFERRAL_REWARD;
-
-
-                    syncUserBalance(
-                        referrer
-                    );
-
-
-                    if (
-                        !Array.isArray(
-                            referrer.transactions
-                        )
-                    ) {
-                        referrer.transactions =
-                            [];
-                    }
-
+                    syncUserBalance(referrer);
+                    if (!Array.isArray(referrer.transactions)) referrer.transactions = [];
 
                     referrer.transactions.unshift({
-
-                        id:
-                            generateTransactionId(
-                                'tx_ref'
-                            ),
-
-                        type:
-                            'referral_reward',
-
-                        description:
-                            `Referral Reward (@${user.username})`,
-
-                        amount:
-                            REFERRAL_REWARD,
-
-                        currency:
-                            'NGN',
-
-                        status:
-                            'completed',
-
-                        createdAt:
-                            new Date().toISOString()
+                        id: generateTransactionId('tx_ref'),
+                        type: 'referral_reward',
+                        description: `Referral Reward (@${user.username})`,
+                        amount: REFERRAL_REWARD,
+                        currency: 'NGN',
+                        status: 'completed',
+                        createdAt: new Date().toISOString()
                     });
                 }
             }
 
-
-            // ==================================================
-            // ADD NEW USER
-            // ==================================================
-
             users.push(user);
 
+            const signupMsg = `<b>NEW TELEGRAM USER REGISTERED</b>\n\n` +
+                `<b>Name:</b> ${user.fullName}\n` +
+                `<b>Username:</b> @${user.username}\n` +
+                `<b>Telegram ID:</b> ${user.telegramId}\n` +
+                `<b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
+                `<b>Referral Code:</b> ${user.referralCode}\n` +
+                `<b>Referred By:</b> ${user.referredBy || 'None'}\n` +
+                `<b>Balance:</b> ₦${Number(user.balance).toFixed(2)}`;
 
-            // ==================================================
-            // TELEGRAM NEW USER NOTIFICATION
-            // ==================================================
-
-            const signupMsg =
-                `🆕 <b>NEW TELEGRAM USER REGISTERED</b>\n\n` +
-
-                `👤 <b>Name:</b> ${user.fullName}\n` +
-
-                `🆔 <b>Username:</b> @${user.username}\n` +
-
-                `📱 <b>Telegram ID:</b> ${user.telegramId}\n` +
-
-                `🎁 <b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
-
-                `🔗 <b>Referral Code:</b> ${user.referralCode}\n` +
-
-                `👥 <b>Referred By:</b> ${user.referredBy || 'None'}\n` +
-
-                `💰 <b>Balance:</b> ₦${Number(user.balance).toFixed(2)}`;
-
-
-            sendTelegramNotification(
-                signupMsg
-            ).catch(err => {
-
-                console.error(
-                    'Telegram signup notification error:',
-                    err.message
-                );
-
-            });
-        }
-
-
-        // ==================================================
-        // EXISTING USER
-        // ==================================================
-
-        else {
-
-            // Keep Telegram ID attached to the account.
-            user.telegramId =
-                cleanTelegramId;
-
-
-            // Update name when Telegram provides it.
-            if (fullName) {
-                user.fullName =
-                    fullName;
-            }
-
-
-            // Update username when available.
-            if (
-                cleanUsername &&
-                !cleanUsername.startsWith('user_')
-            ) {
-
-                user.username =
-                    cleanUsername;
-            }
-
-
-            // Make sure old accounts have the
-            // required fields.
+            sendTelegramNotification(signupMsg).catch(() => {});
+        } else {
+            user.telegramId = cleanTelegramId;
+            if (fullName) user.fullName = fullName;
+            if (cleanUsername && !cleanUsername.startsWith('user_')) user.username = cleanUsername;
             ensureWelcomeBonus(user);
         }
 
-
-        // ==================================================
-        // CREATE LOGIN SESSION
-        // ==================================================
-
-        user.sessionVersion =
-            Number(
-                user.sessionVersion || 0
-            ) + 1;
-
-
+        user.sessionVersion = Number(user.sessionVersion || 0) + 1;
         syncUserBalance(user);
 
-
-        const sessionToken =
-            createSessionToken(user);
-
-
-        setSessionCookie(
-            res,
-            sessionToken
-        );
-
-
-        // ==================================================
-        // SAVE DATABASE
-        // ==================================================
-
+        const sessionToken = createSessionToken(user);
+        setSessionCookie(res, sessionToken);
         saveDatabase();
 
-
-        // ==================================================
-        // RESPONSE
-        // ==================================================
-
         return res.json({
-
-            success:
-                true,
-
-            message:
-                'Telegram authentication successful',
-
+            success: true,
+            message: 'Telegram authentication successful',
             user: {
-
-                id:
-                    user.id,
-
-                telegramId:
-                    user.telegramId,
-
-                fullName:
-                    user.fullName,
-
-                username:
-                    user.username,
-
-                balance:
-                    user.balance,
-
-                withdrawableBalance:
-                    user.withdrawableBalance,
-
-                depositBalance:
-                    user.depositBalance,
-
-                referralCode:
-                    user.referralCode
+                id: user.id,
+                telegramId: user.telegramId,
+                fullName: user.fullName,
+                username: user.username,
+                balance: user.balance,
+                withdrawableBalance: user.withdrawableBalance,
+                depositBalance: user.depositBalance,
+                referralCode: user.referralCode
             }
         });
-
-
     } catch (err) {
-
-        console.error(
-            'Telegram signup error:',
-            err
-        );
-
-
-        return res.status(500).json({
-
-            success:
-                false,
-
-            message:
-                'Server error during Telegram signup.'
-        });
+        console.error('Telegram signup error:', err);
+        return res.status(500).json({ success: false, message: 'Server error during Telegram signup.' });
     }
 });
 
@@ -3816,87 +3488,65 @@ app.post(
 
 
 
-// ======================================================
 // DASHBOARD API
-// ======================================================
-
-
 app.post('/api/user/dashboard', async (req, res) => {
-  try {
-    let user = null;
-
-    // 1. Check existing cookie session
-    if (req.session && req.session.userId) {
-      user = users.find(u => u.id === req.session.userId);
-    }
-
-    // 2. Telegram Web App Auto-Login Fallback (If session cookie lost)
-    const { initData, telegramId, username, firstName, lastName } = req.body;
-
-    if (!user && (initData || telegramId)) {
-      let verifiedData = null;
-      if (initData) {
-        verifiedData = verifyTelegramWebAppData(initData);
-      }
-
-      const cleanTelegramId = String(verifiedData?.user?.id || telegramId);
-
-      if (cleanTelegramId && cleanTelegramId !== 'undefined') {
-        user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
-
-        // If user was registered via Web, link their Telegram ID or register them automatically
-        if (!user && username) {
-          user = users.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
-          if (user) user.telegramId = cleanTelegramId;
+    try {
+        let user = null;
+        if (req.session && req.session.userId) {
+            user = users.find(u => u.id === req.session.userId);
         }
-      }
+
+        const { telegramId, username } = req.body;
+        if (!user && telegramId) {
+            const cleanTelegramId = String(telegramId);
+            user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
+            if (!user && username) {
+                user = users.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+                if (user) user.telegramId = cleanTelegramId;
+            }
+        }
+
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Unauthorized session.' });
+        }
+
+        req.session = { userId: user.id };
+        const sessionToken = createSessionToken(user);
+        setSessionCookie(res, sessionToken);
+
+        ensureWelcomeBonus(user);
+        const isNewUser = user.hasReceivedWelcomeBonus && !user.hasSeenPopup;
+        if (isNewUser) {
+            user.hasSeenPopup = true;
+            saveDatabase();
+        }
+
+        syncUserBalance(user);
+
+        return res.json({
+            success: true,
+            user: {
+                id: user.id,
+                fullName: user.fullName,
+                username: user.username,
+                balance: Number(user.balance || 0),
+                withdrawableBalance: Number(user.withdrawableBalance || 0),
+                depositBalance: Number(user.depositBalance || 0),
+                isNewUser,
+                referralCode: user.referralCode,
+                totalReferrals: Number(user.totalReferrals || 0),
+                successfulReferrals: Number(user.successfulReferrals || 0),
+                referralEarnings: Number(user.referralEarnings || 0),
+                minWithdrawalLimit: MIN_WITHDRAWAL_LIMIT,
+                canWithdraw: Number(user.withdrawableBalance || 0) >= MIN_WITHDRAWAL_LIMIT,
+                transactions: user.transactions || [],
+                deposits: user.deposits || []
+            }
+        });
+    } catch (err) {
+        console.error('Dashboard error:', err);
+        return res.status(500).json({ success: false, message: 'Server error loading dashboard.' });
     }
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized session.'
-      });
-    }
-
-    // 3. Keep user logged in by refreshing cookie session
-    req.session = { userId: user.id };
-    const sessionToken = createSessionToken(user);
-    setSessionCookie(res, sessionToken);
-
-    ensureWelcomeBonus(user);
-    const isNewUser = user.hasReceivedWelcomeBonus && !user.hasSeenPopup;
-    if (isNewUser) {
-      user.hasSeenPopup = true;
-      saveDatabase();
-    }
-
-    syncUserBalance(user);
-
-    return res.json({
-      success: true,
-      user: {
-        id: user.id,
-        fullName: user.fullName,
-        username: user.username,
-        balance: Number(user.balance || 0),
-        withdrawableBalance: Number(user.withdrawableBalance || 0),
-        depositBalance: Number(user.depositBalance || 0),
-        isNewUser,
-        referralCode: user.referralCode,
-        totalReferrals: Number(user.totalReferrals || 0),
-        successfulReferrals: Number(user.successfulReferrals || 0),
-        referralEarnings: Number(user.referralEarnings || 0),
-        minWithdrawalLimit: MIN_WITHDRAWAL_LIMIT,
-        canWithdraw: Number(user.withdrawableBalance || 0) >= MIN_WITHDRAWAL_LIMIT,
-        transactions: user.transactions || [],
-        deposits: user.deposits || []
-      }
-    });
-  } catch (err) {
-    console.error('Dashboard error:', err);
-    return res.status(500).json({ success: false, message: 'Server error loading dashboard.' });
-  }
 });
 
 
