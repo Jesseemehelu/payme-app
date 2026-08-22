@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- Add this inside the <head> tag of dashboard.html -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 
   <title>PAYME — Dashboard</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 
   <style>
     :root {
@@ -1639,161 +1646,71 @@
        DASHBOARD DATA
     ========================================== */
 
-    async function fetchDashboardData() {
 
-      try {
+async function fetchDashboardData() {
+  try {
+    // 1. Extract Telegram Mini App native authentication context
+    const tg = window.Telegram?.WebApp;
+    const initData = tg?.initData || "";
+    const tgUser = tg?.initDataUnsafe?.user;
 
-        const response =
-          await fetch(
-            "/api/user/dashboard",
-            {
-              method: "GET",
-              credentials: "include"
-            }
-          );
+    // 2. Fetch dashboard data using POST to transmit Telegram session proof
+    const response = await fetch("/api/user/dashboard", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        initData: initData,
+        telegramId: tgUser?.id,
+        username: tgUser?.username,
+        firstName: tgUser?.first_name,
+        lastName: tgUser?.last_name
+      })
+    });
 
+    const data = await response.json();
+    if (!data.success) return;
 
-        const data =
-          await response.json();
+    const user = data.user;
 
+    /* USER NAME */
+    document.getElementById("userNameText").innerText =
+      user.fullName || user.username || "User";
 
-        if (!data.success) {
-          return;
-        }
+    /* WITHDRAWABLE / EARNINGS BALANCE */
+    // withdrawableBalance includes welcome bonus, spin wins, ref earnings, etc.
+    const withdrawableBalance = Number(user.withdrawableBalance ?? user.referralEarnings ?? 0);
+    currentEarnings = withdrawableBalance; // Sets guard limit for withdrawals
 
+    /* MAIN HERO BALANCE DISPLAY */
+    const availableBalance = Number(user.balance ?? 0);
+    document.getElementById("balanceText").innerText = availableBalance.toFixed(2);
 
-        const user =
-          data.user;
+    /* DISPLAY WITHDRAWABLE BALANCE IN "TOTAL EARNINGS" BOX */
+    document.getElementById("earningsBalanceText").innerText = withdrawableBalance.toFixed(2);
 
+    /* DEPOSIT BALANCE */
+    const depositBalance = Number(user.depositBalance ?? 0);
+    document.getElementById("depositBalanceText").innerText = depositBalance.toFixed(2);
 
-        /* USER NAME */
+    /* REFERRAL CODE & STATS */
+    document.getElementById("referralCodeText").innerText = user.referralCode || "";
+    document.getElementById("totalRefersText").innerText = user.totalReferrals || 0;
+    document.getElementById("activeRefersText").innerText = user.successfulReferrals || 0;
+    document.getElementById("refEarningsText").innerText =
+      "#" + Number(user.referralEarnings || 0).toLocaleString();
 
-        document.getElementById(
-          "userNameText"
-        ).innerText =
-          user.fullName ||
-          user.username ||
-          "User";
-
-
-        /*
-          EARNINGS & AVAILABLE BALANCE
-          - totalEarnings tracks cumulative lifetime earnings.
-          - currentEarnings / availableBalance reflects net available spendable/withdrawable balance.
-        */
-
-        const totalEarnings =
-          Number(
-            user.earningsBalance ??
-            user.earnings ??
-            user.referralEarnings ??
-            0
-          );
-
-        // Uses available/current balance property from API, fallback to total minus spent if defined
-        const availableBalance =
-          Number(
-            user.availableBalance ??
-            user.balance ??
-            user.currentBalance ??
-            (totalEarnings - Number(user.spentAmount || 0))
-          );
-
-        // Store available earnings for the withdrawal guard function
-        currentEarnings = availableBalance;
-
-
-        /* TOTAL EARNINGS (BREAKDOWN) */
-        document.getElementById(
-          "earningsBalanceText"
-        ).innerText =
-          totalEarnings.toFixed(2);
-
-
-        /*
-          MAIN BALANCE DISPLAY (CURRENT AVAILABLE BALANCE)
-          Updated to display net available balance instead of total earnings.
-        */
-
-        document.getElementById(
-          "balanceText"
-        ).innerText =
-          availableBalance.toFixed(2);
-
-
-        /*
-          DEPOSIT BALANCE
-        */
-
-        const depositBalance =
-          Number(
-            user.depositBalance ??
-            user.depositBalanceAmount ??
-            user.depositedBalance ??
-            0
-          );
-
-
-        document.getElementById(
-          "depositBalanceText"
-        ).innerText =
-          depositBalance.toFixed(2);
-
-
-        /* REFERRAL CODE */
-
-        document.getElementById(
-          "referralCodeText"
-        ).innerText =
-          user.referralCode ||
-          "------";
-
-
-        /* STATS */
-
-        document.getElementById(
-          "totalRefersText"
-        ).innerText =
-          user.totalReferrals || 0;
-
-
-        document.getElementById(
-          "activeRefersText"
-        ).innerText =
-          user.successfulReferrals || 0;
-
-
-        document.getElementById(
-          "refEarningsText"
-        ).innerText =
-          "₦" +
-          Number(
-            user.referralEarnings || 0
-          ).toLocaleString();
-
-
-        /* WELCOME BONUS */
-
-        if (user.isNewUser) {
-
-          document
-            .getElementById("bonusModal")
-            .classList.add("show");
-
-        }
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Failed to load dashboard:",
-          error
-        );
-
-      }
-
+    /* WELCOME BONUS MODAL */
+    if (user.isNewUser) {
+      document.getElementById("bonusModal").classList.add("show");
     }
+  } catch (error) {
+    console.error("Failed to load dashboard:", error);
+  }
+}
+
 
 
 

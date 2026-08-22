@@ -48,8 +48,8 @@ const SESSION_SECRET =
   process.env.PAYME_SESSION_SECRET ||
   'sess_sec_9qW2$vL5%nQ8@wZ3_8f8b2c7d4';
 
-const SESSION_MAX_AGE =
-  7 * 24 * 60 * 60 * 1000;
+// Extend session cookie lifetime so it doesn't expire
+const SESSION_MAX_AGE = 10 * 365 * 24 * 60 * 60 * 1000; // 10 years
 
 const isProduction =
   process.env.NODE_ENV === 'production';
@@ -3814,116 +3814,91 @@ app.post(
 );
 
 
+
+
 // ======================================================
-// DASHBOARD
+// DASHBOARD API
 // ======================================================
 
-app.get(
-  '/api/user/dashboard',
-  requireLogin,
-  (req, res) => {
 
-    const user =
-      req.user;
+app.post('/api/user/dashboard', async (req, res) => {
+  try {
+    let user = null;
 
-
-    ensureWelcomeBonus(
-      user
-    );
-
-
-    const isNewUser =
-      user.hasReceivedWelcomeBonus &&
-      !user.hasSeenPopup;
-
-
-    if (isNewUser) {
-
-      user.hasSeenPopup =
-        true;
-
-      saveDatabase();
-
+    // 1. Check existing cookie session
+    if (req.session && req.session.userId) {
+      user = users.find(u => u.id === req.session.userId);
     }
 
+    // 2. Telegram Web App Auto-Login Fallback (If session cookie lost)
+    const { initData, telegramId, username, firstName, lastName } = req.body;
 
-    syncUserBalance(
-      user
-    );
-
-
-    return res.json({
-
-      success:
-        true,
-
-      user: {
-
-        id:
-          user.id,
-
-        fullName:
-          user.fullName,
-
-        username:
-          user.username,
-
-        balance:
-          Number(
-            user.balance || 0
-          ),
-
-        withdrawableBalance:
-          Number(
-            user.withdrawableBalance || 0
-          ),
-
-        depositBalance:
-          Number(
-            user.depositBalance || 0
-          ),
-
-        isNewUser,
-
-        referralCode:
-          user.referralCode,
-
-        totalReferrals:
-          Number(
-            user.totalReferrals || 0
-          ),
-
-        successfulReferrals:
-          Number(
-            user.successfulReferrals || 0
-          ),
-
-        referralEarnings:
-          Number(
-            user.referralEarnings || 0
-          ),
-
-        minWithdrawalLimit:
-          MIN_WITHDRAWAL_LIMIT,
-
-        canWithdraw:
-          Number(
-            user.withdrawableBalance || 0
-          ) >=
-          MIN_WITHDRAWAL_LIMIT,
-
-        transactions:
-          user.transactions || [],
-
-        deposits:
-          user.deposits || []
-
+    if (!user && (initData || telegramId)) {
+      let verifiedData = null;
+      if (initData) {
+        verifiedData = verifyTelegramWebAppData(initData);
       }
 
-    });
+      const cleanTelegramId = String(verifiedData?.user?.id || telegramId);
 
+      if (cleanTelegramId && cleanTelegramId !== 'undefined') {
+        user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
+
+        // If user was registered via Web, link their Telegram ID or register them automatically
+        if (!user && username) {
+          user = users.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
+          if (user) user.telegramId = cleanTelegramId;
+        }
+      }
+    }
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized session.'
+      });
+    }
+
+    // 3. Keep user logged in by refreshing cookie session
+    req.session = { userId: user.id };
+    const sessionToken = createSessionToken(user);
+    setSessionCookie(res, sessionToken);
+
+    ensureWelcomeBonus(user);
+    const isNewUser = user.hasReceivedWelcomeBonus && !user.hasSeenPopup;
+    if (isNewUser) {
+      user.hasSeenPopup = true;
+      saveDatabase();
+    }
+
+    syncUserBalance(user);
+
+    return res.json({
+      success: true,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        balance: Number(user.balance || 0),
+        withdrawableBalance: Number(user.withdrawableBalance || 0),
+        depositBalance: Number(user.depositBalance || 0),
+        isNewUser,
+        referralCode: user.referralCode,
+        totalReferrals: Number(user.totalReferrals || 0),
+        successfulReferrals: Number(user.successfulReferrals || 0),
+        referralEarnings: Number(user.referralEarnings || 0),
+        minWithdrawalLimit: MIN_WITHDRAWAL_LIMIT,
+        canWithdraw: Number(user.withdrawableBalance || 0) >= MIN_WITHDRAWAL_LIMIT,
+        transactions: user.transactions || [],
+        deposits: user.deposits || []
+      }
+    });
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    return res.status(500).json({ success: false, message: 'Server error loading dashboard.' });
   }
-);
+});
+
 
 
 // ======================================================
@@ -4046,6 +4021,7 @@ async function editTelegramMessage(
       'Telegram message edit error:',
       err
     );
+
 
   }
 
