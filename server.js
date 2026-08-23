@@ -2003,6 +2003,39 @@ app.post('/api/auth/telegram-signup', async (req, res) => {
 
 
 
+
+// ======================================================
+// CHECK USER ACCOUNT STATUS
+// ======================================================
+app.get('/api/auth/check-user', (req, res) => {
+    try {
+        const { telegramId } = req.query;
+
+        if (!telegramId) {
+            return res.json({ exists: false });
+        }
+
+        const cleanTelegramId = String(telegramId).trim();
+        const user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
+
+        if (user) {
+            return res.json({
+                exists: true,
+                username: user.username,
+                fullName: user.fullName
+            });
+        }
+
+        return res.json({ exists: false });
+    } catch (err) {
+        console.error('Check user status error:', err);
+        return res.status(500).json({ exists: false, error: 'Server error checking account.' });
+    }
+});
+
+
+
+
 // ======================================================
 // NORMAL LOGIN
 // ======================================================
