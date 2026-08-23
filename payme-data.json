@@ -17,6 +17,14 @@
       "referralEarnings": 195,
       "transactions": [
         {
+          "id": "tx_spin_reward_mt5k5kc9_8753860305",
+          "type": "Free Spin Reward",
+          "bank": "PAYME Wallet",
+          "amount": 0,
+          "date": "8/23/2026, 9:41:20 AM",
+          "createdAt": "2026-08-23T08:41:20.764Z"
+        },
+        {
           "id": "tx_ref_mt4p2esc_3ac6d7d9e0",
           "type": "referral_reward",
           "description": "Referral Reward (@gwvwssa)",
@@ -448,11 +456,11 @@
         "weekly_2026-08-16": 11
       },
       "withdrawableBalance": 115,
-      "sessionVersion": 19,
+      "sessionVersion": 26,
       "depositBalance": 0,
       "telegramId": null,
       "freeSpins": 0,
-      "hasClaimedGiftBox": false
+      "hasClaimedGiftBox": true
     },
     {
       "id": "usr_1787297085833",
@@ -2991,9 +2999,9 @@
       "username": "local_tester",
       "phone": "N/A",
       "password": "0dcb75eb0f98204a16ad7cd0998e2d7a",
-      "balance": 10,
+      "balance": 30,
       "depositBalance": 0,
-      "withdrawableBalance": 10,
+      "withdrawableBalance": 30,
       "hasReceivedWelcomeBonus": true,
       "hasSeenPopup": true,
       "referralCode": "7X8UI0",
@@ -3002,6 +3010,14 @@
       "successfulReferrals": 0,
       "referralEarnings": 0,
       "transactions": [
+        {
+          "id": "tx_spin_reward_mt52s5lx_898936fb06",
+          "type": "Free Spin Reward",
+          "bank": "PAYME Wallet",
+          "amount": 20,
+          "date": "8/23/2026, 1:35:01 AM",
+          "createdAt": "2026-08-23T00:35:01.673Z"
+        },
         {
           "id": "tx_welcome_mt4ut9qh_5da4cb5c01",
           "type": "welcome_bonus",
@@ -3015,10 +3031,10 @@
       "deposits": [],
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "sessionVersion": 13,
+      "sessionVersion": 24,
       "createdAt": "2026-08-22T20:51:56.680Z",
       "freeSpins": 0,
-      "hasClaimedGiftBox": false
+      "hasClaimedGiftBox": true
     }
   ],
   "weeklyCompetitions": [
