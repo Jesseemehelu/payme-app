@@ -1281,6 +1281,17 @@ app.get(
 );
 
 
+// Add this under your HTML ROUTES section in server.js
+app.get('/dashboard.html', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Optional: Redirect /public/dashboard.html if legacy links hit it
+app.get('/public/dashboard.html', (req, res) => {
+    res.redirect('/dashboard.html');
+});
+
+
 // ======================================================
 // NORMAL SIGNUP
 // ======================================================

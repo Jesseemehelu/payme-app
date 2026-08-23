@@ -1,337 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Start Earning - PAYME</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #060911;
-            color: #F8FAFC;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px 16px;
-            overflow-x: hidden;
-            perspective: 1000px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PAYME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #060911;
+    color: #F8FAFC;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 16px;
+    overflow-x: hidden;
+    perspective: 1000px;
+}
+body::before {
+    content: "";
+    position: fixed;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background:
+        radial-gradient(circle at 50% 15%, rgba(16, 185, 129, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(37, 99, 235, 0.18) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
+    z-index: -1;
+    pointer-events: none;
+}
+.signup-card {
+    background: linear-gradient(145deg, rgba(17, 24, 39, 0.92), rgba(11, 15, 25, 0.96));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 32px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 410px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 18px 36px -18px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+.bonus-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34D399;
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+.signup-header h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+    letter-spacing: -0.03em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.signup-header h1 span {
+    background: linear-gradient(135deg, #38BDF8, #3B82F6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.signup-header p {
+    color: #94A3B8;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    margin-bottom: 24px;
+}
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.benefit-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
+}
+.benefit-icon { font-size: 1.3rem; margin-bottom: 4px; }
+.benefit-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #F1F5F9;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.benefit-sub { font-size: 0.68rem; color: #38BDF8; font-weight: 700; margin-top: 2px; }
+.alert-error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #FCA5A5;
+    font-size: 0.85rem;
+    padding: 12px 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    display: none;
+    font-weight: 600;
+    word-break: break-word;
+    text-align: left;
+}
+.btn-telegram {
+    width: 100%;
+    position: relative;
+    background: linear-gradient(180deg, #28A8E9 0%, #1B87C4 100%);
+    color: #FFFFFF;
+    border: none;
+    padding: 16px;
+    border-radius: 18px;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.15s ease;
+    box-shadow: 0 6px 0 #126393, 0 12px 24px rgba(27, 135, 196, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    margin-bottom: 20px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.btn-telegram:hover {
+    background: linear-gradient(180deg, #30B0F1 0%, #1E91D3 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #126393, 0 16px 28px rgba(27, 135, 196, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+.btn-telegram:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #126393, 0 6px 12px rgba(27, 135, 196, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+.btn-telegram:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-telegram svg { width: 22px; height: 22px; fill: currentColor; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
+.referral-section {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: left;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.referral-label {
+    display: block;
+    font-size: 0.73rem;
+    font-weight: 800;
+    color: #94A3B8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(8, 12, 20, 0.7);
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+.form-control::placeholder { color: #475569; }
+.form-control:focus {
+    border-color: #38BDF8;
+    background: rgba(8, 12, 20, 0.95);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+.terms-notice { font-size: 0.76rem; color: #64748B; line-height: 1.5; }
+.terms-notice a { color: #38BDF8; text-decoration: none; font-weight: 600; }
 
-        /* Ambient Glowing Mesh Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -20%;
-            left: -20%;
-            width: 140%;
-            height: 140%;
-            background: 
-                radial-gradient(circle at 50% 15%, rgba(16, 185, 129, 0.2) 0%, transparent 45%),
-                radial-gradient(circle at 80% 70%, rgba(37, 99, 235, 0.18) 0%, transparent 50%),
-                radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Modern 3D Glass Card */
-        .signup-card {
-            background: linear-gradient(145deg, rgba(17, 24, 39, 0.92), rgba(11, 15, 25, 0.96));
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 32px;
-            padding: 32px 24px;
-            width: 100%;
-            max-width: 410px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 
-                0 30px 60px -12px rgba(0, 0, 0, 0.8),
-                0 18px 36px -18px rgba(0, 0, 0, 0.6),
-                inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            text-align: center;
-        }
-
-        /* TOP EARNINGS HIGHLIGHT BADGE */
-        .bonus-banner {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: #34D399;
-            padding: 8px 16px;
-            border-radius: 99px;
-            font-size: 0.82rem;
-            font-weight: 800;
-            letter-spacing: 0.02em;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-        }
-
-        .signup-header h1 { 
-            font-size: 1.85rem; 
-            font-weight: 800; 
-            color: #FFFFFF; 
-            margin-bottom: 8px;
-            letter-spacing: -0.03em; 
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .signup-header h1 span {
-            background: linear-gradient(135deg, #38BDF8, #3B82F6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .signup-header p { 
-            color: #94A3B8; 
-            font-size: 0.88rem; 
-            line-height: 1.45;
-            margin-bottom: 24px;
-        }
-
-        /* BENEFIT HIGHLIGHT GRID */
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        .benefit-card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 12px 8px;
-            text-align: center;
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
-        }
-
-        .benefit-icon {
-            font-size: 1.3rem;
-            margin-bottom: 4px;
-        }
-
-        .benefit-title {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #F1F5F9;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-        }
-
-        .benefit-sub {
-            font-size: 0.68rem;
-            color: #38BDF8;
-            font-weight: 700;
-            margin-top: 2px;
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.15); 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-            color: #FCA5A5;
-            font-size: 0.85rem; 
-            padding: 12px 16px; 
-            border-radius: 14px; 
-            margin-bottom: 20px;
-            display: none; 
-            font-weight: 600; 
-            word-break: break-word;
-            text-align: left;
-        }
-
-        /* MODERN 3D TELEGRAM BUTTON */
-        .btn-telegram {
-            width: 100%;
-            position: relative;
-            background: linear-gradient(180deg, #28A8E9 0%, #1B87C4 100%);
-            color: #FFFFFF;
-            border: none;
-            padding: 16px;
-            border-radius: 18px;
-            font-weight: 800;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.15s ease;
-            box-shadow: 
-                0 6px 0 #126393,
-                0 12px 24px rgba(27, 135, 196, 0.35),
-                inset 0 1px 1px rgba(255, 255, 255, 0.4);
-            margin-bottom: 20px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .btn-telegram:hover { 
-            background: linear-gradient(180deg, #30B0F1 0%, #1E91D3 100%);
-            transform: translateY(-2px);
-            box-shadow: 
-                0 8px 0 #126393,
-                0 16px 28px rgba(27, 135, 196, 0.45),
-                inset 0 1px 1px rgba(255, 255, 255, 0.4);
-        }
-        
-        .btn-telegram:active { 
-            transform: translateY(4px);
-            box-shadow: 
-                0 2px 0 #126393,
-                0 6px 12px rgba(27, 135, 196, 0.3),
-                inset 0 1px 1px rgba(255, 255, 255, 0.4);
-        }
-
-        .btn-telegram:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-telegram svg { width: 22px; height: 22px; fill: currentColor; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2)); }
-
-        /* 3D REFERRAL BOX */
-        .referral-section {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 20px;
-            text-align: left;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
-        }
-
-        .referral-label {
-            display: block;
-            font-size: 0.73rem;
-            font-weight: 800;
-            color: #94A3B8;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .form-control {
-            width: 100%; 
-            padding: 14px 16px; 
-            border-radius: 14px; 
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(8, 12, 20, 0.7); 
-            color: #FFFFFF;
-            font-size: 0.95rem; 
-            outline: none; 
-            transition: all 0.2s ease;
-            font-family: inherit;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .form-control::placeholder { color: #475569; }
-
-        .form-control:focus { 
-            border-color: #38BDF8; 
-            background: rgba(8, 12, 20, 0.95); 
-            box-shadow: 
-                inset 0 2px 4px rgba(0,0,0,0.5),
-                0 0 0 3px rgba(56, 189, 248, 0.2); 
-        }
-
-        /* FOOTER TERMS */
-        .terms-notice {
-            font-size: 0.76rem;
-            color: #64748B;
-            line-height: 1.5;
-        }
-
-        .terms-notice a {
-            color: #38BDF8;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* ONBOARDING ANIMATION OVERLAY */
-        #onboardingModal {
-            position: fixed; inset: 0; background: #060911; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999; text-align: center; padding: 24px; color: #FFFFFF;
-            overflow: hidden; opacity: 0; transition: opacity 0.4s ease;
-        }
-
-        #onboardingModal.active { display: flex; opacity: 1; }
-
-        .brand-title { font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 24px; letter-spacing: -0.02em; }
-        .brand-title span { color: #38BDF8; }
-
-        .wallet-stage { position: relative; width: 140px; height: 140px; margin-bottom: 24px; display: flex; justify-content: center; align-items: center; }
-
-        .digital-wallet {
-            width: 100px; height: 80px; background: linear-gradient(135deg, #2563EB, #1D4ED8);
-            border-radius: 16px; position: relative; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
-            display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
-            transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .digital-wallet::after {
-            content: ''; width: 14px; height: 14px; background: #38BDF8; border-radius: 50%;
-            box-shadow: 0 0 10px #38BDF8;
-        }
-
-        .wallet-glow {
-            position: absolute; inset: 15px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(11, 16, 32, 0) 70%);
-            opacity: 0; transition: opacity 0.4s ease;
-        }
-
-        .coin {
-            position: absolute; font-weight: 800; font-size: 1.2rem; color: #38BDF8;
-            opacity: 0; transform: translateY(-60px) scale(0.5);
-        }
-
-        @keyframes dropCoin {
-            0% { opacity: 0; transform: translateY(-70px) scale(0.5); }
-            50% { opacity: 1; transform: translateY(-10px) scale(1.1); }
-            100% { opacity: 0; transform: translateY(10px) scale(0.2); }
-        }
-
-        .anim-badge {
-            font-size: 1.6rem; font-weight: 800; color: #38BDF8; margin-bottom: 8px;
-            opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
-        }
-
-        .anim-heading {
-            font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 8px;
-            opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
-        }
-
-        .anim-subtext {
-            font-size: 0.9rem; color: #94A3B8; max-width: 280px; line-height: 1.5; margin-bottom: 24px;
-            opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
-        }
-
-        .btn-continue {
-            background: #2563EB; color: #FFFFFF; border: none; padding: 14px 28px;
-            border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
-            opacity: 0; transform: translateY(10px); transition: all 0.4s ease; pointer-events: none;
-        }
-
-        .btn-continue.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-    </style>
+/* ONBOARDING ANIMATION OVERLAY */
+#onboardingModal {
+    position: fixed; inset: 0; background: #060911; display: none;
+    flex-direction: column; justify-content: center; align-items: center;
+    z-index: 9999; text-align: center; padding: 24px; color: #FFFFFF;
+    overflow: hidden; opacity: 0; transition: opacity 0.4s ease;
+}
+#onboardingModal.active { display: flex; opacity: 1; }
+.brand-title { font-size: 1.8rem; font-weight: 800; color: #FFFFFF; margin-bottom: 24px; letter-spacing: -0.02em; }
+.brand-title span { color: #38BDF8; }
+.wallet-stage { position: relative; width: 140px; height: 140px; margin-bottom: 24px; display: flex; justify-content: center; align-items: center; }
+.digital-wallet {
+    width: 100px; height: 80px; background: linear-gradient(135deg, #2563EB, #1D4ED8);
+    border-radius: 16px; position: relative; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
+    transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.2);
+}
+.digital-wallet::after {
+    content: ""; width: 14px; height: 14px; background: #38BDF8; border-radius: 50%;
+    box-shadow: 0 0 10px #38BDF8;
+}
+.wallet-glow {
+    position: absolute; inset: 15px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(11, 16, 32, 0) 70%);
+    opacity: 0; transition: opacity 0.4s ease;
+}
+.coin {
+    position: absolute; font-weight: 800; font-size: 1.2rem; color: #38BDF8;
+    opacity: 0; transform: translateY(-60px) scale(0.5);
+}
+@keyframes dropCoin {
+    0% { opacity: 0; transform: translateY(-70px) scale(0.5); }
+    50% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(10px) scale(0.2); }
+}
+.anim-badge {
+    font-size: 1.6rem; font-weight: 800; color: #38BDF8; margin-bottom: 8px;
+    opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
+}
+.anim-heading {
+    font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin-bottom: 8px;
+    opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
+}
+.anim-subtext {
+    font-size: 0.9rem; color: #94A3B8; max-width: 280px; line-height: 1.5; margin-bottom: 24px;
+    opacity: 0; transform: translateY(10px); transition: all 0.4s ease;
+}
+.btn-continue {
+    background: #2563EB; color: #FFFFFF; border: none; padding: 14px 28px;
+    border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    opacity: 0; transform: translateY(10px); transition: all 0.4s ease; pointer-events: none;
+}
+.btn-continue.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+</style>
 </head>
 <body>
 
 <div class="signup-card">
-    <div class="bonus-banner">
-        ⚡ INSTANT ₦10 WELCOME BONUS
-    </div>
-
+    <div class="bonus-banner" id="bonusBanner">🎁 INSTANT ₦10 WELCOME BONUS</div>
+    
     <div class="signup-header">
-        <h1>Start Earning on <span>PAYME</span></h1>
-        <p>Join thousands earning daily cash rewards directly to their wallets.</p>
+        <h1 id="mainTitle">Start Earning on <span>PAYME</span></h1>
+        <p id="mainSubtext">Join thousands earning daily cash rewards directly to their wallets.</p>
     </div>
 
     <!-- EARNING BENEFITS GRID -->
-    <div class="benefits-grid">
+    <div class="benefits-grid" id="benefitsGrid">
         <div class="benefit-card">
             <div class="benefit-icon">🎁</div>
             <div class="benefit-title">Welcome</div>
@@ -351,16 +275,16 @@
 
     <div class="alert-error" id="errorBox"></div>
 
-    <!-- 3D TELEGRAM SIGN UP BUTTON -->
-    <button type="button" class="btn-telegram" id="telegramSignUpBtn" onclick="handleTelegramAuth()">
+    <!-- MAIN ACTION BUTTON -->
+    <button type="button" class="btn-telegram" id="telegramSignUpBtn" onclick="handleAuthAction()">
         <svg viewBox="0 0 24 24">
-            <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.161-2.02 9.53c-.15.68-.56.84-1.13.531-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.311.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.121-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.991 12.01-4.63c.56-.21 1.05.13.84.99z"/>
+            <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.161-2.02 9.53c-.15.68-.56.84-1.13.531-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.311.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.121-7.14 4.5-3.07-.96c-.67-21-.68-.67.14-.991 12.01-4.63c.56-.21 1.05.13.84.99z"/>
         </svg>
         <span id="telegramBtnText">Sign Up with Telegram</span>
     </button>
 
     <!-- OPTIONAL REFERRAL CODE BOX -->
-    <div class="referral-section">
+    <div class="referral-section" id="referralSection">
         <label for="referralCode" class="referral-label">Referral Code (Optional)</label>
         <input type="text" id="referralCode" class="form-control" placeholder="e.g. REF123">
     </div>
@@ -387,15 +311,12 @@
 </div>
 
 <script>
-
-
 let tg = null;
 
 function initializeTelegram() {
     try {
         tg = window.Telegram?.WebApp || null;
         if (!tg) return;
-        
         if (typeof tg.ready === 'function') tg.ready();
         if (typeof tg.expand === 'function') tg.expand();
     } catch (error) {
@@ -405,37 +326,53 @@ function initializeTelegram() {
 
 window.addEventListener('DOMContentLoaded', () => {
     initializeTelegram();
-
-    // Auto-fill referral code from URL parameter if present
+    
+    // Auto-fill referral code from URL
     const urlParams = new URLSearchParams(window.location.search);
     const refParam = urlParams.get('ref');
-    if (refParam) {
+    if (refParam && document.getElementById('referralCode')) {
         document.getElementById('referralCode').value = refParam.trim().toUpperCase();
+    }
+
+    // Check if user has already signed up
+    if (localStorage.getItem('hasSignedUp') === 'true') {
+        renderLoginUI();
     }
 });
 
+function renderLoginUI() {
+    // Modify titles and buttons for returning user
+    document.getElementById('mainTitle').innerHTML = 'Welcome Back to <span>PAYME</span>';
+    document.getElementById('mainSubtext').innerText = 'Login to continue earning cash rewards directly to your account.';
+    document.getElementById('telegramBtnText').innerText = 'Login to Account';
+    
+    // Hide registration-only sections
+    document.getElementById('bonusBanner').style.display = 'none';
+    document.getElementById('benefitsGrid').style.display = 'none';
+    document.getElementById('referralSection').style.display = 'none';
+}
+
+function handleAuthAction() {
+    const hasSignedUp = localStorage.getItem('hasSignedUp') === 'true';
+    if (hasSignedUp) {
+        triggerLoginAnimation();
+    } else {
+        handleTelegramAuth();
+    }
+}
 
 async function handleTelegramAuth() {
     const errorBox = document.getElementById('errorBox');
     const tgBtn = document.getElementById('telegramSignUpBtn');
     const tgBtnText = document.getElementById('telegramBtnText');
-    errorBox.style.display = 'none';
-
-    const activeTg = window.Telegram?.WebApp || tg;
     
-    // CHECK IF RUNNING LOCALLY OUTSIDE TELEGRAM
+    errorBox.style.display = 'none';
+    const activeTg = window.Telegram?.WebApp || tg;
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     let telegramUser = activeTg?.initDataUnsafe?.user;
 
-    // IF TESTING LOCALLY, GENERATE A MOCK USER
     if (!telegramUser && isLocalhost) {
-        console.warn('⚠️ Localhost detected: Using mock Telegram user for testing.');
-        telegramUser = {
-            id: '999888777', // Test Telegram ID
-            username: 'local_tester',
-            first_name: 'Local',
-            last_name: 'Tester'
-        };
+        telegramUser = { id: '999888777', username: 'local_tester', first_name: 'Local', last_name: 'Tester' };
     }
 
     if (!telegramUser || !telegramUser.id) {
@@ -445,9 +382,6 @@ async function handleTelegramAuth() {
     }
 
     try {
-        if (typeof activeTg?.ready === 'function') activeTg.ready();
-        if (typeof activeTg?.expand === 'function') activeTg.expand();
-
         tgBtn.disabled = true;
         tgBtnText.innerText = 'Creating account...';
 
@@ -468,12 +402,14 @@ async function handleTelegramAuth() {
         });
 
         const data = await response.json();
-
         if (!response.ok || !data.success) {
             throw new Error(data.message || data.error || 'Telegram authentication failed.');
         }
 
+        // Save sign-up state locally
+        localStorage.setItem('hasSignedUp', 'true');
         triggerOnboardingAnimation();
+
     } catch (error) {
         console.error('Telegram auth error:', error);
         tgBtn.disabled = false;
@@ -483,9 +419,32 @@ async function handleTelegramAuth() {
     }
 }
 
+function triggerLoginAnimation() {
+    const modal = document.getElementById('onboardingModal');
+    const animBadge = document.getElementById('animBadge');
+    const animHeading = document.getElementById('animHeading');
+    const animSubtext = document.getElementById('animSubtext');
+    const continueBtn = document.getElementById('continueBtn');
 
-function redirectDashboard() {
-    window.location.href = '/dashboard.html';
+    // Setup modal text specifically for login
+    animBadge.style.display = 'none';
+    animHeading.innerText = 'Logging In...';
+    animSubtext.innerText = 'Authenticating your session and taking you to your dashboard.';
+    continueBtn.style.display = 'none';
+
+    modal.classList.add('active');
+
+    setTimeout(() => {
+        animHeading.style.opacity = '1';
+        animHeading.style.transform = 'translateY(0)';
+        animSubtext.style.opacity = '1';
+        animSubtext.style.transform = 'translateY(0)';
+    }, 200);
+
+    // Redirect to public/dashboard.html
+    setTimeout(() => {
+        redirectDashboard();
+    }, 1800);
 }
 
 function triggerOnboardingAnimation() {
@@ -517,6 +476,10 @@ function triggerOnboardingAnimation() {
     }, 2000);
 
     setTimeout(() => { redirectDashboard(); }, 4500);
+}
+
+function redirectDashboard() {
+    window.location.href = 'public/dashboard.html';
 }
 </script>
 </body>
