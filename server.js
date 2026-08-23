@@ -134,20 +134,23 @@ function loadDatabase() {
     // UPGRADE OLD USERS
     // ==================================================
 
-    users.forEach(user => {
 
-      if (
-        typeof user.withdrawableBalance ===
-        'undefined'
-      ) {
-        user.withdrawableBalance =
-          Number(
-            user.referralEarnings || 0
-          );
+
+    // UPGRADE OLD USERS
+    users.forEach(user => {
+      if (typeof user.withdrawableBalance === 'undefined') {
+        user.withdrawableBalance = Number(user.referralEarnings || 0);
       }
 
-if (typeof user.freeSpins === 'undefined') { user.freeSpins = 0; }
-if (typeof user.hasClaimedGiftBox === 'undefined') { user.hasClaimedGiftBox = false; }
+      if (!user.dailyReward) {
+        user.dailyReward = {
+          currentDay: 1,
+          lastClaimTimestamp: 0
+        };
+      }
+
+      if (typeof user.freeSpins === 'undefined') { user.freeSpins = 0; }
+      if (typeof user.hasClaimedGiftBox === 'undefined') { user.hasClaimedGiftBox = false; }
 
 
       if (
@@ -3361,7 +3364,9 @@ app.post(
 // DASHBOARD API
 
 
+// ====================
 // DASHBOARD API
+// ====================
 app.post('/api/user/dashboard', async (req, res) => {
   try {
     let user = null;
@@ -3369,11 +3374,11 @@ app.post('/api/user/dashboard', async (req, res) => {
       user = users.find(u => u.id === req.session.userId);
     }
 
-    const { telegramId, username, referralCode } = req.body;
-
+    const { telegramId, username } = req.body;
     if (!user && telegramId) {
       const cleanTelegramId = String(telegramId);
       user = users.find(u => String(u.telegramId || '') === cleanTelegramId);
+
       if (!user && username) {
         user = users.find(u => String(u.username || '').toLowerCase() === String(username).toLowerCase());
       }
@@ -3388,13 +3393,30 @@ app.post('/api/user/dashboard', async (req, res) => {
     req.session = { userId: user.id };
     const sessionToken = createSessionToken(user);
     setSessionCookie(res, sessionToken);
+
     ensureWelcomeBonus(user);
 
-    // Show popup if they have received the bonus but haven't seen the popup yet
     const isNewUser = user.hasReceivedWelcomeBonus && !user.hasSeenPopup;
     if (isNewUser) {
       user.hasSeenPopup = true;
     }
+
+    // ====================
+    // DAILY REWARD LOGIC
+    // ====================
+    const now = Date.now();
+    const CLAIM_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (!user.dailyReward) {
+      user.dailyReward = {
+        currentDay: 1,
+        lastClaimTimestamp: 0
+      };
+    }
+
+    const elapsed = now - (user.dailyReward.lastClaimTimestamp || 0);
+    const canClaim = elapsed >= CLAIM_COOLDOWN;
+    const nextClaimTime = canClaim ? 0 : user.dailyReward.lastClaimTimestamp + CLAIM_COOLDOWN;
 
     syncUserBalance(user);
     saveDatabase();
@@ -3418,6 +3440,12 @@ app.post('/api/user/dashboard', async (req, res) => {
         canWithdraw: Number(user.withdrawableBalance || 0) >= MIN_WITHDRAWAL_LIMIT,
         transactions: user.transactions || [],
         deposits: user.deposits || []
+      },
+      dailyReward: {
+        currentDay: user.dailyReward.currentDay || 1,
+        lastClaimTime: user.dailyReward.lastClaimTimestamp || 0,
+        nextClaimTime: nextClaimTime,
+        canClaim: canClaim
       }
     });
   } catch (err) {
@@ -3425,6 +3453,97 @@ app.post('/api/user/dashboard', async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error loading dashboard.' });
   }
 });
+
+
+
+
+// ====================
+// CLAIM DAILY REWARD
+// ====================
+app.post('/api/user/claim-daily', requireLogin, async (req, res) => {
+  try {
+    const user = req.user;
+    const reqDay = Number(req.body.day);
+    const now = Date.now();
+    const CLAIM_COOLDOWN = 24 * 60 * 60 * 1000;
+
+    if (!user.dailyReward) {
+      user.dailyReward = { currentDay: 1, lastClaimTimestamp: 0 };
+    }
+
+    const currentDay = user.dailyReward.currentDay || 1;
+    const lastClaim = user.dailyReward.lastClaimTimestamp || 0;
+
+    // Validation checks
+    if (reqDay !== currentDay) {
+      return res.status(400).json({ success: false, message: 'Invalid claim day sequence.' });
+    }
+
+    if (now - lastClaim < CLAIM_COOLDOWN) {
+      const remainingMs = CLAIM_COOLDOWN - (now - lastClaim);
+      const hoursLeft = Math.ceil(remainingMs / (1000 * 60 * 60));
+      return res.status(400).json({ 
+        success: false, 
+        message: `Reward not available yet. Please wait ${hoursLeft} hours.` 
+      });
+    }
+
+    // Award logic
+    if (reqDay >= 1 && reqDay <= 6) {
+      user.withdrawableBalance = Number(user.withdrawableBalance || 0) + 10;
+      
+      if (!Array.isArray(user.transactions)) user.transactions = [];
+      user.transactions.unshift({
+        id: generateTransactionId('tx_daily_reward'),
+        type: 'daily_reward',
+        description: `Daily Reward (Day ${reqDay})`,
+        amount: 10,
+        currency: 'NGN',
+        status: 'completed',
+        createdAt: new Date().toISOString()
+      });
+    } else if (reqDay === 7) {
+      user.freeSpins = Number(user.freeSpins || 0) + 1;
+    }
+
+    // Update claim timestamp & sequence progression
+    user.dailyReward.lastClaimTimestamp = now;
+
+    if (reqDay === 7) {
+      user.dailyReward.currentDay = 1;
+    } else {
+      user.dailyReward.currentDay = currentDay + 1;
+    }
+
+    syncUserBalance(user);
+    saveDatabase();
+
+    const nextClaimTime = now + CLAIM_COOLDOWN;
+
+    return res.json({
+      success: true,
+      user: {
+        balance: user.balance,
+        withdrawableBalance: user.withdrawableBalance,
+        depositBalance: user.depositBalance,
+        freeSpins: user.freeSpins || 0
+      },
+      dailyReward: {
+        currentDay: user.dailyReward.currentDay,
+        lastClaimTime: now,
+        nextClaimTime: nextClaimTime,
+        canClaim: false
+      }
+    });
+
+  } catch (error) {
+    console.error('Daily claim server error:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
+
+
 
 
 
