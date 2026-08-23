@@ -3460,6 +3460,9 @@ app.post('/api/user/dashboard', async (req, res) => {
 // ====================
 // CLAIM DAILY REWARD
 // ====================
+
+
+
 app.post('/api/user/claim-daily', requireLogin, async (req, res) => {
   try {
     const user = req.user;
@@ -3471,27 +3474,34 @@ app.post('/api/user/claim-daily', requireLogin, async (req, res) => {
       user.dailyReward = { currentDay: 1, lastClaimTimestamp: 0 };
     }
 
-    const currentDay = user.dailyReward.currentDay || 1;
-    const lastClaim = user.dailyReward.lastClaimTimestamp || 0;
+    let lastClaim = user.dailyReward.lastClaimTimestamp || 0;
+    let currentDay = user.dailyReward.currentDay || 1;
 
-    // Validation checks
+    // 1. Auto-advance active day if 24h has passed since last claim
+    if (lastClaim > 0 && (now - lastClaim >= CLAIM_COOLDOWN)) {
+      currentDay = currentDay >= 7 ? 1 : currentDay + 1;
+      user.dailyReward.currentDay = currentDay;
+    }
+
+    // 2. Cooldown check (prevent claiming if 24 hours haven't passed)
+    if (lastClaim > 0 && (now - lastClaim < CLAIM_COOLDOWN)) {
+      const remainingMs = CLAIM_COOLDOWN - (now - lastClaim);
+      const hoursLeft = Math.ceil(remainingMs / (1000 * 60 * 60));
+      return res.status(400).json({
+        success: false,
+        message: `Reward not available yet. Please wait ${hoursLeft} hours.`
+      });
+    }
+
+    // 3. Validation check
     if (reqDay !== currentDay) {
       return res.status(400).json({ success: false, message: 'Invalid claim day sequence.' });
     }
 
-    if (now - lastClaim < CLAIM_COOLDOWN) {
-      const remainingMs = CLAIM_COOLDOWN - (now - lastClaim);
-      const hoursLeft = Math.ceil(remainingMs / (1000 * 60 * 60));
-      return res.status(400).json({ 
-        success: false, 
-        message: `Reward not available yet. Please wait ${hoursLeft} hours.` 
-      });
-    }
-
-    // Award logic
+    // 4. Award logic
     if (reqDay >= 1 && reqDay <= 6) {
       user.withdrawableBalance = Number(user.withdrawableBalance || 0) + 10;
-      
+
       if (!Array.isArray(user.transactions)) user.transactions = [];
       user.transactions.unshift({
         id: generateTransactionId('tx_daily_reward'),
@@ -3506,14 +3516,9 @@ app.post('/api/user/claim-daily', requireLogin, async (req, res) => {
       user.freeSpins = Number(user.freeSpins || 0) + 1;
     }
 
-    // Update claim timestamp & sequence progression
+    // 5. Save claim state (keep currentDay as reqDay, set timestamp)
     user.dailyReward.lastClaimTimestamp = now;
-
-    if (reqDay === 7) {
-      user.dailyReward.currentDay = 1;
-    } else {
-      user.dailyReward.currentDay = currentDay + 1;
-    }
+    user.dailyReward.currentDay = reqDay;
 
     syncUserBalance(user);
     saveDatabase();
@@ -3529,10 +3534,10 @@ app.post('/api/user/claim-daily', requireLogin, async (req, res) => {
         freeSpins: user.freeSpins || 0
       },
       dailyReward: {
-        currentDay: user.dailyReward.currentDay,
+        currentDay: user.dailyReward.currentDay, // Stays on current claimed day (e.g., Day 1)
         lastClaimTime: now,
         nextClaimTime: nextClaimTime,
-        canClaim: false
+        canClaim: false // Prevents immediate re-claim
       }
     });
 

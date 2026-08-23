@@ -497,7 +497,7 @@
         "weekly_2026-08-16": 11
       },
       "withdrawableBalance": 45,
-      "sessionVersion": 34,
+      "sessionVersion": 35,
       "depositBalance": 0,
       "telegramId": null,
       "freeSpins": 0,
@@ -3257,7 +3257,7 @@
       "deposits": [],
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "sessionVersion": 41,
+      "sessionVersion": 44,
       "createdAt": "2026-08-22T20:51:56.680Z",
       "freeSpins": 0,
       "hasClaimedGiftBox": true,

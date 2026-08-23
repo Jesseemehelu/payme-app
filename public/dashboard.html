@@ -2,551 +2,619 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
+user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>PAYME Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link
+href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f7fb;
-  --white:#ffffff;
-  --dark:#08111f;
-  --dark2:#101b2d;
-  --blue:#2563eb;
-  --blue2:#3b82f6;
-  --cyan:#06b6d4;
-  --green:#10b981;
-  --red:#ef4444;
-  --purple:#7c3aed;
-  --pink:#ec4899;
-  --amber:#f59e0b;
-  --text:#0f172a;
-  --muted:#64748b;
-  --border:#e5eaf1;
-  --radius:24px;
-  --shadow: 0 20px 45px rgba(15,23,42,.07), 0 4px 12px rgba(15,23,42,.04);
+--bg:#f4f7fb;
+--white:#ffffff;
+--dark:#08111f;
+--dark2:#101b2d;
+--blue:#2563eb;
+--blue2:#3b82f6;
+--cyan:#06b6d4;
+--green:#10b981;
+--red:#ef4444;
+--purple:#7c3aed;
+--pink:#ec4899;
+--amber:#f59e0b;
+--text:#0f172a;
+--muted:#64748b;
+--border:#e5eaf1;
+--radius:24px;
+--shadow: 0 20px 45px rgba(15,23,42,.07), 0 4px 12px rgba(15,23,42,.04);
 }
 *{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  -webkit-tap-highlight-color:transparent;
+box-sizing:border-box;
+margin:0;
+padding:0;
+-webkit-tap-highlight-color:transparent;
 }
 html{ scroll-behavior:smooth; }
 body{
-  font-family:'Plus Jakarta Sans', sans-serif;
-  background:
-    radial-gradient(circle at 10% 0%,rgba(37,99,235,.07), transparent 30%),
-    radial-gradient(circle at 90% 20%,rgba(6,182,212,.06), transparent 30%),
-    var(--bg);
-  color:var(--text);
-  padding-bottom:92px;
-  min-height:100vh;
+font-family:'Plus Jakarta Sans', sans-serif;
+background:
+radial-gradient(circle at 10% 0%,rgba(37,99,235,.07), transparent 30%),
+
+radial-gradient(circle at 90% 20%,rgba(6,182,212,.06), transparent 30%),
+var(--bg);
+color:var(--text);
+padding-bottom:92px;
+min-height:100vh;
 }
 button, a{ font-family:inherit; }
 
 /* HEADER */
 header{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  background:rgba(255,255,255,.82);
-  backdrop-filter:blur(25px);
-  -webkit-backdrop-filter:blur(25px);
-  border-bottom:1px solid rgba(226,232,240,.7);
+position:sticky;
+top:0;
+z-index:1000;
+background:rgba(255,255,255,.82);
+backdrop-filter:blur(25px);
+-webkit-backdrop-filter:blur(25px);
+border-bottom:1px solid rgba(226,232,240,.7);
 }
 .nav-container{
-  max-width: 1200px;
-  min-height:70px;
-  margin:auto;
-  padding:12px 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+max-width: 1200px;
+min-height:70px;
+margin:auto;
+padding:12px 18px;
+display:flex;
+align-items:center;
+justify-content:space-between;
 }
 .brand-logo{
-  text-decoration:none;
-  color:var(--dark);
-  font-size:1.45rem;
-  font-weight:800;
-  letter-spacing:-.06em;
+text-decoration:none;
+color:var(--dark);
+font-size:1.45rem;
+font-weight:800;
+letter-spacing:-.06em;
 }
 .brand-logo span{ color:var(--blue); }
 .desktop-nav{
-  display:none;
-  list-style:none;
-  gap:28px;
+display:none;
+list-style:none;
+gap:28px;
 }
 .desktop-nav a{
-  text-decoration:none;
-  color:var(--muted);
-  font-size:.82rem;
-  font-weight:800;
-  transition:.2s;
+text-decoration:none;
+color:var(--muted);
+font-size:.82rem;
+font-weight:800;
+transition:.2s;
 }
 .desktop-nav a:hover, .desktop-nav a.active{ color:var(--blue); }
 .header-actions{
-  display:flex;
-  align-items:center;
-  gap:8px;
+display:flex;
+align-items:center;
+gap:8px;
 }
 .logout-btn{
-  border:1px solid #fecaca;
-  background:rgba(254,242,242,.9);
-  color:#ef4444;
-  padding:8px 13px;
-  border-radius: 18px;
-  font-size:.72rem;
-  font-weight:800;
-  cursor:pointer;
+border:1px solid #fecaca;
+background:rgba(254,242,242,.9);
+color:#ef4444;
+padding:8px 13px;
+border-radius: 18px;
+font-size:.72rem;
+font-weight:800;
+cursor:pointer;
 }
 .support-btn{
-  width:40px;
-  height:40px;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--dark);
-  background:#fff;
-  border:1px solid var(--border);
-  box-shadow:0 5px 15px rgba(15,23,42,.06);
+width:40px;
+height:40px;
+border-radius:14px;
+display:flex;
+align-items:center;
+justify-content:center;
+color:var(--dark);
+background:#fff;
+border:1px solid var(--border);
+box-shadow:0 5px 15px rgba(15,23,42,.06);
 }
 
 /* CONTAINER */
 .dashboard-container{
-  max-width: 1200px;
-  margin:auto;
-  padding:20px 15px 35px;
+max-width: 1200px;
+margin:auto;
+padding:20px 15px 35px;
 }
 .main-col, .side-col{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+display:flex;
+flex-direction:column;
+gap:18px;
 }
 
 /* WELCOME */
 .welcome{ padding:7px 4px 2px; }
 .welcome-small{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  color:#64748b;
-  font-size:.65rem;
-  font-weight:800;
-  letter-spacing:.08em;
+display:inline-flex;
+align-items:center;
+gap:6px;
+color:#64748b;
+font-size:.65rem;
+font-weight:800;
+letter-spacing:.08em;
 }
 .welcome-small::before{
-  content:"";
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:#22c55e;
-  box-shadow:0 0 0 4px rgba(34,197,94,.12);
+content:"";
+width:7px;
+height:7px;
+border-radius:50%;
+background:#22c55e;
+box-shadow:0 0 0 4px rgba(34,197,94,.12);
 }
 .welcome-title{
-  margin-top:7px;
-  font-size:1.65rem;
-  line-height:1.15;
-  font-weight:800;
-  letter-spacing:-.055em;
+margin-top:7px;
+font-size:1.65rem;
+line-height:1.15;
+font-weight:800;
+letter-spacing:-.055em;
 }
 .user-name{ color:var(--blue); }
 .welcome-sub{
-  margin-top:7px;
-  color:var(--muted);
-  font-size:.75rem;
-  line-height:1.5;
+margin-top:7px;
+color:var(--muted);
+font-size:.75rem;
+line-height:1.5;
 }
 
 /* BALANCE HERO */
 .balance-card{
-  position:relative;
-  overflow:hidden;
-  min-height:360px;
-  padding:24px 20px 19px;
-  color:#fff;
-  border-radius:30px;
-  background:
-    radial-gradient(circle at 92% 5%, rgba(59,130,246,.55), transparent 28%),
-    radial-gradient(circle at 5% 95%, rgba(6,182,212,.28), transparent 32%),
-    radial-gradient(circle at 80% 70%, rgba(124,58,237,.17), transparent 32%),
-    linear-gradient(135deg, #050a14 0%, #0b1425 48%, #111e38 100%);
-  box-shadow: 0 35px 65px rgba(2,6,23,.25), 0 10px 20px rgba(15,23,42,.12), inset 0 1px 0 rgba(255,255,255,.08);
-  transform:translateZ(0);
+position:relative;
+overflow:hidden;
+min-height:360px;
+padding:24px 20px 19px;
+color:#fff;
+border-radius:30px;
+background:
+radial-gradient(circle at 92% 5%, rgba(59,130,246,.55), transparent 28%),
+
+radial-gradient(circle at 5% 95%, rgba(6,182,212,.28), transparent 32%),
+radial-gradient(circle at 80% 70%, rgba(124,58,237,.17), transparent 32%),
+linear-gradient(135deg, #050a14 0%, #0b1425 48%, #111e38 100%);
+box-shadow: 0 35px 65px rgba(2,6,23,.25), 0 10px 20px rgba(15,23,42,.12), inset 0 1px 0
+rgba(255,255,255,.08);
+transform:translateZ(0);
 }
 .balance-card::before{
-  content:"";
-  position:absolute;
-  width:280px;
-  height:280px;
-  right:-140px;
-  top:-140px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.09);
-  box-shadow: 0 0 0 35px rgba(255,255,255,.025), 0 0 0 70px rgba(255,255,255,.018), 0 0 0 105px rgba(255,255,255,.012);
-  pointer-events:none;
+content:"";
+position:absolute;
+width:280px;
+height:280px;
+right:-140px;
+top:-140px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,.09);
+box-shadow: 0 0 0 35px rgba(255,255,255,.025), 0 0 0 70px rgba(255,255,255,.018), 0 0 0
+105px rgba(255,255,255,.012);
+pointer-events:none;
 }
 .balance-card::after{
-  content:"";
-  position:absolute;
-  width: 190px;
-  height: 190px;
-  left:-100px;
-  bottom:-100px;
-  border-radius:50%;
-  background:rgba(37,99,235,.12);
-  filter:blur(20px);
+content:"";
+position:absolute;
+width: 190px;
+height: 190px;
+left:-100px;
+bottom:-100px;
+border-radius:50%;
+background:rgba(37,99,235,.12);
+filter:blur(20px);
 }
 .balance-shine{
-  position:absolute;
-  width:240px;
-  height:240px;
-  top:-140px;
-  left:-80px;
-  border-radius:50%;
-  background:rgba(255,255,255,.04);
-  filter:blur(2px);
+position:absolute;
+width:240px;
+height:240px;
+top:-140px;
+left:-80px;
+border-radius:50%;
+background:rgba(255,255,255,.04);
+filter:blur(2px);
 }
 .balance-top{
-  position:relative;
-  z-index:3;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+position:relative;
+z-index:3;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
 }
 .balance-label{
-  color:#94a3b8;
-  font-size:.65rem;
-  text-transform:uppercase;
-  letter-spacing:.09em;
-  font-weight:800;
+color:#94a3b8;
+font-size:.65rem;
+text-transform:uppercase;
+letter-spacing:.09em;
+font-weight:800;
 }
 .verified{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  padding:6px 10px;
-  border-radius:20px;
-  background:rgba(16,185,129,.11);
-  border:1px solid rgba(52,211,153,.2);
-  color:#6ee7b7;
-  font-size:.6rem;
-  font-weight:800;
-  box-shadow: inset 0 0 12px rgba(16,185,129,.06);
+display:flex;
+align-items:center;
+gap:5px;
+padding:6px 10px;
+border-radius:20px;
+background:rgba(16,185,129,.11);
+border:1px solid rgba(52,211,153,.2);
+color:#6ee7b7;
+font-size:.6rem;
+font-weight:800;
+box-shadow: inset 0 0 12px rgba(16,185,129,.06);
 }
 .verified::before{
-  content:"✓";
-  display:grid;
-  place-items:center;
-  width: 14px;
-  height:14px;
-  border-radius:50%;
-  background:#10b981;
-  color:#fff;
-  font-size: .55rem;
+content:"✓";
+display:grid;
+place-items:center;
+width: 14px;
+height:14px;
+border-radius:50%;
+background:#10b981;
+color:#fff;
+font-size: .55rem;
 }
 .total-balance{
-  position:relative;
-  z-index:3;
-  margin-top:8px;
-  font-size:2.75rem;
-  line-height:1;
-  font-weight:800;
-  letter-spacing:-.07em;
-  text-shadow: 0 4px 20px rgba(0,0,0,.3);
+position:relative;
+z-index:3;
+margin-top:8px;
+font-size:2.75rem;
+line-height:1;
+font-weight:800;
+letter-spacing:-.07em;
+text-shadow: 0 4px 20px rgba(0,0,0,.3);
+
 }
 .balance-caption{
-  position:relative;
-  z-index:3;
-  color:#94a3b8;
-  font-size:.67rem;
-  margin-top:7px;
+position:relative;
+z-index:3;
+color:#94a3b8;
+font-size:.67rem;
+margin-top:7px;
 }
 .balance-breakdown{
-  position:relative;
-  z-index:3;
-  margin-top:25px;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10px;
+position:relative;
+z-index:3;
+margin-top:25px;
+display:grid;
+grid-template-columns: 1fr 1fr;
+gap:10px;
 }
 .balance-box{
-  position:relative;
-  overflow:hidden;
-  padding: 14px;
-  border-radius:17px;
-  background: linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.035));
-  border:1px solid rgba(255,255,255,.1);
-  backdrop-filter:blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 20px rgba(0,0,0,.08);
-  transition:.25s;
+position:relative;
+overflow:hidden;
+padding: 14px;
+border-radius:17px;
+background: linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.035));
+border:1px solid rgba(255,255,255,.1);
+backdrop-filter:blur(12px);
+box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 20px rgba(0,0,0,.08);
+transition:.25s;
 }
 .balance-box:hover{
-  transform:translateY(-2px);
-  background:rgba(255,255,255,.1);
+transform:translateY(-2px);
+background:rgba(255,255,255,.1);
 }
 .balance-box-header{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  margin-bottom:7px;
+display:flex;
+align-items:center;
+gap:7px;
+margin-bottom:7px;
 }
 .balance-box-icon{
-  width:20px;
-  height:20px;
-  display:grid;
-  place-items:center;
-  border-radius:7px;
-  font-size:.62rem;
-  font-weight:800;
+width:20px;
+height:20px;
+display:grid;
+place-items:center;
+border-radius:7px;
+font-size:.62rem;
+
+font-weight:800;
 }
 .earnings-icon{ background:rgba(6,182,212,.15); color:#67e8f9; }
 .deposit-icon{ background:rgba(16,185,129,.15); color:#86efac; }
 .balance-box-label{
-  color:#94a3b8;
-  font-size: .58rem;
-  font-weight:800;
-  letter-spacing:.04em;
+color:#94a3b8;
+font-size: .58rem;
+font-weight:800;
+letter-spacing:.04em;
 }
 .balance-box-value{ font-size:1.03rem; font-weight:800; }
 .earnings-value{ color:#67e8f9; }
 .deposit-value{ color:#86efac; }
 .balance-actions{
-  position:relative;
-  z-index:4;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:9px;
-  margin-top:15px;
+position:relative;
+z-index:4;
+display:grid;
+grid-template-columns: 1fr 1fr;
+gap:9px;
+margin-top:15px;
 }
 .action-btn{
-  min-height:47px;
-  border-radius:15px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  border:0;
-  font-size:.76rem;
-  font-weight:800;
-  cursor:pointer;
-  text-decoration:none;
-  transition: transform .18s ease, box-shadow .18s ease;
+min-height:47px;
+border-radius:15px;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:7px;
+border:0;
+font-size:.76rem;
+font-weight:800;
+cursor:pointer;
+text-decoration:none;
+transition: transform .18s ease, box-shadow .18s ease;
 }
 .action-btn:active{ transform:scale(.96); }
 .deposit-btn{
-  color:#fff;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 10px 25px rgba(37,99,235,.3), inset 0 1px 0 rgba(255,255,255,.2);
+color:#fff;
+background: linear-gradient(135deg, #3b82f6, #2563eb);
+box-shadow: 0 10px 25px rgba(37,99,235,.3), inset 0 1px 0 rgba(255,255,255,.2);
 }
 .withdraw-btn{
-  color:#fff;
-  background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
-  border:1px solid rgba(255,255,255,.14);
-  backdrop-filter:blur(8px);
+color:#fff;
+background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
+
+border:1px solid rgba(255,255,255,.14);
+backdrop-filter:blur(8px);
 }
 .transactions-btn{
-  grid-column:span 2;
-  color:#dbeafe;
-  background:rgba(255,255,255,.055);
-  border:1px solid rgba(255,255,255,.1);
+grid-column:span 2;
+color:#dbeafe;
+background:rgba(255,255,255,.055);
+border:1px solid rgba(255,255,255,.1);
 }
 
 /* GENERAL CARD */
 .card{
-  background:rgba(255,255,255,.94);
-  border:1px solid rgba(226,232,240,.9);
-  border-radius:25px;
-  box-shadow:var(--shadow);
-  transition: transform .25s ease, box-shadow .25s ease;
+background:rgba(255,255,255,.94);
+border:1px solid rgba(226,232,240,.9);
+border-radius:25px;
+box-shadow:var(--shadow);
+transition: transform .25s ease, box-shadow .25s ease;
 }
 .card:hover{
-  box-shadow: 0 25px 55px rgba(15,23,42,.08), 0 5px 15px rgba(15,23,42,.04);
+box-shadow: 0 25px 55px rgba(15,23,42,.08), 0 5px 15px rgba(15,23,42,.04);
 }
 
 /* REFERRAL CARD */
 .referral-card{
-  position:relative;
-  overflow:hidden;
-  padding:21px;
+position:relative;
+overflow:hidden;
+padding:21px;
 }
 .referral-card::before{
-  content:"";
-  position:absolute;
-  width:150px;
-  height: 150px;
-  right:-70px;
-  top:-70px;
-  border-radius:50%;
-  background: radial-gradient(circle, rgba(37,99,235,.12), transparent 68%);
+content:"";
+position:absolute;
+width:150px;
+height: 150px;
+right:-70px;
+top:-70px;
+border-radius:50%;
+background: radial-gradient(circle, rgba(37,99,235,.12), transparent 68%);
 }
 .ref-header{
-  position:relative;
-  z-index:2;
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:10px;
+position:relative;
+z-index:2;
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+
+gap:10px;
 }
 .ref-title{ font-size:1.08rem; font-weight:800; letter-spacing:-.03em; }
 .reward-tag{
-  padding:7px 11px;
-  border-radius:12px;
-  background: linear-gradient(135deg, #eff6ff, #e0f2fe);
-  color:var(--blue);
-  font-size:.75rem;
-  font-weight:800;
-  border:1px solid #dbeafe;
-  box-shadow: 0 6px 15px rgba(37,99,235,.08);
+padding:7px 11px;
+border-radius:12px;
+background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+color:var(--blue);
+font-size:.75rem;
+font-weight:800;
+border:1px solid #dbeafe;
+box-shadow: 0 6px 15px rgba(37,99,235,.08);
 }
 .ref-sub{
-  position:relative;
-  z-index:2;
-  color:var(--muted);
-  font-size:.73rem;
-  line-height:1.55;
-  margin:8px 0 16px;
+position:relative;
+z-index:2;
+color:var(--muted);
+font-size:.73rem;
+line-height:1.55;
+margin:8px 0 16px;
 }
 .code-box{
-  position:relative;
-  z-index:2;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding: 13px 15px;
-  margin-bottom:10px;
-  box-shadow: inset 0 1px 2px rgba(15,23,42,.03);
+position:relative;
+z-index:2;
+display:flex;
+align-items:center;
+justify-content:space-between;
+background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+border:1px solid var(--border);
+border-radius:15px;
+padding: 13px 15px;
+margin-bottom:10px;
+box-shadow: inset 0 1px 2px rgba(15,23,42,.03);
 }
 .code-label{ color:var(--muted); font-size:.61rem; font-weight:800; letter-spacing:.03em; }
-.code-value{ color:var(--dark); font-size:1rem; font-weight:800; letter-spacing:.1em; margin-top:2px; }
+.code-value{ color:var(--dark); font-size:1rem; font-weight:800; letter-spacing:.1em;
+margin-top:2px; }
 .copy-btn{
-  position:relative;
-  z-index:2;
-  width:100%;
-  min-height:46px;
-  border:0;
-  border-radius:14px;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color:white;
-  font-weight:800;
-  font-size:.75rem;
-  cursor:pointer;
-  box-shadow: 0 9px 22px rgba(37,99,235,.2);
-  transition:.2s;
+position:relative;
+z-index:2;
+width:100%;
+min-height:46px;
+border:0;
+border-radius:14px;
+
+background: linear-gradient(135deg, #2563eb, #3b82f6);
+color:white;
+font-weight:800;
+font-size:.75rem;
+cursor:pointer;
+box-shadow: 0 9px 22px rgba(37,99,235,.2);
+transition:.2s;
 }
 .copy-btn:active{ transform:scale(.97); }
 .copy-btn.copied{ background: linear-gradient(135deg, #10b981, #059669); }
-
 .share-buttons-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-  position: relative;
-  z-index: 2;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-top: 10px;
+position: relative;
+z-index: 2;
 }
 .share-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 11px;
-  border-radius: 14px;
-  border: 0;
-  color: #fff;
-  font-weight: 800;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-  text-decoration: none;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+padding: 11px;
+border-radius: 14px;
+border: 0;
+color: #fff;
+font-weight: 800;
+font-size: 0.75rem;
+cursor: pointer;
+transition: transform 0.2s, opacity 0.2s;
+text-decoration: none;
 }
 .share-btn:active { transform: scale(0.96); }
-.telegram-share { background: linear-gradient(135deg, #0088cc, #229ed9); box-shadow: 0 6px 16px rgba(0, 136, 204, 0.25); }
-.whatsapp-share { background: linear-gradient(135deg, #25d366, #128c7e); box-shadow: 0 6px 16px rgba(37, 211, 102, 0.25); }
+.telegram-share { background: linear-gradient(135deg, #0088cc, #229ed9); box-shadow: 0 6px
+16px rgba(0, 136, 204, 0.25); }
+.whatsapp-share { background: linear-gradient(135deg, #25d366, #128c7e); box-shadow: 0 6px
+16px rgba(37, 211, 102, 0.25); }
+
+/* ENHANCED REFERRAL */
+.referral-card{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37,99,235,.14), transparent 34%),
+    radial-gradient(circle at 0% 100%, rgba(6,182,212,.09), transparent 32%),
+    linear-gradient(145deg,#ffffff 0%,#f8fbff 100%);
+}
+.referral-hero{position:relative;z-index:2;display:flex;align-items:center;gap:12px;margin:2px 0 14px;padding:13px;border-radius:18px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #dbeafe;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+.referral-hero-icon{width:46px;height:46px;display:grid;place-items:center;flex:0 0 46px;border-radius:15px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:1.35rem;box-shadow:0 10px 22px rgba(37,99,235,.22)}
+.referral-hero-title{font-size:.78rem;font-weight:900;color:#0f172a}.referral-hero-text{font-size:.62rem;line-height:1.45;color:#64748b;margin-top:2px}
+.referral-steps{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.referral-step{padding:10px 7px;border-radius:14px;background:rgba(255,255,255,.8);border:1px solid #e2e8f0;text-align:center}
+.referral-step-num{width:23px;height:23px;margin:0 auto 5px;border-radius:8px;display:grid;place-items:center;background:#eff6ff;color:#2563eb;font-size:.6rem;font-weight:900}
+.referral-step-title{font-size:.59rem;font-weight:900;color:#334155}.referral-step-text{font-size:.52rem;color:#94a3b8;margin-top:2px}
+.link-box{position:relative;z-index:2;padding:12px;border:1px solid #dbeafe;border-radius:16px;background:linear-gradient(135deg,#f8fbff,#f8f5ff);margin-top:10px}
+.link-box-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}.link-box-label{font-size:.59rem;font-weight:900;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.link-copy-mini{border:0;background:#e0e7ff;color:#4338ca;border-radius:9px;padding:6px 9px;font-size:.57rem;font-weight:900;cursor:pointer}.link-copy-mini.copied{background:#dcfce7;color:#047857}
+.referral-link{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#334155;font-size:.62rem;font-weight:800;background:#fff;border:1px solid #e2e8f0;border-radius:11px;padding:10px}
+.referral-card .reward-tag{background:linear-gradient(135deg,#dbeafe,#ede9fe);border-color:#c7d2fe}
+
+/* DAILY MODERN POLISH */
+.daily-overlay{background:radial-gradient(circle at 50% 25%,rgba(59,130,246,.22),transparent 30%),rgba(3,7,18,.86);}
+.daily-overlay.show{animation:dailyBackdropIn .38s ease both}
+.daily-card{background:linear-gradient(160deg,#ffffff 0%,#f8fbff 55%,#f5f3ff 100%);border:1px solid rgba(255,255,255,.95);box-shadow:0 40px 100px rgba(0,0,0,.42),0 0 60px rgba(59,130,246,.18);animation:dailyCardIn .5s cubic-bezier(.16,1,.3,1) both}
+.daily-card:before{content:"";position:absolute;width:220px;height:220px;right:-120px;top:-120px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.18),transparent 68%);pointer-events:none}
+.daily-title{background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+.daily-header:after{content:"✨  Keep your streak alive  ✨";display:block;margin-top:8px;color:#94a3b8;font-size:.58rem;font-weight:800}
+.reward-card{overflow:hidden;box-shadow:0 8px 20px rgba(15,23,42,.045)}
+.reward-card.claimed{opacity:1;background:linear-gradient(145deg,#f8fafc,#eef2f7);border-color:#dbe3ec}
+.reward-card.claimed .day-status{background:#dcfce7;color:#047857}
+.reward-card.locked .day-status{background:#f1f5f9;color:#94a3b8}
+.reward-card.claimable{transform:translateY(-2px);animation:pulseCard 1.7s ease-in-out infinite,claimGlow 2s ease-in-out infinite alternate}
+.daily-timer-box{background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #dbeafe;color:#475569}
+.daily-timer-box span{background:linear-gradient(90deg,#2563eb,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes dailyBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes dailyCardIn{from{opacity:0;transform:translateY(28px) scale(.92) rotateX(4deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
+@keyframes claimGlow{from{box-shadow:0 0 14px rgba(37,99,235,.18)}to{box-shadow:0 0 30px rgba(124,58,237,.34)}}
+
+/* DAILY CLAIM SUCCESS */
+.claim-success-overlay{position:fixed;inset:0;z-index:10020;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(3,7,18,.82);backdrop-filter:blur(14px)}
+.claim-success-overlay.show{display:flex;animation:dailyBackdropIn .25s ease both}.claim-success-card{position:relative;width:100%;max-width:350px;padding:30px 23px 23px;text-align:center;border-radius:30px;background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 35px 90px rgba(0,0,0,.4);overflow:hidden;animation:successPop .55s cubic-bezier(.16,1.3,.3,1) both}
+.claim-success-card:before{content:"";position:absolute;inset:-80px;background:radial-gradient(circle at 50% 20%,rgba(16,185,129,.2),transparent 38%);pointer-events:none}
+.success-sparkles{position:absolute;top:10px;left:0;right:0;color:#7c3aed;font-size:.9rem;font-weight:900;letter-spacing:.2em;animation:sparkleFloat 1.8s ease-in-out infinite}
+.success-orb{position:relative;width:82px;height:82px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;font-size:2.2rem;box-shadow:0 16px 35px rgba(16,185,129,.3);animation:successOrb .8s cubic-bezier(.16,1.3,.3,1) .12s both}
+.success-amount{position:relative;font-size:2rem;font-weight:900;letter-spacing:-.05em;background:linear-gradient(90deg,#059669,#2563eb);-webkit-background-clip:text;background-clip:text;color:transparent}.success-title{position:relative;margin-top:3px;font-size:1.05rem;font-weight:900;color:#0f172a}.success-text{position:relative;margin:7px 0 19px;color:#64748b;font-size:.74rem;line-height:1.5}.success-close{position:relative;width:100%;border:0;border-radius:15px;padding:13px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 12px 24px rgba(37,99,235,.25)}
+@keyframes successPop{from{opacity:0;transform:translateY(25px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes successOrb{from{opacity:0;transform:scale(.2) rotate(-25deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes sparkleFloat{0%,100%{opacity:.45;transform:translateY(0) scale(.9)}50%{opacity:1;transform:translateY(-5px) scale(1.08)}}
 
 /* STATS */
 .stats-grid{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:9px;
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+
+gap:9px;
 }
 .stat-card{
-  position:relative;
-  overflow:hidden;
-  background:rgba(255,255,255,.95);
-  border:1px solid var(--border);
-  border-radius:19px;
-  padding:16px 7px;
-  text-align:center;
-  box-shadow: 0 8px 20px rgba(15,23,42,.04), inset 0 1px 0 rgba(255,255,255,.9);
-  transition:.2s;
+position:relative;
+overflow:hidden;
+background:rgba(255,255,255,.95);
+border:1px solid var(--border);
+border-radius:19px;
+padding:16px 7px;
+text-align:center;
+box-shadow: 0 8px 20px rgba(15,23,42,.04), inset 0 1px 0 rgba(255,255,255,.9);
+transition:.2s;
 }
 .stat-card:hover{ transform:translateY(-3px); box-shadow: 0 15px 30px rgba(15,23,42,.08); }
 .stat-card::after{
-  content:"";
-  position:absolute;
-  width:60px;
-  height:60px;
-  right:-30px;
-  top:-30px;
-  border-radius:50%;
-  background:rgba(37,99,235,.05);
+content:"";
+position:absolute;
+width:60px;
+height:60px;
+right:-30px;
+top:-30px;
+border-radius:50%;
+background:rgba(37,99,235,.05);
 }
 .stat-label{
-  color:var(--muted);
-  font-size: .57rem;
-  text-transform:uppercase;
-  font-weight:800;
-  margin-bottom:5px;
-  letter-spacing:.03em;
+color:var(--muted);
+font-size: .57rem;
+text-transform:uppercase;
+font-weight:800;
+margin-bottom:5px;
+letter-spacing:.03em;
 }
 .stat-value{ color:var(--dark); font-size:1.03rem; font-weight:800; }
 
 /* LEADERBOARD */
 .leaderboard-card{ padding:20px; }
 .section-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:13px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-bottom:13px;
 }
 .section-title{ font-size:1.04rem; font-weight:800; letter-spacing:-.03em; }
+
 .section-sub{ color:var(--muted); font-size: .64rem; margin-top:3px; }
 .view-btn{
-  border:0;
-  background:#eff6ff;
-  color:var(--blue);
-  padding:8px 11px;
-  border-radius:11px;
-  font-size:.65rem;
-  font-weight:800;
-  cursor:pointer;
-  transition:.2s;
+border:0;
+background:#eff6ff;
+color:var(--blue);
+padding:8px 11px;
+border-radius:11px;
+font-size:.65rem;
+font-weight:800;
+cursor:pointer;
+transition:.2s;
 }
 .view-btn:active{ transform:scale(.94); }
 .podium-list{ display:flex; flex-direction:column; gap:8px; }
 .podium-item{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px;
-  border-radius:16px;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-  border:1px solid transparent;
-  transition:.2s;
+position:relative;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:12px;
+border-radius:16px;
+background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+border:1px solid transparent;
+transition:.2s;
 }
 .podium-item:hover{ transform:translateX(2px); }
-.podium-item.rank-1{ background: linear-gradient(135deg, #fffdf1, #fffbeb); border-color:#fde68a; box-shadow: 0 7px 18px rgba(234,179,8,.08); }
-.podium-item.rank-2{ background: linear-gradient(135deg, #ffffff, #f8fafc); border-color:#e2e8f0; }
-.podium-item.rank-3{ background: linear-gradient(135deg, #fffaf5, #fff7ed); border-color:#fed7aa; }
+.podium-item.rank-1{ background: linear-gradient(135deg, #fffdf1, #fffbeb);
+border-color:#fde68a; box-shadow: 0 7px 18px rgba(234,179,8,.08); }
+.podium-item.rank-2{ background: linear-gradient(135deg, #ffffff, #f8fafc); border-color:#e2e8f0;
+}
+.podium-item.rank-3{ background: linear-gradient(135deg, #fffaf5, #fff7ed);
+border-color:#fed7aa; }
 .user-info{ display:flex; align-items:center; gap:9px; }
 .rank{ font-size:1rem; }
 .username{ font-size:.77rem; font-weight:800; }
@@ -555,190 +623,201 @@ header{
 
 /* COMING SOON CARD */
 .coming-card{
-  position:relative;
-  overflow:hidden;
-  padding:21px;
-  background: radial-gradient(circle at 100% 0%, rgba(59,130,246,.12), transparent 35%), linear-gradient(135deg, #eff6ff, #ffffff);
+position:relative;
+overflow:hidden;
+padding:21px;
+
+background: radial-gradient(circle at 100% 0%, rgba(59,130,246,.12), transparent 35%),
+linear-gradient(135deg, #eff6ff, #ffffff);
 }
 .coming-card::before{
-  content:"";
-  position:absolute;
-  width:130px;
-  height:130px;
-  right:-65px;
-  bottom:-65px;
-  border-radius:50%;
-  border:1px solid rgba(37,99,235,.08);
-  box-shadow: 0 0 0 25px rgba(37,99,235,.025), 0 0 0 50px rgba(37,99,235,.018);
+content:"";
+position:absolute;
+width:130px;
+height:130px;
+right:-65px;
+bottom:-65px;
+border-radius:50%;
+border:1px solid rgba(37,99,235,.08);
+box-shadow: 0 0 0 25px rgba(37,99,235,.025), 0 0 0 50px rgba(37,99,235,.018);
 }
-.coming-label{ position:relative; font-size:.62rem; font-weight:800; color:var(--blue); letter-spacing:.08em; margin-bottom:7px; }
+.coming-label{ position:relative; font-size:.62rem; font-weight:800; color:var(--blue);
+letter-spacing:.08em; margin-bottom:7px; }
 .coming-title{ position:relative; font-size:1rem; font-weight:800; margin-bottom:5px; }
 .coming-text{ position:relative; color:var(--muted); font-size:.68rem; line-height:1.55; }
 
 /* MODALS GENERAL */
 .modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(3,7,18,.7);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  z-index:5000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+position:fixed;
+inset:0;
+background:rgba(3,7,18,.7);
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+z-index:5000;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
 .modal-overlay.active{ display:flex; }
 .modal-card{
-  width:100%;
-  max-width:420px;
-  background:#fff;
-  border-radius:25px;
-  padding:20px;
-  box-shadow: 0 30px 80px rgba(0,0,0,.3);
-  animation:modalIn .25s ease;
+width:100%;
+max-width:420px;
+background:#fff;
+border-radius:25px;
+padding:20px;
+box-shadow: 0 30px 80px rgba(0,0,0,.3);
+animation:modalIn .25s ease;
 }
 @keyframes modalIn{
-  from{ opacity:0; transform:translateY(20px) scale(.96); }
-  to{ opacity:1; transform:translateY(0) scale(1); }
+from{ opacity:0; transform:translateY(20px) scale(.96); }
+
+to{ opacity:1; transform:translateY(0) scale(1); }
 }
-.modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:15px; }
+.modal-head{ display:flex; align-items:center; justify-content:space-between;
+margin-bottom:15px; }
 .modal-head h3{ font-size:1rem; font-weight:800; }
-.close-btn{ border:0; background:#f1f5f9; width:32px; height:32px; border-radius:50%; font-size:1.2rem; color:var(--muted); cursor:pointer; }
-#transactionsList{ max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+.close-btn{ border:0; background:#f1f5f9; width:32px; height:32px; border-radius:50%;
+font-size:1.2rem; color:var(--muted); cursor:pointer; }
+#transactionsList{ max-height:300px; overflow-y:auto; display:flex; flex-direction:column;
+gap:8px; }
 
 /* ALERTS */
 .alert-overlay{
-  position:fixed;
-  inset:0;
-  z-index:10000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(11,16,32,.78);
-  backdrop-filter:blur(10px);
+position:fixed;
+inset:0;
+z-index:10000;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:rgba(11,16,32,.78);
+backdrop-filter:blur(10px);
 }
 .alert-overlay.show{ display:flex; }
 .alert-card{
-  width:100%;
-  max-width:360px;
-  background:#fff;
-  border-radius:25px;
-  padding:28px 24px 23px;
-  text-align:center;
-  box-shadow: 0 30px 70px rgba(0,0,0,.25);
-  animation:popIn .35s cubic-bezier(.175,.885,.32,1.275);
+width:100%;
+max-width:360px;
+background:#fff;
+border-radius:25px;
+padding:28px 24px 23px;
+text-align:center;
+box-shadow: 0 30px 70px rgba(0,0,0,.25);
+animation:popIn .35s cubic-bezier(.175,.885,.32,1.275);
 }
 .alert-icon-wrapper{
-  width:58px;
-  height:58px;
-  background:#fef2f2;
-  border:1px solid #fee2e2;
-  color:#ef4444;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0 auto 16px;
+width:58px;
+height:58px;
+background:#fef2f2;
+border:1px solid #fee2e2;
+color:#ef4444;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:0 auto 16px;
+
 }
 .alert-title{ font-size:1.15rem; font-weight:800; color:#0f172a; margin-bottom:8px; }
 .alert-text{ color:#64748b; font-size:.82rem; line-height:1.55; margin-bottom:22px; }
 .alert-text strong{ color:#ef4444; }
-.alert-btn{ width:100%; border:0; background:#0f172a; color:#fff; padding:13px; border-radius: 14px; font-size:.82rem; font-weight:800; cursor:pointer; }
+.alert-btn{ width:100%; border:0; background:#0f172a; color:#fff; padding:13px; border-radius:
+14px; font-size:.82rem; font-weight:800; cursor:pointer; }
 
 /* LOGOUT OVERLAY */
 #logoutOverlay{
-  position:fixed;
-  inset:0;
-  background:rgba(11,16,32,.88);
-  z-index:9999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
+position:fixed;
+inset:0;
+background:rgba(11,16,32,.88);
+z-index:9999;
+display:none;
+align-items:center;
+justify-content:center;
+color:#fff;
 }
 .logout-box{ text-align:center; }
 .spinner{
-  width:35px;
-  height:35px;
-  border:3px solid rgba(255,255,255,.2);
-  border-top-color:white;
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-  margin:0 auto 12px;
+width:35px;
+height:35px;
+border:3px solid rgba(255,255,255,.2);
+border-top-color:white;
+border-radius:50%;
+animation:spin .8s linear infinite;
+margin:0 auto 12px;
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
 /* BONUS MODAL */
 .bonus-overlay{
-  position:fixed;
-  inset:0;
-  z-index:10000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(11,16,32,.8);
-  backdrop-filter:blur(10px);
+position:fixed;
+inset:0;
+z-index:10000;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
+background:rgba(11,16,32,.8);
+backdrop-filter:blur(10px);
 }
 .bonus-overlay.show{ display:flex; }
 .bonus-card{
-  width:100%;
-  max-width:350px;
-  background:#fff;
-  border-radius:26px;
-  padding:30px 22px 23px;
-  text-align:center;
-  box-shadow: 0 30px 70px rgba(0,0,0,.3);
-  animation:popIn .35s cubic-bezier(.175,.885,.32,1.275);
+
+width:100%;
+max-width:350px;
+background:#fff;
+border-radius:26px;
+padding:30px 22px 23px;
+text-align:center;
+box-shadow: 0 30px 70px rgba(0,0,0,.3);
+animation:popIn .35s cubic-bezier(.175,.885,.32,1.275);
 }
 .bonus-amount{ font-size:2rem; font-weight:800; color:var(--blue); margin-bottom:5px; }
 .bonus-title{ font-size:1.15rem; font-weight:800; }
 .bonus-text{ color:var(--muted); font-size: .78rem; line-height:1.5; margin:8px 0 20px; }
 .claim-btn{
-  width:100%;
-  border:0;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color:white;
-  padding: 14px;
-  border-radius:14px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow: 0 10px 25px rgba(37,99,235,.25);
+width:100%;
+border:0;
+background: linear-gradient(135deg, #2563eb, #3b82f6);
+color:white;
+padding: 14px;
+border-radius:14px;
+font-weight:800;
+cursor:pointer;
+box-shadow: 0 10px 25px rgba(37,99,235,.25);
 }
 @keyframes popIn{
-  from{ opacity:0; transform:scale(.75); }
-  to{ opacity:1; transform:scale(1); }
+from{ opacity:0; transform:scale(.75); }
+to{ opacity:1; transform:scale(1); }
 }
 
 /* MOBILE NAV */
 .mobile-nav{
-  position:fixed;
-  left: 10px;
-  right: 10px;
-  bottom:10px;
-  height:68px;
-  z-index:2000;
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
-  background: rgba(255,255,255,.88);
-  backdrop-filter:blur(25px);
-  -webkit-backdrop-filter:blur(25px);
-  border:1px solid rgba(226,232,240,.9);
-  border-radius:23px;
-  box-shadow: 0 18px 40px rgba(15,23,42,.13);
+position:fixed;
+left: 10px;
+right: 10px;
+bottom:10px;
+height:68px;
+z-index:2000;
+display:flex;
+align-items:center;
+justify-content:space-around;
+background: rgba(255,255,255,.88);
+backdrop-filter:blur(25px);
+-webkit-backdrop-filter:blur(25px);
+border:1px solid rgba(226,232,240,.9);
+border-radius:23px;
+
+box-shadow: 0 18px 40px rgba(15,23,42,.13);
 }
 .mobile-nav a{
-  position:relative;
-  width:25%;
-  text-align:center;
-  text-decoration:none;
-  color:var(--muted);
-  font-size: .58rem;
-  font-weight:800;
-  transition:.2s;
+position:relative;
+width:25%;
+text-align:center;
+text-decoration:none;
+color:var(--muted);
+font-size: .58rem;
+font-weight:800;
+transition:.2s;
 }
 .mobile-nav a.active{ color:var(--blue); }
 .nav-icon{ display:block; font-size:1.15rem; margin-bottom:2px; filter:grayscale(.15); }
@@ -746,214 +825,229 @@ header{
 
 /* 3D GIFT OVERLAY */
 .gift-overlay{
-  position:fixed;
-  inset:0;
-  z-index:10001;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  padding:20px;
-  background: radial-gradient(circle at 50% 42%, rgba(99,102,241,.25), transparent 34%), rgba(4,7,18,.95);
-  backdrop-filter:blur(18px);
+position:fixed;
+inset:0;
+z-index:10001;
+display:none;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+padding:20px;
+background: radial-gradient(circle at 50% 42%, rgba(99,102,241,.25), transparent 34%),
+rgba(4,7,18,.95);
+backdrop-filter:blur(18px);
 }
 .gift-overlay.show{ display:flex; animation:giftOverlayIn .55s ease both; }
 .gift-box-container{
-  position:relative;
-  width:100%;
-  max-width:430px;
-  min-height:560px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  perspective: 1200px;
+position:relative;
+width:100%;
+max-width:430px;
+min-height:560px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+perspective: 1200px;
 }
 .gift-stage{
-  position:relative;
-  width:300px;
-  height:300px;
-  margin:0 auto 18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  perspective: 1000px;
+
+position:relative;
+width:300px;
+height:300px;
+margin:0 auto 18px;
+display:flex;
+align-items:center;
+justify-content:center;
+perspective: 1000px;
 }
 .gift-shadow{
-  position:absolute;
-  bottom:25px;
-  left:50%;
-  width:180px;
-  height:34px;
-  transform:translateX(-50%);
-  border-radius:50%;
-  background:rgba(0,0,0,.55);
-  filter:blur(13px);
-  animation:giftShadow 3s ease-in-out infinite;
+position:absolute;
+bottom:25px;
+left:50%;
+width:180px;
+height:34px;
+transform:translateX(-50%);
+border-radius:50%;
+background:rgba(0,0,0,.55);
+filter:blur(13px);
+animation:giftShadow 3s ease-in-out infinite;
 }
 .gift-wrapper{
-  position:relative;
-  width:220px;
-  height:220px;
-  transform-style:preserve-3d;
-  animation: giftEntrance .9s cubic-bezier(.16,1,.3,1) both, giftFloat 3.2s ease-in-out 1s infinite;
-  cursor:pointer;
+position:relative;
+width:220px;
+height:220px;
+transform-style:preserve-3d;
+animation: giftEntrance .9s cubic-bezier(.16,1,.3,1) both, giftFloat 3.2s ease-in-out 1s infinite;
+cursor:pointer;
 }
 .gift-wrapper:before{
-  content:"";
-  position:absolute;
-  inset:28px;
-  border-radius:50%;
-  background: radial-gradient(circle, rgba(56,189,248,.28), rgba(168,85,247,.18) 40%, transparent 70%);
-  filter:blur(18px);
-  opacity:.75;
-  transform:translateZ(-5px);
+content:"";
+position:absolute;
+inset:28px;
+border-radius:50%;
+background: radial-gradient(circle, rgba(56,189,248,.28), rgba(168,85,247,.18) 40%,
+transparent 70%);
+filter:blur(18px);
+opacity:.75;
+transform:translateZ(-5px);
 }
 .gift-glow{
-  position:absolute;
-  left:50%;
-  top:54%;
-  width:150px;
-  height: 150px;
-  transform: translate(-50%,-50%) scale(.5);
-  border-radius:50%;
-  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(125,211,252,.9) 16%, rgba(129,140,248,.55) 38%, rgba(217,70,239,.18) 58%, transparent 76%);
-  filter:blur(2px);
-  opacity:0;
-  z-index:1;
-  pointer-events:none;
-  transition: opacity .35s ease, transform .8s cubic-bezier(.2,1.4,.3,1);
+position:absolute;
+left:50%;
+top:54%;
+
+width:150px;
+height: 150px;
+transform: translate(-50%,-50%) scale(.5);
+border-radius:50%;
+background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(125,211,252,.9) 16%,
+rgba(129,140,248,.55) 38%, rgba(217,70,239,.18) 58%, transparent 76%);
+filter:blur(2px);
+opacity:0;
+z-index:1;
+pointer-events:none;
+transition: opacity .35s ease, transform .8s cubic-bezier(.2,1.4,.3,1);
 }
 .gift-rays{
-  position:absolute;
-  left:50%;
-  top:44%;
-  width:210px;
-  height:210px;
-  transform: translate(-50%,-50%) scale(.4) rotate(0);
-  opacity:0;
-  z-index:1;
-  pointer-events:none;
-  background: conic-gradient(from 0deg, transparent 0 8%, rgba(255,255,255,.9) 9% 11%, transparent 12% 22%, rgba(125,211,252,.8) 23% 25%, transparent 26% 40%, rgba(255,255,255,.85) 41% 43%, transparent 44% 60%, rgba(216,180,254,.8) 61% 63%, transparent 64% 78%, rgba(255,255,255,.9) 79% 81%, transparent 82%);
-  filter:blur(1px);
-  border-radius:50%;
+position:absolute;
+left:50%;
+top:44%;
+width:210px;
+height:210px;
+transform: translate(-50%,-50%) scale(.4) rotate(0);
+opacity:0;
+z-index:1;
+pointer-events:none;
+background: conic-gradient(from 0deg, transparent 0 8%, rgba(255,255,255,.9) 9% 11%,
+transparent 12% 22%, rgba(125,211,252,.8) 23% 25%, transparent 26% 40%,
+rgba(255,255,255,.85) 41% 43%, transparent 44% 60%, rgba(216,180,254,.8) 61% 63%,
+transparent 64% 78%, rgba(255,255,255,.9) 79% 81%, transparent 82%);
+filter:blur(1px);
+border-radius:50%;
 }
 .gift-body-wrapper{
-  position:absolute;
-  left:15px;
-  bottom:20px;
-  width: 190px;
-  height: 135px;
-  z-index:3;
-  transform-style:preserve-3d;
-  border-radius: 18px 18px 22px 22px;
-  background: linear-gradient(135deg, #818cf8 0%, #6366f1 34%, #4f46e5 67%, #312e81 100%);
-  box-shadow: inset 10px 8px 18px rgba(255,255,255,.22), inset -12px -15px 24px rgba(0,0,0,.3), 0 28px 45px rgba(0,0,0,.48);
-  overflow:visible;
+position:absolute;
+left:15px;
+bottom:20px;
+width: 190px;
+height: 135px;
+z-index:3;
+transform-style:preserve-3d;
+border-radius: 18px 18px 22px 22px;
+background: linear-gradient(135deg, #818cf8 0%, #6366f1 34%, #4f46e5 67%, #312e81
+100%);
+box-shadow: inset 10px 8px 18px rgba(255,255,255,.22), inset -12px -15px 24px
+rgba(0,0,0,.3), 0 28px 45px rgba(0,0,0,.48);
+overflow:visible;
 }
+
 .gift-body-wrapper:before{
-  content:"";
-  position:absolute;
-  left:8px;
-  right:8px;
-  top:8px;
-  height:22px;
-  border-radius:12px;
-  background: linear-gradient(180deg, rgba(255,255,255,.25), transparent);
+content:"";
+position:absolute;
+left:8px;
+right:8px;
+top:8px;
+height:22px;
+border-radius:12px;
+background: linear-gradient(180deg, rgba(255,255,255,.25), transparent);
 }
 .gift-body-wrapper:after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:0;
-  height:48%;
-  border-radius:0 0 22px 22px;
-  background: linear-gradient(180deg, transparent, rgba(0,0,0,.17));
+content:"";
+position:absolute;
+left:0; right:0; bottom:0;
+height:48%;
+border-radius:0 0 22px 22px;
+background: linear-gradient(180deg, transparent, rgba(0,0,0,.17));
 }
 .ribbon-v{
-  position:absolute;
-  top:0; bottom:0;
-  width:38px;
-  z-index:4;
-  background: linear-gradient(90deg, #be185d 0%, #fb7185 25%, #f9a8d4 47%, #ec4899 63%, #be185d 100%);
-  box-shadow: inset 2px 0 5px rgba(255,255,255,.28), inset -2px 0 5px rgba(0,0,0,.18);
+position:absolute;
+top:0; bottom:0;
+width:38px;
+z-index:4;
+background: linear-gradient(90deg, #be185d 0%, #fb7185 25%, #f9a8d4 47%, #ec4899 63%,
+#be185d 100%);
+box-shadow: inset 2px 0 5px rgba(255,255,255,.28), inset -2px 0 5px rgba(0,0,0,.18);
 }
 .ribbon-v.center{ left:76px; }
 .gift-lid-wrapper{
-  position:absolute;
-  left:5px;
-  top:39px;
-  width:210px;
-  height:55px;
-  z-index:7;
-  transform-origin:16px 48px;
-  transform-style:preserve-3d;
-  transition: transform .95s cubic-bezier(.16,1,.3,1);
-  filter: drop-shadow(0 15px 18px rgba(0,0,0,.3));
+position:absolute;
+left:5px;
+top:39px;
+width:210px;
+height:55px;
+z-index:7;
+transform-origin:16px 48px;
+transform-style:preserve-3d;
+transition: transform .95s cubic-bezier(.16,1,.3,1);
+filter: drop-shadow(0 15px 18px rgba(0,0,0,.3));
 }
 .gift-lid{
-  position:absolute;
-  inset:0;
-  border-radius:16px;
-  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 30%, #6366f1 60%, #4338ca 100%);
-  border:1px solid rgba(255,255,255,.3);
-  box-shadow: inset 0 6px 12px rgba(255,255,255,.25), inset 0 -8px 12px rgba(0,0,0,.2);
+position:absolute;
+inset:0;
+border-radius:16px;
+
+background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 30%, #6366f1 60%, #4338ca
+100%);
+border:1px solid rgba(255,255,255,.3);
+box-shadow: inset 0 6px 12px rgba(255,255,255,.25), inset 0 -8px 12px rgba(0,0,0,.2);
 }
 .gift-lid:before{
-  content:"";
-  position:absolute;
-  inset:5px;
-  border-radius:12px;
-  border-top:1px solid rgba(255,255,255,.35);
+content:"";
+position:absolute;
+inset:5px;
+border-radius:12px;
+border-top:1px solid rgba(255,255,255,.35);
 }
 .lid-ribbon{
-  position:absolute;
-  top:0; bottom:0; left:50%;
-  width:42px;
-  transform:translateX(-50%);
-  background: linear-gradient(90deg, #be185d, #fb7185, #f9a8d4, #ec4899, #be185d);
+position:absolute;
+top:0; bottom:0; left:50%;
+width:42px;
+transform:translateX(-50%);
+background: linear-gradient(90deg, #be185d, #fb7185, #f9a8d4, #ec4899, #be185d);
 }
 .bow-container{
-  position:absolute;
-  left:50%;
-  top:-39px;
-  width:126px;
-  height:58px;
-  transform:translateX(-50%);
-  z-index:8;
+position:absolute;
+left:50%;
+top:-39px;
+width:126px;
+height:58px;
+transform:translateX(-50%);
+z-index:8;
 }
 .bow-loop{
-  position:absolute;
-  top:8px;
-  width:62px;
-  height:43px;
-  border-radius: 70% 30% 65% 35%;
-  background: linear-gradient(135deg, #fb7185 0%, #ec4899 42%, #be185d 100%);
-  border:2px solid rgba(255,255,255,.45);
-  box-shadow: inset 5px 4px 8px rgba(255,255,255,.22), 0 8px 16px rgba(190,24,93,.45);
+position:absolute;
+top:8px;
+width:62px;
+height:43px;
+border-radius: 70% 30% 65% 35%;
+background: linear-gradient(135deg, #fb7185 0%, #ec4899 42%, #be185d 100%);
+border:2px solid rgba(255,255,255,.45);
+box-shadow: inset 5px 4px 8px rgba(255,255,255,.22), 0 8px 16px rgba(190,24,93,.45);
 }
 .bow-loop.left{ left:0; transform:rotate(-20deg); }
 .bow-loop.right{ right:0; transform: scaleX(-1) rotate(-20deg); }
 .bow-knot{
-  position:absolute;
-  left:50%; top:17px;
-  width:34px; height:34px;
-  transform:translateX(-50%);
-  border-radius:50%;
-  background: radial-gradient(circle at 30% 25%, #fda4af, #ec4899 48%, #9d174d);
-  border:2px solid rgba(255,255,255,.45);
-  box-shadow: 0 5px 12px rgba(190,24,93,.5);
-  z-index:3;
+position:absolute;
+left:50%; top:17px;
+width:34px; height:34px;
+
+transform:translateX(-50%);
+border-radius:50%;
+background: radial-gradient(circle at 30% 25%, #fda4af, #ec4899 48%, #9d174d);
+border:2px solid rgba(255,255,255,.45);
+box-shadow: 0 5px 12px rgba(190,24,93,.5);
+z-index:3;
 }
 .gift-particles{ position:absolute; inset:0; z-index:9; pointer-events:none; }
 .gift-particle{
-  position:absolute;
-  left:50%; top:52%;
-  width:6px; height:6px;
-  border-radius:50%;
-  background:#fff;
-  box-shadow: 0 0 10px #fff, 0 0 20px #7dd3fc;
-  opacity:0;
+position:absolute;
+left:50%; top:52%;
+width:6px; height:6px;
+border-radius:50%;
+background:#fff;
+box-shadow: 0 0 10px #fff, 0 0 20px #7dd3fc;
+opacity:0;
 }
 .gift-particle:nth-child(1){--x:-105px;--y:-105px}
 .gift-particle:nth-child(2){--x:100px;--y:-80px}
@@ -963,1203 +1057,2514 @@ header{
 .gift-particle:nth-child(6){--x:70px;--y:-135px}
 .gift-particle:nth-child(7){--x:-35px;--y:-165px}
 .gift-particle:nth-child(8){--x:35px;--y:-160px}
-
 .gift-wrapper.open{ animation: giftOpen .75s cubic-bezier(.16,1,.3,1) both; }
 .gift-wrapper.open .gift-lid-wrapper{
-  transform: translate3d(-18px,-105px,65px) rotateZ(-10deg) rotateX(-58deg) rotateY(-22deg);
+transform: translate3d(-18px,-105px,65px) rotateZ(-10deg) rotateX(-58deg) rotateY(-22deg);
 }
 .gift-wrapper.open .gift-glow{
-  opacity:1;
-  transform: translate(-50%,-62%) scale(1.55);
-  animation: glowPulse 1.2s ease-in-out infinite alternate;
+opacity:1;
+transform: translate(-50%,-62%) scale(1.55);
+animation: glowPulse 1.2s ease-in-out infinite alternate;
 }
 .gift-wrapper.open .gift-rays{
-  opacity:1;
-  animation: rayBurst 1.1s cubic-bezier(.2,.8,.2,1) both;
+opacity:1;
+animation: rayBurst 1.1s cubic-bezier(.2,.8,.2,1) both;
 }
 .gift-wrapper.open .gift-particle{
-  animation: particleBurst .9s cubic-bezier(.16,1,.3,1) forwards;
+animation: particleBurst .9s cubic-bezier(.16,1,.3,1) forwards;
 }
 .gift-text{
-  color:#f8fafc;
-  font-weight:800;
-  font-size:1rem;
-  text-shadow: 0 3px 18px rgba(0,0,0,.9);
-  transition:.25s;
+color:#f8fafc;
+
+font-weight:800;
+font-size:1rem;
+text-shadow: 0 3px 18px rgba(0,0,0,.9);
+transition:.25s;
 }
 .gift-text.hidden{ opacity:0; transform:translateY(8px); }
 .coupon-card{
-  position:absolute;
-  left:50%; top:50%;
-  width:min(360px, calc(100vw - 38px));
-  padding:25px 22px 20px;
-  border-radius:24px;
-  background: linear-gradient(145deg, #fff, #f8fafc);
-  border:1px solid rgba(255,255,255,.9);
-  box-shadow: 0 30px 80px rgba(0,0,0,.45), 0 0 45px rgba(96,165,250,.18);
-  transform: translate(-50%,45%) translateZ(-180px) scale(.25) rotateX(24deg);
-  opacity:0;
-  pointer-events:none;
-  z-index:30;
-  overflow:hidden;
+position:absolute;
+left:50%; top:50%;
+width:min(360px, calc(100vw - 38px));
+padding:25px 22px 20px;
+border-radius:24px;
+background: linear-gradient(145deg, #fff, #f8fafc);
+border:1px solid rgba(255,255,255,.9);
+box-shadow: 0 30px 80px rgba(0,0,0,.45), 0 0 45px rgba(96,165,250,.18);
+transform: translate(-50%,45%) translateZ(-180px) scale(.25) rotateX(24deg);
+opacity:0;
+pointer-events:none;
+z-index:30;
+overflow:hidden;
 }
 .coupon-card:before{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(120deg, rgba(255,255,255,.85), transparent 35%, rgba(99,102,241,.06));
-  pointer-events:none;
+content:"";
+position:absolute; inset:0;
+background: linear-gradient(120deg, rgba(255,255,255,.85), transparent 35%,
+rgba(99,102,241,.06));
+pointer-events:none;
 }
 .coupon-card:after{
-  content:"";
-  position:absolute;
-  left: 18px; right:18px; top:0;
-  height:3px;
-  border-radius:0 0 10px 10px;
-  background: linear-gradient(90deg, #ec4899, #6366f1, #06b6d4);
+content:"";
+position:absolute;
+left: 18px; right:18px; top:0;
+height:3px;
+border-radius:0 0 10px 10px;
+background: linear-gradient(90deg, #ec4899, #6366f1, #06b6d4);
 }
 .coupon-card.show{
-  animation: couponFlyOut 1.15s cubic-bezier(.16,1,.3,1) forwards;
-  pointer-events:auto;
+animation: couponFlyOut 1.15s cubic-bezier(.16,1,.3,1) forwards;
+pointer-events:auto;
 }
 .coupon-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:7px 11px;
-  border-radius:999px;
-  background:#eef2ff;
-  color:#4f46e5;
-  font-size: .65rem;
-  font-weight:900;
-  letter-spacing:.04em;
-  margin-bottom:10px;
+display:inline-flex;
+align-items:center;
+gap:6px;
+
+padding:7px 11px;
+border-radius:999px;
+background:#eef2ff;
+color:#4f46e5;
+font-size: .65rem;
+font-weight:900;
+letter-spacing:.04em;
+margin-bottom:10px;
 }
 .coupon-title{ font-size:1.5rem; font-weight:900; letter-spacing:-.05em; color:#0f172a; }
 .coupon-title span{
-  background: linear-gradient(90deg, #4f46e5, #db2777);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
+background: linear-gradient(90deg, #4f46e5, #db2777);
+-webkit-background-clip:text;
+background-clip:text;
+color:transparent;
 }
 .coupon-subtitle{ font-size:.75rem; color:#64748b; line-height:1.55; margin:7px 0 18px; }
 .coupon-perk{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:11px 12px;
-  margin-bottom:14px;
-  border:1px dashed #c7d2fe;
-  border-radius:14px;
-  background:#f8faff;
-  color:#334155;
-  font-size:.72rem;
-  font-weight:800;
+display:flex;
+align-items:center;
+gap:10px;
+padding:11px 12px;
+margin-bottom:14px;
+border:1px dashed #c7d2fe;
+border-radius:14px;
+background:#f8faff;
+color:#334155;
+font-size:.72rem;
+font-weight:800;
 }
 .coupon-perk-icon{
-  width:30px; height:30px;
-  display:grid; place-items:center;
-  border-radius:10px;
-  background: linear-gradient(135deg, #4f46e5, #ec4899);
-  color:white;
-  box-shadow: 0 7px 16px rgba(79,70,229,.25);
+width:30px; height:30px;
+display:grid; place-items:center;
+border-radius:10px;
+background: linear-gradient(135deg, #4f46e5, #ec4899);
+color:white;
+box-shadow: 0 7px 16px rgba(79,70,229,.25);
 }
 .coupon-join{
-  display:block;
-  width:100%;
-  border:0;
-  border-radius:14px;
-  padding: 13px 15px;
-  text-decoration:none;
-  text-align:center;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color:white;
-  font-size:.78rem;
-  font-weight:900;
-  box-shadow: 0 10px 22px rgba(16,185,129,.25);
-  cursor:pointer;
+display:block;
+width:100%;
+border:0;
+border-radius:14px;
+padding: 13px 15px;
+
+text-decoration:none;
+text-align:center;
+background: linear-gradient(135deg, #10b981, #059669);
+color:white;
+font-size:.78rem;
+font-weight:900;
+box-shadow: 0 10px 22px rgba(16,185,129,.25);
+cursor:pointer;
 }
 .coupon-verify{
-  width:100%;
-  margin-top:9px;
-  border:0;
-  border-radius:14px;
-  padding: 13px 15px;
-  background:#f59e0b;
-  color:white;
-  font-size:.78rem;
-  font-weight:900;
-  box-shadow: 0 10px 22px rgba(245,158,11,.22);
-  cursor:pointer;
+width:100%;
+margin-top:9px;
+border:0;
+border-radius:14px;
+padding: 13px 15px;
+background:#f59e0b;
+color:white;
+font-size:.78rem;
+font-weight:900;
+box-shadow: 0 10px 22px rgba(245,158,11,.22);
+cursor:pointer;
 }
 .coupon-note{ font-size:.6rem; color:#94a3b8; margin-top:11px; }
-
 .gift-floating-widget{
-  position:fixed;
-  right: 18px;
-  bottom:90px;
-  width:55px;
-  height:55px;
-  display:none;
-  place-items:center;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #6366f1, #ec4899);
-  box-shadow: 0 12px 30px rgba(79,70,229,.35);
-  z-index:4000;
-  cursor:pointer;
-  animation: floatWidget 2.5s ease-in-out infinite;
+position:fixed;
+right: 18px;
+bottom:90px;
+width:55px;
+height:55px;
+display:none;
+place-items:center;
+border-radius: 18px;
+background: linear-gradient(135deg, #6366f1, #ec4899);
+box-shadow: 0 12px 30px rgba(79,70,229,.35);
+z-index:4000;
+cursor:pointer;
+animation: floatWidget 2.5s ease-in-out infinite;
 }
 .gift-floating-widget.show{ display:grid; }
 .floating-gift-icon{ font-size:1.7rem; filter: drop-shadow(0 3px 5px rgba(0,0,0,.25)); }
-
 @keyframes giftOverlayIn{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes giftEntrance{
-  from{ opacity:0; transform: translateY(80px) scale(.65) rotateX(22deg) rotateY(-18deg); }
-  to{ opacity:1; transform: translateY(0) scale(1) rotateX(0) rotateY(0); }
+from{ opacity:0; transform: translateY(80px) scale(.65) rotateX(22deg) rotateY(-18deg); }
+to{ opacity:1; transform: translateY(0) scale(1) rotateX(0) rotateY(0); }
 }
 @keyframes giftFloat{
-  0%,100%{ transform: translateY(0) rotateX(0) rotateY(-3deg) rotateZ(-1deg); }
-  50%{ transform: translateY(-12px) rotateX(2deg) rotateY(5deg) rotateZ(2deg); }
+0%,100%{ transform: translateY(0) rotateX(0) rotateY(-3deg) rotateZ(-1deg); }
+50%{ transform: translateY(-12px) rotateX(2deg) rotateY(5deg) rotateZ(2deg); }
 }
 @keyframes giftOpen{
-  0%{ transform:scale(1) rotateZ(0); }
-  40%{ transform:scale(1.07) rotateZ(-2deg); }
-  100%{ transform:scale(1) rotateZ(0); }
+0%{ transform:scale(1) rotateZ(0); }
+40%{ transform:scale(1.07) rotateZ(-2deg); }
+100%{ transform:scale(1) rotateZ(0); }
 }
 @keyframes giftShadow{
-  0%,100%{ transform:translateX(-50%) scaleX(1); opacity:.55; }
-  50%{ transform:translateX(-50%) scaleX(.78); opacity:.35; }
+0%,100%{ transform:translateX(-50%) scaleX(1); opacity:.55; }
+50%{ transform:translateX(-50%) scaleX(.78); opacity:.35; }
 }
 @keyframes glowPulse{ from{ filter:blur(2px); opacity:.75; } to{ filter:blur(7px); opacity:1; } }
 @keyframes rayBurst{
-  0%{ transform: translate(-50%,-50%) scale(.3) rotate(-25deg); opacity:0; }
-  35%{ opacity:1; }
-  100%{ transform: translate(-50%,-50%) scale(1.35) rotate(35deg); opacity:0; }
+0%{ transform: translate(-50%,-50%) scale(.3) rotate(-25deg); opacity:0; }
+35%{ opacity:1; }
+100%{ transform: translate(-50%,-50%) scale(1.35) rotate(35deg); opacity:0; }
 }
 @keyframes particleBurst{
-  0%{ opacity:0; transform: translate(-50%,-50%) scale(.3); }
-  15%{ opacity:1; }
-  100%{ opacity:0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.2); }
+0%{ opacity:0; transform: translate(-50%,-50%) scale(.3); }
+15%{ opacity:1; }
+100%{ opacity:0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.2); }
 }
 @keyframes couponFlyOut{
-  0%{ opacity:0; transform: translate(-50%,35%) translateZ(-260px) scale(.18) rotateX(32deg) rotateZ(-8deg); }
-  35%{ opacity:1; }
-  68%{ transform: translate(-50%,-54%) translateZ(80px) scale(1.04) rotateX(-5deg) rotateZ(2deg); }
-  100%{ opacity:1; transform: translate(-50%,-50%) translateZ(120px) scale(1) rotateX(0) rotateZ(0); }
+0%{ opacity:0; transform: translate(-50%,35%) translateZ(-260px) scale(.18) rotateX(32deg)
+rotateZ(-8deg); }
+35%{ opacity:1; }
+68%{ transform: translate(-50%,-54%) translateZ(80px) scale(1.04) rotateX(-5deg)
+rotateZ(2deg); }
+100%{ opacity:1; transform: translate(-50%,-50%) translateZ(120px) scale(1) rotateX(0)
+rotateZ(0); }
 }
-@keyframes floatWidget{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+@keyframes floatWidget{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px);
+} }
 
 /* =========================================================
-   1. FLOATING 3D DAILY CALENDAR WIDGET & OVERLAYS
+1. FLOATING 3D DAILY CALENDAR WIDGET & OVERLAYS
 ========================================================= */
 .daily-widget {
-  position: fixed;
-  right: 18px;
-  bottom: 155px;
-  z-index: 4000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-  box-shadow: 0 12px 30px rgba(37,99,235,0.4), inset 0 2px 0 rgba(255,255,255,0.35);
-  border: 1px solid rgba(255,255,255,0.25);
-  cursor: pointer;
-  animation: floatWidget 2.8s ease-in-out infinite;
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+position: fixed;
+
+right: 18px;
+bottom: 155px;
+z-index: 4000;
+display: flex;
+align-items: center;
+justify-content: center;
+width: 58px;
+height: 58px;
+border-radius: 18px;
+background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+box-shadow: 0 12px 30px rgba(37,99,235,0.4), inset 0 2px 0 rgba(255,255,255,0.35);
+border: 1px solid rgba(255,255,255,0.25);
+cursor: pointer;
+animation: floatWidget 2.8s ease-in-out infinite;
+transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .daily-widget:active { transform: scale(0.92); }
 .daily-widget-icon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+font-size: 1.8rem;
+filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
 }
 .daily-widget-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #10b981;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 10px rgba(16,185,129,0.8);
-  animation: pulseGlow 1.5s infinite alternate;
+position: absolute;
+top: -4px;
+right: -4px;
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background: #10b981;
+border: 2px solid #ffffff;
+box-shadow: 0 0 10px rgba(16,185,129,0.8);
+animation: pulseGlow 1.5s infinite alternate;
 }
 .daily-widget-badge.claimed {
-  background: #94a3b8;
-  box-shadow: none;
-  animation: none;
+background: #94a3b8;
+box-shadow: none;
+animation: none;
 }
 .daily-widget-badge.claimed::after {
-  content: "✓";
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 900;
-  height: 100%;
+content: "✓";
+display: flex;
+align-items: center;
+justify-content: center;
+color: #fff;
+
+font-size: 10px;
+font-weight: 900;
+height: 100%;
 }
 @keyframes pulseGlow {
-  from { transform: scale(0.9); box-shadow: 0 0 5px rgba(16,185,129,0.5); }
-  to { transform: scale(1.15); box-shadow: 0 0 14px rgba(16,185,129,1); }
+from { transform: scale(0.9); box-shadow: 0 0 5px rgba(16,185,129,0.5); }
+to { transform: scale(1.15); box-shadow: 0 0 14px rgba(16,185,129,1); }
 }
 
 /* DAILY REWARDS MODAL */
 .daily-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10005;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  background: rgba(8, 17, 31, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+position: fixed;
+inset: 0;
+z-index: 10005;
+display: none;
+align-items: center;
+justify-content: center;
+padding: 16px;
+background: rgba(8, 17, 31, 0.82);
+backdrop-filter: blur(14px);
+-webkit-backdrop-filter: blur(14px);
 }
-.daily-overlay.show { display: flex; animation: dailyModalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.daily-overlay.show { display: flex; animation: dailyModalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)
+forwards; }
 @keyframes dailyModalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(15px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+from { opacity: 0; transform: scale(0.92) translateY(15px); }
+to { opacity: 1; transform: scale(1) translateY(0); }
 }
 .daily-card {
-  position: relative;
-  width: 100%;
-  max-width: 440px;
-  background: linear-gradient(165deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 28px;
-  padding: 24px 20px 22px;
-  box-shadow: 0 35px 80px rgba(0,0,0,0.35), 0 0 40px rgba(37,99,235,0.12);
-  border: 1px solid rgba(255,255,255,0.8);
-  overflow: hidden;
+position: relative;
+width: 100%;
+max-width: 440px;
+background: linear-gradient(165deg, #ffffff 0%, #f8fafc 100%);
+border-radius: 28px;
+padding: 24px 20px 22px;
+box-shadow: 0 35px 80px rgba(0,0,0,0.35), 0 0 40px rgba(37,99,235,0.12);
+border: 1px solid rgba(255,255,255,0.8);
+overflow: hidden;
 }
 .daily-close-btn {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 0;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, color 0.2s;
-  z-index: 10;
+position: absolute;
+top: 18px;
+right: 18px;
+width: 36px;
+
+height: 36px;
+border-radius: 50%;
+border: 0;
+background: #f1f5f9;
+color: #64748b;
+font-size: 1.2rem;
+font-weight: 700;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: background 0.2s, color 0.2s;
+z-index: 10;
 }
 .daily-close-btn:hover { background: #e2e8f0; color: #0f172a; }
 .daily-header { text-align: center; margin-bottom: 20px; padding-right: 25px; padding-left: 25px; }
 .daily-title { font-size: 1.45rem; font-weight: 900; letter-spacing: -0.04em; color: #0f172a; }
 .daily-subtitle { font-size: 0.78rem; color: #64748b; margin-top: 5px; font-weight: 600; }
-
 .daily-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+margin-bottom: 16px;
 }
 .reward-card {
-  position: relative;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 12px 8px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 105px;
-  box-shadow: 0 4px 12px rgba(15,23,42,0.03);
-  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+position: relative;
+background: #ffffff;
+border: 1px solid #e2e8f0;
+border-radius: 18px;
+padding: 12px 8px;
+text-align: center;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: space-between;
+min-height: 105px;
+box-shadow: 0 4px 12px rgba(15,23,42,0.03);
+transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .reward-card.day-7-card {
-  grid-column: span 3;
-  min-height: 90px;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%);
-  border: 1px dashed #a855f7;
-}
+grid-column: span 3;
+min-height: 90px;
+flex-direction: row;
 
-.reward-card .day-num { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+justify-content: space-between;
+padding: 12px 20px;
+background: linear-gradient(135deg, #eff6ff 0%, #faf5ff 100%);
+border: 1px dashed #a855f7;
+}
+.reward-card .day-num { font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform:
+uppercase; letter-spacing: 0.05em; }
 .reward-card .day-val { font-size: 1.05rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
 .reward-card .day-status {
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 10px;
-  background: #f1f5f9;
-  color: #64748b;
-  width: 100%;
+font-size: 0.65rem;
+font-weight: 800;
+padding: 4px 10px;
+border-radius: 10px;
+background: #f1f5f9;
+color: #64748b;
+width: 100%;
 }
 
 /* STATE: CLAIMABLE */
 .reward-card.claimable {
-  border: 2px solid #2563eb;
-  background: #ffffff;
-  box-shadow: 0 0 20px rgba(37,99,235,0.25);
-  animation: pulseCard 1.8s ease-in-out infinite;
-  cursor: pointer;
+border: 2px solid #2563eb;
+background: #ffffff;
+box-shadow: 0 0 20px rgba(37,99,235,0.25);
+animation: pulseCard 1.8s ease-in-out infinite;
+cursor: pointer;
 }
 .reward-card.claimable .day-num { color: #2563eb; }
 .reward-card.claimable .day-val { color: #1e40af; }
 .reward-card.claimable .day-status {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+background: linear-gradient(135deg, #2563eb, #3b82f6);
+color: #ffffff;
+box-shadow: 0 4px 12px rgba(37,99,235,0.3);
 }
-
 .reward-card.day-7-card.claimable {
-  border: 2px solid #7c3aed;
-  background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
-  box-shadow: 0 0 25px rgba(124,58,237,0.3);
+border: 2px solid #7c3aed;
+background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+box-shadow: 0 0 25px rgba(124,58,237,0.3);
 }
 .reward-card.day-7-card.claimable .day-status {
-  background: linear-gradient(135deg, #7c3aed, #ec4899);
+background: linear-gradient(135deg, #7c3aed, #ec4899);
 }
 
 /* STATE: CLAIMED */
 .reward-card.claimed {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  opacity: 0.75;
+background: #f8fafc;
+border-color: #cbd5e1;
+opacity: 0.75;
 }
 .reward-card.claimed .day-status {
-  background: #e2e8f0;
-  color: #64748b;
+background: #e2e8f0;
+color: #64748b;
 }
 
 /* STATE: LOCKED */
 .reward-card.locked { opacity: 0.6; background: #fafafa; }
-
 @keyframes pulseCard {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 12px rgba(37,99,235,0.2); }
-  50% { transform: scale(1.03); box-shadow: 0 0 22px rgba(37,99,235,0.45); }
+0%, 100% { transform: scale(1); box-shadow: 0 0 12px rgba(37,99,235,0.2); }
+50% { transform: scale(1.03); box-shadow: 0 0 22px rgba(37,99,235,0.45); }
 }
-
 .daily-timer-box {
-  background: #f1f5f9;
-  border-radius: 16px;
-  padding: 12px;
-  text-align: center;
-  font-size: 0.75rem;
-  color: #475569;
-  font-weight: 700;
-  margin-top: 6px;
+background: #f1f5f9;
+border-radius: 16px;
+padding: 12px;
+text-align: center;
+font-size: 0.75rem;
+color: #475569;
+font-weight: 700;
+margin-top: 6px;
 }
-.daily-timer-box span { color: #2563eb; font-weight: 900; font-size: 0.85rem; display: inline-block; margin-left: 4px; }
+.daily-timer-box span { color: #2563eb; font-weight: 900; font-size: 0.85rem; display: inline-block;
+margin-left: 4px; }
 
 /* DAY 7 CONGRATS MODAL */
 .streak-congrats-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10010;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(8, 17, 31, 0.88);
-  backdrop-filter: blur(16px);
+position: fixed;
+inset: 0;
+z-index: 10010;
+display: none;
+align-items: center;
+justify-content: center;
+padding: 20px;
+background: rgba(8, 17, 31, 0.88);
+backdrop-filter: blur(16px);
 }
-.streak-congrats-overlay.show { display: flex; animation: popIn 0.35s cubic-bezier(.175,.885,.32,1.275); }
+
+.streak-congrats-overlay.show { display: flex; animation: popIn 0.35s
+cubic-bezier(.175,.885,.32,1.275); }
 .streak-congrats-card {
-  width: 100%;
-  max-width: 380px;
-  background: #ffffff;
-  border-radius: 28px;
-  padding: 30px 22px 24px;
-  text-align: center;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-  position: relative;
-  overflow: hidden;
+width: 100%;
+max-width: 380px;
+background: #ffffff;
+border-radius: 28px;
+padding: 30px 22px 24px;
+text-align: center;
+box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+position: relative;
+overflow: hidden;
 }
-.streak-icon { font-size: 3.5rem; margin-bottom: 12px; animation: giftFloat 2.5s infinite ease-in-out; }
+.streak-icon { font-size: 3.5rem; margin-bottom: 12px; animation: giftFloat 2.5s infinite
+ease-in-out; }
 .streak-title { font-size: 1.4rem; font-weight: 900; color: #0f172a; margin-bottom: 6px; }
 .streak-desc { font-size: 0.8rem; color: #64748b; line-height: 1.5; margin-bottom: 22px; }
 .streak-play-btn {
-  width: 100%;
-  border: 0;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  padding: 14px;
-  border-radius: 16px;
-  font-size: 0.85rem;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(16,185,129,0.3);
-  margin-bottom: 10px;
+width: 100%;
+border: 0;
+background: linear-gradient(135deg, #10b981, #059669);
+color: #fff;
+padding: 14px;
+border-radius: 16px;
+font-size: 0.85rem;
+font-weight: 900;
+cursor: pointer;
+box-shadow: 0 10px 25px rgba(16,185,129,0.3);
+margin-bottom: 10px;
 }
 .streak-later-btn {
-  background: transparent;
-  border: 0;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  padding: 6px 12px;
+background: transparent;
+border: 0;
+color: #94a3b8;
+font-size: 0.75rem;
+font-weight: 800;
+cursor: pointer;
+padding: 6px 12px;
 }
 
 /* RESPONSIVE */
 @media(max-width:480px){
-  .dashboard-container{ padding-left: 13px; padding-right: 13px; }
-  .balance-card{ min-height:350px; padding:22px 18px 18px; }
-  .total-balance{ font-size:2.55rem; }
-  .gift-box-container{ min-height:500px; }
-  .gift-stage{ transform:scale(.9); margin-top:-20px; margin-bottom:-5px; }
-  .coupon-card{ padding:22px 18px 18px; }
-  .coupon-title{ font-size:1.4rem; }
-  .daily-widget { right: 14px; bottom: 145px; width: 52px; height: 52px; }
-  .daily-widget-icon { font-size: 1.5rem; }
+.dashboard-container{ padding-left: 13px; padding-right: 13px; }
+.balance-card{ min-height:350px; padding:22px 18px 18px; }
+
+.total-balance{ font-size:2.55rem; }
+.gift-box-container{ min-height:500px; }
+.gift-stage{ transform:scale(.9); margin-top:-20px; margin-bottom:-5px; }
+.coupon-card{ padding:22px 18px 18px; }
+.coupon-title{ font-size:1.4rem; }
+.daily-widget { right: 14px; bottom: 145px; width: 52px; height: 52px; }
+.daily-widget-icon { font-size: 1.5rem; }
 }
 @media(min-width:700px){
-  .dashboard-container{ padding-left:25px; padding-right:25px; }
-  .balance-card{ padding:28px; }
-  .total-balance{ font-size:3.15rem; }
-  .main-col, .side-col{ gap:20px; }
+.dashboard-container{ padding-left:25px; padding-right:25px; }
+.balance-card{ padding:28px; }
+.total-balance{ font-size:3.15rem; }
+.main-col, .side-col{ gap:20px; }
 }
 @media(min-width:900px){
-  body{ padding-bottom:30px; }
-  .mobile-nav{ display:none; }
-  .desktop-nav{ display:flex; }
-  .dashboard-container{
-    display:grid;
-    grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr);
-    gap:25px;
-    padding:30px 25px;
-  }
-  .main-col, .side-col{ min-width:0; }
-  .welcome-title{ font-size: 1.8rem; }
-  .balance-card{ min-height:385px; }
-  .stats-grid{ gap:12px; }
+body{ padding-bottom:30px; }
+.mobile-nav{ display:none; }
+.desktop-nav{ display:flex; }
+.dashboard-container{
+display:grid;
+grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr);
+gap:25px;
+padding:30px 25px;
+}
+.main-col, .side-col{ min-width:0; }
+.welcome-title{ font-size: 1.8rem; }
+.balance-card{ min-height:385px; }
+.stats-grid{ gap:12px; }
 }
 @media(prefers-reduced-motion:reduce){
-  *, *::before, *::after{
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+*, *::before, *::after{
+animation-duration: 0.01ms !important;
+animation-iteration-count: 1 !important;
+transition-duration: 0.01ms !important;
+}
 }
 </style>
 </head>
 <body>
-
 <!-- HEADER -->
 <header>
 <div class="nav-container">
-  <a href="/dashboard.html" class="brand-logo">PAYME<span>.</span></a>
-  <ul class="desktop-nav">
-    <li><a href="/dashboard.html" class="active">Dashboard</a></li>
-    <li><a href="/earn">Earn</a></li>
-    <li><a href="#referrals">Referrals</a></li>
-    <li><a href="/leaderboard.html">Leaderboard</a></li>
-  </ul>
-  <div class="header-actions">
-    <button class="logout-btn" onclick="handleLogout()">Logout</button>
-    <a href="https://wa.me/+2348034399095" target="_blank" class="support-btn" title="WhatsApp Support">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-      </svg>
-    </a>
-  </div>
+<a href="/dashboard.html" class="brand-logo">PAYME<span>.</span></a>
+
+<ul class="desktop-nav">
+<li><a href="/dashboard.html" class="active">Dashboard</a></li>
+<li><a href="/earn">Earn</a></li>
+<li><a href="#referrals">Referrals</a></li>
+<li><a href="/leaderboard.html">Leaderboard</a></li>
+</ul>
+<div class="header-actions">
+<button class="logout-btn" onclick="handleLogout()">Logout</button>
+<a href="https://wa.me/+2348034399095" target="_blank" class="support-btn"
+title="WhatsApp Support">
+<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+stroke-width="2">
+<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3
+21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1
+8 8v.5z"></path>
+</svg>
+</a>
+</div>
 </div>
 </header>
-
 <!-- MAIN DASHBOARD -->
 <main class="dashboard-container">
 <div class="main-col">
-  <!-- WELCOME -->
-  <section class="welcome">
-    <div class="welcome-small">WELCOME BACK</div>
-    <h1 class="welcome-title">Hello, <span id="userNameText" class="user-name">User</span></h1>
-    <p class="welcome-sub">Manage your wallet, earnings, deposits and referrals.</p>
-  </section>
+<!-- WELCOME -->
+<section class="welcome">
+<div class="welcome-small">WELCOME BACK</div>
+<h1 class="welcome-title">Hello, <span id="userNameText"
+class="user-name">User</span></h1>
+<p class="welcome-sub">Manage your wallet, earnings, deposits and referrals.</p>
+</section>
 
-  <!-- BALANCE -->
-  <section class="balance-card">
-    <div class="balance-shine"></div>
-    <div class="balance-top">
-      <div class="balance-label">Current Earning Balance</div>
-      <div class="verified">Verified</div>
-    </div>
-    <div class="total-balance">₦<span id="balanceText">0.00</span></div>
-    <div class="balance-caption">Available earnings for withdrawal</div>
-    <div class="balance-breakdown">
-      <div class="balance-box">
-        <div class="balance-box-header">
-          <span class="balance-box-icon earnings-icon">★</span>
-          <span class="balance-box-label">TOTAL EARNINGS</span>
-        </div>
-        <div class="balance-box-value earnings-value">₦<span id="earningsBalanceText">0.00</span></div>
-      </div>
-      <div class="balance-box">
-        <div class="balance-box-header">
-          <span class="balance-box-icon deposit-icon">+</span>
-          <span class="balance-box-label">DEPOSIT BALANCE</span>
-        </div>
-        <div class="balance-box-value deposit-value">₦<span id="depositBalanceText">0.00</span></div>
-      </div>
-    </div>
-    <div class="balance-actions">
-      <a href="/deposit.html" class="action-btn deposit-btn"><span>+</span> Deposit</a>
-      <button id="withdrawBtn" class="action-btn withdraw-btn" onclick="handleWithdrawal()">Withdraw</button>
-      <button class="action-btn transactions-btn" onclick="openTransactionsModal()">View Transactions</button>
-    </div>
-  </section>
+<!-- BALANCE -->
+<section class="balance-card">
+<div class="balance-shine"></div>
+<div class="balance-top">
+<div class="balance-label">Current Earning Balance</div>
+<div class="verified">Verified</div>
+</div>
+<div class="total-balance">₦<span id="balanceText">0.00</span></div>
+<div class="balance-caption">Available earnings for withdrawal</div>
+<div class="balance-breakdown">
+<div class="balance-box">
+<div class="balance-box-header">
 
-  <!-- REFERRAL -->
-  <section class="card referral-card" id="referrals">
-    <div class="ref-header">
-      <h2 class="ref-title">Invite & Earn</h2>
-      <span class="reward-tag">+ ₦15</span>
-    </div>
-    <p class="ref-sub">Share your invite code with friends and earn ₦15 when they successfully sign up.</p>
-    <div class="code-box">
-      <div>
-        <div class="code-label">YOUR INVITE CODE</div>
-        <div class="code-value" id="referralCodeText">---</div>
-      </div>
-    </div>
-    <button id="copyCodeBtn" class="copy-btn" onclick="copyReferralCode()">Copy Invite Code</button>
-    <div class="share-buttons-container">
-      <button class="share-btn telegram-share" onclick="shareToTelegram()">Share Telegram</button>
-      <button class="share-btn whatsapp-share" onclick="shareToWhatsApp()">Share WhatsApp</button>
-    </div>
-  </section>
+<span class="balance-box-icon earnings-icon">★</span>
+<span class="balance-box-label">TOTAL EARNINGS</span>
+</div>
+<div class="balance-box-value earnings-value">₦<span
+id="earningsBalanceText">0.00</span></div>
+</div>
+<div class="balance-box">
+<div class="balance-box-header">
+<span class="balance-box-icon deposit-icon">+</span>
+<span class="balance-box-label">DEPOSIT BALANCE</span>
+</div>
+<div class="balance-box-value deposit-value">₦<span
+id="depositBalanceText">0.00</span></div>
+</div>
+</div>
+<div class="balance-actions">
+<a href="/deposit.html" class="action-btn deposit-btn"><span>+</span> Deposit</a>
+<button id="withdrawBtn" class="action-btn withdraw-btn"
+onclick="handleWithdrawal()">Withdraw</button>
+<button class="action-btn transactions-btn" onclick="openTransactionsModal()">View
+Transactions</button>
+</div>
+</section>
 
-  <!-- STATS -->
-  <section class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Referrals</div>
-      <div class="stat-value" id="totalRefersText">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Active</div>
-      <div class="stat-value" id="activeRefersText">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Ref Earned</div>
-      <div class="stat-value" id="refEarningsText">₦0</div>
-    </div>
-  </section>
+<!-- REFERRAL -->
+<section class="card referral-card" id="referrals">
+<div class="ref-header">
+<h2 class="ref-title">Invite & Earn</h2>
+<span class="reward-tag">+ ₦15</span>
+</div>
+
+<div class="referral-hero">
+<div class="referral-hero-icon">🎁</div>
+<div>
+<div class="referral-hero-title">Invite friends. Earn together.</div>
+<div class="referral-hero-text">Your friend gets started and you receive ₦15 when their signup is successful.</div>
+</div>
+</div>
+
+<p class="ref-sub">Send your personal link anywhere. The referral code is already attached, so your invite is tracked automatically.</p>
+
+<div class="referral-steps">
+<div class="referral-step">
+<div class="referral-step-num">1</div>
+<div class="referral-step-title">Share</div>
+<div class="referral-step-text">Send your link</div>
+</div>
+<div class="referral-step">
+<div class="referral-step-num">2</div>
+<div class="referral-step-title">Friend joins</div>
+<div class="referral-step-text">They sign up</div>
+</div>
+<div class="referral-step">
+<div class="referral-step-num">3</div>
+<div class="referral-step-title">You earn</div>
+<div class="referral-step-text">Get ₦15</div>
+</div>
+</div>
+
+<div class="code-box">
+<div>
+<div class="code-label">YOUR INVITE CODE</div>
+<div class="code-value" id="referralCodeText">---</div>
+</div>
+</div>
+
+<button id="copyCodeBtn" class="copy-btn" onclick="copyReferralCode()">Copy Invite Code</button>
+
+<div class="link-box">
+<div class="link-box-head">
+<span class="link-box-label">Your full referral link</span>
+<button id="copyLinkBtn" class="link-copy-mini" onclick="copyReferralLink()">Copy Link</button>
+</div>
+<div class="referral-link" id="referralLinkText">https://t.me/paymeoobot/earn</div>
+</div>
+
+<div class="share-buttons-container">
+<button class="share-btn telegram-share"
+onclick="shareToTelegram()"
+aria-label="Share referral link on Telegram">
+Share Telegram
+</button>
+
+<button class="share-btn whatsapp-share"
+onclick="shareToWhatsApp()"
+aria-label="Share referral link on WhatsApp">
+Share WhatsApp
+</button>
+</div>
+</section>
+
+<!-- STATS -->
+<section class="stats-grid">
+<div class="stat-card">
+<div class="stat-label">Referrals</div>
+<div class="stat-value" id="totalRefersText">0</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Active</div>
+<div class="stat-value" id="activeRefersText">0</div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Ref Earned</div>
+<div class="stat-value" id="refEarningsText">₦0</div>
+</div>
+</section>
 </div>
 
 <!-- SIDE -->
 <div class="side-col">
-  <!-- LEADERBOARD -->
-  <section class="card leaderboard-card" id="leaderboard">
-    <div class="section-head">
-      <div>
-        <div class="section-title">Top Earners</div>
-        <div class="section-sub">Updated in real-time</div>
-      </div>
-      <button class="view-btn" onclick="goToLeaderboard(this)">View All</button>
-    </div>
-    <div class="podium-list" id="leaderboardList">
-      <div style="text-align:center; padding:20px; color:#64748b; font-size:.75rem;">Loading leaderboard...</div>
-    </div>
-  </section>
 
-
-
-<!-- CLAIM SUCCESS OVERLAY -->
-<div class="bonus-overlay" id="claimSuccessModal">
-  <div class="bonus-card">
-    <div style="font-size:3rem; margin-bottom:10px;">🎉</div>
-    <div class="bonus-amount" id="claimSuccessAmount">+₦10.00</div>
-    <div class="bonus-title">Reward Claimed!</div>
-    <p class="bonus-text">Your daily reward has been successfully added to your balance.</p>
-    <button class="claim-btn" onclick="document.getElementById('claimSuccessModal').classList.remove('show')">Great!</button>
-  </div>
+<!-- LEADERBOARD -->
+<section class="card leaderboard-card" id="leaderboard">
+<div class="section-head">
+<div>
+<div class="section-title">Top Earners</div>
+<div class="section-sub">Updated in real-time</div>
+</div>
+<button class="view-btn" onclick="goToLeaderboard(this)">View All</button>
 </div>
 
+<div class="podium-list" id="leaderboardList">
+<div style="text-align:center; padding:20px; color:#64748b; font-size:.75rem;">
+Loading leaderboard...
+</div>
+</div>
+</section>
 
+<!-- COMING SOON -->
+<section class="card coming-card">
+<div class="coming-label"># PAYME</div>
+<div class="coming-title">More ways to earn are coming.</div>
 
-  <!-- COMING SOON -->
-  <section class="card coming-card">
-    <div class="coming-label"># PAYME</div>
-    <div class="coming-title">More ways to earn are coming.</div>
-    <div class="coming-text">Keep checking your dashboard for new earning opportunities, tasks and games.</div>
-  </section>
+<div class="coming-text">Keep checking your dashboard for new earning opportunities, tasks
+and games.</div>
+</section>
 </div>
 </main>
 
 <!-- FLOATING 3D DAILY CALENDAR WIDGET -->
-<div class="daily-widget" id="dailyWidget" onclick="openDailyModal()" title="Daily Rewards">
-  <span class="daily-widget-icon">📅</span>
-  <div class="daily-widget-badge" id="dailyWidgetBadge"></div>
+<div class="daily-widget"
+id="dailyWidget"
+onclick="openDailyModal()"
+title="Daily Rewards">
+<span class="daily-widget-icon">📅</span>
+<div class="daily-widget-badge" id="dailyWidgetBadge"></div>
 </div>
 
 <!-- DAILY REWARDS MODAL -->
-<div class="daily-overlay" id="dailyModal" onclick="if(event.target === this) closeDailyModal()">
-  <div class="daily-card">
-    <button class="daily-close-btn" onclick="closeDailyModal()">×</button>
-    <div class="daily-header">
-      <h2 class="daily-title">Daily Rewards</h2>
-      <p class="daily-subtitle">Claim every day and unlock your 7-day bonus.</p>
-    </div>
+<div class="daily-overlay"
+id="dailyModal"
+onclick="if(event.target === this) closeDailyModal()">
 
-    <div class="daily-grid" id="dailyGrid">
-      <!-- Generated Dynamically via JS -->
-    </div>
+<div class="daily-card">
 
-    <div class="daily-timer-box" id="dailyTimerBox" style="display:none;">
-      Next reward available in: <span id="dailyCountdownText">00h 00m 00s</span>
-    </div>
-  </div>
+<button class="daily-close-btn"
+onclick="closeDailyModal()">×</button>
+
+<div class="daily-header">
+<h2 class="daily-title">Daily Rewards</h2>
+<p class="daily-subtitle">Claim every day and unlock your 7-day bonus.</p>
+</div>
+
+<div class="daily-grid" id="dailyGrid">
+<!-- Generated Dynamically via JS -->
+</div>
+
+<div class="daily-timer-box"
+id="dailyTimerBox"
+style="display:none;">
+Next reward available in:
+<span id="dailyCountdownText">00h 00m 00s</span>
+</div>
+
+</div>
 </div>
 
 <!-- DAY 7 STREAK CONGRATS MODAL -->
 <div class="streak-congrats-overlay" id="streakCongratsModal">
-  <div class="streak-congrats-card">
-    <div class="streak-icon">🎉</div>
-    <h2 class="streak-title">WEEK COMPLETE!</h2>
-    <p class="streak-desc">Amazing! You've completed your 7-day streak and earned <strong>1 FREE SPIN</strong>.</p>
-    <button class="streak-play-btn" onclick="window.location.href='/game.html'">PLAY NOW →</button>
-    <button class="streak-later-btn" onclick="closeStreakCongratsModal()">Maybe Later</button>
-  </div>
+
+<div class="streak-congrats-card">
+
+<div class="streak-icon">🎉</div>
+
+<h2 class="streak-title">WEEK COMPLETE!</h2>
+
+<p class="streak-desc">
+Amazing! You've completed your 7-day streak and earned
+<strong>1 FREE SPIN</strong>.
+</p>
+
+<button class="streak-play-btn"
+onclick="window.location.href='/game.html'">
+PLAY NOW →
+</button>
+
+<button class="streak-later-btn"
+onclick="closeStreakCongratsModal()">
+Maybe Later
+</button>
+
+</div>
+</div>
+
+<!-- DAILY CLAIM SUCCESS -->
+<div class="claim-success-overlay"
+id="claimSuccessModal"
+onclick="if(event.target===this) closeClaimSuccess()">
+
+<div class="claim-success-card">
+
+<div class="success-sparkles"
+aria-hidden="true">
+✦　✧　✦
+</div>
+
+<div class="success-orb">✓</div>
+
+<div class="success-amount"
+id="claimSuccessAmount">
++ ₦10
+</div>
+
+<div class="success-title"
+id="claimSuccessTitle">
+Reward claimed!
+</div>
+
+<p class="success-text"
+id="claimSuccessText">
+Your daily reward has been added to your balance.
+Keep your streak going tomorrow!
+</p>
+
+<button class="success-close"
+onclick="closeClaimSuccess()">
+Awesome ✨
+</button>
+
+</div>
 </div>
 
 <!-- MOBILE NAV -->
 <nav class="mobile-nav">
-  <a href="/dashboard.html" class="active"><span class="nav-icon">🏠</span>Home</a>
-  <a href="/earn"><span class="nav-icon">💎</span>Earn</a>
-  <a href="#referrals"><span class="nav-icon">👥</span>Refer</a>
-  <a href="/leaderboard.html"><span class="nav-icon">🏆</span>Ranking</a>
+<a href="/dashboard.html" class="active">
+<span class="nav-icon">🏠</span>Home
+</a>
+
+<a href="/earn">
+<span class="nav-icon">💎</span>Earn
+</a>
+
+<a href="#referrals">
+<span class="nav-icon">👥</span>Refer
+</a>
+
+<a href="/leaderboard.html">
+<span class="nav-icon">🏆</span>Ranking
+</a>
 </nav>
 
 <!-- TRANSACTIONS MODAL -->
-<div class="modal-overlay" id="transactionsModal" onclick="if(event.target === this) closeTransactionsModal()">
-  <div class="modal-card">
-    <div class="modal-head">
-      <h3>Recent Transactions</h3>
-      <button class="close-btn" onclick="closeTransactionsModal()">×</button>
-    </div>
-    <div id="transactionsList">
-      <p style="text-align:center; color:#64748b; font-size:.8rem; padding:20px;">Loading...</p>
-    </div>
-  </div>
+<div class="modal-overlay"
+id="transactionsModal"
+onclick="if(event.target === this) closeTransactionsModal()">
+
+<div class="modal-card">
+
+<div class="modal-head">
+<h3>Recent Transactions</h3>
+<button class="close-btn"
+onclick="closeTransactionsModal()">×</button>
+</div>
+
+<div id="transactionsList">
+<p style="text-align:center; color:#64748b; font-size:.8rem; padding:20px;">
+Loading...
+</p>
+</div>
+
+</div>
 </div>
 
 <!-- WITHDRAW ALERT -->
 <div class="alert-overlay" id="minWithdrawAlert">
-  <div class="alert-card">
-    <div class="alert-icon-wrapper">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-    </div>
-    <div class="alert-title">Minimum Withdrawal</div>
-    <p class="alert-text">The minimum withdrawal amount is <strong>₦100</strong>. You need a higher earnings balance to proceed.</p>
-    <button class="alert-btn" onclick="closeAlertModal()">Got It</button>
-  </div>
+
+<div class="alert-card">
+
+<div class="alert-icon-wrapper">
+<svg width="24"
+height="24"
+viewBox="0 0 24 24"
+fill="none"
+stroke="currentColor"
+stroke-width="2.5"
+stroke-linecap="round"
+stroke-linejoin="round">
+
+<circle cx="12" cy="12" r="10"></circle>
+<line x1="12" y1="8" x2="12" y2="12"></line>
+<line x1="12" y1="16" x2="12.01" y2="16"></line>
+
+</svg>
+</div>
+
+<div class="alert-title">Minimum Withdrawal</div>
+
+<p class="alert-text">
+The minimum withdrawal amount is
+<strong>₦100</strong>.
+You need a higher earnings balance to proceed.
+</p>
+
+<button class="alert-btn"
+onclick="closeAlertModal()">
+Got It
+</button>
+
+</div>
 </div>
 
 <!-- LOGOUT OVERLAY -->
 <div id="logoutOverlay">
-  <div class="logout-box">
-    <div class="spinner"></div>
-    <div style="font-size:.85rem; font-weight:800;">Logging out...</div>
-  </div>
+
+<div class="logout-box">
+
+<div class="spinner"></div>
+
+<div style="font-size:.85rem; font-weight:800;">
+Logging out...
+</div>
+
+</div>
 </div>
 
 <!-- WELCOME BONUS -->
 <div class="bonus-overlay" id="bonusModal">
-  <div class="bonus-card">
-    <div class="bonus-amount">+ ₦10</div>
-    <div class="bonus-title">Welcome Bonus Credited!</div>
-    <p class="bonus-text">We've added a ₦10 welcome reward directly to your wallet to get you started.</p>
-    <button class="claim-btn" onclick="closeBonusModal()">Awesome!</button>
-  </div>
+
+<div class="bonus-card">
+
+<div class="bonus-amount">+ ₦10</div>
+
+<div class="bonus-title">
+Welcome Bonus Credited!
+</div>
+
+<p class="bonus-text">
+We've added a ₦10 welcome reward directly to your wallet to get you started.
+</p>
+
+<button class="claim-btn"
+onclick="closeBonusModal()">
+Awesome!
+</button>
+
+</div>
 </div>
 
 <!-- 3D GIFT -->
 <div class="gift-overlay" id="giftModal">
-  <div class="gift-box-container">
-    <div class="gift-stage">
-      <div class="gift-shadow"></div>
-      <div class="gift-wrapper" id="giftBox" onclick="openGiftBox()">
-        <div class="gift-glow"></div>
-        <div class="gift-rays"></div>
-        <div class="gift-particles" aria-hidden="true">
-          <span class="gift-particle"></span><span class="gift-particle"></span>
-          <span class="gift-particle"></span><span class="gift-particle"></span>
-          <span class="gift-particle"></span><span class="gift-particle"></span>
-          <span class="gift-particle"></span><span class="gift-particle"></span>
-        </div>
-        <div class="gift-lid-wrapper">
-          <div class="bow-container">
-            <div class="bow-loop left"></div><div class="bow-loop right"></div><div class="bow-knot"></div>
-          </div>
-          <div class="gift-lid"><div class="lid-ribbon"></div></div>
-        </div>
-        <div class="gift-body-wrapper"><div class="ribbon-v center"></div></div>
-      </div>
-    </div>
-    <div class="gift-text" id="giftText">Tap the gift to reveal your surprise ✨</div>
-    <div class="coupon-card" id="couponCard">
-      <div class="coupon-badge">SPECIAL WELCOME REWARD</div>
-      <div class="coupon-title">FREE <span>SPIN</span> COUPON</div>
-      <p class="coupon-subtitle">You've unlocked a special reward. Join our Telegram channel to receive <strong>1 FREE SPIN</strong>.</p>
-      <div class="coupon-perk">
-        <span class="coupon-perk-icon">🎁</span>
-        <span>Join the channel to claim your free spin</span>
-      </div>
-      <a href="https://t.me/paymechannel" target="_blank" rel="noopener noreferrer" class="coupon-join">Join Telegram Channel</a>
-      <button class="coupon-verify" onclick="verifyTelegramJoin(event)">I Have Joined, Claim Spin</button>
-      <div class="coupon-note">Your free spin will be verified before you enter the game.</div>
-    </div>
-  </div>
+
+<div class="gift-box-container">
+
+<div class="gift-stage">
+
+<div class="gift-shadow"></div>
+
+<div class="gift-wrapper"
+id="giftBox"
+onclick="openGiftBox()">
+
+<div class="gift-glow"></div>
+<div class="gift-rays"></div>
+
+<div class="gift-particles" aria-hidden="true">
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+<span class="gift-particle"></span>
+</div>
+
+<div class="gift-lid-wrapper">
+
+<div class="bow-container">
+
+<div class="bow-loop left"></div>
+<div class="bow-loop right"></div>
+<div class="bow-knot"></div>
+
+</div>
+
+<div class="gift-lid">
+<div class="lid-ribbon"></div>
+</div>
+
+</div>
+
+<div class="gift-body-wrapper">
+<div class="ribbon-v center"></div>
+</div>
+
+</div>
+</div>
+
+<div class="gift-text"
+id="giftText">
+Tap the gift to reveal your surprise ✨
+</div>
+
+<div class="coupon-card"
+id="couponCard">
+
+<div class="coupon-badge">
+SPECIAL WELCOME REWARD
+</div>
+
+<div class="coupon-title">
+FREE <span>SPIN</span> COUPON
+</div>
+
+<p class="coupon-subtitle">
+You've unlocked a special reward. Join our Telegram channel to receive
+<strong>1 FREE SPIN</strong>.
+</p>
+
+<div class="coupon-perk">
+<span class="coupon-perk-icon">🎁</span>
+<span>Join the channel to claim your free spin</span>
+</div>
+
+<a href="https://t.me/paymechannel"
+target="_blank"
+rel="noopener noreferrer"
+class="coupon-join">
+Join Telegram Channel
+</a>
+
+<button class="coupon-verify"
+onclick="verifyTelegramJoin(event)">
+I Have Joined, Claim Spin
+</button>
+
+<div class="coupon-note">
+Your free spin will be verified before you enter the game.
+</div>
+
+</div>
+</div>
 </div>
 
 <!-- FLOATING GIFT -->
-<div class="gift-floating-widget" id="giftWidget" onclick="restoreGiftModal()">
-  <span class="floating-gift-icon">🎁</span>
+<div class="gift-floating-widget"
+id="giftWidget"
+onclick="restoreGiftModal()">
+
+<span class="floating-gift-icon">🎁</span>
+
 </div>
 
 <script>
 let currentEarnings = 0;
-let dailyState = { currentDay: 1, nextClaimTime: 0, canClaim: false };
+
+let dailyState = {
+currentDay: 1,
+nextClaimTime: 0,
+canClaim: false,
+claimedDays: [],
+lastClaimedDay: null
+};
+
 let timerInterval = null;
 let isClaimingInProgress = false;
 
 /* SOUND EFFECT */
 function playCheeringSound(){
-  try{
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
-    notes.forEach((freq,idx)=>{
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type="triangle";
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx*.08);
-      gain.gain.setValueAtTime(.15, audioCtx.currentTime + idx*.08);
-      gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + idx*.08 + .6);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(audioCtx.currentTime + idx*.08);
-      osc.stop(audioCtx.currentTime + idx*.08 + .6);
-    });
-  }catch(e){ console.log("Audio play blocked"); }
+try{
+const audioCtx =
+new (window.AudioContext || window.webkitAudioContext)();
+
+const notes = [
+261.63,
+329.63,
+392.00,
+523.25,
+659.25
+];
+
+notes.forEach((freq,idx)=>{
+
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+
+osc.type="triangle";
+
+osc.frequency.setValueAtTime(
+freq,
+audioCtx.currentTime + idx*.08
+);
+
+gain.gain.setValueAtTime(
+.15,
+audioCtx.currentTime + idx*.08
+);
+
+gain.gain.exponentialRampToValueAtTime(
+.001,
+audioCtx.currentTime + idx*.08 + .6
+);
+
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+
+osc.start(
+audioCtx.currentTime + idx*.08
+);
+
+osc.stop(
+audioCtx.currentTime + idx*.08 + .6
+);
+
+});
+
+}catch(e){
+console.log("Audio play blocked");
+}
 }
 
 /* GIFT MODAL */
 function showGiftModal(){
-  document.getElementById("giftModal").classList.add("show");
-  playCheeringSound();
+document.getElementById("giftModal").classList.add("show");
+playCheeringSound();
 }
+
 function restoreGiftModal(){
-  document.getElementById("giftWidget").classList.remove("show");
-  showGiftModal();
+document.getElementById("giftWidget").classList.remove("show");
+showGiftModal();
 }
-function getReferralLink() {
-  const code = document.getElementById("referralCodeText").innerText.trim();
-  const baseUrl = "https://t.me/Withdreawhbot/Tester";
-  if (!code || code === "---") return baseUrl;
-  return `${baseUrl}?startapp=${code}`;
+
+/* REFERRAL LINK */
+function getReferralLink(){
+
+const code =
+document.getElementById("referralCodeText").innerText.trim();
+
+const baseUrl =
+"https://t.me/paymeoobot/earn";
+
+if(!code || code === "---"){
+return baseUrl;
 }
-function shareToTelegram() {
-  const link = getReferralLink();
-  const text = encodeURIComponent('Join me on PAYME and claim your bonus! Use my link to get started: ');
-  const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`;
-  const tg = window.Telegram?.WebApp;
-  if (tg && tg.openTelegramLink) { tg.openTelegramLink(telegramUrl); }
-  else { window.open(telegramUrl, "_blank"); }
+
+return `${baseUrl}?startapp=${encodeURIComponent(code)}`;
 }
-function shareToWhatsApp() {
-  const link = getReferralLink();
-  const text = encodeURIComponent(`Join me on PAYME and claim your bonus! Click here: ${link}`);
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${text}`;
-  window.open(whatsappUrl, "_blank");
+
+function updateReferralLinkUI(){
+
+const el =
+document.getElementById("referralLinkText");
+
+if(el){
+el.textContent = getReferralLink();
+}
+
+}
+
+function shareToTelegram(){
+
+const link = getReferralLink();
+
+const text = encodeURIComponent(
+'Join me on PAYME and claim your bonus! Use my link to get started: '
+);
+
+const telegramUrl =
+`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${text}`;
+
+const tg = window.Telegram?.WebApp;
+
+if(tg && tg.openTelegramLink){
+
+tg.openTelegramLink(telegramUrl);
+
+}else{
+
+window.open(
+telegramUrl,
+"_blank"
+);
+
+}
+
+}
+
+function shareToWhatsApp(){
+
+const link = getReferralLink();
+
+const text = encodeURIComponent(
+`Join me on PAYME and claim your bonus! Click here: ${link}`
+);
+
+const whatsappUrl =
+`https://api.whatsapp.com/send?text=${text}`;
+
+window.open(
+whatsappUrl,
+"_blank"
+);
+
 }
 
 /* LEADERBOARD */
 function goToLeaderboard(btn){
-  if(btn){ btn.style.transform="scale(.94)"; btn.style.opacity=".7"; }
-  setTimeout(()=>{ window.location.href = "/leaderboard.html"; },150);
+
+if(btn){
+btn.style.transform="scale(.94)";
+btn.style.opacity=".7";
 }
+
+setTimeout(()=>{
+window.location.href =
+"/leaderboard.html";
+},150);
+
+}
+
 async function loadLeaderboard(){
-  try{
-    const response = await fetch("/api/leaderboard", { method:"GET", credentials:"include" });
-    if(!response.ok) throw new Error("Leaderboard request failed");
-    const data = await response.json();
-    if(!data.success) throw new Error(data.error || "Leaderboard error");
-    const list = document.getElementById("leaderboardList");
-    if(!list) return;
-    if(!data.leaderboard || data.leaderboard.length === 0){
-      list.innerHTML=`<div style="text-align:center; padding:20px; color:#64748b; font-size:.75rem;">No earners yet.</div>`;
-      return;
-    }
-    const medals=["🥇","🥈","🥉"];
-    const classes=["rank-1","rank-2","rank-3"];
-    list.innerHTML = data.leaderboard.map((user,index)=>{
-      const username = user.username ? "@"+user.username : "@User";
-      const referrals = Number(user.totalReferrals || 0);
-      const earnings = Number(user.referralEarnings || 0);
-      return `<div class="podium-item ${classes[index] || ""}">
-        <div class="user-info">
-          <span class="rank">${medals[index] || ""}</span>
-          <div>
-            <div class="username">${username}</div>
-            <div class="ref-count">${referrals} Referral${referrals===1?"":"s"}</div>
-          </div>
-        </div>
-        <div class="earnings">₦${earnings.toLocaleString()}</div>
-      </div>`;
-    }).join("");
-  }catch(error){
-    console.error("Leaderboard error:", error);
-    const list = document.getElementById("leaderboardList");
-    if(list){ list.innerHTML='<div style="text-align:center; padding:20px; color:#ef4444; font-size:.75rem;">Unable to load leaderboard.</div>'; }
-  }
+
+try{
+
+const response =
+await fetch(
+"/api/leaderboard",
+{
+method:"GET",
+credentials:"include"
+}
+);
+
+if(!response.ok){
+throw new Error("Leaderboard request failed");
+}
+
+const data =
+await response.json();
+
+if(!data.success){
+throw new Error(
+data.error || "Leaderboard error"
+);
+}
+
+const list =
+document.getElementById(
+"leaderboardList"
+);
+
+if(!list) return;
+
+if(!data.leaderboard ||
+!data.leaderboard.length){
+
+list.innerHTML =
+`<div style="text-align:center; padding:20px; color:#64748b; font-size:.75rem;">
+No earners yet.
+</div>`;
+
+return;
+}
+
+const medals=[
+"🥇",
+"🥈",
+"🥉"
+];
+
+const classes=[
+"rank-1",
+"rank-2",
+"rank-3"
+];
+
+list.innerHTML =
+data.leaderboard.map(
+(user,index)=>{
+
+const username =
+user.username
+? "@"+user.username
+: "@User";
+
+const referrals =
+Number(
+user.totalReferrals || 0
+);
+
+const earnings =
+Number(
+user.referralEarnings || 0
+);
+
+return `
+<div class="podium-item ${classes[index] || ""}">
+
+<div class="user-info">
+
+<span class="rank">
+${medals[index] || ""}
+</span>
+
+<div>
+
+<div class="username">
+${username}
+</div>
+
+<div class="ref-count">
+${referrals}
+Referral${referrals===1?"":"s"}
+</div>
+
+</div>
+</div>
+
+<div class="earnings">
+₦${earnings.toLocaleString()}
+</div>
+
+</div>
+`;
+
+}
+).join("");
+
+}catch(error){
+
+console.error(
+"Leaderboard error:",
+error
+);
+
+const list =
+document.getElementById(
+"leaderboardList"
+);
+
+if(list){
+
+list.innerHTML =
+'<div style="text-align:center; padding:20px; color:#ef4444; font-size:.75rem;">Unable to load leaderboard.</div>';
+
+}
+
+}
+
 }
 
 /* FETCH DASHBOARD DATA */
 async function fetchDashboardData(){
-  try{
-    const tg = window.Telegram?.WebApp;
-    const initData = tg?.initData || "";
-    const tgUser = tg?.initDataUnsafe?.user;
-    const response = await fetch("/api/user/dashboard", {
-      method:"POST",
-      headers:{ "Content-Type": "application/json" },
-      credentials:"include",
-      body:JSON.stringify({
-        initData:initData,
-        telegramId: tgUser?.id,
-        username: tgUser?.username,
-        firstName: tgUser?.first_name,
-        lastName: tgUser?.last_name
-      })
-    });
-    const data = await response.json();
-    if(!data.success) return;
-    const user = data.user;
-    document.getElementById("userNameText").innerText = user.fullName || user.username || "User";
-    
-    const withdrawableBalance = Number(user.withdrawableBalance ?? user.referralEarnings ?? 0);
-    currentEarnings = withdrawableBalance;
-    
-    const availableBalance = Number(user.balance ?? 0);
-    document.getElementById("balanceText").innerText = availableBalance.toFixed(2);
-    document.getElementById("earningsBalanceText").innerText = withdrawableBalance.toFixed(2);
-    
-    const depositBalance = Number(user.depositBalance ?? 0);
-    document.getElementById("depositBalanceText").innerText = depositBalance.toFixed(2);
-    document.getElementById("referralCodeText").innerText = user.referralCode || "---";
-    document.getElementById("totalRefersText").innerText = user.totalReferrals || 0;
-    document.getElementById("activeRefersText").innerText = user.successfulReferrals || 0;
-    document.getElementById("refEarningsText").innerText = "₦ "+ Number(user.referralEarnings || 0).toLocaleString();
 
-    // UPDATE DAILY REWARD STATE FROM BACKEND
-    if(data.dailyReward) {
-      dailyState = data.dailyReward;
-      updateDailyWidgetUI();
-    }
+try{
 
-    if(user.isNewUser){
-      document.getElementById("bonusModal").classList.add("show");
-    } else if(!user.hasClaimedGiftBox){
-      showGiftModal();
-    }
-  }catch(error){
-    console.error("Failed to load dashboard:", error);
-  }
+const tg =
+window.Telegram?.WebApp;
+
+const initData =
+tg?.initData || "";
+
+const tgUser =
+tg?.initDataUnsafe?.user;
+
+const response =
+await fetch(
+"/api/user/dashboard",
+{
+method:"POST",
+headers:{
+"Content-Type":
+"application/json"
+},
+credentials:"include",
+
+body:JSON.stringify({
+
+initData:initData,
+
+telegramId:
+tgUser?.id,
+
+username:
+tgUser?.username,
+
+firstName:
+tgUser?.first_name,
+
+lastName:
+tgUser?.last_name
+
+})
+
+}
+);
+
+const data =
+await response.json();
+
+if(!data.success) return;
+
+const user =
+data.user;
+
+document.getElementById(
+"userNameText"
+).innerText =
+user.fullName ||
+user.username ||
+"User";
+
+const withdrawableBalance =
+Number(
+user.withdrawableBalance ??
+user.referralEarnings ??
+0
+);
+
+currentEarnings =
+withdrawableBalance;
+
+const availableBalance =
+Number(
+user.balance ?? 0
+);
+
+document.getElementById(
+"balanceText"
+).innerText =
+availableBalance.toFixed(2);
+
+document.getElementById(
+"earningsBalanceText"
+).innerText =
+withdrawableBalance.toFixed(2);
+
+const depositBalance =
+Number(
+user.depositBalance ?? 0
+);
+
+document.getElementById(
+"depositBalanceText"
+).innerText =
+depositBalance.toFixed(2);
+
+document.getElementById(
+"referralCodeText"
+).innerText =
+user.referralCode || "---";
+
+updateReferralLinkUI();
+
+document.getElementById(
+"totalRefersText"
+).innerText =
+user.totalReferrals || 0;
+
+document.getElementById(
+"activeRefersText"
+).innerText =
+user.successfulReferrals || 0;
+
+document.getElementById(
+"refEarningsText"
+).innerText =
+"₦ " +
+Number(
+user.referralEarnings || 0
+).toLocaleString();
+
+/* UPDATE DAILY REWARD STATE FROM BACKEND */
+if(data.dailyReward){
+
+dailyState =
+data.dailyReward;
+
+updateDailyWidgetUI();
+
+}
+
+if(user.isNewUser){
+
+document.getElementById(
+"bonusModal"
+).classList.add("show");
+
+}else if(!user.hasClaimedGiftBox){
+
+showGiftModal();
+
+}
+
+}catch(error){
+
+console.error(
+"Failed to load dashboard:",
+error
+);
+
+}
+
 }
 
 /* =========================================================
-   2. DAILY REWARDS SYSTEM LOGIC
+2. DAILY REWARDS SYSTEM LOGIC
 ========================================================= */
-function updateDailyWidgetUI() {
-  const badge = document.getElementById("dailyWidgetBadge");
-  if(dailyState.canClaim) {
-    badge.classList.remove("claimed");
-  } else {
-    badge.classList.add("claimed");
-  }
+
+function updateDailyWidgetUI(){
+
+const badge =
+document.getElementById(
+"dailyWidgetBadge"
+);
+
+if(!badge) return;
+
+if(dailyState.canClaim){
+
+badge.classList.remove(
+"claimed"
+);
+
+}else{
+
+badge.classList.add(
+"claimed"
+);
+
 }
 
-function openDailyModal() {
-  renderDailyGrid();
-  document.getElementById("dailyModal").classList.add("show");
-  startCountdownTimer();
 }
 
-function closeDailyModal() {
-  document.getElementById("dailyModal").classList.remove("show");
-  if(timerInterval) clearInterval(timerInterval);
+function openDailyModal(){
+
+renderDailyGrid();
+
+document.getElementById(
+"dailyModal"
+).classList.add("show");
+
+startCountdownTimer();
+
 }
 
+function closeDailyModal(){
 
-function renderDailyGrid() {
-  const grid = document.getElementById("dailyGrid");
-  if(!grid) return;
-  grid.innerHTML = "";
+document.getElementById(
+"dailyModal"
+).classList.remove("show");
 
-  for(let day = 1; day <= 7; day++) {
-    const isDay7 = day === 7;
-    const card = document.createElement("div");
-    card.className = `reward-card ${isDay7 ? 'day-7-card' : ''}`;
-    let statusText = "LOCKED";
-
-    if (day < dailyState.currentDay) {
-      // Days before current day are fully claimed
-      card.classList.add("claimed");
-      statusText = "CLAIMED ✓";
-    } else if (day === dailyState.currentDay) {
-      if (dailyState.canClaim) {
-        // Only mark current day as claimable if backend confirms canClaim is true
-        card.classList.add("claimable");
-        statusText = "CLAIM NOW";
-        card.onclick = () => claimDailyReward(day);
-      } else {
-        // If current day is already claimed, show claimed status
-        card.classList.add("claimed");
-        statusText = "CLAIMED ✓";
-      }
-    } else {
-      // Future days remain locked
-      card.classList.add("locked");
-      statusText = "LOCKED";
-    }
-
-    if (isDay7) {
-      card.innerHTML = `
-        <div>
-          <div class="day-num">DAY 7 SPECIAL BONUS</div>
-          <div class="day-val">1 FREE SPIN</div>
-        </div>
-        <div>
-          <span class="day-status">${statusText}</span>
-        </div>`;
-    } else {
-      card.innerHTML = `
-        <div class="day-num">DAY ${day}</div>
-        <div class="day-val">₦10</div>
-        <span class="day-status">${statusText}</span>`;
-    }
-
-    grid.appendChild(card);
-  }
+if(timerInterval){
+clearInterval(
+timerInterval
+);
 }
 
-async function claimDailyReward(day) {
-  if (isClaimingInProgress) return;
-  isClaimingInProgress = true;
-
-  try {
-    const tg = window.Telegram?.WebApp;
-    const initData = tg?.initData || "";
-
-    const response = await fetch("/api/user/claim-daily", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ initData, day: day })
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      playCheeringSound();
-      dailyState = result.dailyReward;
-      updateDailyWidgetUI();
-      renderDailyGrid();
-      startCountdownTimer();
-      fetchDashboardData();
-
-      if (day === 7) {
-        closeDailyModal();
-        document.getElementById("streakCongratsModal").classList.add("show");
-      } else {
-        // Trigger Modern Popup instead of default alert
-        document.getElementById("claimSuccessAmount").innerText = "+₦10.00";
-        document.getElementById("claimSuccessModal").classList.add("show");
-      }
-    } else {
-      alert(result.message || "Unable to claim reward. Please try again.");
-    }
-  } catch (e) {
-    console.error("Claim error:", e);
-    alert("Network error. Could not claim reward.");
-  } finally {
-    isClaimingInProgress = false;
-  }
 }
 
+/*
+ * IMPORTANT:
+ * The backend returns claimedDays.
+ * Only days inside claimedDays are shown as CLAIMED.
+ * This prevents Day 2 from being incorrectly marked
+ * claimed immediately after Day 1 is claimed.
+ */
+function getClaimedDays(){
 
+const raw =
+Array.isArray(
+dailyState.claimedDays
+)
+? dailyState.claimedDays
+: [];
 
-function startCountdownTimer() {
-  if(timerInterval) clearInterval(timerInterval);
-  const timerBox = document.getElementById("dailyTimerBox");
-  const countdownEl = document.getElementById("dailyCountdownText");
+return new Set(
+raw
+.map(Number)
+.filter(
+day =>
+day >= 1 &&
+day <= 7
+)
+);
 
-  if(dailyState.canClaim || !dailyState.nextClaimTime) {
-    timerBox.style.display = "none";
-    return;
-  }
-
-  timerBox.style.display = "block";
-
-  function updateTimer() {
-    const now = Date.now();
-    const diff = dailyState.nextClaimTime - now;
-
-    if(diff <= 0) {
-      dailyState.canClaim = true;
-      updateDailyWidgetUI();
-      renderDailyGrid();
-      timerBox.style.display = "none";
-      clearInterval(timerInterval);
-      return;
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    countdownEl.innerText = `${String(hours).padStart(2,'0')}h ${String(minutes).padStart(2,'0')}m ${String(seconds).padStart(2,'0')}s`;
-  }
-
-  updateTimer();
-  timerInterval = setInterval(updateTimer, 1000);
 }
 
-function closeStreakCongratsModal() {
-  document.getElementById("streakCongratsModal").classList.remove("show");
+function renderDailyGrid(){
+
+const grid =
+document.getElementById(
+"dailyGrid"
+);
+
+if(!grid) return;
+
+grid.innerHTML = "";
+
+const claimedDays =
+getClaimedDays();
+
+const currentDay =
+Number(
+dailyState.currentDay || 1
+);
+
+for(
+let day = 1;
+day <= 7;
+day++
+){
+
+const isDay7 =
+day === 7;
+
+const card =
+document.createElement(
+"div"
+);
+
+card.className =
+`reward-card ${isDay7 ? 'day-7-card' : ''}`;
+
+let statusText =
+"LOCKED";
+
+/* ACTUALLY CLAIMED DAYS */
+if(claimedDays.has(day)){
+
+card.classList.add(
+"claimed"
+);
+
+statusText =
+"CLAIMED ✓";
+
+/* CURRENT CLAIMABLE DAY */
+}else if(
+day === currentDay &&
+dailyState.canClaim
+){
+
+card.classList.add(
+"claimable"
+);
+
+statusText =
+"CLAIM NOW";
+
+card.onclick =
+() => claimDailyReward(day);
+
+/* CURRENT DAY BUT STILL IN COOLDOWN */
+}else if(
+day === currentDay &&
+!dailyState.canClaim
+){
+
+card.classList.add(
+"locked"
+);
+
+statusText =
+"NEXT UP";
+
+/* ALL OTHER DAYS */
+}else{
+
+card.classList.add(
+"locked"
+);
+
+statusText =
+day < currentDay
+? "COMPLETED"
+: "LOCKED";
+
+}
+
+/* DAY 7 */
+if(isDay7){
+
+card.innerHTML = `
+
+<div>
+
+<div class="day-num">
+DAY 7 • SPECIAL BONUS
+</div>
+
+<div class="day-val">
+🎁 1 FREE SPIN
+</div>
+
+</div>
+
+<div>
+
+<span class="day-status">
+${statusText}
+</span>
+
+</div>
+
+`;
+
+}else{
+
+card.innerHTML = `
+
+<div class="day-num">
+DAY ${day}
+</div>
+
+<div class="day-val">
+₦10
+</div>
+
+<span class="day-status">
+${statusText}
+</span>
+
+`;
+
+}
+
+grid.appendChild(
+card
+);
+
+}
+
+}
+
+async function claimDailyReward(day){
+
+if(isClaimingInProgress)
+return;
+
+isClaimingInProgress =
+true;
+
+try{
+
+const tg =
+window.Telegram?.WebApp;
+
+const initData =
+tg?.initData || "";
+
+const response =
+await fetch(
+"/api/user/claim-daily",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+credentials:"include",
+
+body:JSON.stringify({
+initData,
+day:day
+})
+
+}
+);
+
+const result =
+await response.json();
+
+if(result.success){
+
+playCheeringSound();
+
+/*
+ * Replace the entire daily state with the
+ * backend response. This includes claimedDays.
+ */
+dailyState =
+result.dailyReward;
+
+updateDailyWidgetUI();
+
+renderDailyGrid();
+
+startCountdownTimer();
+
+fetchDashboardData();
+
+if(day === 7){
+
+closeDailyModal();
+
+document.getElementById(
+"streakCongratsModal"
+).classList.add("show");
+
+}else{
+
+showClaimSuccess(
+"+ ₦10",
+"Daily reward claimed!",
+"Your ₦10 reward has been added to your balance. Keep your streak alive and come back tomorrow!"
+);
+
+}
+
+}else{
+
+alert(
+result.message ||
+"Unable to claim reward. Please try again."
+);
+
+}
+
+}catch(e){
+
+console.error(
+"Claim error:",
+e
+);
+
+alert(
+"Network error. Could not claim reward."
+);
+
+}finally{
+
+isClaimingInProgress =
+false;
+
+}
+
+}
+
+function startCountdownTimer(){
+
+if(timerInterval){
+clearInterval(
+timerInterval
+);
+}
+
+const timerBox =
+document.getElementById(
+"dailyTimerBox"
+);
+
+const countdownEl =
+document.getElementById(
+"dailyCountdownText"
+);
+
+if(
+dailyState.canClaim ||
+!dailyState.nextClaimTime
+){
+
+timerBox.style.display =
+"none";
+
+return;
+
+}
+
+timerBox.style.display =
+"block";
+
+function updateTimer(){
+
+const now =
+Date.now();
+
+const diff =
+dailyState.nextClaimTime -
+now;
+
+if(diff <= 0){
+
+dailyState.canClaim =
+true;
+
+updateDailyWidgetUI();
+
+renderDailyGrid();
+
+timerBox.style.display =
+"none";
+
+clearInterval(
+timerInterval
+);
+
+return;
+
+}
+
+const hours =
+Math.floor(
+diff /
+(1000 * 60 * 60)
+);
+
+const minutes =
+Math.floor(
+(diff %
+(1000 * 60 * 60)) /
+(1000 * 60)
+);
+
+const seconds =
+Math.floor(
+(diff %
+(1000 * 60)) /
+1000
+);
+
+countdownEl.innerText =
+`${String(hours).padStart(2,'0')}h ${String(minutes).padStart(2,'0')}m
+${String(seconds).padStart(2,'0')}s`;
+
+}
+
+updateTimer();
+
+timerInterval =
+setInterval(
+updateTimer,
+1000
+);
+
+}
+
+function closeStreakCongratsModal(){
+
+document.getElementById(
+"streakCongratsModal"
+).classList.remove(
+"show"
+);
+
 }
 
 /* WITHDRAWAL & ALERT HANDLERS */
 function handleWithdrawal(){
-  if(currentEarnings < 100){
-    document.getElementById("minWithdrawAlert").classList.add("show");
-  } else {
-    window.location.href = "/withdraw.html";
-  }
+
+if(currentEarnings < 100){
+
+document.getElementById(
+"minWithdrawAlert"
+).classList.add(
+"show"
+);
+
+}else{
+
+window.location.href =
+"/withdraw.html";
+
 }
+
+}
+
 function closeAlertModal(){
-  document.getElementById("minWithdrawAlert").classList.remove("show");
+
+document.getElementById(
+"minWithdrawAlert"
+).classList.remove(
+"show"
+);
+
+}
+
+/* COPY REFERRAL LINK */
+function copyReferralLink(){
+
+const link =
+getReferralLink();
+
+const button =
+document.getElementById(
+"copyLinkBtn"
+);
+
+if(!link || !button)
+return;
+
+const done = () => {
+
+button.classList.add(
+"copied"
+);
+
+button.innerText =
+"✓ Copied";
+
+setTimeout(()=>{
+
+button.classList.remove(
+"copied"
+);
+
+button.innerText =
+"Copy Link";
+
+},1800);
+
+};
+
+if(
+navigator.clipboard &&
+navigator.clipboard.writeText
+){
+
+navigator.clipboard.writeText(
+link
+)
+.then(done)
+.catch(
+() =>
+fallbackCopy(
+link,
+done
+)
+);
+
+}else{
+
+fallbackCopy(
+link,
+done
+);
+
+}
+
+}
+
+function fallbackCopy(
+text,
+done
+){
+
+const ta =
+document.createElement(
+"textarea"
+);
+
+ta.value =
+text;
+
+ta.style.position =
+"fixed";
+
+ta.style.opacity =
+"0";
+
+document.body.appendChild(
+ta
+);
+
+ta.select();
+
+try{
+
+document.execCommand(
+"copy"
+);
+
+done();
+
+}catch(e){
+
+alert(
+"Unable to copy link."
+);
+
+}
+
+ta.remove();
+
+}
+
+/* DAILY CLAIM SUCCESS POPUP */
+function showClaimSuccess(
+amount,
+title,
+text
+){
+
+const modal =
+document.getElementById(
+"claimSuccessModal"
+);
+
+if(!modal)
+return;
+
+document.getElementById(
+"claimSuccessAmount"
+).innerText =
+amount;
+
+document.getElementById(
+"claimSuccessTitle"
+).innerText =
+title;
+
+document.getElementById(
+"claimSuccessText"
+).innerText =
+text;
+
+modal.classList.add(
+"show"
+);
+
+}
+
+function closeClaimSuccess(){
+
+const modal =
+document.getElementById(
+"claimSuccessModal"
+);
+
+if(modal){
+
+modal.classList.remove(
+"show"
+);
+
+}
+
 }
 
 /* COPY CODE */
 function copyReferralCode(){
-  const code = document.getElementById("referralCodeText").innerText;
-  const button = document.getElementById("copyCodeBtn");
-  if(!code || code==="---") return;
-  navigator.clipboard.writeText(code).then(()=>{
-    button.classList.add("copied");
-    button.innerText = "✓ Copied!";
-    setTimeout(()=>{
-      button.classList.remove("copied");
-      button.innerText = "Copy Invite Code";
-    },2000);
-  }).catch(()=>{ alert("Unable to copy code."); });
+
+const code =
+document.getElementById(
+"referralCodeText"
+).innerText;
+
+const button =
+document.getElementById(
+"copyCodeBtn"
+);
+
+if(
+!code ||
+code === "---"
+)
+return;
+
+if(
+navigator.clipboard &&
+navigator.clipboard.writeText
+){
+
+navigator.clipboard.writeText(
+code
+)
+.then(()=>{
+
+button.classList.add(
+"copied"
+);
+
+button.innerText =
+"✓ Copied!";
+
+setTimeout(()=>{
+
+button.classList.remove(
+"copied"
+);
+
+button.innerText =
+"Copy Invite Code";
+
+},2000);
+
+})
+.catch(
+() =>
+alert(
+"Unable to copy code."
+)
+);
+
+}else{
+
+fallbackCopy(
+code,
+()=>{
+
+button.classList.add(
+"copied"
+);
+
+button.innerText =
+"✓ Copied!";
+
+setTimeout(()=>{
+
+button.classList.remove(
+"copied"
+);
+
+button.innerText =
+"Copy Invite Code";
+
+},2000);
+
+}
+);
+
+}
+
 }
 
 /* BONUS MODAL */
 function closeBonusModal(){
-  document.getElementById("bonusModal").classList.remove("show");
-  setTimeout(()=>{ showGiftModal(); },400);
+
+document.getElementById(
+"bonusModal"
+).classList.remove(
+"show"
+);
+
+setTimeout(()=>{
+showGiftModal();
+},400);
+
 }
 
 /* GIFT BOX */
 function openGiftBox(){
-  const box = document.getElementById("giftBox");
-  const text = document.getElementById("giftText");
-  const coupon = document.getElementById("couponCard");
-  if(!box || box.classList.contains("open")) return;
-  box.classList.add("open");
-  if(text) text.classList.add("hidden");
-  setTimeout(()=>{ if(coupon) coupon.classList.add("show"); },620);
+
+const box =
+document.getElementById(
+"giftBox"
+);
+
+const text =
+document.getElementById(
+"giftText"
+);
+
+const coupon =
+document.getElementById(
+"couponCard"
+);
+
+if(
+!box ||
+box.classList.contains("open")
+)
+return;
+
+box.classList.add(
+"open"
+);
+
+if(text)
+text.classList.add(
+"hidden"
+);
+
+setTimeout(()=>{
+
+if(coupon)
+coupon.classList.add(
+"show"
+);
+
+},620);
+
 }
 
 /* TELEGRAM VERIFY */
 async function verifyTelegramJoin(e){
-  e.stopPropagation();
-  const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  try{
-    const res = await fetch("/api/user/verify-telegram-join",{
-      method:"POST",
-      headers:{ "Content-Type": "application/json" },
-      credentials:"include",
-      body:JSON.stringify({ isLocal:isLocal })
-    });
-    const data = await res.json();
-    if(data.success){
-      alert("Free spin granted! Redirecting to the Spin Game...");
-      document.getElementById("giftModal").classList.remove("show");
-      window.location.href = "/game.html";
-    } else {
-      alert(data.message);
-    }
-  }catch(err){
-    alert("Verification failed. Please try again.");
-  }
+
+e.stopPropagation();
+
+const isLocal =
+window.location.hostname ===
+"localhost" ||
+window.location.hostname ===
+"127.0.0.1";
+
+try{
+
+const res =
+await fetch(
+"/api/user/verify-telegram-join",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+credentials:"include",
+
+body:JSON.stringify({
+isLocal:isLocal
+})
+
+}
+);
+
+const data =
+await res.json();
+
+if(data.success){
+
+alert(
+"Free spin granted! Redirecting to the Spin Game..."
+);
+
+document.getElementById(
+"giftModal"
+).classList.remove(
+"show"
+);
+
+window.location.href =
+"/game.html";
+
+}else{
+
+alert(
+data.message
+);
+
+}
+
+}catch(err){
+
+alert(
+"Verification failed. Please try again."
+);
+
+}
+
 }
 
 /* LOGOUT */
 async function handleLogout(){
-  const overlay = document.getElementById("logoutOverlay");
-  if(overlay) overlay.style.display = "flex";
-  try{
-    await fetch("/api/auth/logout", { method:"POST", credentials:"include" });
-    setTimeout(()=>{ window.location.href = "/"; },700);
-  }catch(error){
-    console.error("Logout error:", error);
-    window.location.href = "/";
-  }
+
+const overlay =
+document.getElementById(
+"logoutOverlay"
+);
+
+if(overlay)
+overlay.style.display =
+"flex";
+
+try{
+
+await fetch(
+"/api/auth/logout",
+{
+method:"POST",
+credentials:"include"
+}
+);
+
+setTimeout(()=>{
+window.location.href =
+"/";
+},700);
+
+}catch(error){
+
+console.error(
+"Logout error:",
+error
+);
+
+window.location.href =
+"/";
+
+}
+
 }
 
 /* TRANSACTIONS */
 function openTransactionsModal(){
-  const modal = document.getElementById("transactionsModal");
-  modal.classList.add("active");
-  const container = document.getElementById("transactionsList");
-  container.innerHTML=`<p style="text-align:center; color:#64748b; font-size:.8rem; padding:20px;">Loading...</p>`;
-  fetch("/api/user/transactions", { method:"GET", credentials:"include" })
-    .then(res=>res.json())
-    .then(data=>{
-      if(data.success && data.transactions && data.transactions.length){
-        container.innerHTML = data.transactions.map(tx=>{
-          const amount = Number(tx.amount || 0);
-          return `<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:13px;">
-            <div>
-              <div style="font-weight:800; font-size:.78rem; color:#0f172a;">${tx.type || "Transaction"}</div>
-              <div style="font-size:.65rem; color:#64748b; margin-top:3px;">${tx.bank || ""} ${tx.date ? "(" + tx.date + ")" : ""}</div>
-            </div>
-            <div style="font-weight:800; font-size:.78rem; color:#ef4444;">-₦${amount.toLocaleString()}</div>
-          </div>`;
-        }).join("");
-      }else{
-        container.innerHTML=`<p style="text-align:center; color:#64748b; font-size:.8rem; padding:20px;">No recent transactions found.</p>`;
-      }
-    })
-    .catch(error=>{
-      console.error("Transaction error:", error);
-      container.innerHTML=`<p style="text-align:center; color:#ef4444; font-size:.8rem; padding:20px;">Failed to load transactions.</p>`;
-    });
+
+const modal =
+document.getElementById(
+"transactionsModal"
+);
+
+modal.classList.add(
+"active"
+);
+
+const container =
+document.getElementById(
+"transactionsList"
+);
+
+container.innerHTML =
+`<p style="text-align:center; color:#64748b; font-size:.8rem;
+padding:20px;">Loading...</p>`;
+
+fetch(
+"/api/user/transactions",
+{
+method:"GET",
+credentials:"include"
 }
-function closeTransactionsModal(){
-  document.getElementById("transactionsModal").classList.remove("active");
+)
+
+.then(res =>
+res.json()
+)
+
+.then(data=>{
+
+if(
+data.success &&
+data.transactions &&
+data.transactions.length
+){
+
+container.innerHTML =
+data.transactions.map(
+tx=>{
+
+const amount =
+Number(
+tx.amount || 0
+);
+
+return `
+<div style="display:flex; align-items:center; justify-content:space-between;
+gap:10px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:13px;">
+
+<div>
+
+<div style="font-weight:800; font-size:.78rem; color:#0f172a;">
+${tx.type || "Transaction"}
+</div>
+
+<div style="font-size:.65rem; color:#64748b; margin-top:3px;">
+${tx.bank || ""}
+${tx.date ? "(" + tx.date + ")" : ""}
+</div>
+
+</div>
+
+<div style="font-weight:800; font-size:.78rem;
+color:#ef4444;">
+-₦${amount.toLocaleString()}
+</div>
+
+</div>
+`;
+
+}
+).join("");
+
+}else{
+
+container.innerHTML =
+`<p style="text-align:center; color:#64748b; font-size:.8rem;
+padding:20px;">No recent transactions found.</p>`;
+
 }
 
-/* INIT */
-window.addEventListener("DOMContentLoaded", ()=>{
-  fetchDashboardData();
-  loadLeaderboard();
-  setInterval(fetchDashboardData, 5000);
-  setInterval(loadLeaderboard, 5000);
+})
+
+.catch(error=>{
+
+console.error(
+"Transaction error:",
+error
+);
+
+container.innerHTML =
+`<p style="text-align:center; color:#ef4444; font-size:.8rem;
+padding:20px;">Failed to load transactions.</p>`;
+
 });
+
+}
+
+function closeTransactionsModal(){
+
+document.getElementById(
+"transactionsModal"
+).classList.remove(
+"active"
+);
+
+}
+
+/* ESCAPE KEY */
+document.addEventListener(
+"keydown",
+e=>{
+
+if(e.key === "Escape"){
+
+closeClaimSuccess();
+closeDailyModal();
+closeStreakCongratsModal();
+
+}
+
+}
+);
+
+/* INIT */
+window.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+fetchDashboardData();
+
+updateReferralLinkUI();
+
+loadLeaderboard();
+
+setInterval(
+fetchDashboardData,
+5000
+);
+
+setInterval(
+loadLeaderboard,
+5000
+);
+
+}
+);
+
 </script>
+
 </body>
 </html>
