@@ -301,6 +301,8 @@ body::before {
     <button class="btn-continue" id="continueBtn" onclick="redirectDashboard()">Continue to PAYME</button>
 </div>
 
+
+
 <script>
 let tg = null;
 
@@ -315,7 +317,7 @@ function initializeTelegram() {
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     initializeTelegram();
     const activeTg = window.Telegram?.WebApp || tg;
     const urlParams = new URLSearchParams(window.location.search);
@@ -326,10 +328,47 @@ window.addEventListener('DOMContentLoaded', () => {
         refInput.value = refParam.trim().toUpperCase();
     }
 
-    if (localStorage.getItem('hasSignedUp') === 'true') {
-        renderLoginUI();
-    }
+    // Check backend session status on load instead of relying solely on localStorage
+    await checkUserAccountStatus();
 });
+
+async function checkUserAccountStatus() {
+    const activeTg = window.Telegram?.WebApp || tg;
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    let telegramUser = activeTg?.initDataUnsafe?.user;
+
+    if (!telegramUser && isLocalhost) {
+        telegramUser = { id: '999888777' };
+    }
+
+    if (!telegramUser || !telegramUser.id) {
+        // If localStorage says signed up, render login UI as fallback
+        if (localStorage.getItem('hasSignedUp') === 'true') {
+            renderLoginUI();
+        }
+        return;
+    }
+
+    try {
+        // Query backend to check if this Telegram ID exists in your database
+        const res = await fetch(`/api/auth/check-user?telegramId=${telegramUser.id}`);
+        const data = await res.json();
+
+        if (res.ok && data.exists) {
+            localStorage.setItem('hasSignedUp', 'true');
+            renderLoginUI();
+        } else {
+            // User was deleted on redeploy/reset -> clear localStorage and show Signup
+            localStorage.removeItem('hasSignedUp');
+            renderSignupUI();
+        }
+    } catch (err) {
+        // Fallback to localStorage if offline/error
+        if (localStorage.getItem('hasSignedUp') === 'true') {
+            renderLoginUI();
+        }
+    }
+}
 
 function renderLoginUI() {
     document.getElementById('mainTitle').innerHTML = 'Welcome Back to <span>PAYME</span>';
@@ -340,8 +379,16 @@ function renderLoginUI() {
     document.getElementById('referralSection').style.display = 'none';
 }
 
+function renderSignupUI() {
+    document.getElementById('mainTitle').innerHTML = 'Start Earning on <span>PAYME</span>';
+    document.getElementById('mainSubtext').innerText = 'Join thousands earning daily cash rewards directly to their wallets.';
+    document.getElementById('telegramBtnText').innerText = 'Sign Up with Telegram';
+    document.getElementById('bonusBanner').style.display = 'inline-flex';
+    document.getElementById('benefitsGrid').style.display = 'grid';
+    document.getElementById('referralSection').style.display = 'block';
+}
+
 async function handleAuthAction() {
-    // Perform authentication regardless of login or signup state
     await handleTelegramAuth();
 }
 
@@ -357,7 +404,6 @@ async function handleTelegramAuth() {
 
     let telegramUser = activeTg?.initDataUnsafe?.user;
 
-    // Enable testing on Termux local environment
     if (!telegramUser && isLocalhost) {
         telegramUser = { id: '999888777', username: 'local_tester', first_name: 'Local', last_name: 'Tester' };
     }
@@ -469,5 +515,10 @@ function redirectDashboard() {
     window.location.href = '/dashboard.html';
 }
 </script>
+
+
+
+
+
 </body>
 </html>
