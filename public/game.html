@@ -2,1289 +2,1487 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>PAYME Wheel - Spin & Win</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<link
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet">
 
 <style>
 :root {
-    --bg: #050816;
-    --bg2: #0a1022;
-    --card: rgba(15, 23, 42, .78);
+  --bg: #050816;
+  --bg2: #080d1d;
+  --card: rgba(14, 23, 42, .82);
 
-    --blue: #2563eb;
-    --cyan: #38bdf8;
-    --purple: #8b5cf6;
-    --pink: #ec4899;
-    --green: #10b981;
-    --gold: #f59e0b;
-    --red: #ef4444;
+  --blue: #2563eb;
+  --blue2: #1d4ed8;
+  --cyan: #38bdf8;
+  --purple: #8b5cf6;
+  --green: #10b981;
+  --gold: #f59e0b;
+  --red: #ef4444;
 
-    --text: #f8fafc;
-    --muted: #94a3b8;
+  --text: #f8fafc;
+  --muted: #94a3b8;
 
-    --glass-border: rgba(255,255,255,.09);
+  --border: rgba(255,255,255,.075);
+  --border-light: rgba(255,255,255,.11);
 }
 
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
-    background: var(--bg);
+  background: var(--bg);
 }
 
 body {
-    min-height: 100vh;
-    color: var(--text);
-    background:
-        radial-gradient(circle at 50% -10%, rgba(56,189,248,.18), transparent 35%),
-        radial-gradient(circle at 0% 55%, rgba(37,99,235,.12), transparent 30%),
-        radial-gradient(circle at 100% 80%, rgba(139,92,246,.12), transparent 32%),
-        linear-gradient(180deg, #050816 0%, #070b18 100%);
-    overflow-x: hidden;
-    padding-bottom: 45px;
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(56,189,248,.15),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at -10% 55%,
+      rgba(37,99,235,.10),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 110% 75%,
+      rgba(139,92,246,.10),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      #050816 0%,
+      #070b18 100%
+    );
+
+  overflow-x: hidden;
+  padding-bottom: 45px;
 }
 
-/* ================================
-   BACKGROUND EFFECTS
-================================ */
+/* =========================
+   BACKGROUND
+========================= */
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
 
 body::before {
-    content: "";
-    position: fixed;
-    width: 380px;
-    height: 380px;
-    border-radius: 50%;
-    background: rgba(37,99,235,.08);
-    filter: blur(80px);
-    top: 20%;
-    left: -180px;
-    pointer-events: none;
+  width: 360px;
+  height: 360px;
+  left: -180px;
+  top: 22%;
+  background: rgba(37,99,235,.075);
+  filter: blur(80px);
 }
 
 body::after {
-    content: "";
-    position: fixed;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: rgba(139,92,246,.08);
-    filter: blur(80px);
-    bottom: 5%;
-    right: -150px;
-    pointer-events: none;
+  width: 330px;
+  height: 330px;
+  right: -160px;
+  bottom: 5%;
+  background: rgba(139,92,246,.075);
+  filter: blur(80px);
 }
 
-/* ================================
+/* =========================
    HEADER
-================================ */
+========================= */
 
 header {
-    width: 100%;
-    max-width: 500px;
-    margin: auto;
-    padding: 17px 18px;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+  padding: 15px 18px;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 
-    background: rgba(5,8,22,.72);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+  background: rgba(5,8,22,.82);
+  border-bottom: 1px solid rgba(255,255,255,.045);
 
-    border-bottom: 1px solid rgba(255,255,255,.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .back-btn {
-    text-decoration: none;
-    color: #cbd5e1;
+  text-decoration: none;
+  color: #cbd5e1;
 
-    display: flex;
-    align-items: center;
-    gap: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 
-    font-size: .82rem;
-    font-weight: 800;
+  padding: 9px 14px;
 
-    padding: 9px 14px;
-    border-radius: 14px;
+  border-radius: 14px;
 
-    background: rgba(255,255,255,.055);
-    border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.065);
 
-    transition: .2s ease;
+  font-size: .80rem;
+  font-weight: 800;
+
+  transition:
+    transform .18s ease,
+    background .18s ease;
 }
 
 .back-btn:active {
-    transform: scale(.94);
+  transform: scale(.95);
 }
 
 .header-right {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .balance-badge {
-    min-width: 104px;
+  min-width: 108px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    padding: 9px 14px;
+  padding: 9px 14px;
 
-    border-radius: 30px;
+  border-radius: 30px;
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(37,99,235,.22),
-            rgba(56,189,248,.08)
-        );
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37,99,235,.22),
+      rgba(56,189,248,.08)
+    );
 
-    border: 1px solid rgba(56,189,248,.28);
+  border: 1px solid rgba(56,189,248,.25);
 
-    color: #67e8f9;
+  color: #67e8f9;
 
-    font-size: .88rem;
-    font-weight: 900;
+  font-size: .84rem;
+  font-weight: 900;
 
-    box-shadow:
-        0 0 25px rgba(56,189,248,.10),
-        inset 0 1px rgba(255,255,255,.08);
+  box-shadow:
+    0 0 25px rgba(56,189,248,.08),
+    inset 0 1px rgba(255,255,255,.08);
 }
 
-/* ================================
+/* =========================
    MAIN
-================================ */
+========================= */
 
 .container {
-    width: 100%;
-    max-width: 500px;
+  width: 100%;
+  max-width: 500px;
 
-    margin: auto;
+  margin: auto;
+  padding: 0 18px;
 
-    padding: 0 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  gap: 17px;
 
-    gap: 18px;
-
-    position: relative;
-    z-index: 2;
+  position: relative;
+  z-index: 2;
 }
 
-/* ================================
+/* =========================
    HERO
-================================ */
+========================= */
 
 .hero {
-    width: 100%;
-    text-align: center;
-
-    margin-top: 14px;
-
-    position: relative;
+  width: 100%;
+  text-align: center;
+  margin-top: 15px;
 }
 
 .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 
-    padding: 6px 12px;
-    margin-bottom: 10px;
+  padding: 6px 12px;
+  margin-bottom: 10px;
 
-    border-radius: 30px;
+  border-radius: 30px;
 
-    background: rgba(56,189,248,.08);
-    border: 1px solid rgba(56,189,248,.16);
+  background: rgba(56,189,248,.075);
+  border: 1px solid rgba(56,189,248,.15);
 
-    color: #7dd3fc;
+  color: #7dd3fc;
 
-    font-size: .67rem;
-    font-weight: 900;
-
-    letter-spacing: .8px;
-    text-transform: uppercase;
+  font-size: .65rem;
+  font-weight: 900;
+  letter-spacing: .75px;
+  text-transform: uppercase;
 }
 
 .hero-badge-dot {
-    width: 6px;
-    height: 6px;
+  width: 6px;
+  height: 6px;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    background: #38bdf8;
+  background: #38bdf8;
 
-    box-shadow: 0 0 10px #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
 
-    animation: livePulse 1.5s infinite;
+  animation: livePulse 1.8s ease-in-out infinite;
 }
 
 @keyframes livePulse {
-    0%,100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 
-    50% {
-        transform: scale(.65);
-        opacity: .55;
-    }
+  50% {
+    transform: scale(.7);
+    opacity: .55;
+  }
 }
 
 .hero h1 {
-    font-size: clamp(1.9rem, 9vw, 2.4rem);
+  font-size: clamp(1.9rem, 9vw, 2.4rem);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -1.5px;
 
-    line-height: 1;
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 10%,
+      #e0f2fe 42%,
+      #38bdf8 75%,
+      #8b5cf6 100%
+    );
 
-    font-weight: 900;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 
-    letter-spacing: -1.4px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff 10%,
-            #e0f2fe 42%,
-            #38bdf8 75%,
-            #8b5cf6 100%
-        );
-
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-
-    filter: drop-shadow(0 10px 25px rgba(56,189,248,.15));
+  filter:
+    drop-shadow(
+      0 10px 25px rgba(56,189,248,.13)
+    );
 }
 
 .hero p {
-    margin-top: 9px;
+  margin-top: 9px;
 
-    color: var(--muted);
+  color: var(--muted);
 
-    font-size: .78rem;
-    font-weight: 600;
+  font-size: .76rem;
+  font-weight: 600;
 }
 
+/* =========================
+   COST
+========================= */
+
 .cost-tag-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 
-    margin-top: 13px;
+  margin-top: 13px;
 
-    padding: 6px 9px 6px 13px;
+  padding: 6px 9px 6px 13px;
 
-    border-radius: 30px;
+  border-radius: 30px;
 
-    background: rgba(15,23,42,.75);
+  background: rgba(15,23,42,.72);
+  border: 1px solid rgba(255,255,255,.075);
 
-    border: 1px solid rgba(255,255,255,.08);
-
-    box-shadow:
-        0 8px 25px rgba(0,0,0,.25),
-        inset 0 1px rgba(255,255,255,.05);
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.23),
+    inset 0 1px rgba(255,255,255,.05);
 }
 
 .cost-text {
-    color: #94a3b8;
+  color: #94a3b8;
 
-    font-size: .69rem;
-    font-weight: 900;
-
-    letter-spacing: .35px;
+  font-size: .67rem;
+  font-weight: 900;
+  letter-spacing: .3px;
 }
 
 .free-spin-pill {
-    display: none;
+  display: none;
 
-    padding: 4px 10px;
+  padding: 4px 10px;
 
-    border-radius: 30px;
+  border-radius: 30px;
 
-    background:
-        linear-gradient(
-            135deg,
-            #10b981,
-            #047857
-        );
+  background:
+    linear-gradient(
+      135deg,
+      #10b981,
+      #047857
+    );
 
-    color: white;
+  color: white;
 
-    font-size: .65rem;
-    font-weight: 900;
+  font-size: .62rem;
+  font-weight: 900;
 
-    letter-spacing: .4px;
-
-    box-shadow:
-        0 0 15px rgba(16,185,129,.38);
-
-    animation: freePulse 1.5s infinite;
+  box-shadow:
+    0 0 15px rgba(16,185,129,.30);
 }
 
-@keyframes freePulse {
-    0%,100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.04);
-    }
-}
-
-/* ================================
-   WHEEL STAGE
-================================ */
+/* =========================
+   WHEEL
+========================= */
 
 .wheel-stage {
-    width: 350px;
-    height: 350px;
+  width: 350px;
+  height: 350px;
 
-    max-width: 92vw;
-    max-height: 92vw;
+  max-width: 92vw;
+  max-height: 92vw;
 
-    position: relative;
+  position: relative;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    margin: 3px auto 0;
-
-    perspective: 1200px;
+  margin: 3px auto 0;
 }
 
-/* Outer halo */
-
 .wheel-stage::before {
-    content: "";
+  content: "";
 
-    position: absolute;
+  position: absolute;
 
-    width: 360px;
-    height: 360px;
+  width: 360px;
+  height: 360px;
 
-    max-width: 95vw;
-    max-height: 95vw;
+  max-width: 95vw;
+  max-height: 95vw;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    background:
-        conic-gradient(
-            from 0deg,
-            rgba(56,189,248,.0),
-            rgba(56,189,248,.18),
-            rgba(139,92,246,.16),
-            rgba(56,189,248,.0)
-        );
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent,
+      rgba(56,189,248,.15),
+      rgba(139,92,246,.13),
+      transparent
+    );
 
-    filter: blur(13px);
+  filter: blur(13px);
 
-    animation: haloRotate 8s linear infinite;
+  opacity: .8;
 
-    opacity: .85;
+  animation: haloRotate 10s linear infinite;
 }
 
 @keyframes haloRotate {
-    to {
-        transform: rotate(360deg);
-    }
+  to {
+    transform: rotate(360deg);
+  }
 }
-
-/* Outer wheel frame */
 
 .wheel-outer-ring {
-    position: absolute;
+  position: absolute;
 
-    width: 340px;
-    height: 340px;
+  width: 340px;
+  height: 340px;
 
-    max-width: 94vw;
-    max-height: 94vw;
+  max-width: 94vw;
+  max-height: 94vw;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    background:
-        radial-gradient(
-            circle at 35% 25%,
-            #24324c 0%,
-            #111a2d 48%,
-            #070b15 100%
-        );
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      #24324c 0%,
+      #111a2d 48%,
+      #070b15 100%
+    );
 
-    border: 2px solid rgba(148,163,184,.16);
+  border: 2px solid rgba(148,163,184,.15);
 
-    box-shadow:
-        0 30px 65px rgba(0,0,0,.7),
-        0 0 0 5px rgba(255,255,255,.018),
-        0 0 35px rgba(37,99,235,.25),
-        inset 0 0 25px rgba(56,189,248,.10);
+  box-shadow:
+    0 30px 65px rgba(0,0,0,.68),
+    0 0 0 5px rgba(255,255,255,.015),
+    0 0 35px rgba(37,99,235,.22),
+    inset 0 0 25px rgba(56,189,248,.08);
 
-    z-index: 1;
+  z-index: 1;
 }
 
-/* Decorative ring */
-
 .wheel-outer-ring::before {
-    content: "";
+  content: "";
 
-    position: absolute;
-    inset: 8px;
+  position: absolute;
+  inset: 8px;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    border: 1px solid rgba(56,189,248,.22);
+  border: 1px solid rgba(56,189,248,.20);
 
-    box-shadow:
-        inset 0 0 15px rgba(56,189,248,.08);
+  box-shadow:
+    inset 0 0 15px rgba(56,189,248,.07);
 }
 
 .wheel-outer-ring::after {
-    content: "";
+  content: "";
 
-    position: absolute;
-    inset: 15px;
+  position: absolute;
+  inset: 15px;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    border: 1px dashed rgba(255,255,255,.08);
+  border: 1px dashed rgba(255,255,255,.07);
 }
 
-/* Pointer */
+/* =========================
+   POINTER
+========================= */
 
 .pointer-3d {
-    position: absolute;
+  position: absolute;
 
-    top: -8px;
-    left: 50%;
+  top: -8px;
+  left: 50%;
 
-    transform: translateX(-50%);
+  transform: translateX(-50%);
 
-    width: 43px;
-    height: 51px;
+  width: 43px;
+  height: 51px;
 
-    z-index: 40;
+  z-index: 40;
 
-    filter:
-        drop-shadow(0 7px 8px rgba(0,0,0,.75))
-        drop-shadow(0 0 10px rgba(56,189,248,.35));
-
-    animation: pointerFloat 2.5s ease-in-out infinite;
-}
-
-@keyframes pointerFloat {
-    0%,100% {
-        transform: translateX(-50%) translateY(0);
-    }
-
-    50% {
-        transform: translateX(-50%) translateY(3px);
-    }
+  filter:
+    drop-shadow(0 7px 8px rgba(0,0,0,.75))
+    drop-shadow(0 0 10px rgba(56,189,248,.30));
 }
 
 .pointer-3d path {
-    fill: url(#pointerGrad);
-
-    stroke: rgba(255,255,255,.95);
-
-    stroke-width: 1.5;
+  fill: url(#pointerGrad);
+  stroke: rgba(255,255,255,.95);
+  stroke-width: 1.5;
 }
 
-/* Canvas */
+/* =========================
+   CANVAS
+========================= */
 
 canvas {
-    width: 312px;
-    height: 312px;
+  width: 312px;
+  height: 312px;
 
-    max-width: 87vw;
-    max-height: 87vw;
+  max-width: 87vw;
+  max-height: 87vw;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    position: relative;
-    z-index: 10;
+  position: relative;
+  z-index: 10;
 
-    transform: rotateX(7deg);
+  transform: rotateX(7deg);
 
-    box-shadow:
-        0 18px 35px rgba(0,0,0,.62),
-        0 0 30px rgba(37,99,235,.15);
+  box-shadow:
+    0 18px 35px rgba(0,0,0,.60),
+    0 0 30px rgba(37,99,235,.13);
 
-    transition: filter .3s ease;
+  transition:
+    filter .25s ease;
 }
 
 canvas.spinning {
-    filter:
-        brightness(1.08)
-        saturate(1.15)
-        drop-shadow(0 0 15px rgba(56,189,248,.25));
+  filter:
+    brightness(1.07)
+    saturate(1.13)
+    drop-shadow(
+      0 0 15px rgba(56,189,248,.23)
+    );
 }
 
-/* ================================
-   SPIN BUTTON
-================================ */
+/* =========================
+   BUTTONS
+========================= */
 
 .spin-btn {
-    width: 100%;
+  width: 100%;
+  min-height: 60px;
 
-    min-height: 62px;
+  position: relative;
+  overflow: hidden;
 
-    position: relative;
-    overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 19px;
 
-    border: 1px solid rgba(255,255,255,.13);
+  color: white;
 
-    border-radius: 20px;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #1d4ed8 50%,
+      #1e40af
+    );
 
-    color: white;
+  font-size: .95rem;
+  font-weight: 900;
 
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb 0%,
-            #1d4ed8 48%,
-            #1e40af 100%
-        );
+  cursor: pointer;
 
-    font-size: 1rem;
-    font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
 
-    letter-spacing: .3px;
+  box-shadow:
+    0 13px 30px rgba(37,99,235,.30),
+    inset 0 1px rgba(255,255,255,.27);
 
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 10px;
-
-    box-shadow:
-        0 13px 30px rgba(37,99,235,.35),
-        inset 0 1px rgba(255,255,255,.3),
-        inset 0 -1px rgba(0,0,0,.15);
-
-    transition:
-        transform .18s ease,
-        box-shadow .18s ease,
-        filter .18s ease;
+  transition:
+    transform .16s ease,
+    filter .16s ease,
+    box-shadow .16s ease;
 }
 
-.spin-btn::before {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    left: -120%;
-
-    width: 80%;
-    height: 100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.2),
-            transparent
-        );
-
-    transform: skewX(-20deg);
-
-    animation: buttonShine 3.2s infinite;
-}
-
-@keyframes buttonShine {
-    0%, 55% {
-        left: -120%;
-    }
-
-    75%, 100% {
-        left: 140%;
-    }
+.spin-btn:hover {
+  filter: brightness(1.05);
 }
 
 .spin-btn:active {
-    transform: translateY(2px) scale(.985);
+  transform: translateY(2px) scale(.985);
 }
 
 .spin-btn:disabled {
-    opacity: .65;
-    cursor: not-allowed;
-    transform: none;
+  opacity: .62;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .spin-btn.is-free {
-    background:
-        linear-gradient(
-            135deg,
-            #10b981,
-            #059669,
-            #047857
-        );
+  background:
+    linear-gradient(
+      135deg,
+      #10b981,
+      #059669,
+      #047857
+    );
 
-    box-shadow:
-        0 13px 30px rgba(16,185,129,.32),
-        inset 0 1px rgba(255,255,255,.3);
+  box-shadow:
+    0 13px 30px rgba(16,185,129,.27),
+    inset 0 1px rgba(255,255,255,.28);
 }
 
-/* ================================
-   INFO STRIP
-================================ */
+/* =========================
+   AUTO SPIN CONTROL
+========================= */
+
+.auto-spin-card {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 13px 15px;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(18,28,50,.78),
+      rgba(8,13,27,.78)
+    );
+
+  border: 1px solid rgba(255,255,255,.07);
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.18),
+    inset 0 1px rgba(255,255,255,.035);
+
+  transition:
+    border-color .2s ease,
+    background .2s ease;
+}
+
+.auto-spin-card.active {
+  border-color: rgba(56,189,248,.28);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(18,42,68,.82),
+      rgba(8,20,38,.82)
+    );
+}
+
+.auto-spin-info {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.auto-spin-icon {
+  width: 37px;
+  height: 37px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: rgba(56,189,248,.08);
+  border: 1px solid rgba(56,189,248,.12);
+
+  color: #67e8f9;
+
+  font-size: 1rem;
+}
+
+.auto-spin-title {
+  color: #e2e8f0;
+
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.auto-spin-subtitle {
+  margin-top: 2px;
+
+  color: #64748b;
+
+  font-size: .60rem;
+  font-weight: 700;
+}
+
+/* Switch */
+
+.auto-switch {
+  width: 48px;
+  height: 27px;
+
+  position: relative;
+
+  flex-shrink: 0;
+
+  border: 0;
+  border-radius: 30px;
+
+  background: #1e293b;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.auto-switch::after {
+  content: "";
+
+  position: absolute;
+
+  width: 21px;
+  height: 21px;
+
+  top: 3px;
+  left: 3px;
+
+  border-radius: 50%;
+
+  background: #cbd5e1;
+
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.35);
+
+  transition:
+    transform .22s cubic-bezier(.16,1,.3,1),
+    background .2s ease;
+}
+
+.auto-switch.active {
+  background:
+    linear-gradient(
+      135deg,
+      #0ea5e9,
+      #2563eb
+    );
+
+  box-shadow:
+    0 0 16px rgba(37,99,235,.28);
+}
+
+.auto-switch.active::after {
+  transform: translateX(21px);
+  background: white;
+}
+
+.auto-status {
+  width: 100%;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 8px 12px;
+
+  border-radius: 12px;
+
+  color: #7dd3fc;
+
+  background: rgba(56,189,248,.055);
+  border: 1px solid rgba(56,189,248,.10);
+
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+.auto-status.active {
+  display: flex;
+}
+
+.auto-status-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #38bdf8;
+
+  box-shadow: 0 0 8px #38bdf8;
+
+  animation: autoPulse 1s infinite;
+}
+
+@keyframes autoPulse {
+  50% {
+    opacity: .35;
+    transform: scale(.7);
+  }
+}
+
+/* =========================
+   INFO
+========================= */
 
 .info-strip {
-    width: 100%;
+  width: 100%;
 
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
 
-    gap: 8px;
+  gap: 8px;
 }
 
 .info-box {
-    padding: 11px 7px;
+  padding: 11px 7px;
 
-    text-align: center;
+  text-align: center;
 
-    border-radius: 15px;
+  border-radius: 15px;
 
-    background: rgba(15,23,42,.58);
+  background: rgba(15,23,42,.55);
 
-    border: 1px solid rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.055);
 
-    box-shadow: inset 0 1px rgba(255,255,255,.035);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.03);
 }
 
 .info-value {
-    display: block;
+  display: block;
 
-    color: #e2e8f0;
+  color: #e2e8f0;
 
-    font-size: .75rem;
-    font-weight: 900;
+  font-size: .72rem;
+  font-weight: 900;
 }
 
 .info-label {
-    display: block;
+  display: block;
 
-    color: #64748b;
+  color: #64748b;
 
-    font-size: .58rem;
-    font-weight: 700;
+  font-size: .57rem;
+  font-weight: 700;
 
-    margin-top: 2px;
+  margin-top: 2px;
 }
 
-/* ================================
-   CARD
-================================ */
+/* =========================
+   HISTORY
+========================= */
 
 .card {
-    width: 100%;
+  width: 100%;
 
-    padding: 19px;
+  padding: 18px;
 
-    border-radius: 24px;
+  border-radius: 23px;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18,28,50,.82),
-            rgba(8,13,27,.82)
-        );
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18,28,50,.82),
+      rgba(8,13,27,.82)
+    );
 
-    border: 1px solid rgba(255,255,255,.075);
+  border: 1px solid rgba(255,255,255,.07);
 
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 
-    box-shadow:
-        0 18px 40px rgba(0,0,0,.28),
-        inset 0 1px rgba(255,255,255,.035);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.26),
+    inset 0 1px rgba(255,255,255,.035);
 }
 
 .card-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    margin-bottom: 14px;
+  margin-bottom: 14px;
 
-    font-size: .9rem;
-    font-weight: 900;
+  font-size: .88rem;
+  font-weight: 900;
 }
 
-.card-title span {
-    color: #64748b;
+.card-title span:last-child {
+  color: #64748b;
 
-    font-size: .62rem;
-    font-weight: 700;
+  font-size: .60rem;
+  font-weight: 700;
 }
 
 .history-list {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
-    gap: 8px;
+  max-height: 190px;
 
-    max-height: 190px;
+  overflow-y: auto;
 
-    overflow-y: auto;
-
-    scrollbar-width: thin;
+  scrollbar-width: thin;
 }
 
 .history-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    padding: 12px 14px;
+  padding: 11px 13px;
 
-    border-radius: 15px;
+  border-radius: 15px;
 
-    background: rgba(3,7,18,.55);
+  background: rgba(3,7,18,.55);
 
-    border: 1px solid rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.045);
 
-    font-size: .8rem;
+  font-size: .78rem;
 }
 
 .history-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .history-icon {
-    width: 31px;
-    height: 31px;
+  width: 31px;
+  height: 31px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    border-radius: 10px;
+  border-radius: 10px;
 
-    background: rgba(56,189,248,.08);
+  background: rgba(56,189,248,.07);
 
-    font-size: .85rem;
-}
-
-.history-name {
-    color: #e2e8f0;
-    font-weight: 800;
-}
-
-.history-time {
-    color: #475569;
-
-    font-size: .62rem;
-    margin-top: 2px;
+  font-size: .82rem;
 }
 
 .history-item.won .history-icon {
-    background: rgba(16,185,129,.1);
+  background: rgba(16,185,129,.09);
 }
 
-.history-item.won .history-amount {
-    color: #4ade80;
+.history-name {
+  color: #e2e8f0;
+  font-weight: 800;
 }
 
-.history-item.zero .history-amount {
-    color: #64748b;
+.history-time {
+  color: #475569;
+  font-size: .61rem;
+  margin-top: 2px;
 }
 
 .history-amount {
-    font-size: .82rem;
-    font-weight: 900;
+  color: #64748b;
+
+  font-size: .81rem;
+  font-weight: 900;
 }
 
-/* ================================
-   GENERAL MODALS
-================================ */
+.history-item.won .history-amount {
+  color: #4ade80;
+}
+
+/* =========================
+   MODALS
+   Flicker-resistant implementation
+========================= */
 
 .modal-overlay {
-    display: none;
+  position: fixed;
+  inset: 0;
 
-    position: fixed;
-    inset: 0;
+  padding: 20px;
 
-    padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    align-items: center;
-    justify-content: center;
+  background: rgba(2,5,14,.82);
 
-    background: rgba(2,5,14,.82);
+  /*
+    Instead of display:none/display:flex,
+    the overlay stays mounted.
+    This prevents browser repaint flickering.
+  */
 
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+  visibility: hidden;
+  opacity: 0;
 
-    z-index: 1000;
+  pointer-events: none;
+
+  z-index: 1000;
+
+  transform: translateZ(0);
+
+  transition:
+    opacity .20s ease,
+    visibility 0s linear .20s;
+
+  will-change: opacity;
 }
 
 .modal-overlay.active {
-    display: flex;
+  visibility: visible;
+  opacity: 1;
+
+  pointer-events: auto;
+
+  transition:
+    opacity .20s ease,
+    visibility 0s linear 0s;
 }
 
-/* ================================
+.modal-card,
+.insufficient-card {
+  transform:
+    translate3d(0, 18px, 0)
+    scale(.97);
+
+  opacity: 0;
+
+  transition:
+    transform .24s cubic-bezier(.16,1,.3,1),
+    opacity .20s ease;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+.modal-overlay.active .modal-card,
+.modal-overlay.active .insufficient-card {
+  transform:
+    translate3d(0,0,0)
+    scale(1);
+
+  opacity: 1;
+}
+
+/* =========================
    RESULT MODAL
-================================ */
+========================= */
 
 .modal-card {
-    width: 100%;
-    max-width: 350px;
+  width: 100%;
+  max-width: 350px;
 
-    padding: 30px 23px 23px;
+  padding: 29px 23px 23px;
 
-    text-align: center;
+  text-align: center;
 
-    border-radius: 28px;
+  border-radius: 27px;
 
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(56,189,248,.11),
-            transparent 45%
-        ),
-        linear-gradient(
-            180deg,
-            #131d34,
-            #080e1e
-        );
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(56,189,248,.10),
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      #131d34,
+      #080e1e
+    );
 
-    border: 1px solid rgba(56,189,248,.22);
+  border: 1px solid rgba(56,189,248,.20);
 
-    box-shadow:
-        0 30px 70px rgba(0,0,0,.72),
-        0 0 35px rgba(56,189,248,.12);
+  box-shadow:
+    0 30px 70px rgba(0,0,0,.70),
+    0 0 35px rgba(56,189,248,.10);
 
-    animation: modalIn .4s cubic-bezier(.16,1,.3,1);
-}
-
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(.88);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+  /*
+    Prevent rendering flicker on mobile browsers.
+  */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .modal-icon {
-    width: 80px;
-    height: 80px;
+  width: 76px;
+  height: 76px;
 
-    margin: 0 auto 14px;
+  margin: 0 auto 14px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    border-radius: 25px;
+  border-radius: 23px;
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(56,189,248,.16),
-            rgba(139,92,246,.14)
-        );
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56,189,248,.15),
+      rgba(139,92,246,.12)
+    );
 
-    border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.07);
 
-    font-size: 3rem;
+  font-size: 2.65rem;
 
-    box-shadow:
-        0 15px 35px rgba(0,0,0,.3);
+  box-shadow:
+    0 15px 35px rgba(0,0,0,.28);
 }
 
 .modal-title {
-    color: white;
+  color: white;
 
-    font-size: 1.35rem;
-    font-weight: 900;
+  font-size: 1.30rem;
+  font-weight: 900;
 
-    margin-bottom: 7px;
+  margin-bottom: 7px;
 }
 
 .modal-desc {
-    color: #67e8f9;
+  color: #67e8f9;
 
-    font-size: 1.05rem;
-    font-weight: 900;
+  font-size: 1rem;
+  font-weight: 900;
 
-    margin-bottom: 23px;
+  margin-bottom: 22px;
 }
 
 .modal-btn {
-    width: 100%;
+  width: 100%;
 
-    padding: 14px;
+  padding: 14px;
 
-    border: 0;
+  border: 0;
+  border-radius: 16px;
 
-    border-radius: 16px;
+  color: white;
 
-    color: white;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #1d4ed8
+    );
 
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #1d4ed8
-        );
+  font-size: .92rem;
+  font-weight: 900;
 
-    font-size: .95rem;
-    font-weight: 900;
+  cursor: pointer;
 
-    cursor: pointer;
+  box-shadow:
+    0 10px 22px rgba(37,99,235,.27);
 
-    box-shadow:
-        0 10px 22px rgba(37,99,235,.3);
+  transition:
+    transform .16s ease,
+    filter .16s ease;
 }
 
-/* ================================
-   INSUFFICIENT BALANCE MODAL
-================================ */
+.modal-btn:active {
+  transform: scale(.98);
+}
+
+/* =========================
+   INSUFFICIENT BALANCE
+========================= */
 
 #insufficientModal {
-    z-index: 1200;
+  z-index: 1200;
 }
 
 .insufficient-card {
-    width: 100%;
-    max-width: 370px;
+  width: 100%;
+  max-width: 370px;
 
-    padding: 26px 22px 22px;
+  padding: 25px 22px 22px;
 
-    position: relative;
-    overflow: hidden;
+  position: relative;
 
-    text-align: center;
+  text-align: center;
 
-    border-radius: 30px;
+  border-radius: 29px;
 
-    background:
-        radial-gradient(
-            circle at 50% -15%,
-            rgba(245,158,11,.18),
-            transparent 42%
-        ),
-        linear-gradient(
-            180deg,
-            #172036 0%,
-            #090e1c 100%
-        );
+  background:
+    radial-gradient(
+      circle at 50% -15%,
+      rgba(245,158,11,.16),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      #172036,
+      #090e1c
+    );
 
-    border: 1px solid rgba(245,158,11,.24);
+  border: 1px solid rgba(245,158,11,.22);
 
-    box-shadow:
-        0 35px 80px rgba(0,0,0,.8),
-        0 0 45px rgba(245,158,11,.10);
+  box-shadow:
+    0 35px 80px rgba(0,0,0,.80),
+    0 0 45px rgba(245,158,11,.08);
 
-    animation: insufficientIn .45s cubic-bezier(.16,1,.3,1);
-}
+  overflow: hidden;
 
-@keyframes insufficientIn {
-    0% {
-        opacity: 0;
-        transform: translateY(40px) scale(.82) rotateX(8deg);
-    }
-
-    65% {
-        transform: translateY(-5px) scale(1.02);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.insufficient-card::before {
-    content: "";
-
-    position: absolute;
-
-    width: 190px;
-    height: 190px;
-
-    top: -100px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    border-radius: 50%;
-
-    background: rgba(245,158,11,.13);
-
-    filter: blur(35px);
-
-    pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .insufficient-close {
-    position: absolute;
+  position: absolute;
 
-    top: 13px;
-    right: 14px;
+  top: 13px;
+  right: 14px;
 
-    width: 34px;
-    height: 34px;
+  width: 34px;
+  height: 34px;
 
-    border: 1px solid rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 50%;
 
-    border-radius: 50%;
+  background: rgba(255,255,255,.045);
 
-    background: rgba(255,255,255,.05);
+  color: #94a3b8;
 
-    color: #94a3b8;
+  font-size: 1.05rem;
 
-    font-size: 1.1rem;
-
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .balance-warning-icon {
-    width: 76px;
-    height: 76px;
+  width: 74px;
+  height: 74px;
 
-    margin: 3px auto 15px;
+  margin: 3px auto 15px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    border-radius: 24px;
+  border-radius: 23px;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(245,158,11,.19),
-            rgba(234,88,12,.08)
-        );
+  background:
+    linear-gradient(
+      145deg,
+      rgba(245,158,11,.17),
+      rgba(234,88,12,.07)
+    );
 
-    border: 1px solid rgba(245,158,11,.22);
+  border: 1px solid rgba(245,158,11,.21);
 
-    box-shadow:
-        0 12px 30px rgba(245,158,11,.12),
-        inset 0 1px rgba(255,255,255,.08);
+  box-shadow:
+    0 12px 30px rgba(245,158,11,.10),
+    inset 0 1px rgba(255,255,255,.07);
 
-    font-size: 2.35rem;
-
-    animation: warningFloat 2.5s ease-in-out infinite;
-}
-
-@keyframes warningFloat {
-    0%,100% {
-        transform: translateY(0) rotate(0deg);
-    }
-
-    50% {
-        transform: translateY(-5px) rotate(-2deg);
-    }
+  font-size: 2.25rem;
 }
 
 .insufficient-title {
-    font-size: 1.32rem;
+  font-size: 1.30rem;
+  font-weight: 900;
 
-    font-weight: 900;
+  color: white;
 
-    color: #fff;
-
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 
 .insufficient-subtitle {
-    color: #94a3b8;
+  color: #94a3b8;
 
-    font-size: .78rem;
+  font-size: .77rem;
+  line-height: 1.55;
 
-    line-height: 1.55;
+  font-weight: 600;
 
-    font-weight: 600;
-
-    margin-bottom: 17px;
+  margin-bottom: 17px;
 }
 
 .balance-comparison {
-    display: flex;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    align-items: center;
-    justify-content: space-between;
+  gap: 8px;
 
-    gap: 8px;
+  padding: 13px;
 
-    padding: 13px;
+  margin-bottom: 17px;
 
-    margin-bottom: 17px;
+  border-radius: 17px;
 
-    border-radius: 17px;
+  background: rgba(3,7,18,.5);
 
-    background: rgba(3,7,18,.5);
-
-    border: 1px solid rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.055);
 }
 
 .balance-comparison-item {
-    flex: 1;
-
-    text-align: center;
+  flex: 1;
+  text-align: center;
 }
 
 .balance-comparison-label {
-    display: block;
+  display: block;
 
-    color: #64748b;
+  color: #64748b;
 
-    font-size: .59rem;
+  font-size: .58rem;
+  font-weight: 800;
 
-    font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .4px;
 
-    text-transform: uppercase;
-
-    letter-spacing: .4px;
-
-    margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 
 .balance-comparison-value {
-    display: block;
+  display: block;
 
-    font-size: .92rem;
-
-    font-weight: 900;
+  font-size: .90rem;
+  font-weight: 900;
 }
 
 .balance-comparison-value.current {
-    color: #f87171;
+  color: #f87171;
 }
 
 .balance-comparison-value.required {
-    color: #fbbf24;
+  color: #fbbf24;
 }
 
 .comparison-arrow {
-    color: #475569;
-
-    font-size: 1.1rem;
+  color: #475569;
+  font-size: 1.05rem;
 }
 
 .deposit-btn {
-    width: 100%;
+  width: 100%;
+  min-height: 51px;
 
-    min-height: 52px;
+  border: none;
+  border-radius: 17px;
 
-    border: none;
+  background:
+    linear-gradient(
+      135deg,
+      #f59e0b,
+      #ea580c
+    );
 
-    border-radius: 17px;
+  color: white;
 
-    background:
-        linear-gradient(
-            135deg,
-            #f59e0b,
-            #ea580c
-        );
+  font-size: .93rem;
+  font-weight: 900;
 
-    color: white;
+  cursor: pointer;
 
-    font-size: .95rem;
+  box-shadow:
+    0 12px 25px rgba(245,158,11,.23),
+    inset 0 1px rgba(255,255,255,.28);
 
-    font-weight: 900;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 12px 25px rgba(245,158,11,.25),
-        inset 0 1px rgba(255,255,255,.3);
-
-    transition: .18s ease;
+  transition:
+    transform .16s ease;
 }
 
 .deposit-btn:active {
-    transform: scale(.97);
+  transform: scale(.97);
 }
 
 .deposit-btn-content {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .deposit-note {
-    margin-top: 12px;
+  margin-top: 12px;
 
-    color: #475569;
+  color: #475569;
 
-    font-size: .61rem;
-
-    font-weight: 700;
+  font-size: .60rem;
+  font-weight: 700;
 }
 
-/* ================================
+/* =========================
+   TOAST
+========================= */
+
+.spin-toast {
+  position: fixed;
+
+  left: 50%;
+  bottom: 22px;
+
+  width: max-content;
+  max-width: calc(100vw - 40px);
+
+  padding: 11px 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(9,16,31,.94);
+
+  border: 1px solid rgba(56,189,248,.18);
+
+  color: #e2e8f0;
+
+  font-size: .72rem;
+  font-weight: 800;
+
+  box-shadow:
+    0 15px 35px rgba(0,0,0,.45);
+
+  transform:
+    translate(-50%, 25px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  z-index: 2000;
+
+  transition:
+    opacity .20s ease,
+    transform .22s ease,
+    visibility 0s linear .22s;
+}
+
+.spin-toast.active {
+  opacity: 1;
+  visibility: visible;
+
+  transform:
+    translate(-50%, 0);
+
+  transition:
+    opacity .20s ease,
+    transform .22s ease,
+    visibility 0s linear 0s;
+}
+
+.toast-icon {
+  color: #38bdf8;
+}
+
+/* =========================
    MOBILE
-================================ */
+========================= */
 
 @media (max-width: 370px) {
 
-    .wheel-stage {
-        width: 315px;
-        height: 315px;
-    }
+  .wheel-stage {
+    width: 315px;
+    height: 315px;
+  }
 
-    .wheel-outer-ring {
-        width: 305px;
-        height: 305px;
-    }
+  .wheel-outer-ring {
+    width: 305px;
+    height: 305px;
+  }
 
-    canvas {
-        width: 280px;
-        height: 280px;
-    }
+  canvas {
+    width: 280px;
+    height: 280px;
+  }
 
-    .spin-btn {
-        min-height: 58px;
-    }
+  .spin-btn {
+    min-height: 57px;
+  }
 }
 
-/* ================================
+/* =========================
    REDUCED MOTION
-================================ */
+========================= */
 
 @media (prefers-reduced-motion: reduce) {
 
-    *,
-    *::before,
-    *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-    }
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
 }
 </style>
 </head>
@@ -1293,379 +1491,442 @@ canvas.spinning {
 
 <header>
 
-    <a href="/dashboard.html" class="back-btn">
-        ‹ Dashboard
-    </a>
+  <a href="/dashboard.html" class="back-btn">
+    ‹ Dashboard
+  </a>
 
-    <div class="header-right">
-        <div class="balance-badge" id="headerBalance">
-            ₦0.00
-        </div>
+  <div class="header-right">
+    <div class="balance-badge" id="headerBalance">
+      ₦0.00
     </div>
+  </div>
 
 </header>
 
 
 <div class="container">
 
-    <!-- HERO -->
+  <!-- =========================
+       HERO
+  ========================= -->
 
-    <div class="hero">
+  <div class="hero">
 
-        <div class="hero-badge">
-            <span class="hero-badge-dot"></span>
-            LIVE REWARDS
-        </div>
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      LIVE REWARDS
+    </div>
 
-        <h1>PAYME Wheel</h1>
+    <h1>PAYME Wheel</h1>
 
-        <p>
-            Spin the wheel and win instant cash rewards
-        </p>
+    <p>
+      Spin the wheel and win instant cash rewards
+    </p>
 
-        <div class="cost-tag-wrapper">
+    <div class="cost-tag-wrapper">
 
-            <span class="cost-text">
-                SPIN COST: ₦50
-            </span>
+      <span class="cost-text">
+        SPIN COST: ₦50
+      </span>
 
-            <span
-                class="free-spin-pill"
-                id="freeSpinPill">
-                1 FREE SPIN
-            </span>
-
-        </div>
+      <span
+        class="free-spin-pill"
+        id="freeSpinPill">
+        1 FREE SPIN
+      </span>
 
     </div>
 
+  </div>
 
-    <!-- WHEEL -->
 
-    <div class="wheel-stage">
+  <!-- =========================
+       WHEEL
+  ========================= -->
 
-        <div class="wheel-outer-ring"></div>
+  <div class="wheel-stage">
 
-        <svg
-            class="pointer-3d"
-            viewBox="0 0 32 38">
+    <div class="wheel-outer-ring"></div>
 
-            <defs>
+    <svg
+      class="pointer-3d"
+      viewBox="0 0 32 38">
 
-                <linearGradient
-                    id="pointerGrad"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%">
+      <defs>
 
-                    <stop
-                        offset="0%"
-                        stop-color="#7DD3FC"/>
+        <linearGradient
+          id="pointerGrad"
+          x1="0%"
+          y1="0%"
+          x2="100%"
+          y2="100%">
 
-                    <stop
-                        offset="45%"
-                        stop-color="#38BDF8"/>
+          <stop
+            offset="0%"
+            stop-color="#7DD3FC"/>
 
-                    <stop
-                        offset="100%"
-                        stop-color="#2563EB"/>
+          <stop
+            offset="45%"
+            stop-color="#38BDF8"/>
 
-                </linearGradient>
+          <stop
+            offset="100%"
+            stop-color="#2563EB"/>
 
-            </defs>
+        </linearGradient>
 
-            <path
-                d="M16 38 L2 8 C0 4 4 0 8 0 L24 0 C28 0 32 4 30 8 Z"/>
+      </defs>
 
-        </svg>
+      <path
+        d="M16 38 L2 8 C0 4 4 0 8 0 L24 0 C28 0 32 4 30 8 Z"/>
 
-        <canvas
-            id="wheelCanvas"
-            width="600"
-            height="600">
-        </canvas>
+    </svg>
+
+    <canvas
+      id="wheelCanvas"
+      width="600"
+      height="600">
+    </canvas>
+
+  </div>
+
+
+  <!-- =========================
+       SPIN BUTTON
+  ========================= -->
+
+  <button
+    class="spin-btn"
+    id="spinBtn"
+    onclick="startSpin()">
+
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.7"
+      stroke-linecap="round"
+      stroke-linejoin="round">
+
+      <circle
+        cx="12"
+        cy="12"
+        r="9"/>
+
+      <path
+        d="M12 6v6l4 2"/>
+
+    </svg>
+
+    <span id="spinBtnText">
+      SPIN FOR ₦50
+    </span>
+
+  </button>
+
+
+  <!-- =========================
+       AUTO SPIN
+  ========================= -->
+
+  <div
+    class="auto-spin-card"
+    id="autoSpinCard">
+
+    <div class="auto-spin-info">
+
+      <div class="auto-spin-icon">
+        ↻
+      </div>
+
+      <div>
+
+        <div class="auto-spin-title">
+          Auto Spin
+        </div>
+
+        <div class="auto-spin-subtitle">
+          Automatically spin again after each result
+        </div>
+
+      </div>
 
     </div>
-
-
-    <!-- SPIN BUTTON -->
 
     <button
-        class="spin-btn"
-        id="spinBtn"
-        onclick="startSpin()">
+      type="button"
+      class="auto-switch"
+      id="autoSpinSwitch"
+      aria-label="Toggle auto spin"
+      aria-pressed="false"
+      onclick="toggleAutoSpin()">
+    </button>
 
-        <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.7"
-            stroke-linecap="round"
-            stroke-linejoin="round">
+  </div>
 
-            <circle
-                cx="12"
-                cy="12"
-                r="9"/>
 
-            <path d="M12 6v6l4 2"/>
+  <div
+    class="auto-status"
+    id="autoStatus">
 
-        </svg>
+    <span class="auto-status-dot"></span>
 
-        <span id="spinBtnText">
-            SPIN FOR ₦50
-        </span>
+    Auto Spin is active
+
+  </div>
+
+
+  <!-- =========================
+       QUICK INFO
+  ========================= -->
+
+  <div class="info-strip">
+
+    <div class="info-box">
+
+      <span class="info-value">
+        ₦50
+      </span>
+
+      <span class="info-label">
+        SPIN COST
+      </span>
+
+    </div>
+
+    <div class="info-box">
+
+      <span class="info-value">
+        ₦2,000
+      </span>
+
+      <span class="info-label">
+        TOP PRIZE
+      </span>
+
+    </div>
+
+    <div class="info-box">
+
+      <span class="info-value">
+        INSTANT
+      </span>
+
+      <span class="info-label">
+        REWARDS
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       HISTORY
+  ========================= -->
+
+  <div class="card">
+
+    <div class="card-title">
+
+      <span>
+        Recent Activity
+      </span>
+
+      <span>
+        YOUR SPINS
+      </span>
+
+    </div>
+
+    <div
+      class="history-list"
+      id="historyList">
+
+      <p
+        style="
+          text-align:center;
+          color:var(--muted);
+          font-size:.78rem;
+          padding:14px;
+        ">
+
+        Your wheel history will appear here.
+
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     RESULT MODAL
+========================= -->
+
+<div
+  class="modal-overlay"
+  id="resultModal">
+
+  <div class="modal-card">
+
+    <div
+      class="modal-icon"
+      id="modalIcon">
+      🎁
+    </div>
+
+    <div
+      class="modal-title"
+      id="modalTitle">
+      Winner!
+    </div>
+
+    <div
+      class="modal-desc"
+      id="modalDesc">
+      You won ₦100
+    </div>
+
+    <button
+      class="modal-btn"
+      onclick="closeModal()">
+
+      Continue
 
     </button>
 
-
-    <!-- QUICK INFO -->
-
-    <div class="info-strip">
-
-        <div class="info-box">
-
-            <span
-                class="info-value">
-                ₦50
-            </span>
-
-            <span
-                class="info-label">
-                SPIN COST
-            </span>
-
-        </div>
-
-        <div class="info-box">
-
-            <span
-                class="info-value">
-                ₦2,000
-            </span>
-
-            <span
-                class="info-label">
-                TOP PRIZE
-            </span>
-
-        </div>
-
-        <div class="info-box">
-
-            <span
-                class="info-value">
-                INSTANT
-            </span>
-
-            <span
-                class="info-label">
-                REWARDS
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <!-- HISTORY -->
-
-    <div class="card">
-
-        <div class="card-title">
-
-            <span>
-                Recent Activity
-            </span>
-
-            <span>
-                YOUR SPINS
-            </span>
-
-        </div>
-
-        <div
-            class="history-list"
-            id="historyList">
-
-            <p
-                style="
-                    text-align:center;
-                    color:var(--muted);
-                    font-size:.78rem;
-                    padding:14px;
-                ">
-
-                Your wheel history will appear here.
-
-            </p>
-
-        </div>
-
-    </div>
+  </div>
 
 </div>
 
 
-<!-- =========================================
-     RESULT MODAL
-========================================= -->
+<!-- =========================
+     INSUFFICIENT BALANCE
+========================= -->
 
 <div
-    class="modal-overlay"
-    id="resultModal">
+  class="modal-overlay"
+  id="insufficientModal">
 
-    <div class="modal-card">
+  <div class="insufficient-card">
 
-        <div
-            class="modal-icon"
-            id="modalIcon">
-            🎁
-        </div>
+    <button
+      class="insufficient-close"
+      onclick="closeInsufficientModal()">
+      ×
+    </button>
 
-        <div
-            class="modal-title"
-            id="modalTitle">
-            Winner!
-        </div>
+    <div class="balance-warning-icon">
+      💰
+    </div>
 
-        <div
-            class="modal-desc"
-            id="modalDesc">
-            You won ₦100
-        </div>
+    <div class="insufficient-title">
+      Not Enough Balance
+    </div>
 
-        <button
-            class="modal-btn"
-            onclick="closeModal()">
+    <div class="insufficient-subtitle">
 
-            Claim & Continue
+      You need at least
+      <strong style="color:#fbbf24;">
+        ₦50
+      </strong>
+      to spin the wheel.
 
-        </button>
+      Add funds to your balance and try again.
 
     </div>
+
+    <div class="balance-comparison">
+
+      <div class="balance-comparison-item">
+
+        <span class="balance-comparison-label">
+          Your Balance
+        </span>
+
+        <span
+          class="balance-comparison-value current"
+          id="insufficientCurrentBalance">
+          ₦0.00
+        </span>
+
+      </div>
+
+      <div class="comparison-arrow">
+        →
+      </div>
+
+      <div class="balance-comparison-item">
+
+        <span class="balance-comparison-label">
+          Required
+        </span>
+
+        <span class="balance-comparison-value required">
+          ₦50
+        </span>
+
+      </div>
+
+    </div>
+
+    <button
+      class="deposit-btn"
+      onclick="goToDeposit()">
+
+      <span class="deposit-btn-content">
+
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+
+          <path d="M12 3v18"/>
+          <path d="M7 8l5-5 5 5"/>
+          <path d="M5 21h14"/>
+
+        </svg>
+
+        Deposit Now
+
+      </span>
+
+    </button>
+
+    <div class="deposit-note">
+      Add funds to continue spinning
+    </div>
+
+  </div>
 
 </div>
 
 
-<!-- =========================================
-     INSUFFICIENT BALANCE MODAL
-========================================= -->
+<!-- =========================
+     AUTO SPIN TOAST
+========================= -->
 
 <div
-    class="modal-overlay"
-    id="insufficientModal">
+  class="spin-toast"
+  id="spinToast">
 
-    <div class="insufficient-card">
+  <span class="toast-icon">
+    ✓
+  </span>
 
-        <button
-            class="insufficient-close"
-            onclick="closeInsufficientModal()">
-
-            ×
-
-        </button>
-
-
-        <div class="balance-warning-icon">
-            💰
-        </div>
-
-
-        <div class="insufficient-title">
-            Not Enough Balance
-        </div>
-
-
-        <div class="insufficient-subtitle">
-
-            You need at least
-            <strong style="color:#fbbf24;">
-                ₦50
-            </strong>
-            to spin the wheel.
-
-            Add funds to your balance and try again.
-
-        </div>
-
-
-        <div class="balance-comparison">
-
-            <div class="balance-comparison-item">
-
-                <span class="balance-comparison-label">
-                    Your Balance
-                </span>
-
-                <span
-                    class="balance-comparison-value current"
-                    id="insufficientCurrentBalance">
-
-                    ₦0
-
-                </span>
-
-            </div>
-
-
-            <div class="comparison-arrow">
-                →
-            </div>
-
-
-            <div class="balance-comparison-item">
-
-                <span class="balance-comparison-label">
-                    Required
-                </span>
-
-                <span class="balance-comparison-value required">
-                    ₦50
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <button
-            class="deposit-btn"
-            onclick="goToDeposit()">
-
-            <span class="deposit-btn-content">
-
-                <svg
-                    width="19"
-                    height="19"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round">
-
-                    <path d="M12 3v18"/>
-                    <path d="M7 8l5-5 5 5"/>
-                    <path d="M5 21h14"/>
-
-                </svg>
-
-                Deposit Now
-
-            </span>
-
-        </button>
-
-
-        <div class="deposit-note">
-            Add funds to continue spinning
-        </div>
-
-    </div>
+  <span id="spinToastText">
+    Spin completed
+  </span>
 
 </div>
 
@@ -1678,84 +1939,88 @@ canvas.spinning {
 
 const segments = [
 
-    {
-        label: 'NO',
-        color1: '#263247',
-        color2: '#0f172a',
-        text: '#94a3b8'
-    },
+  {
+    label: '₦0',
+    color1: '#263247',
+    color2: '#0f172a',
+    text: '#94a3b8'
+  },
 
-    {
-        label: '₦10',
-        color1: '#2563eb',
-        color2: '#1d4ed8',
-        text: '#ffffff'
-    },
+  {
+    label: '₦10',
+    color1: '#2563eb',
+    color2: '#1d4ed8',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦20',
-        color1: '#0284c7',
-        color2: '#0369a1',
-        text: '#ffffff'
-    },
+  {
+    label: '₦20',
+    color1: '#0284c7',
+    color2: '#0369a1',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦50',
-        color1: '#3b82f6',
-        color2: '#1e40af',
-        text: '#ffffff'
-    },
+  {
+    label: '₦50',
+    color1: '#3b82f6',
+    color2: '#1e40af',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦100',
-        color1: '#8b5cf6',
-        color2: '#6d28d9',
-        text: '#ffffff'
-    },
+  {
+    label: '₦100',
+    color1: '#8b5cf6',
+    color2: '#6d28d9',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦250',
-        color1: '#38bdf8',
-        color2: '#0284c7',
-        text: '#ffffff'
-    },
+  {
+    label: '₦250',
+    color1: '#38bdf8',
+    color2: '#0284c7',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦500',
-        color1: '#10b981',
-        color2: '#047857',
-        text: '#ffffff'
-    },
+  {
+    label: '₦500',
+    color1: '#10b981',
+    color2: '#047857',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦1000',
-        color1: '#f59e0b',
-        color2: '#d97706',
-        text: '#ffffff'
-    },
+  {
+    label: '₦1000',
+    color1: '#f59e0b',
+    color2: '#d97706',
+    text: '#ffffff'
+  },
 
-    {
-        label: '₦2000',
-        color1: '#ec4899',
-        color2: '#be185d',
-        text: '#ffffff'
-    }
+  {
+    label: '₦2000',
+    color1: '#ec4899',
+    color2: '#be185d',
+    text: '#ffffff'
+  }
 
 ];
 
 
 const canvas =
-    document.getElementById('wheelCanvas');
+  document.getElementById('wheelCanvas');
 
 const ctx =
-    canvas.getContext('2d');
+  canvas.getContext('2d');
 
 const numSegments =
-    segments.length;
+  segments.length;
 
 const arc =
-    (Math.PI * 2) / numSegments;
+  (Math.PI * 2) / numSegments;
 
+
+/* =========================================
+   GAME STATE
+========================================= */
 
 let isSpinning = false;
 
@@ -1765,431 +2030,441 @@ let currentBalance = 0;
 
 
 /* =========================================
+   AUTO SPIN STATE
+========================================= */
+
+let autoSpinEnabled = false;
+
+let autoSpinTimer = null;
+
+let toastTimer = null;
+
+
+/* =========================================
    DRAW WHEEL
 ========================================= */
 
 function drawWheel(angle = 0) {
 
-    const width = canvas.width;
+  const width =
+    canvas.width;
 
-    const radius = width / 2;
+  const radius =
+    width / 2;
 
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        width
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    width
+  );
+
+  ctx.save();
+
+  ctx.translate(
+    radius,
+    radius
+  );
+
+  ctx.rotate(angle);
+
+
+  /* Outer shadow ring */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    radius - 5,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle =
+    '#050a16';
+
+  ctx.shadowColor =
+    'rgba(0,0,0,.8)';
+
+  ctx.shadowBlur = 20;
+
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+
+
+  /* Wheel segments */
+
+  for (
+    let i = 0;
+    i < numSegments;
+    i++
+  ) {
+
+    const startAngle =
+      i * arc;
+
+    const endAngle =
+      (i + 1) * arc;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      0,
+      0
     );
 
+    ctx.arc(
+      0,
+      0,
+      radius - 16,
+      startAngle,
+      endAngle
+    );
+
+    ctx.closePath();
+
+
+    /* Segment gradient */
+
+    const grad =
+      ctx.createRadialGradient(
+        -50,
+        -70,
+        15,
+        0,
+        0,
+        radius
+      );
+
+    grad.addColorStop(
+      0,
+      segments[i].color1
+    );
+
+    grad.addColorStop(
+      .55,
+      segments[i].color1
+    );
+
+    grad.addColorStop(
+      1,
+      segments[i].color2
+    );
+
+    ctx.fillStyle =
+      grad;
+
+    ctx.fill();
+
+
+    /* Separator */
+
+    ctx.strokeStyle =
+      'rgba(2,6,23,.85)';
+
+    ctx.lineWidth = 5;
+
+    ctx.stroke();
+
+
+    /* Highlight */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      0,
+      0
+    );
+
+    ctx.arc(
+      0,
+      0,
+      radius - 19,
+      startAngle + .01,
+      endAngle - .01
+    );
+
+    ctx.strokeStyle =
+      'rgba(255,255,255,.07)';
+
+    ctx.lineWidth = 2;
+
+    ctx.stroke();
+
+
+    /* Segment text */
 
     ctx.save();
 
-    ctx.translate(
-        radius,
-        radius
+    ctx.rotate(
+      startAngle + arc / 2
     );
-
-    ctx.rotate(angle);
-
-
-    /* Outer shadow ring */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        0,
-        radius - 5,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle = '#050a16';
-
-    ctx.shadowColor =
-        'rgba(0,0,0,.8)';
-
-    ctx.shadowBlur = 20;
-
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-
-
-    /* Segments */
-
-    for (
-        let i = 0;
-        i < numSegments;
-        i++
-    ) {
-
-        const startAngle =
-            i * arc;
-
-        const endAngle =
-            (i + 1) * arc;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            0
-        );
-
-        ctx.arc(
-            0,
-            0,
-            radius - 16,
-            startAngle,
-            endAngle
-        );
-
-        ctx.closePath();
-
-
-        /* Gradient */
-
-        const grad =
-            ctx.createRadialGradient(
-                -50,
-                -70,
-                15,
-                0,
-                0,
-                radius
-            );
-
-        grad.addColorStop(
-            0,
-            segments[i].color1
-        );
-
-        grad.addColorStop(
-            .55,
-            segments[i].color1
-        );
-
-        grad.addColorStop(
-            1,
-            segments[i].color2
-        );
-
-
-        ctx.fillStyle = grad;
-
-        ctx.fill();
-
-
-        /* Segment separator */
-
-        ctx.strokeStyle =
-            'rgba(2,6,23,.85)';
-
-        ctx.lineWidth = 5;
-
-        ctx.stroke();
-
-
-        /* Highlight */
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            0
-        );
-
-        ctx.arc(
-            0,
-            0,
-            radius - 19,
-            startAngle + .01,
-            endAngle - .01
-        );
-
-        ctx.strokeStyle =
-            'rgba(255,255,255,.07)';
-
-        ctx.lineWidth = 2;
-
-        ctx.stroke();
-
-
-        /* Text */
-
-        ctx.save();
-
-        ctx.rotate(
-            startAngle + arc / 2
-        );
-
-        ctx.textAlign = 'right';
-
-        ctx.textBaseline = 'middle';
-
-        ctx.fillStyle =
-            segments[i].text;
-
-        ctx.font =
-            '900 28px "Plus Jakarta Sans", sans-serif';
-
-
-        ctx.shadowColor =
-            'rgba(0,0,0,.75)';
-
-        ctx.shadowBlur = 9;
-
-        ctx.fillText(
-            segments[i].label,
-            radius - 52,
-            0
-        );
-
-
-        ctx.restore();
-
-    }
-
-
-    /* Decorative studs */
-
-    for (
-        let i = 0;
-        i < numSegments * 2;
-        i++
-    ) {
-
-        const studAngle =
-            i * (arc / 2);
-
-        const studRadius =
-            radius - 26;
-
-        const x =
-            studRadius *
-            Math.cos(studAngle);
-
-        const y =
-            studRadius *
-            Math.sin(studAngle);
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            6.5,
-            0,
-            Math.PI * 2
-        );
-
-
-        const studGrad =
-            ctx.createRadialGradient(
-                x - 2,
-                y - 2,
-                1,
-                x,
-                y,
-                7
-            );
-
-        studGrad.addColorStop(
-            0,
-            '#ffffff'
-        );
-
-        studGrad.addColorStop(
-            .35,
-            '#bae6fd'
-        );
-
-        studGrad.addColorStop(
-            1,
-            i % 2 === 0
-                ? '#0284c7'
-                : '#475569'
-        );
-
-
-        ctx.fillStyle =
-            studGrad;
-
-        ctx.shadowColor =
-            i % 2 === 0
-                ? '#38bdf8'
-                : 'rgba(255,255,255,.2)';
-
-        ctx.shadowBlur =
-            i % 2 === 0
-                ? 12
-                : 3;
-
-        ctx.fill();
-
-    }
-
-
-    /* Inner ring */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        0,
-        radius - 52,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.strokeStyle =
-        'rgba(255,255,255,.08)';
-
-    ctx.lineWidth = 2;
-
-    ctx.stroke();
-
-
-    /* Center cap */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        0,
-        50,
-        0,
-        Math.PI * 2
-    );
-
-
-    const capGrad =
-        ctx.createLinearGradient(
-            -50,
-            -50,
-            50,
-            50
-        );
-
-    capGrad.addColorStop(
-        0,
-        '#334155'
-    );
-
-    capGrad.addColorStop(
-        .45,
-        '#111827'
-    );
-
-    capGrad.addColorStop(
-        1,
-        '#020617'
-    );
-
-
-    ctx.fillStyle =
-        capGrad;
-
-    ctx.shadowColor =
-        'rgba(0,0,0,.9)';
-
-    ctx.shadowBlur = 20;
-
-    ctx.fill();
-
-
-    ctx.shadowBlur = 0;
-
-
-    ctx.strokeStyle =
-        '#38bdf8';
-
-    ctx.lineWidth = 3;
-
-    ctx.stroke();
-
-
-    /* Center inner ring */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        0,
-        33,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.strokeStyle =
-        'rgba(56,189,248,.35)';
-
-    ctx.lineWidth = 2;
-
-    ctx.stroke();
-
-
-    /* Center logo */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        0,
-        20,
-        0,
-        Math.PI * 2
-    );
-
-    const logoGrad =
-        ctx.createLinearGradient(
-            -20,
-            -20,
-            20,
-            20
-        );
-
-    logoGrad.addColorStop(
-        0,
-        '#7dd3fc'
-    );
-
-    logoGrad.addColorStop(
-        1,
-        '#2563eb'
-    );
-
-    ctx.fillStyle =
-        logoGrad;
-
-    ctx.fill();
-
-
-    /* Dollar symbol */
-
-    ctx.fillStyle =
-        '#ffffff';
-
-    ctx.font =
-        '900 20px Arial';
 
     ctx.textAlign =
-        'center';
+      'right';
 
     ctx.textBaseline =
-        'middle';
+      'middle';
+
+    ctx.fillStyle =
+      segments[i].text;
+
+    ctx.font =
+      '900 28px "Plus Jakarta Sans", sans-serif';
+
+    ctx.shadowColor =
+      'rgba(0,0,0,.75)';
+
+    ctx.shadowBlur = 9;
 
     ctx.fillText(
-        '₦',
-        0,
-        1
+      segments[i].label,
+      radius - 52,
+      0
+    );
+
+    ctx.restore();
+
+  }
+
+
+  /* Decorative studs */
+
+  for (
+    let i = 0;
+    i < numSegments * 2;
+    i++
+  ) {
+
+    const studAngle =
+      i * (arc / 2);
+
+    const studRadius =
+      radius - 26;
+
+    const x =
+      studRadius *
+      Math.cos(studAngle);
+
+    const y =
+      studRadius *
+      Math.sin(studAngle);
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      6.5,
+      0,
+      Math.PI * 2
     );
 
 
-    ctx.restore();
+    const studGrad =
+      ctx.createRadialGradient(
+        x - 2,
+        y - 2,
+        1,
+        x,
+        y,
+        7
+      );
+
+    studGrad.addColorStop(
+      0,
+      '#ffffff'
+    );
+
+    studGrad.addColorStop(
+      .35,
+      '#bae6fd'
+    );
+
+    studGrad.addColorStop(
+      1,
+      i % 2 === 0
+        ? '#0284c7'
+        : '#475569'
+    );
+
+    ctx.fillStyle =
+      studGrad;
+
+    ctx.shadowColor =
+      i % 2 === 0
+        ? '#38bdf8'
+        : 'rgba(255,255,255,.2)';
+
+    ctx.shadowBlur =
+      i % 2 === 0
+        ? 12
+        : 3;
+
+    ctx.fill();
+
+  }
+
+
+  /* Inner ring */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    radius - 52,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.strokeStyle =
+    'rgba(255,255,255,.08)';
+
+  ctx.lineWidth = 2;
+
+  ctx.stroke();
+
+
+  /* Center cap */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    50,
+    0,
+    Math.PI * 2
+  );
+
+
+  const capGrad =
+    ctx.createLinearGradient(
+      -50,
+      -50,
+      50,
+      50
+    );
+
+  capGrad.addColorStop(
+    0,
+    '#334155'
+  );
+
+  capGrad.addColorStop(
+    .45,
+    '#111827'
+  );
+
+  capGrad.addColorStop(
+    1,
+    '#020617'
+  );
+
+  ctx.fillStyle =
+    capGrad;
+
+  ctx.shadowColor =
+    'rgba(0,0,0,.9)';
+
+  ctx.shadowBlur = 20;
+
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+
+  ctx.strokeStyle =
+    '#38bdf8';
+
+  ctx.lineWidth = 3;
+
+  ctx.stroke();
+
+
+  /* Center inner ring */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    33,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.strokeStyle =
+    'rgba(56,189,248,.35)';
+
+  ctx.lineWidth = 2;
+
+  ctx.stroke();
+
+
+  /* Center logo */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    20,
+    0,
+    Math.PI * 2
+  );
+
+
+  const logoGrad =
+    ctx.createLinearGradient(
+      -20,
+      -20,
+      20,
+      20
+    );
+
+  logoGrad.addColorStop(
+    0,
+    '#7dd3fc'
+  );
+
+  logoGrad.addColorStop(
+    1,
+    '#2563eb'
+  );
+
+  ctx.fillStyle =
+    logoGrad;
+
+  ctx.fill();
+
+
+  /* Naira symbol */
+
+  ctx.fillStyle =
+    '#ffffff';
+
+  ctx.font =
+    '900 20px Arial';
+
+  ctx.textAlign =
+    'center';
+
+  ctx.textBaseline =
+    'middle';
+
+  ctx.fillText(
+    '₦',
+    0,
+    1
+  );
+
+
+  ctx.restore();
 
 }
 
@@ -2200,48 +2475,234 @@ function drawWheel(angle = 0) {
 
 function updateSpinButtonState() {
 
-    const btn =
-        document.getElementById('spinBtn');
+  const btn =
+    document.getElementById('spinBtn');
 
-    const btnText =
-        document.getElementById('spinBtnText');
+  const btnText =
+    document.getElementById('spinBtnText');
 
-    const freePill =
-        document.getElementById('freeSpinPill');
+  const freePill =
+    document.getElementById('freeSpinPill');
 
 
-    if (userFreeSpins > 0) {
+  if (userFreeSpins > 0) {
 
-        btn.classList.add(
-            'is-free'
-        );
+    btn.classList.add('is-free');
 
-        btnText.innerText =
-            `USE FREE SPIN (${userFreeSpins})`;
+    btnText.innerText =
+      `USE FREE SPIN (${userFreeSpins})`;
 
-        freePill.style.display =
-            'inline-block';
+    freePill.style.display =
+      'inline-block';
 
-        freePill.innerText =
-            `${userFreeSpins} FREE SPIN${
-                userFreeSpins > 1
-                    ? 'S'
-                    : ''
-            }`;
+    freePill.innerText =
+      `${userFreeSpins} FREE SPIN${
+        userFreeSpins > 1
+          ? 'S'
+          : ''
+      }`;
 
-    } else {
+  } else {
 
-        btn.classList.remove(
-            'is-free'
-        );
+    btn.classList.remove('is-free');
 
-        btnText.innerText =
-            'SPIN FOR ₦50';
+    btnText.innerText =
+      'SPIN FOR ₦50';
 
-        freePill.style.display =
-            'none';
+    freePill.style.display =
+      'none';
 
-    }
+  }
+
+}
+
+
+/* =========================================
+   AUTO SPIN TOGGLE
+========================================= */
+
+function toggleAutoSpin() {
+
+  if (isSpinning) {
+    return;
+  }
+
+  autoSpinEnabled =
+    !autoSpinEnabled;
+
+
+  const switchButton =
+    document.getElementById(
+      'autoSpinSwitch'
+    );
+
+  const card =
+    document.getElementById(
+      'autoSpinCard'
+    );
+
+  const status =
+    document.getElementById(
+      'autoStatus'
+    );
+
+
+  switchButton.classList.toggle(
+    'active',
+    autoSpinEnabled
+  );
+
+  card.classList.toggle(
+    'active',
+    autoSpinEnabled
+  );
+
+  status.classList.toggle(
+    'active',
+    autoSpinEnabled
+  );
+
+  switchButton.setAttribute(
+    'aria-pressed',
+    String(autoSpinEnabled)
+  );
+
+
+  if (autoSpinEnabled) {
+
+    showToast(
+      'Auto Spin enabled'
+    );
+
+    /*
+      Start immediately.
+    */
+
+    setTimeout(
+      () => {
+
+        if (
+          autoSpinEnabled &&
+          !isSpinning
+        ) {
+          startSpin();
+        }
+
+      },
+      250
+    );
+
+  } else {
+
+    clearAutoSpinTimer();
+
+    showToast(
+      'Auto Spin disabled'
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   STOP AUTO SPIN
+========================================= */
+
+function stopAutoSpin(reason = '') {
+
+  autoSpinEnabled =
+    false;
+
+  clearAutoSpinTimer();
+
+
+  const switchButton =
+    document.getElementById(
+      'autoSpinSwitch'
+    );
+
+  const card =
+    document.getElementById(
+      'autoSpinCard'
+    );
+
+  const status =
+    document.getElementById(
+      'autoStatus'
+    );
+
+
+  switchButton.classList.remove(
+    'active'
+  );
+
+  card.classList.remove(
+    'active'
+  );
+
+  status.classList.remove(
+    'active'
+  );
+
+  switchButton.setAttribute(
+    'aria-pressed',
+    'false'
+  );
+
+
+  if (reason) {
+    showToast(reason);
+  }
+
+}
+
+
+function clearAutoSpinTimer() {
+
+  if (autoSpinTimer) {
+
+    clearTimeout(
+      autoSpinTimer
+    );
+
+    autoSpinTimer = null;
+
+  }
+
+}
+
+
+/* =========================================
+   AUTO SPIN NEXT
+========================================= */
+
+function scheduleNextAutoSpin() {
+
+  clearAutoSpinTimer();
+
+
+  if (!autoSpinEnabled) {
+    return;
+  }
+
+
+  autoSpinTimer =
+    setTimeout(
+      () => {
+
+        if (
+          autoSpinEnabled &&
+          !isSpinning
+        ) {
+
+          startSpin();
+
+        }
+
+      },
+      650
+    );
 
 }
 
@@ -2252,62 +2713,79 @@ function updateSpinButtonState() {
 
 async function fetchGameState() {
 
-    try {
+  try {
 
-        const res =
-            await fetch(
-                '/api/game/state'
-            );
-
-        const data =
-            await res.json();
-
-
-        if (data.success) {
-
-            currentBalance =
-                Number(
-                    data.balance || 0
-                );
-
-
-            document
-                .getElementById(
-                    'headerBalance'
-                )
-                .innerText =
-                    '₦' +
-                    currentBalance.toLocaleString(
-                        undefined,
-                        {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        }
-                    );
-
-
-            userFreeSpins =
-                Number(
-                    data.freeSpins || 0
-                );
-
-
-            updateSpinButtonState();
-
-            renderHistory(
-                data.spins
-            );
-
+    const res =
+      await fetch(
+        '/api/game/state',
+        {
+          cache: 'no-store'
         }
+      );
 
-    } catch (err) {
+    const data =
+      await res.json();
 
-        console.error(
-            'Failed to load game state:',
-            err
+
+    if (data.success) {
+
+      currentBalance =
+        Number(
+          data.balance || 0
         );
 
+
+      updateBalanceDisplay();
+
+
+      userFreeSpins =
+        Number(
+          data.freeSpins || 0
+        );
+
+
+      updateSpinButtonState();
+
+
+      renderHistory(
+        data.spins
+      );
+
     }
+
+  } catch (err) {
+
+    console.error(
+      'Failed to load game state:',
+      err
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   BALANCE DISPLAY
+========================================= */
+
+function updateBalanceDisplay() {
+
+  document
+    .getElementById(
+      'headerBalance'
+    )
+    .innerText =
+      '₦' +
+      Number(
+        currentBalance || 0
+      ).toLocaleString(
+        undefined,
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      );
 
 }
 
@@ -2318,168 +2796,171 @@ async function fetchGameState() {
 
 function renderHistory(spins) {
 
-    const list =
-        document.getElementById(
-            'historyList'
-        );
+  const list =
+    document.getElementById(
+      'historyList'
+    );
 
 
-    if (
-        !spins ||
-        spins.length === 0
-    ) {
+  if (
+    !spins ||
+    spins.length === 0
+  ) {
 
-        list.innerHTML = `
-            <p
-                style="
-                    text-align:center;
-                    color:var(--muted);
-                    font-size:.78rem;
-                    padding:14px;
-                "
-            >
-                Your wheel history will appear here.
-            </p>
-        `;
+    list.innerHTML = `
 
-        return;
+      <p
+        style="
+          text-align:center;
+          color:var(--muted);
+          font-size:.78rem;
+          padding:14px;
+        ">
 
-    }
+        Your wheel history will appear here.
 
+      </p>
 
-    list.innerHTML =
-        spins.map(
-            s => {
+    `;
 
-                const isWin =
-                    s.type &&
-                    s.type.includes(
-                        'Reward'
-                    ) &&
-                    Number(s.amount) > 0;
+    return;
+
+  }
 
 
-                return `
+  list.innerHTML =
+    spins
+      .map(
+        s => {
 
-                    <div class="history-item ${
-                        isWin
-                            ? 'won'
-                            : 'zero'
-                    }">
+          const isWin =
+            s.type &&
+            s.type.includes(
+              'Reward'
+            ) &&
+            Number(
+              s.amount
+            ) > 0;
 
-                        <div class="history-left">
 
-                            <div class="history-icon">
-                                ${
-                                    isWin
-                                        ? '🎉'
-                                        : '🎰'
-                                }
-                            </div>
+          return `
 
-                            <div>
+            <div
+              class="history-item ${
+                isWin
+                  ? 'won'
+                  : 'zero'
+              }">
 
-                                <div class="history-name">
-                                    ${s.type || 'Wheel Spin'}
-                                </div>
+              <div
+                class="history-left">
 
-                                <div class="history-time">
-                                    ${s.date || ''}
-                                </div>
+                <div class="history-icon">
+                  ${isWin ? '✓' : '↻'}
+                </div>
 
-                            </div>
+                <div>
 
-                        </div>
+                  <div class="history-name">
+                    ${s.type || 'Wheel Spin'}
+                  </div>
 
-                        <div class="history-amount">
+                  <div class="history-time">
+                    ${s.date || ''}
+                  </div>
 
-                            ${
-                                isWin
-                                    ? '+'
-                                    : ''
-                            }
+                </div>
 
-                            ₦${
-                                Number(
-                                    s.amount || 0
-                                ).toLocaleString()
-                            }
+              </div>
 
-                        </div>
+              <div class="history-amount">
 
-                    </div>
+                ${
+                  isWin
+                    ? '+'
+                    : ''
+                }
 
-                `;
+                ₦${
+                  Number(
+                    s.amount || 0
+                  ).toLocaleString()
+                }
 
-            }
-        ).join('');
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join('');
 
 }
 
 
 /* =========================================
-   INSUFFICIENT BALANCE POPUP
+   INSUFFICIENT BALANCE
 ========================================= */
 
 function showInsufficientModal() {
 
-    const modal =
-        document.getElementById(
-            'insufficientModal'
-        );
+  const modal =
+    document.getElementById(
+      'insufficientModal'
+    );
 
-    const balanceText =
-        document.getElementById(
-            'insufficientCurrentBalance'
-        );
-
-
-    balanceText.innerText =
-        '₦' +
-        Number(
-            currentBalance || 0
-        ).toLocaleString(
-            undefined,
-            {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        );
-
-
-    modal.classList.add(
-        'active'
+  const balanceText =
+    document.getElementById(
+      'insufficientCurrentBalance'
     );
 
 
-    document.body.style.overflow =
-        'hidden';
+  balanceText.innerText =
+    '₦' +
+    Number(
+      currentBalance || 0
+    ).toLocaleString(
+      undefined,
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+
+
+  modal.classList.add(
+    'active'
+  );
+
+  document.body.style.overflow =
+    'hidden';
 
 }
 
 
 function closeInsufficientModal() {
 
-    const modal =
-        document.getElementById(
-            'insufficientModal'
-        );
-
-    modal.classList.remove(
-        'active'
+  const modal =
+    document.getElementById(
+      'insufficientModal'
     );
 
+  modal.classList.remove(
+    'active'
+  );
 
-    document.body.style.overflow =
-        '';
+  document.body.style.overflow =
+    '';
 
 }
 
 
 function goToDeposit() {
 
-    window.location.href =
-        '/deposit.html';
+  window.location.href =
+    '/deposit.html';
 
 }
 
@@ -2490,400 +2971,498 @@ function goToDeposit() {
 
 async function startSpin() {
 
-    if (isSpinning) {
-        return;
-    }
+  if (isSpinning) {
+    return;
+  }
 
 
-    /*
-       IMPORTANT:
+  /*
+    Check balance before request.
 
-       If the user has a free spin,
-       they don't need ₦50.
+    Free spins do not require ₦50.
+  */
 
-       Otherwise check balance BEFORE
-       sending the spin request.
-    */
+  if (
+    userFreeSpins <= 0 &&
+    Number(currentBalance) < 50
+  ) {
 
-    if (
-        userFreeSpins <= 0 &&
-        Number(currentBalance) < 50
-    ) {
+    if (autoSpinEnabled) {
 
-        showInsufficientModal();
-
-        return;
+      stopAutoSpin(
+        'Auto Spin stopped — insufficient balance'
+      );
 
     }
 
+    showInsufficientModal();
 
-    const btn =
-        document.getElementById(
-            'spinBtn'
-        );
+    return;
 
-    const btnText =
-        document.getElementById(
-            'spinBtnText'
-        );
+  }
 
 
-    btn.disabled = true;
+  const btn =
+    document.getElementById(
+      'spinBtn'
+    );
 
-    btnText.innerText =
-        'Launching...';
+  const btnText =
+    document.getElementById(
+      'spinBtnText'
+    );
+
+
+  btn.disabled = true;
+
+  btnText.innerText =
+    'Launching...';
+
+
+  try {
+
+    const res =
+      await fetch(
+        '/api/game/spin',
+        {
+          method: 'POST'
+        }
+      );
+
+
+    let data;
 
 
     try {
 
-        const res =
-            await fetch(
-                '/api/game/spin',
-                {
-                    method: 'POST'
-                }
-            );
-
-
-        let data;
-
-        try {
-
-            data =
-                await res.json();
-
-        } catch {
-
-            data = {
-                success: false,
-                error:
-                    'Unable to process spin.'
-            };
-
-        }
-
-
-        /*
-           Also handle the backend
-           returning insufficient balance.
-
-           This protects the user even if
-           the balance on the screen is stale.
-        */
-
-        if (!data.success) {
-
-            const errorText =
-                String(
-                    data.error || ''
-                ).toLowerCase();
-
-
-            if (
-                errorText.includes(
-                    'insufficient'
-                ) ||
-                errorText.includes(
-                    'not enough'
-                ) ||
-                errorText.includes(
-                    'balance'
-                ) ||
-                errorText.includes(
-                    '50'
-                )
-            ) {
-
-                if (
-                    typeof data.balance !==
-                    'undefined'
-                ) {
-
-                    currentBalance =
-                        Number(
-                            data.balance || 0
-                        );
-
-                }
-
-
-                showInsufficientModal();
-
-            } else {
-
-                showSimpleError(
-                    data.error ||
-                    'Failed to process spin.'
-                );
-
-            }
-
-
-            btn.disabled = false;
-
-            updateSpinButtonState();
-
-            return;
-
-        }
-
-
-        if (
-            typeof data.freeSpins !==
-            'undefined'
-        ) {
-
-            userFreeSpins =
-                Number(
-                    data.freeSpins
-                );
-
-        }
-
-
-        btnText.innerText =
-            'Spinning...';
-
-
-        isSpinning = true;
-
-        canvas.classList.add(
-            'spinning'
-        );
-
-
-        const winningIndex =
-            Number(
-                data.prizeIndex
-            );
-
-
-        const degreesPerSegment =
-            360 / numSegments;
-
-
-        const targetSliceCenterAngle =
-            (
-                winningIndex *
-                degreesPerSegment
-            ) +
-            (
-                degreesPerSegment / 2
-            );
-
-
-        /*
-           The pointer is at the top.
-           Rotate enough full rounds for
-           a satisfying spin.
-        */
-
-        const desiredRotationDeg =
-            (
-                360 * 8
-            ) +
-            (
-                270 -
-                targetSliceCenterAngle
-            );
-
-
-        const targetRad =
-            desiredRotationDeg *
-            (
-                Math.PI / 180
-            );
-
-
-        let startTime =
-            null;
-
-
-        const duration =
-            5200;
-
-
-        function animateSpin(timestamp) {
-
-            if (!startTime) {
-                startTime =
-                    timestamp;
-            }
-
-
-            const elapsed =
-                timestamp -
-                startTime;
-
-
-            const progress =
-                Math.min(
-                    elapsed /
-                    duration,
-                    1
-                );
-
-
-            /*
-               Strong ease-out:
-               fast beginning,
-               smooth dramatic finish.
-            */
-
-            const easeProgress =
-                1 -
-                Math.pow(
-                    1 - progress,
-                    5
-                );
-
-
-            const currentRotation =
-                easeProgress *
-                targetRad;
-
-
-            drawWheel(
-                currentRotation
-            );
-
-
-            if (
-                progress < 1
-            ) {
-
-                requestAnimationFrame(
-                    animateSpin
-                );
-
-            } else {
-
-                isSpinning = false;
-
-                canvas.classList.remove(
-                    'spinning'
-                );
-
-
-                currentBalance =
-                    Number(
-                        data.newBalance ||
-                        0
-                    );
-
-
-                document
-                    .getElementById(
-                        'headerBalance'
-                    )
-                    .innerText =
-                        '₦' +
-                        currentBalance.toLocaleString(
-                            undefined,
-                            {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            }
-                        );
-
-
-                renderHistory(
-                    data.spins
-                );
-
-
-                showResultModal(
-                    Number(
-                        data.prize || 0
-                    )
-                );
-
-
-                btn.disabled =
-                    false;
-
-
-                updateSpinButtonState();
-
-            }
-
-        }
-
-
-        requestAnimationFrame(
-            animateSpin
-        );
-
-
-    } catch (err) {
-
-        console.error(
-            'Spin error:',
-            err
-        );
-
-
-        isSpinning = false;
-
-        canvas.classList.remove(
-            'spinning'
-        );
-
-
-        showSimpleError(
-            'Network error. Please check your connection and try again.'
-        );
-
-
-        btn.disabled =
-            false;
-
-
-        updateSpinButtonState();
+      data =
+        await res.json();
+
+    } catch {
+
+      data = {
+        success: false,
+        error:
+          'Unable to process spin.'
+      };
 
     }
+
+
+    /*
+      Backend error handling.
+    */
+
+    if (!data.success) {
+
+      const errorText =
+        String(
+          data.error || ''
+        ).toLowerCase();
+
+
+      if (
+        errorText.includes(
+          'insufficient'
+        ) ||
+        errorText.includes(
+          'not enough'
+        ) ||
+        errorText.includes(
+          'balance'
+        ) ||
+        errorText.includes(
+          '50'
+        )
+      ) {
+
+        if (
+          typeof data.balance !==
+          'undefined'
+        ) {
+
+          currentBalance =
+            Number(
+              data.balance || 0
+            );
+
+          updateBalanceDisplay();
+
+        }
+
+
+        if (autoSpinEnabled) {
+
+          stopAutoSpin(
+            'Auto Spin stopped — insufficient balance'
+          );
+
+        }
+
+
+        showInsufficientModal();
+
+      } else {
+
+        showSimpleError(
+          data.error ||
+          'Failed to process spin.'
+        );
+
+      }
+
+
+      btn.disabled = false;
+
+      updateSpinButtonState();
+
+      return;
+
+    }
+
+
+    /*
+      Update free spins.
+    */
+
+    if (
+      typeof data.freeSpins !==
+      'undefined'
+    ) {
+
+      userFreeSpins =
+        Number(
+          data.freeSpins
+        );
+
+    }
+
+
+    btnText.innerText =
+      'Spinning...';
+
+    isSpinning =
+      true;
+
+    canvas.classList.add(
+      'spinning'
+    );
+
+
+    /*
+      IMPORTANT:
+      The backend supplies the winning index.
+    */
+
+    const winningIndex =
+      Number(
+        data.prizeIndex
+      );
+
+
+    const degreesPerSegment =
+      360 /
+      numSegments;
+
+
+    const targetSliceCenterAngle =
+      (
+        winningIndex *
+        degreesPerSegment
+      ) +
+      (
+        degreesPerSegment / 2
+      );
+
+
+    /*
+      Pointer is positioned at top.
+
+      8 full rotations gives
+      the wheel a smooth premium spin.
+    */
+
+    const desiredRotationDeg =
+      (
+        360 * 8
+      ) +
+      (
+        270 -
+        targetSliceCenterAngle
+      );
+
+
+    const targetRad =
+      desiredRotationDeg *
+      (
+        Math.PI / 180
+      );
+
+
+    let startTime =
+      null;
+
+
+    const duration =
+      5000;
+
+
+    function animateSpin(timestamp) {
+
+      if (!startTime) {
+        startTime =
+          timestamp;
+      }
+
+
+      const elapsed =
+        timestamp -
+        startTime;
+
+
+      const progress =
+        Math.min(
+          elapsed /
+          duration,
+          1
+        );
+
+
+      /*
+        Premium ease-out.
+      */
+
+      const easeProgress =
+        1 -
+        Math.pow(
+          1 - progress,
+          5
+        );
+
+
+      const currentRotation =
+        easeProgress *
+        targetRad;
+
+
+      drawWheel(
+        currentRotation
+      );
+
+
+      if (
+        progress < 1
+      ) {
+
+        requestAnimationFrame(
+          animateSpin
+        );
+
+      } else {
+
+        finishSpin(
+          data
+        );
+
+      }
+
+    }
+
+
+    requestAnimationFrame(
+      animateSpin
+    );
+
+
+  } catch (err) {
+
+    console.error(
+      'Spin error:',
+      err
+    );
+
+
+    isSpinning =
+      false;
+
+    canvas.classList.remove(
+      'spinning'
+    );
+
+
+    showSimpleError(
+      'Network error. Please check your connection and try again.'
+    );
+
+
+    btn.disabled =
+      false;
+
+    updateSpinButtonState();
+
+  }
 
 }
 
 
 /* =========================================
-   SIMPLE ERROR POPUP
+   FINISH SPIN
+========================================= */
+
+function finishSpin(data) {
+
+  const btn =
+    document.getElementById(
+      'spinBtn'
+    );
+
+  isSpinning =
+    false;
+
+  canvas.classList.remove(
+    'spinning'
+  );
+
+
+  currentBalance =
+    Number(
+      data.newBalance || 0
+    );
+
+
+  updateBalanceDisplay();
+
+
+  if (
+    typeof data.freeSpins !==
+    'undefined'
+  ) {
+
+    userFreeSpins =
+      Number(
+        data.freeSpins
+      );
+
+  }
+
+
+  renderHistory(
+    data.spins
+  );
+
+
+  const prize =
+    Number(
+      data.prize || 0
+    );
+
+
+  /*
+    AUTO SPIN MODE
+    ----------------
+
+    Do not open a modal after every
+    spin because that would block
+    automatic spinning.
+
+    Instead show a small toast.
+  */
+
+  if (autoSpinEnabled) {
+
+    if (prize > 0) {
+
+      showToast(
+        `You won ₦${prize.toLocaleString()}`
+      );
+
+    } else {
+
+      showToast(
+        'Spin completed — ₦0'
+      );
+
+    }
+
+
+    btn.disabled =
+      false;
+
+
+    updateSpinButtonState();
+
+
+    /*
+      Continue automatically.
+    */
+
+    scheduleNextAutoSpin();
+
+    return;
+
+  }
+
+
+  /*
+    Normal manual spin.
+  */
+
+  showResultModal(
+    prize
+  );
+
+
+  btn.disabled =
+    false;
+
+  updateSpinButtonState();
+
+}
+
+
+/* =========================================
+   SIMPLE ERROR
 ========================================= */
 
 function showSimpleError(message) {
 
-    const modal =
-        document.getElementById(
-            'resultModal'
-        );
-
-    document
-        .getElementById(
-            'modalIcon'
-        )
-        .innerText =
-            '⚠️';
-
-
-    document
-        .getElementById(
-            'modalTitle'
-        )
-        .innerText =
-            'Something went wrong';
-
-
-    document
-        .getElementById(
-            'modalDesc'
-        )
-        .innerText =
-            message;
-
-
-    modal.classList.add(
-        'active'
+  const modal =
+    document.getElementById(
+      'resultModal'
     );
+
+
+  document
+    .getElementById(
+      'modalIcon'
+    )
+    .innerText =
+      '⚠️';
+
+
+  document
+    .getElementById(
+      'modalTitle'
+    )
+    .innerText =
+      'Something went wrong';
+
+
+  document
+    .getElementById(
+      'modalDesc'
+    )
+    .innerText =
+      message;
+
+
+  modal.classList.add(
+    'active'
+  );
+
+
+  document.body.style.overflow =
+    'hidden';
 
 }
 
@@ -2894,178 +3473,184 @@ function showSimpleError(message) {
 
 function showResultModal(prize) {
 
-    const modal =
-        document.getElementById(
-            'resultModal'
-        );
-
-    const title =
-        document.getElementById(
-            'modalTitle'
-        );
-
-    const desc =
-        document.getElementById(
-            'modalDesc'
-        );
-
-    const icon =
-        document.getElementById(
-            'modalIcon'
-        );
-
-
-    if (
-        Number(prize) > 0
-    ) {
-
-        icon.innerText =
-            '🎉';
-
-        title.innerText =
-            'Congratulations!';
-
-        desc.innerText =
-            `You won ₦${Number(
-                prize
-            ).toLocaleString()}`;
-
-
-        /* Celebration */
-
-        if (
-            typeof confetti ===
-            'function'
-        ) {
-
-            confetti({
-                particleCount: 120,
-                spread: 80,
-                startVelocity: 35,
-                origin: {
-                    y: .62
-                }
-            });
-
-
-            setTimeout(
-                () => {
-
-                    confetti({
-                        particleCount: 70,
-                        spread: 100,
-                        origin: {
-                            x: .15,
-                            y: .65
-                        }
-                    });
-
-                },
-                250
-            );
-
-
-            setTimeout(
-                () => {
-
-                    confetti({
-                        particleCount: 70,
-                        spread: 100,
-                        origin: {
-                            x: .85,
-                            y: .65
-                        }
-                    });
-
-                },
-                400
-            );
-
-        }
-
-    } else {
-
-        icon.innerText =
-            '🎰';
-
-        title.innerText =
-            'Better luck next time!';
-
-        desc.innerText =
-            'You got ₦0';
-
-    }
-
-
-    modal.classList.add(
-        'active'
+  const modal =
+    document.getElementById(
+      'resultModal'
     );
 
-    document.body.style.overflow =
-        'hidden';
+  const title =
+    document.getElementById(
+      'modalTitle'
+    );
+
+  const desc =
+    document.getElementById(
+      'modalDesc'
+    );
+
+  const icon =
+    document.getElementById(
+      'modalIcon'
+    );
+
+
+  if (
+    Number(prize) > 0
+  ) {
+
+    icon.innerText =
+      '✓';
+
+    title.innerText =
+      'Congratulations!';
+
+    desc.innerText =
+      `You won ₦${Number(
+        prize
+      ).toLocaleString()}`;
+
+  } else {
+
+    icon.innerText =
+      '↻';
+
+    title.innerText =
+      'Better luck next time!';
+
+    desc.innerText =
+      'You got ₦0';
+
+  }
+
+
+  /*
+    IMPORTANT:
+    No confetti here.
+
+    The old version used canvas-confetti
+    after winning. It has been completely
+    removed from this version.
+  */
+
+
+  modal.classList.add(
+    'active'
+  );
+
+  document.body.style.overflow =
+    'hidden';
 
 }
 
 
 function closeModal() {
 
-    document
-        .getElementById(
-            'resultModal'
-        )
-        .classList.remove(
-            'active'
-        );
+  document
+    .getElementById(
+      'resultModal'
+    )
+    .classList.remove(
+      'active'
+    );
 
-
-    document.body.style.overflow =
-        '';
+  document.body.style.overflow =
+    '';
 
 }
 
 
 /* =========================================
-   CLOSE MODALS WHEN CLICKING OUTSIDE
+   TOAST
+========================================= */
+
+function showToast(message) {
+
+  const toast =
+    document.getElementById(
+      'spinToast'
+    );
+
+  const text =
+    document.getElementById(
+      'spinToastText'
+    );
+
+
+  text.innerText =
+    message;
+
+
+  toast.classList.add(
+    'active'
+  );
+
+
+  if (toastTimer) {
+
+    clearTimeout(
+      toastTimer
+    );
+
+  }
+
+
+  toastTimer =
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          'active'
+        );
+
+      },
+      1700
+    );
+
+}
+
+
+/* =========================================
+   CLOSE MODALS OUTSIDE
 ========================================= */
 
 document
-    .getElementById(
-        'insufficientModal'
-    )
-    .addEventListener(
-        'click',
-        function(e) {
+  .getElementById(
+    'insufficientModal'
+  )
+  .addEventListener(
+    'click',
+    function(e) {
 
-            if (
-                e.target === this
-            ) {
+      if (
+        e.target === this
+      ) {
 
-                closeInsufficientModal();
+        closeInsufficientModal();
 
-            }
+      }
 
-        }
-    );
+    }
+  );
 
 
 document
-    .getElementById(
-        'resultModal'
-    )
-    .addEventListener(
-        'click',
-        function(e) {
+  .getElementById(
+    'resultModal'
+  )
+  .addEventListener(
+    'click',
+    function(e) {
 
-            if (
-                e.target === this
-            ) {
+      if (
+        e.target === this
+      ) {
 
-                closeModal();
+        closeModal();
 
-            }
+      }
 
-        }
-    );
+    }
+  );
 
 
 /* =========================================
@@ -3073,20 +3658,20 @@ document
 ========================================= */
 
 document.addEventListener(
-    'keydown',
-    function(e) {
+  'keydown',
+  function(e) {
 
-        if (
-            e.key === 'Escape'
-        ) {
+    if (
+      e.key === 'Escape'
+    ) {
 
-            closeModal();
+      closeModal();
 
-            closeInsufficientModal();
-
-        }
+      closeInsufficientModal();
 
     }
+
+  }
 );
 
 

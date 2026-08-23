@@ -351,6 +351,47 @@ color:#fff;
 background: linear-gradient(135deg, #3b82f6, #2563eb);
 box-shadow: 0 10px 25px rgba(37,99,235,.3), inset 0 1px 0 rgba(255,255,255,.2);
 }
+
+
+
+.action-btn-icon{
+    width:18px;
+    height:18px;
+    flex:0 0 18px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.balance-label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.balance-label-icon{
+    width:17px;
+    height:17px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    color:#60a5fa;
+}
+
+.reward-card.claimed .day-status{
+    background:#dcfce7;
+    color:#047857;
+}
+
+.reward-card.claimed .day-num{
+    color:#64748b;
+}
+
+
 .withdraw-btn{
 color:#fff;
 background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
@@ -1596,7 +1637,18 @@ class="user-name">User</span></h1>
 <section class="balance-card">
 <div class="balance-shine"></div>
 <div class="balance-top">
-<div class="balance-label">Current Earning Balance</div>
+
+<div class="balance-label">
+    <svg class="balance-label-icon"
+         viewBox="0 0 24 24"
+         aria-hidden="true">
+        <rect x="3" y="6" width="18" height="13" rx="3"></rect>
+        <path d="M7 10h.01M17 14h.01"></path>
+        <path d="M8 6V4h8v2"></path>
+    </svg>
+    Current Earning Balance
+</div>
+
 <div class="verified">Verified</div>
 </div>
 <div class="total-balance">₦<span id="balanceText">0.00</span></div>
@@ -1620,13 +1672,59 @@ id="earningsBalanceText">0.00</span></div>
 id="depositBalanceText">0.00</span></div>
 </div>
 </div>
+
+
 <div class="balance-actions">
-<a href="/deposit.html" class="action-btn deposit-btn"><span>+</span> Deposit</a>
-<button id="withdrawBtn" class="action-btn withdraw-btn"
-onclick="handleWithdrawal()">Withdraw</button>
-<button class="action-btn transactions-btn" onclick="openTransactionsModal()">View
-Transactions</button>
+
+<a href="/deposit.html"
+   class="action-btn deposit-btn">
+
+    <svg class="action-btn-icon"
+         viewBox="0 0 24 24"
+         aria-hidden="true">
+        <path d="M12 5v14"></path>
+        <path d="M5 12l7 7 7-7"></path>
+        <path d="M5 5h14"></path>
+    </svg>
+
+    Deposit
+
+</a>
+
+<button id="withdrawBtn"
+        class="action-btn withdraw-btn"
+        onclick="handleWithdrawal()">
+
+    <svg class="action-btn-icon"
+         viewBox="0 0 24 24"
+         aria-hidden="true">
+        <path d="M12 19V5"></path>
+        <path d="M5 12l7-7 7 7"></path>
+        <path d="M5 19h14"></path>
+    </svg>
+
+    Withdraw
+
+</button>
+
+<button class="action-btn transactions-btn"
+        onclick="openTransactionsModal()">
+
+    <svg class="action-btn-icon"
+         viewBox="0 0 24 24"
+         aria-hidden="true">
+        <path d="M4 6h16"></path>
+        <path d="M4 12h16"></path>
+        <path d="M4 18h10"></path>
+    </svg>
+
+    View Transactions
+
+</button>
+
 </div>
+
+
 </section>
 
 <!-- REFERRAL -->
@@ -2603,6 +2701,7 @@ day <= 7
 
 }
 
+
 function renderDailyGrid(){
 
 const grid =
@@ -2617,83 +2716,50 @@ grid.innerHTML = "";
 const claimedDays =
 getClaimedDays();
 
-const currentDay =
-Number(
-dailyState.currentDay || 1
-);
+/*
+ * The backend may keep currentDay on the day that was just claimed
+ * while the 24-hour cooldown is running.
+ *
+ * We therefore calculate the next unclaimed day directly from
+ * claimedDays so Day 2 immediately becomes NEXT UP after Day 1.
+ */
+const nextUnclaimedDay =
+[1,2,3,4,5,6,7].find(
+day => !claimedDays.has(day)
+) || 7;
 
-for(
-let day = 1;
-day <= 7;
-day++
-){
 
-const isDay7 =
-day === 7;
+const currentDay = Number(dailyState.currentDay || 1);
+const canClaim = dailyState.canClaim;
 
-const card =
-document.createElement(
-"div"
-);
+for (let day = 1; day <= 7; day++) {
+  const isDay7 = day === 7;
+  const card = document.createElement("div");
+  card.className = `reward-card ${isDay7 ? "day-7-card" : ""}`;
+  let statusText = "LOCKED";
 
-card.className =
-`reward-card ${isDay7 ? 'day-7-card' : ''}`;
+  /* DAYS THAT HAVE ACTUALLY BEEN CLAIMED */
+  if (claimedDays.has(day)) {
+    card.classList.add("claimed");
+    statusText = "COMPLETED ✓";
+  } 
+  /* NEXT AVAILABLE DAY TO CLAIM */
+  else if (day === currentDay && canClaim) {
+    card.classList.add("claimable");
+    statusText = "CLAIM NOW";
+    card.onclick = () => claimDailyReward(day);
+  } 
+  /* NEXT DAY SHOWING NEXT UP DURING COOLDOWN */
+  else if (day === currentDay && !canClaim) {
+    card.classList.add("locked");
+    statusText = "NEXT UP";
+  } 
+  /* FUTURE DAYS */
+  else {
+    card.classList.add("locked");
+    statusText = "LOCKED";
+  }
 
-let statusText =
-"LOCKED";
-
-/* ACTUALLY CLAIMED DAYS */
-if(claimedDays.has(day)){
-
-card.classList.add(
-"claimed"
-);
-
-statusText =
-"CLAIMED ✓";
-
-/* CURRENT CLAIMABLE DAY */
-}else if(
-day === currentDay &&
-dailyState.canClaim
-){
-
-card.classList.add(
-"claimable"
-);
-
-statusText =
-"CLAIM NOW";
-
-card.onclick =
-() => claimDailyReward(day);
-
-/* CURRENT DAY BUT STILL IN COOLDOWN */
-}else if(
-day === currentDay &&
-!dailyState.canClaim
-){
-
-card.classList.add(
-"locked"
-);
-
-statusText =
-"NEXT UP";
-
-/* ALL OTHER DAYS */
-}else{
-
-card.classList.add(
-"locked"
-);
-
-statusText =
-day < currentDay
-? "COMPLETED"
-: "LOCKED";
-
-}
 
 /* DAY 7 */
 if(isDay7){
@@ -2749,6 +2815,8 @@ card
 }
 
 }
+
+
 
 async function claimDailyReward(day){
 

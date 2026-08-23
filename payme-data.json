@@ -497,7 +497,7 @@
         "weekly_2026-08-16": 11
       },
       "withdrawableBalance": 45,
-      "sessionVersion": 35,
+      "sessionVersion": 38,
       "depositBalance": 0,
       "telegramId": null,
       "freeSpins": 0,
@@ -3257,13 +3257,14 @@
       "deposits": [],
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "sessionVersion": 44,
+      "sessionVersion": 51,
       "createdAt": "2026-08-22T20:51:56.680Z",
       "freeSpins": 0,
       "hasClaimedGiftBox": true,
       "dailyReward": {
         "currentDay": 2,
-        "lastClaimTimestamp": 1787493990168
+        "lastClaimTimestamp": 1787493990168,
+        "claimedDays": []
       }
     }
   ],

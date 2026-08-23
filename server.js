@@ -3516,9 +3516,9 @@ app.post('/api/user/claim-daily', requireLogin, async (req, res) => {
       user.freeSpins = Number(user.freeSpins || 0) + 1;
     }
 
-    // 5. Save claim state (keep currentDay as reqDay, set timestamp)
-    user.dailyReward.lastClaimTimestamp = now;
-    user.dailyReward.currentDay = reqDay;
+// 5. Save claim state (advance to the next day for the next cycle)
+user.dailyReward.lastClaimTimestamp = now;
+user.dailyReward.currentDay = reqDay >= 7 ? 1 : reqDay + 1;
 
     syncUserBalance(user);
     saveDatabase();
@@ -5165,3 +5165,5 @@ app.listen(
 
   }
 );
+
+
