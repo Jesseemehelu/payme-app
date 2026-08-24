@@ -373,13 +373,18 @@ function mapUser(row) {
 
 }
 
+
 // ======================================================
 // USER -> SUPABASE PATCH
 // ======================================================
-
 function userDbPatch(user) {
-
   return {
+
+    // IMPORTANT:
+    // Supabase users.id is the PRIMARY KEY.
+    // It must be included when creating a new user.
+    id:
+      user.id || null,
 
     telegram_id:
       user.telegramId || null,
@@ -400,7 +405,9 @@ function userDbPatch(user) {
       user.password || null,
 
     balance:
-      number(user.balance),
+      number(
+        user.balance
+      ),
 
     deposit_balance:
       number(
@@ -454,13 +461,17 @@ function userDbPatch(user) {
 
     daily_reward:
       user.dailyReward || {
-        currentDay: 1,
-        lastClaimTimestamp: 0,
-        claimedDays: []
+        currentDay:
+          1,
+
+        lastClaimTimestamp:
+          0,
+
+        claimedDays:
+          []
       }
 
   };
-
 }
 
 // ======================================================
