@@ -473,7 +473,7 @@ body::before {
 
 
 /* =====================================================
-   REFERRAL
+   REFERRAL & TESTER SECTION
 ===================================================== */
 
 .referral-section {
@@ -563,6 +563,36 @@ body::before {
 
     0 0 0 3px
       rgba(56,189,248,0.2);
+}
+
+
+/* =====================================================
+   LOCAL TESTER BUTTON
+===================================================== */
+
+.btn-tester {
+  width: 100%;
+  margin-top: 10px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  transition: all 0.15s ease;
+}
+
+.btn-tester:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-tester:active {
+  transform: translateY(2px);
+  box-shadow: none;
 }
 
 
@@ -1106,6 +1136,33 @@ body::before {
   </div>
 
 
+  <!-- =====================================================
+       TESTER ACCESS SECTION
+  ===================================================== -->
+  <div class="referral-section" style="border-color: rgba(16, 185, 129, 0.3);">
+    <label for="testerUsername" class="referral-label" style="color: #34D399;">
+      Developer / Tester Access
+    </label>
+    
+    <input
+      type="text"
+      id="testerUsername"
+      class="form-control"
+      placeholder="Enter test username"
+      autocomplete="off"
+    >
+    
+    <button
+      type="button"
+      id="localtest"
+      class="btn-tester"
+      onclick="handleLocalTesterLogin()"
+    >
+      Join as Tester
+    </button>
+  </div>
+
+
   <p class="terms-notice">
 
     By continuing, you agree to our
@@ -1587,6 +1644,56 @@ async function handleAuthAction() {
   await handleTelegramAuth();
 
 }
+
+
+/* ======================================================
+   LOCAL TESTER LOGIN ACTION
+====================================================== */
+
+async function handleLocalTesterLogin() {
+  const usernameInput = document.getElementById('testerUsername');
+  const errorBox = document.getElementById('errorBox');
+
+  const username = usernameInput ? usernameInput.value.trim() : 'localtester';
+
+  if (!username) {
+    if (errorBox) {
+      errorBox.innerText = 'Please enter a username to join as a tester.';
+      errorBox.style.display = 'block';
+    }
+    return;
+  }
+
+  if (errorBox) {
+    errorBox.style.display = 'none';
+  }
+
+  try {
+    const response = await fetch('/api/auth/localtest-signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      window.location.href = data.redirectTo || '/dashboard.html';
+    } else if (errorBox) {
+      errorBox.innerText = data.message || 'Local test signup failed.';
+      errorBox.style.display = 'block';
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    if (errorBox) {
+      errorBox.innerText = 'Failed to connect to local test endpoint.';
+      errorBox.style.display = 'block';
+    }
+  }
+}
+
 
 
 /* ======================================================
