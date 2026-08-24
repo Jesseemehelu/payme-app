@@ -1520,6 +1520,10 @@ async function sendTelegramNotification(
 // SECURE TELEGRAM WEB APP VERIFICATION
 // ======================================================
 
+// ======================================================
+// SECURE TELEGRAM WEB APP INIT DATA VERIFICATION
+// ======================================================
+
 function verifyTelegramWebAppData(
   initData
 ) {
@@ -1533,34 +1537,41 @@ function verifyTelegramWebAppData(
       return null;
     }
 
+
     const params =
       new URLSearchParams(
         initData
       );
 
+
     const receivedHash =
       params.get('hash');
+
 
     if (!receivedHash) {
       return null;
     }
 
+
     params.delete('hash');
+
 
     const dataCheckString =
       Array.from(
         params.entries()
       )
-        .sort(
-          ([a], [b]) =>
-            a.localeCompare(b)
-        )
-        .map(
-          ([key, value]) =>
-            `${key}=${value}`
-        )
-        .join('\n');
+      .sort(
+        ([a], [b]) =>
+          a.localeCompare(b)
+      )
+      .map(
+        ([key, value]) =>
+          `${key}=${value}`
+      )
+      .join('\n');
 
+
+    // Telegram Web App secret key
     const secretKey =
       crypto
         .createHmac(
@@ -1572,6 +1583,8 @@ function verifyTelegramWebAppData(
         )
         .digest();
 
+
+    // Calculate Telegram hash
     const calculatedHash =
       crypto
         .createHmac(
@@ -1583,11 +1596,13 @@ function verifyTelegramWebAppData(
         )
         .digest('hex');
 
+
     const receivedBuffer =
       Buffer.from(
         receivedHash,
         'hex'
       );
+
 
     const calculatedBuffer =
       Buffer.from(
@@ -1595,12 +1610,14 @@ function verifyTelegramWebAppData(
         'hex'
       );
 
+
     if (
       receivedBuffer.length !==
       calculatedBuffer.length
     ) {
       return null;
     }
+
 
     if (
       !crypto.timingSafeEqual(
@@ -1611,36 +1628,64 @@ function verifyTelegramWebAppData(
       return null;
     }
 
+
+    // --------------------------------------------------
+    // CHECK AUTH DATE
+    // --------------------------------------------------
+
     const authDate =
-      number(
-        params.get('auth_date')
+      Number(
+        params.get(
+          'auth_date'
+        ) || 0
       );
 
-    const age =
+
+    if (!authDate) {
+      return null;
+    }
+
+
+    const currentTime =
       Math.floor(
         Date.now() / 1000
-      ) -
+      );
+
+
+    const age =
+      currentTime -
       authDate;
 
+
+    // Allow 24 hours
     if (
-      !authDate ||
-      age < -60 ||
+      age < 0 ||
       age > 86400
     ) {
       return null;
     }
 
+
+    // --------------------------------------------------
+    // GET TELEGRAM USER
+    // --------------------------------------------------
+
     const userString =
-      params.get('user');
+      params.get(
+        'user'
+      );
+
 
     if (!userString) {
       return null;
     }
 
+
     const telegramUser =
       JSON.parse(
         userString
       );
+
 
     if (
       !telegramUser ||
@@ -1648,6 +1693,7 @@ function verifyTelegramWebAppData(
     ) {
       return null;
     }
+
 
     return {
 
@@ -1661,6 +1707,7 @@ function verifyTelegramWebAppData(
 
     };
 
+
   } catch (err) {
 
     console.error(
@@ -1673,6 +1720,7 @@ function verifyTelegramWebAppData(
   }
 
 }
+
 
 // ======================================================
 // WELCOME BONUS
@@ -2375,350 +2423,536 @@ async function processReferral(
 // TELEGRAM SIGNUP
 // ======================================================
 
-app.post(
-  '/api/auth/telegram-signup',
-  async (req, res) => {
 
-    try {
+// ======================================================
+// TELEGRAM SIGN UP / AUTHENTICATION
+// SECURE TELEGRAM WEB APP INITDATA
+// ======================================================
 
-      const {
-        telegramId,
-        username,
-        firstName,
-        lastName,
-        referralCode,
-        initData
-      } = req.body;
+app.post('/api/auth/telegram-signup', async (req, res) => {
 
-      let verifiedTelegramId =
-        telegramId
-          ? String(telegramId)
-          : '';
+  try {
 
-      let verifiedUser =
-        null;
+    const {
+      initData,
+      referralCode
+    } = req.body;
 
-      if (initData) {
 
-        const verification =
-          verifyTelegramWebAppData(
-            initData
-          );
+    // --------------------------------------------------
+    // TELEGRAM BOT TOKEN CHECK
+    // --------------------------------------------------
 
-        if (!verification) {
-
-          return res.status(401).json({
-
-            success:
-              false,
-
-            message:
-              'Invalid or expired Telegram authentication data.'
-
-          });
-
-        }
-
-        verifiedUser =
-          verification.user;
-
-        verifiedTelegramId =
-          String(
-            verifiedUser.id
-          );
-
-      }
-
-      if (!verifiedTelegramId) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          message:
-            'Telegram account information could not be detected.'
-
-        });
-
-      }
-
-      const cleanUsername =
-        String(
-          verifiedUser?.username ||
-          username ||
-          `user_${verifiedTelegramId}`
-        )
-          .trim()
-          .replace(
-            /^@/,
-            ''
-          )
-          .toLowerCase();
-
-      const cleanFirstName =
-        String(
-          verifiedUser?.first_name ||
-          firstName ||
-          ''
-        ).trim();
-
-      const cleanLastName =
-        String(
-          verifiedUser?.last_name ||
-          lastName ||
-          ''
-        ).trim();
-
-      const cleanRefInput =
-        referralCode
-          ? String(
-              referralCode
-            )
-              .trim()
-              .toUpperCase()
-          : null;
-
-      const fullName =
-        `${cleanFirstName} ${cleanLastName}`
-          .trim() ||
-        cleanUsername;
-
-      let user =
-        await getUserByTelegramId(
-          verifiedTelegramId
-        );
-
-      if (
-        !user &&
-        cleanUsername &&
-        !cleanUsername.startsWith(
-          'user_'
-        )
-      ) {
-
-        user =
-          await getUserByUsername(
-            cleanUsername
-          );
-
-      }
-
-      if (!user) {
-
-        user =
-          await createUser({
-
-            id:
-              generateUserId(),
-
-            telegramId:
-              verifiedTelegramId,
-
-            fullName:
-              fullName,
-
-            email:
-              `${cleanUsername}@telegram.user`,
-
-            username:
-              cleanUsername,
-
-            phone:
-              'N/A',
-
-            password:
-              crypto
-                .randomBytes(16)
-                .toString('hex'),
-
-            balance:
-              0,
-
-            depositBalance:
-              0,
-
-            withdrawableBalance:
-              0,
-
-            hasReceivedWelcomeBonus:
-              false,
-
-            hasSeenPopup:
-              false,
-
-            referralCode:
-              await generateUniqueReferralCode(),
-
-            referredBy:
-              cleanRefInput,
-
-            totalReferrals:
-              0,
-
-            successfulReferrals:
-              0,
-
-            referralEarnings:
-              0,
-
-            freeSpins:
-              0,
-
-            hasClaimedGiftBox:
-              false,
-
-            sessionVersion:
-              0,
-
-            dailyReward: {
-
-              currentDay:
-                1,
-
-              lastClaimTimestamp:
-                0,
-
-              claimedDays:
-                []
-
-            }
-
-          });
-
-        await ensureWelcomeBonus(
-          user
-        );
-
-        if (
-          cleanRefInput
-        ) {
-
-          const referrer =
-            await getUserByReferralCode(
-              cleanRefInput
-            );
-
-          if (
-            referrer &&
-            referrer.id !== user.id
-          ) {
-
-            await processReferral(
-              referrer,
-              user
-            );
-
-          }
-
-        }
-
-        await sendTelegramNotification(
-
-          `<b>NEW TELEGRAM USER REGISTERED</b>\n\n` +
-
-          `<b>Name:</b> ${user.fullName}\n` +
-
-          `<b>Username:</b> @${user.username}\n` +
-
-          `<b>Telegram ID:</b> ${user.telegramId}\n` +
-
-          `<b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
-
-          `<b>Referral Code:</b> ${user.referralCode}`
-
-        );
-
-      } else {
-
-        user.telegramId =
-          verifiedTelegramId;
-
-        if (fullName) {
-
-          user.fullName =
-            fullName;
-
-        }
-
-        if (
-          cleanUsername &&
-          !cleanUsername.startsWith(
-            'user_'
-          )
-        ) {
-
-          user.username =
-            cleanUsername;
-
-        }
-
-        await ensureWelcomeBonus(
-          user
-        );
-
-      }
-
-      user.sessionVersion =
-        number(
-          user.sessionVersion
-        ) +
-        1;
-
-      await updateUser(
-        user
-      );
-
-      const finalUser =
-        await loadUserData(
-          await getUserById(
-            user.id
-          )
-        );
-
-      setSessionCookie(
-        res,
-        createSessionToken(
-          finalUser
-        )
-      );
-
-      return res.json({
-
-        success:
-          true,
-
-        message:
-          'Telegram authentication successful',
-
-        user:
-          sanitizeUser(
-            finalUser
-          )
-
-      });
-
-    } catch (err) {
+    if (!TELEGRAM_BOT_TOKEN) {
 
       console.error(
-        'Telegram signup error:',
-        err
+        'TELEGRAM_BOT_TOKEN is missing.'
       );
 
       return res.status(500).json({
-
-        success:
-          false,
-
+        success: false,
         message:
-          'Server error during Telegram signup.'
-
+          'Telegram authentication is not configured on the server.'
       });
 
     }
 
+
+    // --------------------------------------------------
+    // INIT DATA CHECK
+    // --------------------------------------------------
+
+    if (
+      !initData ||
+      typeof initData !== 'string'
+    ) {
+
+      return res.status(401).json({
+        success: false,
+        message:
+          'Invalid or expired Telegram authentication data.'
+      });
+
+    }
+
+
+    // --------------------------------------------------
+    // VERIFY TELEGRAM WEB APP DATA
+    // --------------------------------------------------
+
+    const telegramAuth =
+      verifyTelegramWebAppData(
+        initData
+      );
+
+
+    if (!telegramAuth) {
+
+      console.error(
+        'Telegram Web App authentication verification failed.'
+      );
+
+      return res.status(401).json({
+        success: false,
+        message:
+          'Invalid or expired Telegram authentication data.'
+      });
+
+    }
+
+
+    // --------------------------------------------------
+    // TELEGRAM USER
+    // --------------------------------------------------
+
+    const telegramUser =
+      telegramAuth.user;
+
+
+    if (
+      !telegramUser ||
+      !telegramUser.id
+    ) {
+
+      return res.status(401).json({
+        success: false,
+        message:
+          'Telegram account information could not be detected.'
+      });
+
+    }
+
+
+    const cleanTelegramId =
+      String(
+        telegramUser.id
+      );
+
+
+    const cleanUsername =
+      String(
+        telegramUser.username ||
+        `user_${cleanTelegramId}`
+      )
+      .trim()
+      .replace(/^@/, '')
+      .toLowerCase();
+
+
+    const cleanFirstName =
+      String(
+        telegramUser.first_name || ''
+      ).trim();
+
+
+    const cleanLastName =
+      String(
+        telegramUser.last_name || ''
+      ).trim();
+
+
+    const fullName =
+      `${cleanFirstName} ${cleanLastName}`
+        .trim() ||
+      cleanUsername;
+
+
+    const cleanRefInput =
+      referralCode
+        ? String(
+            referralCode
+          )
+          .trim()
+          .toUpperCase()
+        : (
+            telegramAuth.startParam
+              ? String(
+                  telegramAuth.startParam
+                )
+                .trim()
+                .toUpperCase()
+              : null
+          );
+
+
+    // --------------------------------------------------
+    // FIND EXISTING USER
+    // --------------------------------------------------
+
+    let user =
+      users.find(
+        u =>
+          String(
+            u.telegramId || ''
+          ) === cleanTelegramId
+      );
+
+
+    if (!user) {
+
+      user =
+        users.find(
+          u =>
+            String(
+              u.username || ''
+            ).toLowerCase() ===
+            cleanUsername
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // CREATE NEW TELEGRAM USER
+    // --------------------------------------------------
+
+    if (!user) {
+
+      const uniqueRefCode =
+        generateUniqueReferralCode();
+
+
+      user = {
+
+        id:
+          generateUserId(),
+
+        telegramId:
+          cleanTelegramId,
+
+        fullName:
+          fullName,
+
+        email:
+          `${cleanUsername}@telegram.user`,
+
+        username:
+          cleanUsername,
+
+        phone:
+          'N/A',
+
+        password:
+          crypto
+            .randomBytes(16)
+            .toString('hex'),
+
+        balance:
+          0,
+
+        depositBalance:
+          0,
+
+        withdrawableBalance:
+          0,
+
+        hasReceivedWelcomeBonus:
+          false,
+
+        hasSeenPopup:
+          false,
+
+        referralCode:
+          uniqueRefCode,
+
+        referredBy:
+          cleanRefInput,
+
+        totalReferrals:
+          0,
+
+        successfulReferrals:
+          0,
+
+        referralEarnings:
+          0,
+
+        freeSpins:
+          0,
+
+        hasClaimedGiftBox:
+          false,
+
+        sessionVersion:
+          0,
+
+        dailyReward: {
+          currentDay: 1,
+          lastClaimTimestamp: 0
+        },
+
+        createdAt:
+          new Date().toISOString()
+
+      };
+
+
+      // ------------------------------------------------
+      // WELCOME BONUS
+      // ------------------------------------------------
+
+      ensureWelcomeBonus(
+        user
+      );
+
+
+      // ------------------------------------------------
+      // REFERRAL
+      // ------------------------------------------------
+
+      if (
+        user.referredBy
+      ) {
+
+        const referrer =
+          users.find(
+            u =>
+              String(
+                u.referralCode || ''
+              ).toUpperCase() ===
+              user.referredBy
+          );
+
+
+        if (
+          referrer &&
+          referrer.id !== user.id
+        ) {
+
+          referrer.withdrawableBalance =
+            Number(
+              referrer.withdrawableBalance || 0
+            ) +
+            REFERRAL_REWARD;
+
+
+          referrer.totalReferrals =
+            Number(
+              referrer.totalReferrals || 0
+            ) + 1;
+
+
+          referrer.successfulReferrals =
+            Number(
+              referrer.successfulReferrals || 0
+            ) + 1;
+
+
+          referrer.referralEarnings =
+            Number(
+              referrer.referralEarnings || 0
+            ) +
+            REFERRAL_REWARD;
+
+
+          syncUserBalance(
+            referrer
+          );
+
+
+          if (
+            !Array.isArray(
+              referrer.transactions
+            )
+          ) {
+
+            referrer.transactions = [];
+
+          }
+
+
+          referrer.transactions.unshift({
+
+            id:
+              generateTransactionId(
+                'tx_ref'
+              ),
+
+            type:
+              'referral_reward',
+
+            description:
+              `Referral Reward (@${cleanUsername})`,
+
+            amount:
+              REFERRAL_REWARD,
+
+            currency:
+              'NGN',
+
+            status:
+              'completed',
+
+            createdAt:
+              new Date().toISOString()
+
+          });
+
+        }
+
+      }
+
+
+      // ------------------------------------------------
+      // ADD USER
+      // ------------------------------------------------
+
+      users.push(
+        user
+      );
+
+
+      const signupMsg =
+        `<b>NEW TELEGRAM USER REGISTERED</b>\n\n` +
+        `<b>Name:</b> ${user.fullName}\n` +
+        `<b>Username:</b> @${user.username}\n` +
+        `<b>Telegram ID:</b> ${user.telegramId}\n` +
+        `<b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
+        `<b>Referral Code:</b> ${user.referralCode}\n` +
+        `<b>Referred By:</b> ${user.referredBy || 'None'}\n` +
+        `<b>Balance:</b> ₦${Number(user.balance).toFixed(2)}`;
+
+
+      sendTelegramNotification(
+        signupMsg
+      ).catch(() => {});
+
+
+    } else {
+
+      // ------------------------------------------------
+      // UPDATE EXISTING TELEGRAM USER
+      // ------------------------------------------------
+
+      user.telegramId =
+        cleanTelegramId;
+
+
+      user.fullName =
+        fullName;
+
+
+      if (
+        cleanUsername &&
+        !cleanUsername.startsWith('user_')
+      ) {
+
+        user.username =
+          cleanUsername;
+
+      }
+
+    }
+
+
+    // --------------------------------------------------
+    // ENSURE ACCOUNT VALUES
+    // --------------------------------------------------
+
+    ensureWelcomeBonus(
+      user
+    );
+
+
+    user.sessionVersion =
+      Number(
+        user.sessionVersion || 0
+      ) + 1;
+
+
+    syncUserBalance(
+      user
+    );
+
+
+    // --------------------------------------------------
+    // CREATE SESSION
+    // --------------------------------------------------
+
+    const sessionToken =
+      createSessionToken(
+        user
+      );
+
+
+    setSessionCookie(
+      res,
+      sessionToken
+    );
+
+
+    // --------------------------------------------------
+    // SAVE
+    // --------------------------------------------------
+
+    saveDatabase();
+
+
+    // --------------------------------------------------
+    // RESPONSE
+    // --------------------------------------------------
+
+    return res.json({
+
+      success:
+        true,
+
+      message:
+        'Telegram authentication successful',
+
+      user: {
+
+        id:
+          user.id,
+
+        telegramId:
+          user.telegramId,
+
+        fullName:
+          user.fullName,
+
+        username:
+          user.username,
+
+        balance:
+          user.balance,
+
+        withdrawableBalance:
+          user.withdrawableBalance,
+
+        depositBalance:
+          user.depositBalance,
+
+        referralCode:
+          user.referralCode
+
+      }
+
+    });
+
+
+  } catch (err) {
+
+    console.error(
+      'Telegram signup error:',
+      err
+    );
+
+
+    return res.status(500).json({
+
+      success:
+        false,
+
+      message:
+        'Server error during Telegram signup.'
+
+    });
+
   }
-);
+
+});
+
 
 // ======================================================
 // CHECK TELEGRAM USER
