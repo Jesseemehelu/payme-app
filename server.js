@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -5,10 +7,6 @@ const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-
-// ======================================================
-// RENDER / PRODUCTION
-// ======================================================
 
 app.set('trust proxy', 1);
 
@@ -38,46 +36,80 @@ app.use(express.static(
 // CONFIGURATION
 // ======================================================
 
-const TELEGRAM_BOT_TOKEN =
-  process.env.TELEGRAM_BOT_TOKEN || '';
+function normalizeSupabaseUrl(value) {
 
-const TELEGRAM_CHAT_ID =
-  process.env.TELEGRAM_CHAT_ID || '';
+  const raw =
+    String(value || '')
+      .trim()
+      .replace(/\/+$/, '');
+
+  if (!raw) {
+    return '';
+  }
+
+  // Prevent accidental:
+  // https://project.supabase.co/rest/v1/rest/v1
+  return raw.replace(
+    /\/rest\/v1$/i,
+    ''
+  );
+}
 
 const SUPABASE_URL =
-  process.env.SUPABASE_URL || '';
+  normalizeSupabaseUrl(
+    process.env.SUPABASE_URL
+  );
 
 const SUPABASE_SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_SERVICE_KEY ||
-  '';
+  String(
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  ).trim();
 
 if (
   !SUPABASE_URL ||
   !SUPABASE_SERVICE_ROLE_KEY
 ) {
-  console.error(
-    'ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured in Render.'
+
+  throw new Error(
+    'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured. ' +
+    'Use .env in Termux or Environment Variables in Render.'
   );
+
 }
 
-const supabase = createClient(
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+const supabase =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-);
+  );
+
+const TELEGRAM_BOT_TOKEN =
+  String(
+    process.env.TELEGRAM_BOT_TOKEN || ''
+  ).trim();
+
+const TELEGRAM_CHAT_ID =
+  String(
+    process.env.TELEGRAM_CHAT_ID || ''
+  ).trim();
 
 const SESSION_SECRET =
   process.env.PAYME_SESSION_SECRET ||
   'sess_sec_9qW2$vL5%nQ8@wZ3_8f8b2c7d4';
 
 const SESSION_MAX_AGE =
-  10 * 365 * 24 * 60 * 60 * 1000;
+  10 *
+  365 *
+  24 *
+  60 *
+  60 *
+  1000;
 
 const isProduction =
   process.env.NODE_ENV === 'production';
@@ -87,6 +119,7 @@ const isProduction =
 // ======================================================
 
 const WELCOME_BONUS = 10;
+
 const REFERRAL_REWARD = 15;
 
 const MIN_WITHDRAWAL_LIMIT = 100;
@@ -96,10 +129,13 @@ const MIN_DEPOSIT_AMOUNT = 200;
 const SPIN_COST = 50;
 
 const CLAIM_COOLDOWN =
-  24 * 60 * 60 * 1000;
+  24 *
+  60 *
+  60 *
+  1000;
 
 // ======================================================
-// DATABASE HELPERS
+// GENERIC HELPERS
 // ======================================================
 
 function generateUserId() {
@@ -115,7 +151,9 @@ function generateUserId() {
 
 }
 
-function generateTransactionId(prefix) {
+function generateTransactionId(
+  prefix
+) {
 
   return (
     prefix +
@@ -125,6 +163,18 @@ function generateTransactionId(prefix) {
     crypto
       .randomBytes(5)
       .toString('hex')
+  );
+
+}
+
+function generateDepositReference() {
+
+  return (
+    'PM-' +
+    crypto
+      .randomBytes(4)
+      .toString('hex')
+      .toUpperCase()
   );
 
 }
@@ -160,7 +210,7 @@ async function generateUniqueReferralCode() {
 
   for (
     let attempt = 0;
-    attempt < 20;
+    attempt < 30;
     attempt++
   ) {
 
@@ -170,11 +220,15 @@ async function generateUniqueReferralCode() {
     const {
       data,
       error
-    } = await supabase
-      .from('users')
-      .select('id')
-      .eq('referral_code', code)
-      .maybeSingle();
+    } =
+      await supabase
+        .from('users')
+        .select('id')
+        .eq(
+          'referral_code',
+          code
+        )
+        .maybeSingle();
 
     if (error) {
       throw error;
@@ -192,43 +246,38 @@ async function generateUniqueReferralCode() {
 
 }
 
+function number(value) {
+
+  const n =
+    Number(value);
+
+  return Number.isFinite(n)
+    ? n
+    : 0;
+
+}
+
 // ======================================================
-// NORMALIZE SUPABASE USER
+// USER MAPPING
 // ======================================================
 
-function normalizeUser(row) {
+function mapUser(row) {
 
   if (!row) {
     return null;
   }
 
-  const dailyReward =
+  const daily =
     row.daily_reward &&
     typeof row.daily_reward === 'object'
       ? row.daily_reward
-      : {};
-
-  if (!dailyReward.currentDay) {
-    dailyReward.currentDay = 1;
-  }
-
-  if (
-    !dailyReward.lastClaimTimestamp
-  ) {
-    dailyReward.lastClaimTimestamp = 0;
-  }
-
-  if (
-    !Number.isFinite(
-      Number(dailyReward.freeSpins)
-    )
-  ) {
-    dailyReward.freeSpins = 0;
-  }
+      : {
+          currentDay: 1,
+          lastClaimTimestamp: 0,
+          claimedDays: []
+        };
 
   return {
-
-    ...row,
 
     id:
       row.id,
@@ -237,28 +286,30 @@ function normalizeUser(row) {
       row.telegram_id,
 
     fullName:
-      row.full_name,
+      row.full_name || '',
 
     email:
-      row.email,
+      row.email || '',
 
     username:
-      row.username,
+      row.username || '',
 
     phone:
-      row.phone,
+      row.phone || '',
 
     password:
-      row.password,
+      row.password || '',
 
     balance:
-      Number(row.balance || 0),
+      number(row.balance),
 
     depositBalance:
-      Number(row.deposit_balance || 0),
+      number(row.deposit_balance),
 
     withdrawableBalance:
-      Number(row.withdrawable_balance || 0),
+      number(
+        row.withdrawable_balance
+      ),
 
     hasReceivedWelcomeBonus:
       !!row.has_received_welcome_bonus,
@@ -273,82 +324,93 @@ function normalizeUser(row) {
       row.referred_by,
 
     totalReferrals:
-      Number(row.total_referrals || 0),
+      number(row.total_referrals),
 
     successfulReferrals:
-      Number(row.successful_referrals || 0),
+      number(
+        row.successful_referrals
+      ),
 
     referralEarnings:
-      Number(row.referral_earnings || 0),
+      number(
+        row.referral_earnings
+      ),
 
     freeSpins:
-      Number(dailyReward.freeSpins || 0),
+      number(row.free_spins),
 
     hasClaimedGiftBox:
       !!row.has_claimed_gift_box,
 
     sessionVersion:
-      Number(row.session_version || 0),
+      number(row.session_version),
 
-    dailyReward
+    dailyReward: {
+
+      currentDay:
+        number(
+          daily.currentDay
+        ) || 1,
+
+      lastClaimTimestamp:
+        number(
+          daily.lastClaimTimestamp
+        ),
+
+      claimedDays:
+        Array.isArray(
+          daily.claimedDays
+        )
+          ? daily.claimedDays.map(Number)
+          : []
+
+    },
+
+    createdAt:
+      row.created_at
 
   };
 
 }
 
 // ======================================================
-// USER -> SUPABASE FORMAT
+// USER -> SUPABASE PATCH
 // ======================================================
 
-function toDbUserFields(user) {
-
-  const dailyReward = {
-
-    ...(user.dailyReward || {}),
-
-    currentDay:
-      Number(
-        user.dailyReward?.currentDay || 1
-      ),
-
-    lastClaimTimestamp:
-      Number(
-        user.dailyReward?.lastClaimTimestamp || 0
-      ),
-
-    freeSpins:
-      Number(user.freeSpins || 0)
-
-  };
+function userDbPatch(user) {
 
   return {
 
     telegram_id:
-      user.telegramId ?? null,
+      user.telegramId || null,
 
     full_name:
-      user.fullName ?? null,
+      user.fullName || null,
 
     email:
-      user.email ?? null,
+      user.email || null,
 
     username:
-      user.username ?? null,
+      user.username || null,
 
     phone:
-      user.phone ?? null,
+      user.phone || null,
 
     password:
-      user.password ?? null,
+      user.password || null,
 
     balance:
-      Number(user.balance || 0),
+      number(user.balance),
 
     deposit_balance:
-      Number(user.depositBalance || 0),
+      number(
+        user.depositBalance
+      ),
 
     withdrawable_balance:
-      Number(user.withdrawableBalance || 0),
+      number(
+        user.withdrawableBalance
+      ),
 
     has_received_welcome_bonus:
       !!user.hasReceivedWelcomeBonus,
@@ -357,65 +419,52 @@ function toDbUserFields(user) {
       !!user.hasSeenPopup,
 
     referral_code:
-      user.referralCode ?? null,
+      user.referralCode || null,
 
     referred_by:
-      user.referredBy ?? null,
+      user.referredBy || null,
 
     total_referrals:
-      Number(user.totalReferrals || 0),
+      number(
+        user.totalReferrals
+      ),
 
     successful_referrals:
-      Number(user.successfulReferrals || 0),
+      number(
+        user.successfulReferrals
+      ),
 
     referral_earnings:
-      Number(user.referralEarnings || 0),
+      number(
+        user.referralEarnings
+      ),
+
+    free_spins:
+      number(
+        user.freeSpins
+      ),
 
     has_claimed_gift_box:
       !!user.hasClaimedGiftBox,
 
     session_version:
-      Number(user.sessionVersion || 0),
+      number(
+        user.sessionVersion
+      ),
 
     daily_reward:
-      dailyReward
+      user.dailyReward || {
+        currentDay: 1,
+        lastClaimTimestamp: 0,
+        claimedDays: []
+      }
 
   };
 
 }
 
 // ======================================================
-// BALANCE HELPERS
-// ======================================================
-
-function syncUserBalance(user) {
-
-  user.depositBalance =
-    Math.max(
-      0,
-      Number(
-        user.depositBalance || 0
-      )
-    );
-
-  user.withdrawableBalance =
-    Math.max(
-      0,
-      Number(
-        user.withdrawableBalance || 0
-      )
-    );
-
-  user.balance =
-    user.depositBalance +
-    user.withdrawableBalance;
-
-  return user.balance;
-
-}
-
-// ======================================================
-// UPDATE USER
+// SUPABASE USER OPERATIONS
 // ======================================================
 
 async function updateUser(user) {
@@ -425,64 +474,26 @@ async function updateUser(user) {
   const {
     data,
     error
-  } = await supabase
-    .from('users')
-    .update(
-      toDbUserFields(user)
-    )
-    .eq('id', user.id)
-    .select('*')
-    .single();
+  } =
+    await supabase
+      .from('users')
+      .update(
+        userDbPatch(user)
+      )
+      .eq(
+        'id',
+        user.id
+      )
+      .select('*')
+      .single();
 
   if (error) {
     throw error;
   }
 
-  return normalizeUser(data);
+  return mapUser(data);
 
 }
-
-// ======================================================
-// INSERT USER
-// ======================================================
-
-async function insertUser(user) {
-
-  syncUserBalance(user);
-
-  const row = {
-
-    id:
-      user.id,
-
-    ...toDbUserFields(user),
-
-    created_at:
-      user.createdAt ||
-      new Date().toISOString()
-
-  };
-
-  const {
-    data,
-    error
-  } = await supabase
-    .from('users')
-    .insert(row)
-    .select('*')
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return normalizeUser(data);
-
-}
-
-// ======================================================
-// GET USER BY ID
-// ======================================================
 
 async function getUserById(id) {
 
@@ -493,77 +504,23 @@ async function getUserById(id) {
   const {
     data,
     error
-  } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle();
+  } =
+    await supabase
+      .from('users')
+      .select('*')
+      .eq(
+        'id',
+        String(id)
+      )
+      .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return normalizeUser(data);
+  return mapUser(data);
 
 }
-
-// ======================================================
-// GET USER BY USERNAME
-// ======================================================
-
-async function getUserByUsername(username) {
-
-  if (!username) {
-    return null;
-  }
-
-  const {
-    data,
-    error
-  } = await supabase
-    .from('users')
-    .select('*')
-    .eq('username', username)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return normalizeUser(data);
-
-}
-
-// ======================================================
-// GET USER BY EMAIL
-// ======================================================
-
-async function getUserByEmail(email) {
-
-  if (!email) {
-    return null;
-  }
-
-  const {
-    data,
-    error
-  } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return normalizeUser(data);
-
-}
-
-// ======================================================
-// GET USER BY TELEGRAM ID
-// ======================================================
 
 async function getUserByTelegramId(
   telegramId
@@ -576,26 +533,83 @@ async function getUserByTelegramId(
   const {
     data,
     error
-  } = await supabase
-    .from('users')
-    .select('*')
-    .eq(
-      'telegram_id',
-      String(telegramId)
-    )
-    .maybeSingle();
+  } =
+    await supabase
+      .from('users')
+      .select('*')
+      .eq(
+        'telegram_id',
+        String(telegramId)
+      )
+      .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return normalizeUser(data);
+  return mapUser(data);
 
 }
 
-// ======================================================
-// GET USER BY REFERRAL CODE
-// ======================================================
+async function getUserByUsername(
+  username
+) {
+
+  if (!username) {
+    return null;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('users')
+      .select('*')
+      .eq(
+        'username',
+        String(username)
+          .toLowerCase()
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return mapUser(data);
+
+}
+
+async function getUserByEmail(
+  email
+) {
+
+  if (!email) {
+    return null;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('users')
+      .select('*')
+      .eq(
+        'email',
+        String(email)
+          .toLowerCase()
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return mapUser(data);
+
+}
 
 async function getUserByReferralCode(
   code
@@ -608,98 +622,48 @@ async function getUserByReferralCode(
   const {
     data,
     error
-  } = await supabase
-    .from('users')
-    .select('*')
-    .eq(
-      'referral_code',
-      code
-    )
-    .maybeSingle();
+  } =
+    await supabase
+      .from('users')
+      .select('*')
+      .eq(
+        'referral_code',
+        String(code).toUpperCase()
+      )
+      .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return normalizeUser(data);
+  return mapUser(data);
+
+}
+
+async function createUser(user) {
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('users')
+      .insert(
+        userDbPatch(user)
+      )
+      .select('*')
+      .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return mapUser(data);
 
 }
 
 // ======================================================
 // TRANSACTIONS
-// ======================================================
-
-function mapTransactionFromDb(row) {
-
-  return {
-
-    id:
-      row.id,
-
-    type:
-      row.type,
-
-    description:
-      row.description,
-
-    amount:
-      Number(row.amount || 0),
-
-    currency:
-      row.currency || 'NGN',
-
-    status:
-      row.status,
-
-    bank:
-      row.bank,
-
-    accountName:
-      row.account_name,
-
-    accountNumber:
-      row.account_number,
-
-    createdAt:
-      row.created_at
-
-  };
-
-}
-
-async function getTransactions(userId) {
-
-  const {
-    data,
-    error
-  } = await supabase
-    .from('transactions')
-    .select('*')
-    .eq(
-      'user_id',
-      userId
-    )
-    .order(
-      'created_at',
-      {
-        ascending: false
-      }
-    );
-
-  if (error) {
-    throw error;
-  }
-
-  return (
-    data || []
-  ).map(
-    mapTransactionFromDb
-  );
-
-}
-
-// ======================================================
-// ADD TRANSACTION
 // ======================================================
 
 async function addTransaction(
@@ -717,28 +681,35 @@ async function addTransaction(
       userId,
 
     type:
-      tx.type || null,
+      tx.type ||
+      'transaction',
 
     description:
-      tx.description || null,
+      tx.description ||
+      '',
 
     amount:
-      Number(tx.amount || 0),
+      number(tx.amount),
 
     currency:
-      tx.currency || 'NGN',
+      tx.currency ||
+      'NGN',
 
     status:
-      tx.status || null,
+      tx.status ||
+      'completed',
 
     bank:
-      tx.bank || null,
+      tx.bank ||
+      null,
 
     account_name:
-      tx.accountName || null,
+      tx.accountName ||
+      null,
 
     account_number:
-      tx.accountNumber || null,
+      tx.accountNumber ||
+      null,
 
     created_at:
       tx.createdAt ||
@@ -749,68 +720,44 @@ async function addTransaction(
   const {
     data,
     error
-  } = await supabase
-    .from('transactions')
-    .insert(row)
-    .select('*')
-    .single();
+  } =
+    await supabase
+      .from('transactions')
+      .insert(row)
+      .select('*')
+      .single();
 
   if (error) {
     throw error;
   }
 
-  return mapTransactionFromDb(data);
+  return data;
 
 }
 
-// ======================================================
-// DEPOSITS
-// ======================================================
-
-function mapDepositFromDb(row) {
-
-  return {
-
-    reference:
-      row.reference,
-
-    amount:
-      Number(row.amount || 0),
-
-    status:
-      row.status,
-
-    screenshot:
-      row.screenshot,
-
-    reason:
-      row.reason,
-
-    createdAt:
-      row.created_at
-
-  };
-
-}
-
-async function getDeposits(userId) {
+async function getTransactions(
+  userId,
+  limit = 200
+) {
 
   const {
     data,
     error
-  } = await supabase
-    .from('deposits')
-    .select('*')
-    .eq(
-      'user_id',
-      userId
-    )
-    .order(
-      'created_at',
-      {
-        ascending: false
-      }
-    );
+  } =
+    await supabase
+      .from('transactions')
+      .select('*')
+      .eq(
+        'user_id',
+        userId
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      )
+      .limit(limit);
 
   if (error) {
     throw error;
@@ -819,31 +766,117 @@ async function getDeposits(userId) {
   return (
     data || []
   ).map(
-    mapDepositFromDb
+    t => ({
+
+      id:
+        t.id,
+
+      type:
+        t.type,
+
+      description:
+        t.description,
+
+      amount:
+        number(t.amount),
+
+      currency:
+        t.currency,
+
+      status:
+        t.status,
+
+      bank:
+        t.bank,
+
+      accountName:
+        t.account_name,
+
+      accountNumber:
+        t.account_number,
+
+      createdAt:
+        t.created_at
+
+    })
+  );
+
+}
+
+// ======================================================
+// DEPOSITS
+// ======================================================
+
+async function getUserDeposits(
+  userId
+) {
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('deposits')
+      .select('*')
+      .eq(
+        'user_id',
+        userId
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return (
+    data || []
+  ).map(
+    d => ({
+
+      reference:
+        d.reference,
+
+      amount:
+        number(d.amount),
+
+      status:
+        d.status,
+
+      screenshot:
+        d.screenshot,
+
+      reason:
+        d.reason,
+
+      createdAt:
+        d.created_at
+
+    })
   );
 
 }
 
 async function getDeposit(
-  userId,
   reference
 ) {
 
   const {
     data,
     error
-  } = await supabase
-    .from('deposits')
-    .select('*')
-    .eq(
-      'user_id',
-      userId
-    )
-    .eq(
-      'reference',
-      reference
-    )
-    .maybeSingle();
+  } =
+    await supabase
+      .from('deposits')
+      .select('*')
+      .eq(
+        'reference',
+        reference
+      )
+      .maybeSingle();
 
   if (error) {
     throw error;
@@ -854,36 +887,139 @@ async function getDeposit(
 }
 
 // ======================================================
+// BALANCE HELPERS
+// ======================================================
+
+function getDepositBalance(
+  user
+) {
+
+  return Math.max(
+    0,
+    number(
+      user.depositBalance
+    )
+  );
+
+}
+
+function getWithdrawableBalance(
+  user
+) {
+
+  return Math.max(
+    0,
+    number(
+      user.withdrawableBalance
+    )
+  );
+
+}
+
+function syncUserBalance(
+  user
+) {
+
+  user.depositBalance =
+    getDepositBalance(user);
+
+  user.withdrawableBalance =
+    getWithdrawableBalance(user);
+
+  user.balance =
+    user.depositBalance +
+    user.withdrawableBalance;
+
+  return user.balance;
+
+}
+
+async function loadUserData(
+  user
+) {
+
+  if (!user) {
+    return null;
+  }
+
+  const [
+    transactions,
+    deposits
+  ] =
+    await Promise.all([
+
+      getTransactions(
+        user.id
+      ),
+
+      getUserDeposits(
+        user.id
+      )
+
+    ]);
+
+  user.transactions =
+    transactions;
+
+  user.deposits =
+    deposits;
+
+  syncUserBalance(user);
+
+  return user;
+
+}
+
+// ======================================================
 // SESSION SYSTEM
 // ======================================================
 
-function base64UrlEncode(value) {
+function base64UrlEncode(
+  value
+) {
 
   return Buffer
     .from(value)
     .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+    .replace(
+      /\+/g,
+      '-'
+    )
+    .replace(
+      /\//g,
+      '_'
+    )
+    .replace(
+      /=+$/,
+      ''
+    );
 
 }
 
-function base64UrlDecode(value) {
+function base64UrlDecode(
+  value
+) {
 
-  value =
-    value
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
+  let v =
+    String(value)
+      .replace(
+        /-/g,
+        '+'
+      )
+      .replace(
+        /_/g,
+        '/'
+      );
 
   while (
-    value.length % 4
+    v.length % 4
   ) {
-    value += '=';
+    v += '=';
   }
 
   return Buffer
     .from(
-      value,
+      v,
       'base64'
     )
     .toString('utf8');
@@ -901,9 +1037,18 @@ function createSignature(
     )
     .update(payload)
     .digest('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+    .replace(
+      /\+/g,
+      '-'
+    )
+    .replace(
+      /\//g,
+      '_'
+    )
+    .replace(
+      /=+$/,
+      ''
+    );
 
 }
 
@@ -911,31 +1056,29 @@ function createSessionToken(
   user
 ) {
 
-  const payloadObject = {
-
-    userId:
-      user.id,
-
-    sessionVersion:
-      Number(
-        user.sessionVersion || 0
-      ),
-
-    expiresAt:
-      Date.now() +
-      SESSION_MAX_AGE
-
-  };
-
   const payload =
     base64UrlEncode(
-      JSON.stringify(
-        payloadObject
-      )
+      JSON.stringify({
+
+        userId:
+          user.id,
+
+        sessionVersion:
+          number(
+            user.sessionVersion
+          ),
+
+        expiresAt:
+          Date.now() +
+          SESSION_MAX_AGE
+
+      })
     );
 
   return (
-    `${payload}.${createSignature(payload)}`
+    payload +
+    '.' +
+    createSignature(payload)
   );
 
 }
@@ -962,32 +1105,31 @@ function verifySessionToken(
       return null;
     }
 
-    const payload =
-      parts[0];
+    const expected =
+      createSignature(
+        parts[0]
+      );
 
-    const provided =
+    const a =
       Buffer.from(
         parts[1]
       );
 
-    const expected =
+    const b =
       Buffer.from(
-        createSignature(
-          payload
-        )
+        expected
       );
 
     if (
-      provided.length !==
-      expected.length
+      a.length !== b.length
     ) {
       return null;
     }
 
     if (
       !crypto.timingSafeEqual(
-        provided,
-        expected
+        a,
+        b
       )
     ) {
       return null;
@@ -996,7 +1138,7 @@ function verifySessionToken(
     const decoded =
       JSON.parse(
         base64UrlDecode(
-          payload
+          parts[0]
         )
       );
 
@@ -1009,7 +1151,7 @@ function verifySessionToken(
 
     if (
       Date.now() >
-      Number(
+      number(
         decoded.expiresAt
       )
     ) {
@@ -1031,33 +1173,28 @@ function getCookie(
   name
 ) {
 
-  const cookieHeader =
+  const header =
     req.headers.cookie;
 
-  if (!cookieHeader) {
+  if (!header) {
     return null;
   }
 
   for (
     const cookie of
-    cookieHeader.split(';')
+    header.split(';')
   ) {
 
-    const separatorIndex =
+    const i =
       cookie.indexOf('=');
 
-    if (
-      separatorIndex === -1
-    ) {
+    if (i === -1) {
       continue;
     }
 
     const key =
       cookie
-        .slice(
-          0,
-          separatorIndex
-        )
+        .slice(0, i)
         .trim();
 
     if (
@@ -1068,9 +1205,7 @@ function getCookie(
 
     const value =
       cookie
-        .slice(
-          separatorIndex + 1
-        )
+        .slice(i + 1)
         .trim();
 
     try {
@@ -1096,7 +1231,7 @@ function setSessionCookie(
   token
 ) {
 
-  const cookieParts = [
+  const parts = [
 
     `payme_session=${encodeURIComponent(token)}`,
 
@@ -1113,12 +1248,12 @@ function setSessionCookie(
   ];
 
   if (isProduction) {
-    cookieParts.push('Secure');
+    parts.push('Secure');
   }
 
   res.setHeader(
     'Set-Cookie',
-    cookieParts.join('; ')
+    parts.join('; ')
   );
 
 }
@@ -1127,7 +1262,7 @@ function clearSessionCookie(
   res
 ) {
 
-  const cookieParts = [
+  const parts = [
 
     'payme_session=',
 
@@ -1142,12 +1277,12 @@ function clearSessionCookie(
   ];
 
   if (isProduction) {
-    cookieParts.push('Secure');
+    parts.push('Secure');
   }
 
   res.setHeader(
     'Set-Cookie',
-    cookieParts.join('; ')
+    parts.join('; ')
   );
 
 }
@@ -1177,12 +1312,12 @@ async function authenticateRequest(
       return next();
     }
 
-    const sessionData =
+    const session =
       verifySessionToken(
         token
       );
 
-    if (!sessionData) {
+    if (!session) {
 
       clearSessionCookie(res);
 
@@ -1192,23 +1327,16 @@ async function authenticateRequest(
 
     const user =
       await getUserById(
-        sessionData.userId
+        session.userId
       );
 
-    if (!user) {
-
-      clearSessionCookie(res);
-
-      return next();
-
-    }
-
     if (
-      Number(
-        user.sessionVersion || 0
+      !user ||
+      number(
+        user.sessionVersion
       ) !==
-      Number(
-        sessionData.sessionVersion || 0
+      number(
+        session.sessionVersion
       )
     ) {
 
@@ -1224,7 +1352,9 @@ async function authenticateRequest(
     };
 
     req.user =
-      user;
+      await loadUserData(
+        user
+      );
 
     return next();
 
@@ -1274,16 +1404,23 @@ async function requireLogin(
 
   }
 
-  try {
+  if (!req.user) {
 
-    const user =
-      await getUserById(
-        req.session.userId
+    try {
+
+      req.user =
+        await loadUserData(
+          await getUserById(
+            req.session.userId
+          )
+        );
+
+    } catch (err) {
+
+      console.error(
+        'Require login error:',
+        err
       );
-
-    if (!user) {
-
-      clearSessionCookie(res);
 
       return res.status(401).json({
 
@@ -1297,34 +1434,14 @@ async function requireLogin(
 
     }
 
-    req.user =
-      user;
-
-    return next();
-
-  } catch (err) {
-
-    console.error(
-      'Require login error:',
-      err
-    );
-
-    return res.status(500).json({
-
-      success:
-        false,
-
-      message:
-        'Authentication error.'
-
-    });
-
   }
+
+  return next();
 
 }
 
 // ======================================================
-// TELEGRAM API
+// TELEGRAM NOTIFICATION
 // ======================================================
 
 async function sendTelegramNotification(
@@ -1337,7 +1454,7 @@ async function sendTelegramNotification(
   ) {
 
     console.warn(
-      'Telegram environment variables are not configured.'
+      'Telegram notification disabled: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.'
     );
 
     return;
@@ -1400,7 +1517,7 @@ async function sendTelegramNotification(
 }
 
 // ======================================================
-// TELEGRAM WEB APP VERIFICATION
+// SECURE TELEGRAM WEB APP VERIFICATION
 // ======================================================
 
 function verifyTelegramWebAppData(
@@ -1495,13 +1612,9 @@ function verifyTelegramWebAppData(
     }
 
     const authDate =
-      Number(
-        params.get('auth_date') || 0
+      number(
+        params.get('auth_date')
       );
-
-    if (!authDate) {
-      return null;
-    }
 
     const age =
       Math.floor(
@@ -1510,7 +1623,8 @@ function verifyTelegramWebAppData(
       authDate;
 
     if (
-      age < 0 ||
+      !authDate ||
+      age < -60 ||
       age > 86400
     ) {
       return null;
@@ -1561,79 +1675,6 @@ function verifyTelegramWebAppData(
 }
 
 // ======================================================
-// USER HELPERS
-// ======================================================
-
-function getDepositBalance(
-  user
-) {
-
-  return Math.max(
-    0,
-    Number(
-      user.depositBalance || 0
-    )
-  );
-
-}
-
-function getWithdrawableBalance(
-  user
-) {
-
-  return Math.max(
-    0,
-    Number(
-      user.withdrawableBalance || 0
-    )
-  );
-
-}
-
-// ======================================================
-// FREE SPINS
-// Stored inside daily_reward JSONB because the
-// supplied users table has no free_spins column.
-// ======================================================
-
-function getFreeSpins(
-  user
-) {
-
-  return Math.max(
-    0,
-    Number(
-      user.freeSpins ||
-      user.dailyReward?.freeSpins ||
-      0
-    )
-  );
-
-}
-
-function setFreeSpins(
-  user,
-  value
-) {
-
-  user.freeSpins =
-    Math.max(
-      0,
-      Number(value || 0)
-    );
-
-  user.dailyReward = {
-
-    ...(user.dailyReward || {}),
-
-    freeSpins:
-      user.freeSpins
-
-  };
-
-}
-
-// ======================================================
 // WELCOME BONUS
 // ======================================================
 
@@ -1644,19 +1685,23 @@ async function ensureWelcomeBonus(
   if (
     user.hasReceivedWelcomeBonus
   ) {
+
+    syncUserBalance(user);
+
     return user;
+
   }
 
   user.withdrawableBalance =
-    Number(
-      user.withdrawableBalance || 0
-    ) +
+    getWithdrawableBalance(user) +
     WELCOME_BONUS;
 
   user.hasReceivedWelcomeBonus =
     true;
 
   syncUserBalance(user);
+
+  await updateUser(user);
 
   await addTransaction(
     user.id,
@@ -1685,90 +1730,74 @@ async function ensureWelcomeBonus(
     }
   );
 
-  return updateUser(user);
+  return user;
 
 }
 
 // ======================================================
-// REFERRAL PROCESSING
+// SANITIZE USER RESPONSE
 // ======================================================
 
-async function processReferral(
-  referrer,
-  newUser
+function sanitizeUser(
+  user
 ) {
 
-  if (
-    !referrer ||
-    referrer.id === newUser.id
-  ) {
-    return;
-  }
+  return {
 
-  const confirmedAt =
-    new Date().toISOString();
+    id:
+      user.id,
 
-  referrer.withdrawableBalance =
-    Number(
-      referrer.withdrawableBalance || 0
-    ) +
-    REFERRAL_REWARD;
+    telegramId:
+      user.telegramId,
 
-  referrer.totalReferrals =
-    Number(
-      referrer.totalReferrals || 0
-    ) +
-    1;
+    fullName:
+      user.fullName,
 
-  referrer.successfulReferrals =
-    Number(
-      referrer.successfulReferrals || 0
-    ) +
-    1;
+    username:
+      user.username,
 
-  referrer.referralEarnings =
-    Number(
-      referrer.referralEarnings || 0
-    ) +
-    REFERRAL_REWARD;
+    balance:
+      number(
+        user.balance
+      ),
 
-  syncUserBalance(
-    referrer
-  );
+    withdrawableBalance:
+      number(
+        user.withdrawableBalance
+      ),
 
-  await updateUser(
-    referrer
-  );
+    depositBalance:
+      number(
+        user.depositBalance
+      ),
 
-  await addTransaction(
-    referrer.id,
-    {
+    referralCode:
+      user.referralCode,
 
-      id:
-        generateTransactionId(
-          'tx_ref'
-        ),
+    totalReferrals:
+      number(
+        user.totalReferrals
+      ),
 
-      type:
-        'referral_reward',
+    successfulReferrals:
+      number(
+        user.successfulReferrals
+      ),
 
-      description:
-        `Referral Reward (@${newUser.username})`,
+    referralEarnings:
+      number(
+        user.referralEarnings
+      ),
 
-      amount:
-        REFERRAL_REWARD,
+    freeSpins:
+      number(
+        user.freeSpins
+      ),
 
-      currency:
-        'NGN',
+    hasClaimedGiftBox:
+      !!user.hasClaimedGiftBox
 
-      status:
-        'completed',
-
-      createdAt:
-        confirmedAt
-
-    }
-  );
+  };
 
 }
 
@@ -1833,6 +1862,54 @@ app.get(
   }
 );
 
+app.get(
+  '/game',
+  (req, res) => {
+
+    if (
+      !req.session ||
+      !req.session.userId
+    ) {
+
+      return res.redirect('/');
+
+    }
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        'public',
+        'game.html'
+      )
+    );
+
+  }
+);
+
+app.get(
+  '/deposit.html',
+  (req, res) => {
+
+    if (
+      !req.session ||
+      !req.session.userId
+    ) {
+
+      return res.redirect('/');
+
+    }
+
+    res.sendFile(
+      path.join(
+        __dirname,
+        'public',
+        'deposit.html'
+      )
+    );
+
+  }
+);
+
 // ======================================================
 // NORMAL SIGNUP
 // ======================================================
@@ -1856,7 +1933,9 @@ app.post(
 
       if (
         !fullName ||
-        fullName.trim().length < 2
+        String(fullName)
+          .trim()
+          .length < 2
       ) {
 
         return res.status(400).json({
@@ -1873,7 +1952,7 @@ app.post(
 
       if (
         !email ||
-        !email.includes('@')
+        !String(email).includes('@')
       ) {
 
         return res.status(400).json({
@@ -1890,7 +1969,9 @@ app.post(
 
       if (
         !username ||
-        username.trim().length < 3
+        String(username)
+          .trim()
+          .length < 3
       ) {
 
         return res.status(400).json({
@@ -1907,7 +1988,9 @@ app.post(
 
       if (
         !phone ||
-        phone.trim().length < 7
+        String(phone)
+          .trim()
+          .length < 7
       ) {
 
         return res.status(400).json({
@@ -1924,7 +2007,7 @@ app.post(
 
       if (
         !password ||
-        password.length < 8
+        String(password).length < 8
       ) {
 
         return res.status(400).json({
@@ -1954,21 +2037,23 @@ app.post(
       }
 
       const cleanUsername =
-        username
+        String(username)
           .trim()
           .toLowerCase();
 
       const cleanEmail =
-        email
+        String(email)
           .trim()
           .toLowerCase();
 
       const cleanPhone =
-        `${countryCode || '+234'}${phone.trim()}`;
+        `${countryCode || '+234'}${String(phone).trim()}`;
 
       const cleanRefInput =
         referralCode
-          ? referralCode
+          ? String(
+              referralCode
+            )
               .trim()
               .toUpperCase()
           : null;
@@ -2009,95 +2094,95 @@ app.post(
 
       }
 
-      const newUser =
-        normalizeUser({
+      const newUser = {
 
-          id:
-            generateUserId(),
+        id:
+          generateUserId(),
 
-          telegram_id:
-            null,
+        fullName:
+          String(fullName).trim(),
 
-          full_name:
-            fullName.trim(),
+        email:
+          cleanEmail,
 
-          email:
-            cleanEmail,
+        username:
+          cleanUsername,
 
-          username:
-            cleanUsername,
+        phone:
+          cleanPhone,
 
-          phone:
-            cleanPhone,
+        password:
+          String(password),
 
-          password,
+        telegramId:
+          null,
 
-          balance:
-            0,
+        balance:
+          0,
 
-          deposit_balance:
-            0,
+        depositBalance:
+          0,
 
-          withdrawable_balance:
-            0,
+        withdrawableBalance:
+          0,
 
-          has_received_welcome_bonus:
-            false,
+        hasReceivedWelcomeBonus:
+          false,
 
-          has_seen_popup:
-            false,
+        hasSeenPopup:
+          false,
 
-          referral_code:
-            await generateUniqueReferralCode(),
+        referralCode:
+          await generateUniqueReferralCode(),
 
-          referred_by:
-            cleanRefInput,
+        referredBy:
+          cleanRefInput,
 
-          total_referrals:
-            0,
+        totalReferrals:
+          0,
 
-          successful_referrals:
-            0,
+        successfulReferrals:
+          0,
 
-          referral_earnings:
-            0,
+        referralEarnings:
+          0,
 
-          has_claimed_gift_box:
-            false,
+        freeSpins:
+          0,
 
-          session_version:
+        hasClaimedGiftBox:
+          false,
+
+        sessionVersion:
+          1,
+
+        dailyReward: {
+
+          currentDay:
             1,
 
-          daily_reward: {
+          lastClaimTimestamp:
+            0,
 
-            currentDay:
-              1,
+          claimedDays:
+            []
 
-            lastClaimTimestamp:
-              0,
+        }
 
-            freeSpins:
-              0
+      };
 
-          },
-
-          created_at:
-            new Date().toISOString()
-
-        });
-
-      await insertUser(
-        newUser
-      );
-
-      let savedUser =
-        await getUserById(
-          newUser.id
+      const created =
+        await createUser(
+          newUser
         );
 
-      savedUser =
-        await ensureWelcomeBonus(
-          savedUser
+      await ensureWelcomeBonus(
+        created
+      );
+
+      const savedUser =
+        await getUserById(
+          created.id
         );
 
       if (
@@ -2120,55 +2205,45 @@ app.post(
             savedUser
           );
 
-          savedUser =
-            await getUserById(
-              savedUser.id
-            );
-
         }
 
       }
 
-      savedUser.sessionVersion =
-        1;
-
-      savedUser =
-        await updateUser(
-          savedUser
+      const finalUser =
+        await loadUserData(
+          await getUserById(
+            savedUser.id
+          )
         );
 
       setSessionCookie(
         res,
         createSessionToken(
-          savedUser
+          finalUser
         )
       );
 
-      sendTelegramNotification(
+      await sendTelegramNotification(
 
-        `🆕 <b>NEW USER REGISTERED</b>\n\n` +
+        `<b>NEW USER REGISTERED</b>\n\n` +
 
-        `👤 <b>Name:</b> ${savedUser.fullName}\n` +
+        `<b>Name:</b> ${finalUser.fullName}\n` +
 
-        `🆔 <b>Username:</b> @${savedUser.username}\n` +
+        `<b>Username:</b> @${finalUser.username}\n` +
 
-        `📧 <b>Email:</b> ${savedUser.email}\n` +
+        `<b>Email:</b> ${finalUser.email}\n` +
 
-        `📱 <b>Phone:</b> ${savedUser.phone}\n` +
+        `<b>Phone:</b> ${finalUser.phone}\n` +
 
-        `🎁 <b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
+        `<b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
 
-        `🔗 <b>Referral Code:</b> ${savedUser.referralCode}\n` +
+        `<b>Referral Code:</b> ${finalUser.referralCode}\n` +
 
-        `👥 <b>Referred By:</b> ${savedUser.referredBy || 'None'}\n` +
+        `<b>Balance:</b> ₦${number(
+          finalUser.balance
+        ).toFixed(2)}`
 
-        `💰 <b>Balance:</b> ₦${savedUser.balance.toFixed(2)}\n` +
-
-        `💵 <b>Earnings:</b> ₦${savedUser.withdrawableBalance.toFixed(2)}\n` +
-
-        `💳 <b>Deposit Balance:</b> ₦${savedUser.depositBalance.toFixed(2)}`
-
-      ).catch(() => {});
+      );
 
       return res.json({
 
@@ -2178,27 +2253,10 @@ app.post(
         message:
           'Signup successful',
 
-        user: {
-
-          id:
-            savedUser.id,
-
-          fullName:
-            savedUser.fullName,
-
-          username:
-            savedUser.username,
-
-          balance:
-            savedUser.balance,
-
-          withdrawableBalance:
-            savedUser.withdrawableBalance,
-
-          depositBalance:
-            savedUser.depositBalance
-
-        }
+        user:
+          sanitizeUser(
+            finalUser
+          )
 
       });
 
@@ -2210,8 +2268,8 @@ app.post(
       );
 
       if (
-        err?.code ===
-        '23505'
+        err &&
+        err.code === '23505'
       ) {
 
         return res.status(400).json({
@@ -2220,7 +2278,7 @@ app.post(
             false,
 
           message:
-            'Username, email, Telegram ID, or referral code is already in use.'
+            'That username, email, Telegram account, or referral code is already registered.'
 
         });
 
@@ -2242,7 +2300,79 @@ app.post(
 );
 
 // ======================================================
-// TELEGRAM SIGNUP / AUTHENTICATION
+// PROCESS REFERRAL
+// ======================================================
+
+async function processReferral(
+  referrer,
+  newUser
+) {
+
+  const confirmedAt =
+    new Date().toISOString();
+
+  referrer.withdrawableBalance =
+    getWithdrawableBalance(
+      referrer
+    ) +
+    REFERRAL_REWARD;
+
+  referrer.totalReferrals =
+    number(
+      referrer.totalReferrals
+    ) +
+    1;
+
+  referrer.successfulReferrals =
+    number(
+      referrer.successfulReferrals
+    ) +
+    1;
+
+  referrer.referralEarnings =
+    number(
+      referrer.referralEarnings
+    ) +
+    REFERRAL_REWARD;
+
+  await updateUser(
+    referrer
+  );
+
+  await addTransaction(
+    referrer.id,
+    {
+
+      id:
+        generateTransactionId(
+          'tx_ref'
+        ),
+
+      type:
+        'referral_reward',
+
+      description:
+        `Referral Reward (@${newUser.username})`,
+
+      amount:
+        REFERRAL_REWARD,
+
+      currency:
+        'NGN',
+
+      status:
+        'completed',
+
+      createdAt:
+        confirmedAt
+
+    }
+  );
+
+}
+
+// ======================================================
+// TELEGRAM SIGNUP
 // ======================================================
 
 app.post(
@@ -2256,10 +2386,50 @@ app.post(
         username,
         firstName,
         lastName,
-        referralCode
+        referralCode,
+        initData
       } = req.body;
 
-      if (!telegramId) {
+      let verifiedTelegramId =
+        telegramId
+          ? String(telegramId)
+          : '';
+
+      let verifiedUser =
+        null;
+
+      if (initData) {
+
+        const verification =
+          verifyTelegramWebAppData(
+            initData
+          );
+
+        if (!verification) {
+
+          return res.status(401).json({
+
+            success:
+              false,
+
+            message:
+              'Invalid or expired Telegram authentication data.'
+
+          });
+
+        }
+
+        verifiedUser =
+          verification.user;
+
+        verifiedTelegramId =
+          String(
+            verifiedUser.id
+          );
+
+      }
+
+      if (!verifiedTelegramId) {
 
         return res.status(400).json({
 
@@ -2273,15 +2443,11 @@ app.post(
 
       }
 
-      const cleanTelegramId =
-        String(
-          telegramId
-        );
-
       const cleanUsername =
         String(
+          verifiedUser?.username ||
           username ||
-          `user_${cleanTelegramId}`
+          `user_${verifiedTelegramId}`
         )
           .trim()
           .replace(
@@ -2292,12 +2458,16 @@ app.post(
 
       const cleanFirstName =
         String(
-          firstName || ''
+          verifiedUser?.first_name ||
+          firstName ||
+          ''
         ).trim();
 
       const cleanLastName =
         String(
-          lastName || ''
+          verifiedUser?.last_name ||
+          lastName ||
+          ''
         ).trim();
 
       const cleanRefInput =
@@ -2316,12 +2486,15 @@ app.post(
 
       let user =
         await getUserByTelegramId(
-          cleanTelegramId
+          verifiedTelegramId
         );
 
       if (
         !user &&
-        cleanUsername
+        cleanUsername &&
+        !cleanUsername.startsWith(
+          'user_'
+        )
       ) {
 
         user =
@@ -2334,15 +2507,15 @@ app.post(
       if (!user) {
 
         user =
-          normalizeUser({
+          await createUser({
 
             id:
               generateUserId(),
 
-            telegram_id:
-              cleanTelegramId,
+            telegramId:
+              verifiedTelegramId,
 
-            full_name:
+            fullName:
               fullName,
 
             email:
@@ -2362,40 +2535,43 @@ app.post(
             balance:
               0,
 
-            deposit_balance:
+            depositBalance:
               0,
 
-            withdrawable_balance:
+            withdrawableBalance:
               0,
 
-            has_received_welcome_bonus:
+            hasReceivedWelcomeBonus:
               false,
 
-            has_seen_popup:
+            hasSeenPopup:
               false,
 
-            referral_code:
+            referralCode:
               await generateUniqueReferralCode(),
 
-            referred_by:
+            referredBy:
               cleanRefInput,
 
-            total_referrals:
+            totalReferrals:
               0,
 
-            successful_referrals:
+            successfulReferrals:
               0,
 
-            referral_earnings:
+            referralEarnings:
               0,
 
-            has_claimed_gift_box:
+            freeSpins:
+              0,
+
+            hasClaimedGiftBox:
               false,
 
-            session_version:
+            sessionVersion:
               0,
 
-            daily_reward: {
+            dailyReward: {
 
               currentDay:
                 1,
@@ -2403,43 +2579,29 @@ app.post(
               lastClaimTimestamp:
                 0,
 
-              freeSpins:
-                0
+              claimedDays:
+                []
 
-            },
-
-            created_at:
-              new Date().toISOString()
+            }
 
           });
 
-        await insertUser(
+        await ensureWelcomeBonus(
           user
         );
 
-        user =
-          await getUserById(
-            user.id
-          );
-
-        user =
-          await ensureWelcomeBonus(
-            user
-          );
-
         if (
-          user.referredBy
+          cleanRefInput
         ) {
 
           const referrer =
             await getUserByReferralCode(
-              user.referredBy
+              cleanRefInput
             );
 
           if (
             referrer &&
-            referrer.id !==
-            user.id
+            referrer.id !== user.id
           ) {
 
             await processReferral(
@@ -2451,7 +2613,7 @@ app.post(
 
         }
 
-        sendTelegramNotification(
+        await sendTelegramNotification(
 
           `<b>NEW TELEGRAM USER REGISTERED</b>\n\n` +
 
@@ -2463,18 +2625,14 @@ app.post(
 
           `<b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
 
-          `<b>Referral Code:</b> ${user.referralCode}\n` +
+          `<b>Referral Code:</b> ${user.referralCode}`
 
-          `<b>Referred By:</b> ${user.referredBy || 'None'}\n` +
-
-          `<b>Balance:</b> ₦${Number(user.balance).toFixed(2)}`
-
-        ).catch(() => {});
+        );
 
       } else {
 
         user.telegramId =
-          cleanTelegramId;
+          verifiedTelegramId;
 
         if (fullName) {
 
@@ -2495,28 +2653,33 @@ app.post(
 
         }
 
-      }
-
-      user =
         await ensureWelcomeBonus(
           user
         );
 
+      }
+
       user.sessionVersion =
-        Number(
-          user.sessionVersion || 0
+        number(
+          user.sessionVersion
         ) +
         1;
 
-      user =
-        await updateUser(
-          user
+      await updateUser(
+        user
+      );
+
+      const finalUser =
+        await loadUserData(
+          await getUserById(
+            user.id
+          )
         );
 
       setSessionCookie(
         res,
         createSessionToken(
-          user
+          finalUser
         )
       );
 
@@ -2528,33 +2691,10 @@ app.post(
         message:
           'Telegram authentication successful',
 
-        user: {
-
-          id:
-            user.id,
-
-          telegramId:
-            user.telegramId,
-
-          fullName:
-            user.fullName,
-
-          username:
-            user.username,
-
-          balance:
-            user.balance,
-
-          withdrawableBalance:
-            user.withdrawableBalance,
-
-          depositBalance:
-            user.depositBalance,
-
-          referralCode:
-            user.referralCode
-
-        }
+        user:
+          sanitizeUser(
+            finalUser
+          )
 
       });
 
@@ -2581,7 +2721,7 @@ app.post(
 );
 
 // ======================================================
-// CHECK USER
+// CHECK TELEGRAM USER
 // ======================================================
 
 app.get(
@@ -2590,29 +2730,40 @@ app.get(
 
     try {
 
-      const {
-        telegramId
-      } = req.query;
+      const telegramId =
+        String(
+          req.query.telegramId || ''
+        ).trim();
 
       if (!telegramId) {
 
         return res.json({
-          exists: false
+
+          exists:
+            false
+
         });
 
       }
 
       const user =
         await getUserByTelegramId(
-          String(
-            telegramId
-          ).trim()
+          telegramId
         );
 
-      if (!user) {
+      if (user) {
 
         return res.json({
-          exists: false
+
+          exists:
+            true,
+
+          username:
+            user.username,
+
+          fullName:
+            user.fullName
+
         });
 
       }
@@ -2620,13 +2771,7 @@ app.get(
       return res.json({
 
         exists:
-          true,
-
-        username:
-          user.username,
-
-        fullName:
-          user.fullName
+          false
 
       });
 
@@ -2685,7 +2830,9 @@ app.post(
       }
 
       const cleanId =
-        loginIdentifier
+        String(
+          loginIdentifier
+        )
           .trim()
           .toLowerCase();
 
@@ -2706,7 +2853,7 @@ app.post(
       if (
         !user ||
         user.password !==
-        password
+        String(password)
       ) {
 
         return res.status(401).json({
@@ -2721,44 +2868,33 @@ app.post(
 
       }
 
-      user =
-        await ensureWelcomeBonus(
-          user
-        );
+      await ensureWelcomeBonus(
+        user
+      );
 
       user.sessionVersion =
-        Number(
-          user.sessionVersion || 0
+        number(
+          user.sessionVersion
         ) +
         1;
 
-      user =
-        await updateUser(
-          user
+      await updateUser(
+        user
+      );
+
+      const finalUser =
+        await loadUserData(
+          await getUserById(
+            user.id
+          )
         );
 
       setSessionCookie(
         res,
         createSessionToken(
-          user
+          finalUser
         )
       );
-
-      sendTelegramNotification(
-
-        `🔐 <b>USER LOGIN ALERT</b>\n\n` +
-
-        `👤 <b>Name:</b> ${user.fullName}\n` +
-
-        `🆔 <b>Username:</b> @${user.username}\n` +
-
-        `💰 <b>Current Balance:</b> ₦${user.balance.toFixed(2)}\n` +
-
-        `💵 <b>Earnings:</b> ₦${user.withdrawableBalance.toFixed(2)}\n` +
-
-        `💳 <b>Deposit Balance:</b> ₦${user.depositBalance.toFixed(2)}`
-
-      ).catch(() => {});
 
       return res.json({
 
@@ -2768,27 +2904,10 @@ app.post(
         message:
           'Login successful',
 
-        user: {
-
-          id:
-            user.id,
-
-          fullName:
-            user.fullName,
-
-          username:
-            user.username,
-
-          balance:
-            user.balance,
-
-          withdrawableBalance:
-            user.withdrawableBalance,
-
-          depositBalance:
-            user.depositBalance
-
-        }
+        user:
+          sanitizeUser(
+            finalUser
+          )
 
       });
 
@@ -2837,8 +2956,8 @@ app.post(
         if (user) {
 
           user.sessionVersion =
-            Number(
-              user.sessionVersion || 0
+            number(
+              user.sessionVersion
             ) +
             1;
 
@@ -2894,17 +3013,15 @@ app.post(
         amount
       } = req.body;
 
-      let user =
+      const user =
         req.user;
+
+      const withdrawnAmount =
+        number(amount);
 
       const withdrawable =
         getWithdrawableBalance(
           user
-        );
-
-      const withdrawnAmount =
-        Number(
-          amount
         );
 
       if (
@@ -2963,18 +3080,17 @@ app.post(
       }
 
       const oldBalance =
-        Number(
-          user.balance || 0
+        number(
+          user.balance
         );
 
       user.withdrawableBalance =
         withdrawable -
         withdrawnAmount;
 
-      user =
-        await updateUser(
-          user
-        );
+      await updateUser(
+        user
+      );
 
       await addTransaction(
         user.id,
@@ -3011,27 +3127,21 @@ app.post(
 
       await sendTelegramNotification(
 
-        `🚨 <b>NEW WITHDRAWAL REQUEST</b> 🚨\n\n` +
+        `<b>NEW WITHDRAWAL REQUEST</b>\n\n` +
 
-        `👤 <b>User:</b> @${user.username || 'User'}\n` +
+        `<b>User:</b> @${user.username || 'User'}\n` +
 
-        `💰 <b>Amount:</b> ₦${withdrawnAmount.toLocaleString()}\n` +
+        `<b>Amount:</b> ₦${withdrawnAmount.toLocaleString()}\n` +
 
-        `📉 <b>Old Balance:</b> ₦${oldBalance.toLocaleString()}\n` +
+        `<b>Old Balance:</b> ₦${oldBalance.toLocaleString()}\n` +
 
-        `🔄 <b>New Balance:</b> ₦${Number(user.balance).toLocaleString()}\n` +
+        `<b>New Balance:</b> ₦${number(user.balance).toLocaleString()}\n` +
 
-        `💵 <b>Earnings Remaining:</b> ₦${Number(user.withdrawableBalance).toLocaleString()}\n` +
+        `<b>Account Name:</b> ${accountName}\n` +
 
-        `💳 <b>Deposit Balance:</b> ₦${Number(user.depositBalance).toLocaleString()}\n\n` +
+        `<b>Bank:</b> ${bankName}\n` +
 
-        `🏦 <b>BANK DETAILS</b>\n` +
-
-        `• <b>Account Name:</b> ${accountName}\n` +
-
-        `• <b>Bank:</b> ${bankName}\n` +
-
-        `• <b>Account No:</b> ${accountNumber}`
+        `<b>Account No:</b> ${accountNumber}`
 
       );
 
@@ -3122,35 +3232,7 @@ app.get(
 );
 
 // ======================================================
-// GAME PAGE
-// ======================================================
-
-app.get(
-  '/game',
-  (req, res) => {
-
-    if (
-      !req.session ||
-      !req.session.userId
-    ) {
-
-      return res.redirect('/');
-
-    }
-
-    res.sendFile(
-      path.join(
-        __dirname,
-        'public',
-        'game.html'
-      )
-    );
-
-  }
-);
-
-// ======================================================
-// TELEGRAM CHANNEL GIFT
+// TELEGRAM JOIN VERIFICATION
 // ======================================================
 
 app.post(
@@ -3160,12 +3242,13 @@ app.post(
 
     try {
 
-      let user =
+      const user =
         req.user;
 
       const isLocal =
         req.body?.isLocal ||
-        process.env.NODE_ENV !== 'production';
+        process.env.NODE_ENV !==
+        'production';
 
       if (isLocal) {
 
@@ -3176,15 +3259,15 @@ app.post(
           user.hasClaimedGiftBox =
             true;
 
-          setFreeSpins(
-            user,
-            getFreeSpins(user) + 1
-          );
+          user.freeSpins =
+            number(
+              user.freeSpins
+            ) +
+            1;
 
-          user =
-            await updateUser(
-              user
-            );
+          await updateUser(
+            user
+          );
 
         }
 
@@ -3197,7 +3280,7 @@ app.post(
             'Telegram channel verified successfully!',
 
           freeSpins:
-            getFreeSpins(user)
+            user.freeSpins
 
         });
 
@@ -3225,7 +3308,7 @@ app.post(
             false,
 
           message:
-            'Telegram bot is not configured.'
+            'Telegram bot is not configured on the server.'
 
         });
 
@@ -3259,15 +3342,15 @@ app.post(
           user.hasClaimedGiftBox =
             true;
 
-          setFreeSpins(
-            user,
-            getFreeSpins(user) + 1
-          );
+          user.freeSpins =
+            number(
+              user.freeSpins
+            ) +
+            1;
 
-          user =
-            await updateUser(
-              user
-            );
+          await updateUser(
+            user
+          );
 
         }
 
@@ -3280,7 +3363,7 @@ app.post(
             'Telegram channel verified successfully!',
 
           freeSpins:
-            getFreeSpins(user)
+            user.freeSpins
 
         });
 
@@ -3329,21 +3412,15 @@ app.get(
 
     try {
 
-      const user =
-        req.user;
-
-      const transactions =
-        await getTransactions(
-          user.id
-        );
-
       const spins =
-        transactions.filter(
+        (
+          await getTransactions(
+            req.user.id
+          )
+        ).filter(
           t =>
             t.type &&
-            t.type.includes(
-              'Spin'
-            )
+            t.type.includes('Spin')
         );
 
       return res.json({
@@ -3352,21 +3429,21 @@ app.get(
           true,
 
         balance:
-          user.balance,
+          req.user.balance,
 
         withdrawableBalance:
-          user.withdrawableBalance,
+          req.user.withdrawableBalance,
 
         depositBalance:
-          user.depositBalance,
+          req.user.depositBalance,
 
         spins,
 
         freeSpins:
-          getFreeSpins(user),
+          req.user.freeSpins || 0,
 
         hasClaimedGiftBox:
-          !!user.hasClaimedGiftBox
+          !!req.user.hasClaimedGiftBox
 
       });
 
@@ -3403,20 +3480,19 @@ app.post(
 
     try {
 
-      let user =
+      const user =
         req.user;
 
       let usedFreeSpin =
         false;
 
       if (
-        getFreeSpins(user) > 0
+        number(
+          user.freeSpins
+        ) > 0
       ) {
 
-        setFreeSpins(
-          user,
-          getFreeSpins(user) - 1
-        );
+        user.freeSpins -= 1;
 
         usedFreeSpin =
           true;
@@ -3424,8 +3500,8 @@ app.post(
       } else {
 
         if (
-          Number(
-            user.balance || 0
+          number(
+            user.balance
           ) <
           SPIN_COST
         ) {
@@ -3442,46 +3518,48 @@ app.post(
 
         }
 
-        let remainingSpinCost =
+        let remaining =
           SPIN_COST;
 
-        const currentDepositBalance =
+        const deposit =
           getDepositBalance(
             user
           );
 
-        const currentEarnings =
+        const earnings =
           getWithdrawableBalance(
             user
           );
 
         if (
-          currentDepositBalance >=
-          remainingSpinCost
+          deposit >=
+          remaining
         ) {
 
           user.depositBalance =
-            currentDepositBalance -
-            remainingSpinCost;
+            deposit -
+            remaining;
 
         } else {
 
-          remainingSpinCost -=
-            currentDepositBalance;
+          remaining -=
+            deposit;
 
           user.depositBalance =
             0;
 
           user.withdrawableBalance =
-            currentEarnings -
-            remainingSpinCost;
+            Math.max(
+              0,
+              earnings -
+              remaining
+            );
 
         }
 
-        user =
-          await updateUser(
-            user
-          );
+        await updateUser(
+          user
+        );
 
         await addTransaction(
           user.id,
@@ -3501,11 +3579,8 @@ app.post(
             amount:
               SPIN_COST,
 
-            status:
-              'completed',
-
             description:
-              'Spin Entry'
+              'Spin entry'
 
           }
         );
@@ -3515,111 +3590,57 @@ app.post(
       const prizes = [
 
         {
-          amount:
-            0,
-
-          weight:
-            2000,
-
-          label:
-            'NO'
-
+          amount: 0,
+          weight: 2000,
+          label: '₦0'
         },
 
         {
-          amount:
-            10,
-
-          weight:
-            2500,
-
-          label:
-            '₦10'
-
+          amount: 10,
+          weight: 2500,
+          label: '₦10'
         },
 
         {
-          amount:
-            20,
-
-          weight:
-            2500,
-
-          label:
-            '₦20'
-
+          amount: 20,
+          weight: 2500,
+          label: '₦20'
         },
 
         {
-          amount:
-            50,
-
-          weight:
-            1800,
-
-          label:
-            '₦50'
-
+          amount: 50,
+          weight: 1800,
+          label: '₦50'
         },
 
         {
-          amount:
-            100,
-
-          weight:
-            800,
-
-          label:
-            '₦100'
-
+          amount: 100,
+          weight: 800,
+          label: '₦100'
         },
 
         {
-          amount:
-            250,
-
-          weight:
-            250,
-
-          label:
-            '₦250'
-
+          amount: 250,
+          weight: 250,
+          label: '₦250'
         },
 
         {
-          amount:
-            500,
-
-          weight:
-            100,
-
-          label:
-            '₦500'
-
+          amount: 500,
+          weight: 100,
+          label: '₦500'
         },
 
         {
-          amount:
-            1000,
-
-          weight:
-            45,
-
-          label:
-            '₦1000'
-
+          amount: 1000,
+          weight: 45,
+          label: '₦1000'
         },
 
         {
-          amount:
-            2000,
-
-          weight:
-            5,
-
-          label:
-            '₦2000'
-
+          amount: 2000,
+          weight: 5,
+          label: '₦2000'
         }
 
       ];
@@ -3627,10 +3648,10 @@ app.post(
       const totalWeight =
         prizes.reduce(
           (
-            total,
+            sum,
             prize
           ) =>
-            total +
+            sum +
             prize.weight,
           0
         );
@@ -3641,23 +3662,22 @@ app.post(
           totalWeight
         );
 
-      let cumulativeWeight =
+      let cumulative =
         0;
 
       let selectedPrize =
         prizes[0];
 
       for (
-        const prize of
-        prizes
+        const prize of prizes
       ) {
 
-        cumulativeWeight +=
+        cumulative +=
           prize.weight;
 
         if (
           randomWeight <
-          cumulativeWeight
+          cumulative
         ) {
 
           selectedPrize =
@@ -3675,19 +3695,16 @@ app.post(
       ) {
 
         user.withdrawableBalance =
-          Number(
-            user.withdrawableBalance || 0
+          getWithdrawableBalance(
+            user
           ) +
-          Number(
-            selectedPrize.amount
-          );
+          selectedPrize.amount;
 
       }
 
-      user =
-        await updateUser(
-          user
-        );
+      await updateUser(
+        user
+      );
 
       await addTransaction(
         user.id,
@@ -3709,13 +3726,8 @@ app.post(
           amount:
             selectedPrize.amount,
 
-          status:
-            'completed',
-
           description:
-            usedFreeSpin
-              ? 'Free Spin Reward'
-              : 'Spin Reward'
+            selectedPrize.label
 
         }
       );
@@ -3728,9 +3740,7 @@ app.post(
         ).filter(
           t =>
             t.type &&
-            t.type.includes(
-              'Spin'
-            )
+            t.type.includes('Spin')
         );
 
       return res.json({
@@ -3741,7 +3751,7 @@ app.post(
         usedFreeSpin,
 
         freeSpins:
-          getFreeSpins(user),
+          user.freeSpins || 0,
 
         prize:
           selectedPrize.amount,
@@ -3788,35 +3798,7 @@ app.post(
 );
 
 // ======================================================
-// DEPOSIT PAGE
-// ======================================================
-
-app.get(
-  '/deposit.html',
-  (req, res) => {
-
-    if (
-      !req.session ||
-      !req.session.userId
-    ) {
-
-      return res.redirect('/');
-
-    }
-
-    res.sendFile(
-      path.join(
-        __dirname,
-        'public',
-        'deposit.html'
-      )
-    );
-
-  }
-);
-
-// ======================================================
-// GET USER DEPOSITS
+// GET DEPOSITS
 // ======================================================
 
 app.get(
@@ -3832,7 +3814,7 @@ app.get(
           true,
 
         deposits:
-          await getDeposits(
+          await getUserDeposits(
             req.user.id
           )
 
@@ -3871,21 +3853,17 @@ app.post(
 
     try {
 
-      const {
-        amount,
-        screenshot
-      } = req.body;
-
-      const depositAmount =
-        Number(
-          amount
+      const amount =
+        number(
+          req.body?.amount
         );
 
+      const screenshot =
+        req.body?.screenshot;
+
       if (
-        !Number.isFinite(
-          depositAmount
-        ) ||
-        depositAmount <
+        !Number.isFinite(amount) ||
+        amount <
         MIN_DEPOSIT_AMOUNT
       ) {
 
@@ -3916,7 +3894,7 @@ app.post(
       }
 
       const matches =
-        screenshot.match(
+        String(screenshot).match(
           /^data:image\/([a-zA-Z0-9.+-]+);base64,(.+)$/
         );
 
@@ -3934,74 +3912,52 @@ app.post(
 
       }
 
-      const user =
-        req.user;
-
       const reference =
-        'PM-' +
-        crypto
-          .randomBytes(4)
-          .toString('hex')
-          .toUpperCase();
+        generateDepositReference();
 
       const {
-        error: insertError
-      } = await supabase
-        .from('deposits')
-        .insert({
+        error: depositError
+      } =
+        await supabase
+          .from('deposits')
+          .insert({
 
-          reference,
+            reference,
 
-          user_id:
-            user.id,
+            user_id:
+              req.user.id,
 
-          amount:
-            depositAmount,
+            amount,
 
-          status:
-            'Pending Verification',
+            status:
+              'Pending Verification',
 
-          screenshot,
+            screenshot,
 
-          reason:
-            null,
+            reason:
+              null
 
-          created_at:
-            new Date().toISOString()
+          });
 
-        });
-
-      if (insertError) {
-        throw insertError;
+      if (depositError) {
+        throw depositError;
       }
-
-      const imageType =
-        matches[1];
-
-      const base64Data =
-        matches[2];
-
-      const imageBuffer =
-        Buffer.from(
-          base64Data,
-          'base64'
-        );
 
       const caption =
 
-        `📥 <b>NEW DEPOSIT REQUEST</b>\n\n` +
+        `<b>NEW DEPOSIT REQUEST</b>\n\n` +
 
-        `👤 <b>Name:</b> ${user.fullName}\n` +
+        `<b>Name:</b> ${req.user.fullName}\n` +
 
-        `🆔 <b>Username:</b> @${user.username}\n` +
+        `<b>Username:</b> @${req.user.username}\n` +
 
-        `📧 <b>Email:</b> ${user.email}\n` +
+        `<b>Email:</b> ${req.user.email}\n` +
 
-        `💰 <b>Amount:</b> ₦${depositAmount.toLocaleString()}\n` +
+        `<b>Amount:</b> ₦${amount.toLocaleString()}\n` +
 
-        `🔖 <b>Reference:</b> ${reference}\n` +
+        `<b>Reference:</b> ${reference}\n` +
 
-        `⏳ <b>Status:</b> Pending Verification`;
+        `<b>Status:</b> Pending Verification`;
 
       if (
         !TELEGRAM_BOT_TOKEN ||
@@ -4020,6 +3976,12 @@ app.post(
 
       }
 
+      const imageBuffer =
+        Buffer.from(
+          matches[2],
+          'base64'
+        );
+
       const formData =
         new FormData();
 
@@ -4033,52 +3995,45 @@ app.post(
         caption
       );
 
-      const imageBlob =
+      formData.append(
+        'photo',
         new Blob(
           [imageBuffer],
           {
             type:
-              `image/${imageType}`
+              `image/${matches[1]}`
           }
-        );
-
-      formData.append(
-        'photo',
-        imageBlob,
-        `deposit-${reference}.${imageType}`
+        ),
+        `deposit-${reference}.${matches[1]}`
       );
 
       formData.append(
         'reply_markup',
         JSON.stringify({
 
-          inline_keyboard: [
+          inline_keyboard: [[
 
-            [
+            {
 
-              {
+              text:
+                'APPROVE',
 
-                text:
-                  '✅ APPROVE',
+              callback_data:
+                `approve_deposit:${req.user.id}:${reference}`
 
-                callback_data:
-                  `approve_deposit:${user.id}:${reference}`
+            },
 
-              },
+            {
 
-              {
+              text:
+                'REJECT',
 
-                text:
-                  '❌ REJECT',
+              callback_data:
+                `reject_deposit:${req.user.id}:${reference}`
 
-                callback_data:
-                  `reject_deposit:${user.id}:${reference}`
+            }
 
-              }
-
-            ]
-
-          ]
+          ]]
 
         })
       );
@@ -4149,7 +4104,7 @@ app.post(
           false,
 
         error:
-          'Deposit saved, but Telegram notification failed.'
+          'Server error during deposit submission.'
 
       });
 
@@ -4159,33 +4114,55 @@ app.post(
 );
 
 // ======================================================
-// ADMIN DEPOSIT VERIFICATION
+// VERIFY DEPOSIT
 // ======================================================
 
-async function verifyDepositAction({
+async function verifyDeposit(
   userId,
   reference,
   action,
   reason
-}) {
+) {
+
+  const targetUser =
+    await getUserById(
+      userId
+    );
+
+  if (!targetUser) {
+
+    throw Object.assign(
+      new Error(
+        'User not found'
+      ),
+      {
+        status:
+          404
+      }
+    );
+
+  }
 
   const deposit =
     await getDeposit(
-      userId,
       reference
     );
 
-  if (!deposit) {
+  if (
+    !deposit ||
+    deposit.user_id !==
+    targetUser.id
+  ) {
 
-    return {
-
-      error:
-        'Deposit not found or already verified.',
-
-      status:
-        400
-
-    };
+    throw Object.assign(
+      new Error(
+        'Deposit not found'
+      ),
+      {
+        status:
+          404
+      }
+    );
 
   }
 
@@ -4194,15 +4171,15 @@ async function verifyDepositAction({
     'Pending Verification'
   ) {
 
-    return {
-
-      error:
-        'Deposit not found or already verified.',
-
-      status:
-        400
-
-    };
+    throw Object.assign(
+      new Error(
+        'Deposit not found or already verified'
+      ),
+      {
+        status:
+          400
+      }
+    );
 
   }
 
@@ -4212,90 +4189,45 @@ async function verifyDepositAction({
   ) {
 
     const amount =
-      Number(
-        deposit.amount || 0
+      number(
+        deposit.amount
       );
 
-    const user =
-      await getUserById(
-        userId
-      );
-
-    if (!user) {
-
-      return {
-
-        error:
-          'User not found.',
-
-        status:
-          404
-
-      };
-
-    }
-
-    const {
-      data:
-        updatedDeposit,
-      error:
-        depositError
-    } = await supabase
-      .from('deposits')
-      .update({
-
-        status:
-          'Approved',
-
-        reason:
-          null
-
-      })
-      .eq(
-        'reference',
-        reference
-      )
-      .eq(
-        'user_id',
-        userId
-      )
-      .eq(
-        'status',
-        'Pending Verification'
-      )
-      .select('*')
-      .maybeSingle();
-
-    if (depositError) {
-      throw depositError;
-    }
-
-    if (!updatedDeposit) {
-
-      return {
-
-        error:
-          'Deposit was already processed.',
-
-        status:
-          409
-
-      };
-
-    }
-
-    user.depositBalance =
-      Number(
-        user.depositBalance || 0
+    targetUser.depositBalance =
+      getDepositBalance(
+        targetUser
       ) +
       amount;
 
     await updateUser(
-      user
+      targetUser
     );
 
+    const {
+      error
+    } =
+      await supabase
+        .from('deposits')
+        .update({
+
+          status:
+            'Approved',
+
+          reason:
+            null
+
+        })
+        .eq(
+          'reference',
+          reference
+        );
+
+    if (error) {
+      throw error;
+    }
+
     await addTransaction(
-      user.id,
+      targetUser.id,
       {
 
         id:
@@ -4309,118 +4241,82 @@ async function verifyDepositAction({
         description:
           `Deposit ${reference}`,
 
-        amount:
-          amount,
+        amount,
 
         currency:
           'NGN',
 
-        bank:
-          'PalmPay',
-
         status:
-          'completed'
+          'completed',
+
+        bank:
+          'PalmPay'
 
       }
     );
 
-    return {
-
-      deposit:
-        mapDepositFromDb(
-          updatedDeposit
-        ),
-
-      user:
-        await getUserById(
-          userId
-        )
-
-    };
-
-  }
-
-  if (
+  } else if (
     action ===
     'reject'
   ) {
 
     const {
-      data:
-        updatedDeposit,
       error
-    } = await supabase
-      .from('deposits')
-      .update({
+    } =
+      await supabase
+        .from('deposits')
+        .update({
 
-        status:
-          'Rejected',
+          status:
+            'Rejected',
 
-        reason:
-          reason ||
-          'Payment proof was rejected.'
+          reason:
+            reason ||
+            'Payment proof was rejected.'
 
-      })
-      .eq(
-        'reference',
-        reference
-      )
-      .eq(
-        'user_id',
-        userId
-      )
-      .eq(
-        'status',
-        'Pending Verification'
-      )
-      .select('*')
-      .maybeSingle();
+        })
+        .eq(
+          'reference',
+          reference
+        );
 
     if (error) {
       throw error;
     }
 
-    if (!updatedDeposit) {
+  } else {
 
-      return {
-
-        error:
-          'Deposit was already processed.',
-
+    throw Object.assign(
+      new Error(
+        'Invalid action. Use approve or reject.'
+      ),
+      {
         status:
-          409
-
-      };
-
-    }
-
-    return {
-
-      deposit:
-        mapDepositFromDb(
-          updatedDeposit
-        ),
-
-      user:
-        await getUserById(
-          userId
-        )
-
-    };
+          400
+      }
+    );
 
   }
 
   return {
 
-    error:
-      'Invalid action. Use approve or reject.',
+    user:
+      await getUserById(
+        targetUser.id
+      ),
 
-    status:
-      400
+    deposit:
+      await getDeposit(
+        reference
+      )
 
   };
 
 }
+
+// ======================================================
+// ADMIN DEPOSIT VERIFY
+// ======================================================
 
 app.post(
   '/api/admin/deposits/verify',
@@ -4428,20 +4324,12 @@ app.post(
 
     try {
 
-      const {
-        adminSecret,
-        userId,
-        reference,
-        action,
-        reason
-      } = req.body;
-
       const expectedSecret =
         process.env.PAYME_ADMIN_SECRET ||
         'payme_admin_secret_2026';
 
       if (
-        adminSecret !==
+        req.body.adminSecret !==
         expectedSecret
       ) {
 
@@ -4458,32 +4346,17 @@ app.post(
       }
 
       const result =
-        await verifyDepositAction({
+        await verifyDeposit(
 
-          userId,
-          reference,
-          action,
-          reason
+          req.body.userId,
 
-        });
+          req.body.reference,
 
-      if (
-        result.error
-      ) {
+          req.body.action,
 
-        return res.status(
-          result.status || 400
-        ).json({
+          req.body.reason
 
-          success:
-            false,
-
-          error:
-            result.error
-
-        });
-
-      }
+        );
 
       return res.json({
 
@@ -4514,13 +4387,16 @@ app.post(
         err
       );
 
-      return res.status(500).json({
+      return res.status(
+        err.status || 500
+      ).json({
 
         success:
           false,
 
         error:
-          'Server error verifying deposit.'
+          err.message ||
+          'Failed to verify deposit.'
 
       });
 
@@ -4530,7 +4406,87 @@ app.post(
 );
 
 // ======================================================
-// DASHBOARD API
+// DAILY REWARD HELPERS
+// ======================================================
+
+function normalizeDailyReward(
+  user
+) {
+
+  if (
+    !user.dailyReward ||
+    typeof user.dailyReward !==
+    'object'
+  ) {
+
+    user.dailyReward = {
+
+      currentDay:
+        1,
+
+      lastClaimTimestamp:
+        0,
+
+      claimedDays:
+        []
+
+    };
+
+  }
+
+  if (
+    !Array.isArray(
+      user.dailyReward.claimedDays
+    )
+  ) {
+
+    user.dailyReward.claimedDays =
+      [];
+
+  }
+
+  user.dailyReward.claimedDays =
+    [
+      ...new Set(
+        user.dailyReward.claimedDays
+          .map(Number)
+          .filter(
+            d =>
+              Number.isInteger(d) &&
+              d >= 1 &&
+              d <= 7
+          )
+      )
+    ]
+      .sort(
+        (a, b) =>
+          a - b
+      );
+
+  let currentDay =
+    number(
+      user.dailyReward.currentDay
+    ) || 1;
+
+  if (
+    currentDay < 1 ||
+    currentDay > 7
+  ) {
+
+    currentDay =
+      1;
+
+  }
+
+  user.dailyReward.currentDay =
+    currentDay;
+
+  return user.dailyReward;
+
+}
+
+// ======================================================
+// DASHBOARD
 // ======================================================
 
 app.post(
@@ -4540,24 +4496,13 @@ app.post(
     try {
 
       let user =
-        null;
-
-      if (
-        req.session &&
-        req.session.userId
-      ) {
-
-        user =
-          await getUserById(
-            req.session.userId
-          );
-
-      }
+        req.user;
 
       const {
         telegramId,
         username
-      } = req.body || {};
+      } =
+        req.body || {};
 
       if (
         !user &&
@@ -4580,9 +4525,8 @@ app.post(
 
         user =
           await getUserByUsername(
-            String(
-              username
-            ).toLowerCase()
+            String(username)
+              .toLowerCase()
           );
 
       }
@@ -4603,101 +4547,84 @@ app.post(
 
       if (
         telegramId &&
-        String(
-          user.telegramId || ''
-        ) !==
-        String(
-          telegramId
-        )
+        user.telegramId !==
+        String(telegramId)
       ) {
 
         user.telegramId =
-          String(
-            telegramId
-          );
+          String(telegramId);
 
-        user =
-          await updateUser(
-            user
-          );
-
-      }
-
-      req.session = {
-        userId:
-          user.id
-      };
-
-      setSessionCookie(
-        res,
-        createSessionToken(
-          user
-        )
-      );
-
-      const wasPopupSeen =
-        user.hasSeenPopup;
-
-      user =
-        await ensureWelcomeBonus(
+        await updateUser(
           user
         );
 
-      const isNewUser =
-        !wasPopupSeen &&
+      }
+
+      const beforeBonus =
         user.hasReceivedWelcomeBonus;
+
+      await ensureWelcomeBonus(
+        user
+      );
+
+      user =
+        await getUserById(
+          user.id
+        );
+
+      const isNewUser =
+        !beforeBonus &&
+        user.hasReceivedWelcomeBonus &&
+        !user.hasSeenPopup;
 
       if (isNewUser) {
 
         user.hasSeenPopup =
           true;
 
-        user =
-          await updateUser(
-            user
-          );
+        await updateUser(
+          user
+        );
 
       }
 
-      const lastClaim =
-        Number(
-          user.dailyReward
-            ?.lastClaimTimestamp || 0
+      user =
+        await loadUserData(
+          await getUserById(
+            user.id
+          )
         );
 
-      const currentDay =
-        Number(
-          user.dailyReward
-            ?.currentDay || 1
+      const daily =
+        normalizeDailyReward(
+          user
+        );
+
+      const lastClaimTimestamp =
+        number(
+          daily.lastClaimTimestamp
         );
 
       const canClaim =
-        lastClaim === 0 ||
+        !lastClaimTimestamp ||
         Date.now() -
-          lastClaim >=
-          CLAIM_COOLDOWN;
+        lastClaimTimestamp >=
+        CLAIM_COOLDOWN;
 
-      const nextClaimTime =
-        canClaim
-          ? 0
-          : lastClaim +
-            CLAIM_COOLDOWN;
+      if (
+        canClaim &&
+        daily.currentDay === 1 &&
+        daily.claimedDays.includes(7)
+      ) {
 
-      const [
-        transactions,
-        deposits
-      ] =
-        await Promise.all([
+        daily.claimedDays =
+          [];
 
-          getTransactions(
-            user.id
-          ),
+      }
 
-          getDeposits(
-            user.id
-          )
-
-        ]);
+      await updateUser(
+        user
+      );
 
       return res.json({
 
@@ -4706,78 +4633,54 @@ app.post(
 
         user: {
 
-          id:
-            user.id,
-
-          fullName:
-            user.fullName,
-
-          username:
-            user.username,
-
-          balance:
-            Number(
-              user.balance || 0
-            ),
-
-          withdrawableBalance:
-            Number(
-              user.withdrawableBalance || 0
-            ),
-
-          depositBalance:
-            Number(
-              user.depositBalance || 0
-            ),
+          ...sanitizeUser(
+            user
+          ),
 
           isNewUser,
-
-          hasClaimedGiftBox:
-            !!user.hasClaimedGiftBox,
-
-          referralCode:
-            user.referralCode,
-
-          totalReferrals:
-            Number(
-              user.totalReferrals || 0
-            ),
-
-          successfulReferrals:
-            Number(
-              user.successfulReferrals || 0
-            ),
-
-          referralEarnings:
-            Number(
-              user.referralEarnings || 0
-            ),
 
           minWithdrawalLimit:
             MIN_WITHDRAWAL_LIMIT,
 
           canWithdraw:
-            Number(
-              user.withdrawableBalance || 0
+            number(
+              user.withdrawableBalance
             ) >=
             MIN_WITHDRAWAL_LIMIT,
 
-          transactions,
+          transactions:
+            user.transactions,
 
-          deposits
+          deposits:
+            user.deposits
 
         },
 
         dailyReward: {
 
-          currentDay,
+          currentDay:
+            daily.currentDay,
 
           lastClaimTime:
-            lastClaim,
+            lastClaimTimestamp,
 
-          nextClaimTime,
+          nextClaimTime:
+            canClaim
+              ? 0
+              : lastClaimTimestamp +
+                CLAIM_COOLDOWN,
 
-          canClaim
+          canClaim,
+
+          claimedDays:
+            daily.claimedDays,
+
+          lastClaimedDay:
+            daily.claimedDays.length
+              ? Math.max(
+                  ...daily.claimedDays
+                )
+              : 0
 
         }
 
@@ -4807,7 +4710,6 @@ app.post(
 
 // ======================================================
 // CLAIM DAILY REWARD
-// SERVER ENFORCES DAY 1 -> DAY 2 -> ... -> DAY 7
 // ======================================================
 
 app.post(
@@ -4822,11 +4724,8 @@ app.post(
 
       const reqDay =
         Number(
-          req.body.day
+          req.body?.day
         );
-
-      const now =
-        Date.now();
 
       if (
         !Number.isInteger(
@@ -4842,50 +4741,97 @@ app.post(
             false,
 
           message:
-            'Invalid reward day.'
+            'Invalid daily reward day.'
 
         });
 
       }
 
+      const daily =
+        normalizeDailyReward(
+          user
+        );
+
+      const now =
+        Date.now();
+
       const lastClaim =
-        Number(
-          user.dailyReward
-            ?.lastClaimTimestamp || 0
+        number(
+          daily.lastClaimTimestamp
         );
 
-      const currentDay =
-        Number(
-          user.dailyReward
-            ?.currentDay || 1
-        );
-
-      // ===============================================
-      // DATABASE IS THE AUTHORITY
-      // ===============================================
-
-      if (
-        lastClaim > 0 &&
+      const canClaim =
+        !lastClaim ||
         now -
-          lastClaim <
-          CLAIM_COOLDOWN
+        lastClaim >=
+        CLAIM_COOLDOWN;
+
+      // BACKEND ENFORCES THE EXACT NEXT DAY.
+      if (
+        reqDay !==
+        daily.currentDay
       ) {
 
-        const remainingMs =
-          CLAIM_COOLDOWN -
-          (
-            now -
-            lastClaim
+        return res.status(400).json({
+
+          success:
+            false,
+
+          message:
+            `You must claim Day ${daily.currentDay} next.`,
+
+          dailyReward: {
+
+            currentDay:
+              daily.currentDay,
+
+            lastClaimTime:
+              lastClaim,
+
+            nextClaimTime:
+              canClaim
+                ? 0
+                : lastClaim +
+                  CLAIM_COOLDOWN,
+
+            canClaim,
+
+            claimedDays:
+              daily.claimedDays
+
+          }
+
+        });
+
+      }
+
+      // BACKEND ENFORCES 24-HOUR WAIT.
+      if (
+        lastClaim &&
+        !canClaim
+      ) {
+
+        const remaining =
+          Math.max(
+            0,
+            lastClaim +
+            CLAIM_COOLDOWN -
+            now
           );
 
-        const hoursLeft =
+        const hours =
+          Math.floor(
+            remaining /
+            3600000
+          );
+
+        const minutes =
           Math.ceil(
-            remainingMs /
             (
-              1000 *
-              60 *
-              60
-            )
+              remaining %
+              3600000
+            ) /
+            60000
           );
 
         return res.status(400).json({
@@ -4894,11 +4840,12 @@ app.post(
             false,
 
           message:
-            `Reward not available yet. Please wait ${hoursLeft} hours.`,
+            `Day ${daily.currentDay} is not available yet. Please wait ${hours}h ${minutes}m.`,
 
           dailyReward: {
 
-            currentDay,
+            currentDay:
+              daily.currentDay,
 
             lastClaimTime:
               lastClaim,
@@ -4908,7 +4855,10 @@ app.post(
               CLAIM_COOLDOWN,
 
             canClaim:
-              false
+              false,
+
+            claimedDays:
+              daily.claimedDays
 
           }
 
@@ -4916,67 +4866,24 @@ app.post(
 
       }
 
-      // ===============================================
-      // STRICT SEQUENCE
-      // ===============================================
+      let rewardMessage;
 
       if (
-        reqDay !==
-        currentDay
-      ) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          message:
-            `Invalid claim day sequence. The next available day is Day ${currentDay}.`,
-
-          dailyReward: {
-
-            currentDay,
-
-            lastClaimTime:
-              lastClaim,
-
-            nextClaimTime:
-              lastClaim
-                ? lastClaim +
-                  CLAIM_COOLDOWN
-                : 0,
-
-            canClaim:
-              lastClaim === 0 ||
-              now -
-                lastClaim >=
-                CLAIM_COOLDOWN
-
-          }
-
-        });
-
-      }
-
-      // ===============================================
-      // DAY 1 - DAY 6
-      // ===============================================
-
-      if (
-        reqDay >= 1 &&
         reqDay <= 6
       ) {
 
         user.withdrawableBalance =
-          Number(
-            user.withdrawableBalance || 0
+          getWithdrawableBalance(
+            user
           ) +
           10;
 
+        await updateUser(
+          user
+        );
+
         await addTransaction(
-
           user.id,
-
           {
 
             id:
@@ -5000,59 +4907,105 @@ app.post(
               'completed'
 
           }
-
         );
 
-      }
+        rewardMessage =
+          '₦10 daily reward claimed.';
 
-      // ===============================================
-      // DAY 7 = FREE SPIN
-      // ===============================================
+      } else {
 
-      else {
+        user.freeSpins =
+          number(
+            user.freeSpins
+          ) +
+          1;
 
-        setFreeSpins(
-
-          user,
-
-          getFreeSpins(user) + 1
-
-        );
-
-      }
-
-      // ===============================================
-      // ADVANCE TO NEXT DAY
-      // ===============================================
-
-      user.dailyReward = {
-
-        ...(user.dailyReward || {}),
-
-        currentDay:
-          reqDay >= 7
-            ? 1
-            : reqDay + 1,
-
-        lastClaimTimestamp:
-          now,
-
-        freeSpins:
-          getFreeSpins(user)
-
-      };
-
-      user =
         await updateUser(
           user
         );
+
+        await addTransaction(
+          user.id,
+          {
+
+            id:
+              generateTransactionId(
+                'tx_daily_reward'
+              ),
+
+            type:
+              'daily_reward',
+
+            description:
+              'Daily Reward (Day 7) - Free Spin',
+
+            amount:
+              0,
+
+            currency:
+              'NGN',
+
+            status:
+              'completed'
+
+          }
+        );
+
+        rewardMessage =
+          'You earned 1 FREE SPIN!';
+
+      }
+
+      if (
+        !daily.claimedDays.includes(
+          reqDay
+        )
+      ) {
+
+        daily.claimedDays.push(
+          reqDay
+        );
+
+      }
+
+      daily.claimedDays =
+        [
+          ...new Set(
+            daily.claimedDays
+          )
+        ]
+          .sort(
+            (a, b) =>
+              a - b
+          );
+
+      daily.lastClaimTimestamp =
+        now;
+
+      daily.currentDay =
+        reqDay >= 7
+          ? 1
+          : reqDay + 1;
+
+      user.dailyReward =
+        daily;
+
+      await updateUser(
+        user
+      );
 
       return res.json({
 
         success:
           true,
 
+        message:
+          rewardMessage,
+
         user: {
+
+          id:
+            user.id,
 
           balance:
             user.balance,
@@ -5064,15 +5017,14 @@ app.post(
             user.depositBalance,
 
           freeSpins:
-            getFreeSpins(user)
+            user.freeSpins
 
         },
 
         dailyReward: {
 
           currentDay:
-            user.dailyReward
-              .currentDay,
+            daily.currentDay,
 
           lastClaimTime:
             now,
@@ -5082,17 +5034,23 @@ app.post(
             CLAIM_COOLDOWN,
 
           canClaim:
-            false
+            false,
+
+          claimedDays:
+            daily.claimedDays,
+
+          lastClaimedDay:
+            reqDay
 
         }
 
       });
 
-    } catch (error) {
+    } catch (err) {
 
       console.error(
         'Daily claim server error:',
-        error
+        err
       );
 
       return res.status(500).json({
@@ -5111,19 +5069,830 @@ app.post(
 );
 
 // ======================================================
+// LEADERBOARD
+// ======================================================
+
+app.get(
+  '/api/leaderboard',
+  async (req, res) => {
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('users')
+          .select(
+            'username,total_referrals,referral_earnings'
+          )
+          .gt(
+            'total_referrals',
+            0
+          )
+          .order(
+            'referral_earnings',
+            {
+              ascending:
+                false
+            }
+          )
+          .limit(10);
+
+      if (error) {
+        throw error;
+      }
+
+      return res.json({
+
+        success:
+          true,
+
+        leaderboard:
+          (
+            data || []
+          ).map(
+            u => ({
+
+              username:
+                u.username,
+
+              totalReferrals:
+                number(
+                  u.total_referrals
+                ),
+
+              referralEarnings:
+                number(
+                  u.referral_earnings
+                )
+
+            })
+          )
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        'Leaderboard error:',
+        err
+      );
+
+      return res.status(500).json({
+
+        success:
+          false,
+
+        error:
+          'Failed to load leaderboard.'
+
+      });
+
+    }
+
+  }
+);
+
+// ======================================================
+// WEEKLY REFERRAL COMPETITION
+// ======================================================
+
+const WEEKLY_PRIZES = [
+
+  {
+
+    position:
+      1,
+
+    amount:
+      500,
+
+    description:
+      'Weekly Referral Challenge — 1st Place'
+
+  },
+
+  {
+
+    position:
+      2,
+
+    amount:
+      200,
+
+    description:
+      'Weekly Referral Challenge — 2nd Place'
+
+  },
+
+  {
+
+    position:
+      3,
+
+    amount:
+      50,
+
+    description:
+      'Weekly Referral Challenge — 3rd Place'
+
+  }
+
+];
+
+const WEEKLY_TIMEZONE =
+  'Africa/Lagos';
+
+function getCompetitionStart(
+  date = new Date()
+) {
+
+  const wat =
+    new Date(
+      new Date(date).getTime() +
+      60 *
+      60 *
+      1000
+    );
+
+  const day =
+    wat.getUTCDay();
+
+  const daysSinceMonday =
+    day === 0
+      ? 6
+      : day - 1;
+
+  wat.setUTCDate(
+    wat.getUTCDate() -
+    daysSinceMonday
+  );
+
+  wat.setUTCHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  return new Date(
+    wat.getTime() -
+    60 *
+    60 *
+    1000
+  );
+
+}
+
+function getCompetitionEnd(
+  startDate
+) {
+
+  const end =
+    new Date(
+      startDate
+    );
+
+  end.setUTCDate(
+    end.getUTCDate() +
+    7
+  );
+
+  return end;
+
+}
+
+function getCurrentCompetition() {
+
+  const start =
+    getCompetitionStart();
+
+  const end =
+    getCompetitionEnd(
+      start
+    );
+
+  return {
+
+    competitionId:
+      `weekly_${start
+        .toISOString()
+        .slice(0, 10)}`,
+
+    startTime:
+      start.toISOString(),
+
+    endTime:
+      end.toISOString(),
+
+    status:
+      'active'
+
+  };
+
+}
+
+// ======================================================
+// WEEKLY LEADERBOARD FROM SUPABASE
+// ======================================================
+
+async function getWeeklyLeaderboard(
+  competition =
+    getCurrentCompetition()
+) {
+
+  const {
+    data: referrals,
+    error
+  } =
+    await supabase
+      .from('transactions')
+      .select(
+        'user_id,created_at,description'
+      )
+      .eq(
+        'type',
+        'referral_reward'
+      )
+      .gte(
+        'created_at',
+        competition.startTime
+      )
+      .lt(
+        'created_at',
+        competition.endTime
+      )
+      .order(
+        'created_at',
+        {
+          ascending:
+            true
+        }
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  const groups =
+    new Map();
+
+  for (
+    const tx of
+    referrals || []
+  ) {
+
+    if (
+      !groups.has(
+        tx.user_id
+      )
+    ) {
+
+      groups.set(
+        tx.user_id,
+        []
+      );
+
+    }
+
+    groups
+      .get(
+        tx.user_id
+      )
+      .push(tx);
+
+  }
+
+  if (
+    !groups.size
+  ) {
+
+    return [];
+
+  }
+
+  const ids =
+    [
+      ...groups.keys()
+    ];
+
+  const {
+    data: users,
+    error: usersError
+  } =
+    await supabase
+      .from('users')
+      .select(
+        'id,username,full_name'
+      )
+      .in(
+        'id',
+        ids
+      );
+
+  if (usersError) {
+    throw usersError;
+  }
+
+  const byId =
+    new Map(
+      (
+        users || []
+      ).map(
+        u =>
+          [
+            u.id,
+            u
+          ]
+      )
+    );
+
+  return [
+
+    ...groups.entries()
+
+  ]
+
+    .map(
+      ([userId, events]) => ({
+
+        userId,
+
+        username:
+          byId.get(
+            userId
+          )?.username ||
+          'User',
+
+        fullName:
+          byId.get(
+            userId
+          )?.full_name ||
+          '',
+
+        eligibleReferrals:
+          events.length,
+
+        lastReferralAt:
+          events[
+            events.length - 1
+          ]?.created_at ||
+          null
+
+      })
+    )
+
+    .sort(
+      (a, b) => {
+
+        if (
+          b.eligibleReferrals !==
+          a.eligibleReferrals
+        ) {
+
+          return (
+            b.eligibleReferrals -
+            a.eligibleReferrals
+          );
+
+        }
+
+        return (
+          new Date(
+            a.lastReferralAt
+          ).getTime() -
+          new Date(
+            b.lastReferralAt
+          ).getTime()
+        );
+
+      }
+    )
+
+    .map(
+      (u, i) => ({
+
+        ...u,
+
+        position:
+          i + 1,
+
+        prize:
+          WEEKLY_PRIZES.find(
+            p =>
+              p.position ===
+              i + 1
+          )?.amount ||
+          0
+
+      })
+    );
+
+}
+
+// ======================================================
+// FINALIZE WEEKLY COMPETITION
+// ======================================================
+
+async function finalizeWeeklyCompetition() {
+
+  const competition =
+    getCurrentCompetition();
+
+  if (
+    Date.now() <
+    new Date(
+      competition.endTime
+    ).getTime()
+  ) {
+
+    return;
+
+  }
+
+  const leaderboard =
+    await getWeeklyLeaderboard(
+      competition
+    );
+
+  for (
+    const prize of
+    WEEKLY_PRIZES
+  ) {
+
+    const winner =
+      leaderboard.find(
+        u =>
+          u.position ===
+          prize.position
+      );
+
+    if (!winner) {
+      continue;
+    }
+
+    const uniqueId =
+      `tx_weekly_referral_${competition.competitionId}_${winner.userId}`;
+
+    const {
+      data: alreadyPaid,
+      error
+    } =
+      await supabase
+        .from('transactions')
+        .select('id')
+        .eq(
+          'id',
+          uniqueId
+        )
+        .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (alreadyPaid) {
+      continue;
+    }
+
+    const user =
+      await getUserById(
+        winner.userId
+      );
+
+    if (!user) {
+      continue;
+    }
+
+    user.withdrawableBalance =
+      getWithdrawableBalance(
+        user
+      ) +
+      prize.amount;
+
+    await updateUser(
+      user
+    );
+
+    await addTransaction(
+      user.id,
+      {
+
+        id:
+          uniqueId,
+
+        type:
+          'weekly_referral_reward',
+
+        description:
+          `${prize.description} (${competition.competitionId})`,
+
+        amount:
+          prize.amount,
+
+        currency:
+          'NGN',
+
+        status:
+          'completed'
+
+      }
+    );
+
+  }
+
+}
+
+// ======================================================
+// WEEKLY COMPETITION API
+// ======================================================
+
+app.get(
+  '/api/weekly-competition',
+  async (req, res) => {
+
+    try {
+
+      const competition =
+        getCurrentCompetition();
+
+      const leaderboard =
+        await getWeeklyLeaderboard(
+          competition
+        );
+
+      let userPosition =
+        null;
+
+      let userEligibleReferrals =
+        0;
+
+      if (
+        req.session &&
+        req.session.userId
+      ) {
+
+        const row =
+          leaderboard.find(
+            u =>
+              u.userId ===
+              req.session.userId
+          );
+
+        if (row) {
+
+          userPosition =
+            row.position;
+
+          userEligibleReferrals =
+            row.eligibleReferrals;
+
+        }
+
+      }
+
+      const remainingMs =
+        Math.max(
+          0,
+          new Date(
+            competition.endTime
+          ).getTime() -
+          Date.now()
+        );
+
+      return res.json({
+
+        success:
+          true,
+
+        competition: {
+
+          ...competition,
+
+          timezone:
+            WEEKLY_TIMEZONE,
+
+          remainingMs
+
+        },
+
+        prizes:
+          WEEKLY_PRIZES,
+
+        leaderboard:
+          leaderboard.slice(
+            0,
+            10
+          ),
+
+        user: {
+
+          position:
+            userPosition,
+
+          eligibleReferrals:
+            userEligibleReferrals
+
+        },
+
+        rules: {
+
+          tieBreaker:
+            'If users have the same number of eligible referrals, the user who reached that count first ranks higher.',
+
+          eligibility:
+            'Only eligible referrals confirmed during the current competition period count.'
+
+        }
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        'Weekly leaderboard error:',
+        err
+      );
+
+      return res.status(500).json({
+
+        success:
+          false,
+
+        error:
+          'Failed to load weekly competition.'
+
+      });
+
+    }
+
+  }
+);
+
+// ======================================================
+// WEEKLY HISTORY
+// ======================================================
+
+app.get(
+  '/api/weekly-competition/history',
+  async (req, res) => {
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from('transactions')
+          .select(
+            'id,user_id,type,description,amount,created_at'
+          )
+          .eq(
+            'type',
+            'weekly_referral_reward'
+          )
+          .order(
+            'created_at',
+            {
+              ascending:
+                false
+            }
+          );
+
+      if (error) {
+        throw error;
+      }
+
+      const historyMap =
+        new Map();
+
+      for (
+        const tx of
+        data || []
+      ) {
+
+        const match =
+          String(
+            tx.description || ''
+          ).match(
+            /(weekly_\d{4}-\d{2}-\d{2})/
+          );
+
+        const competitionId =
+          match
+            ? match[1]
+            : 'unknown';
+
+        if (
+          !historyMap.has(
+            competitionId
+          )
+        ) {
+
+          historyMap.set(
+            competitionId,
+            []
+          );
+
+        }
+
+        historyMap
+          .get(
+            competitionId
+          )
+          .push({
+
+            userId:
+              tx.user_id,
+
+            amount:
+              number(
+                tx.amount
+              ),
+
+            createdAt:
+              tx.created_at
+
+          });
+
+      }
+
+      const history =
+        [
+          ...historyMap.entries()
+        ]
+          .map(
+            ([competitionId, winners]) => ({
+
+              competitionId,
+
+              startTime:
+                competitionId
+                  .replace(
+                    'weekly_',
+                    ''
+                  ) +
+                'T00:00:00+01:00',
+
+              endTime:
+                '',
+
+              winners
+
+            })
+          )
+          .slice(
+            0,
+            20
+          );
+
+      return res.json({
+
+        success:
+          true,
+
+        history
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        'Competition history error:',
+        err
+      );
+
+      return res.status(500).json({
+
+        success:
+          false,
+
+        error:
+          'Failed to load competition history.'
+
+      });
+
+    }
+
+  }
+);
+
+// ======================================================
 // TELEGRAM CALLBACKS
 // ======================================================
 
-let telegramUpdateOffset = 0;
+let telegramUpdateOffset =
+  0;
 
 async function answerTelegramCallback(
   callbackId,
   text
 ) {
 
-  if (
-    !TELEGRAM_BOT_TOKEN
-  ) {
+  if (!TELEGRAM_BOT_TOKEN) {
     return;
   }
 
@@ -5176,9 +5945,7 @@ async function editTelegramMessage(
   text
 ) {
 
-  if (
-    !TELEGRAM_BOT_TOKEN
-  ) {
+  if (!TELEGRAM_BOT_TOKEN) {
     return;
   }
 
@@ -5261,7 +6028,8 @@ async function handleTelegramCallback(
     }
 
     const data =
-      callbackQuery.data || '';
+      callbackQuery.data ||
+      '';
 
     if (
       !data.startsWith(
@@ -5286,132 +6054,75 @@ async function handleTelegramCallback(
       parts[1];
 
     const reference =
-      parts
-        .slice(2)
-        .join(':');
+      parts[2];
 
     const result =
-      await verifyDepositAction({
+      await verifyDeposit(
 
         userId,
 
         reference,
 
-        action:
-          action ===
-          'approve_deposit'
-            ? 'approve'
-            : 'reject',
+        action ===
+        'approve_deposit'
+          ? 'approve'
+          : 'reject',
 
-        reason:
-          'Payment proof was rejected.'
-
-      });
-
-    if (
-      result.error
-    ) {
-
-      await answerTelegramCallback(
-
-        callbackQuery.id,
-
-        result.error
+        'Payment proof was rejected.'
 
       );
 
-      return;
-
-    }
-
-    const user =
+    const targetUser =
       result.user;
 
     const deposit =
       result.deposit;
 
-    if (
-      deposit.status ===
-      'Approved'
-    ) {
+    await answerTelegramCallback(
 
-      await answerTelegramCallback(
+      callbackQuery.id,
 
-        callbackQuery.id,
+      action ===
+      'approve_deposit'
+        ? 'Deposit approved!'
+        : 'Deposit rejected.'
 
-        'Deposit approved!'
+    );
 
-      );
+    const status =
+      deposit.status;
 
-      await editTelegramMessage(
+    await editTelegramMessage(
 
-        callbackQuery.message.chat.id,
+      callbackQuery.message.chat.id,
 
-        callbackQuery.message.message_id,
+      callbackQuery.message.message_id,
 
-        `✅ <b>DEPOSIT APPROVED</b>\n\n` +
+      `${status === 'Approved' ? '✅' : '❌'} <b>DEPOSIT ${status.toUpperCase()}</b>\n\n` +
 
-        `👤 <b>Name:</b> ${user.fullName}\n` +
+      `👤 <b>Name:</b> ${targetUser.fullName}\n` +
 
-        `🆔 <b>Username:</b> @${user.username}\n` +
+      `🆔 <b>Username:</b> @${targetUser.username}\n` +
 
-        `💰 <b>Amount:</b> ₦${Number(
-          deposit.amount
-        ).toLocaleString()}\n` +
+      `💰 <b>Amount:</b> ₦${number(
+        deposit.amount
+      ).toLocaleString()}\n` +
 
-        `🔖 <b>Reference:</b> ${deposit.reference}\n` +
+      `🔖 <b>Reference:</b> ${deposit.reference}\n` +
 
-        `💳 <b>New Balance:</b> ₦${Number(
-          user.balance
-        ).toLocaleString()}\n` +
+      `💳 <b>Balance:</b> ₦${number(
+        targetUser.balance
+      ).toLocaleString()}\n` +
 
-        `💵 <b>Earnings:</b> ₦${Number(
-          user.withdrawableBalance
-        ).toLocaleString()}\n` +
+      `💵 <b>Earnings:</b> ₦${number(
+        targetUser.withdrawableBalance
+      ).toLocaleString()}\n` +
 
-        `💳 <b>Deposit Balance:</b> ₦${Number(
-          user.depositBalance
-        ).toLocaleString()}\n` +
+      `💳 <b>Deposit Balance:</b> ₦${number(
+        targetUser.depositBalance
+      ).toLocaleString()}`
 
-        `✅ <b>Status:</b> Approved`
-
-      );
-
-    } else {
-
-      await answerTelegramCallback(
-
-        callbackQuery.id,
-
-        'Deposit rejected.'
-
-      );
-
-      await editTelegramMessage(
-
-        callbackQuery.message.chat.id,
-
-        callbackQuery.message.message_id,
-
-        `❌ <b>DEPOSIT REJECTED</b>\n\n` +
-
-        `👤 <b>Name:</b> ${user.fullName}\n` +
-
-        `🆔 <b>Username:</b> @${user.username}\n` +
-
-        `💰 <b>Amount:</b> ₦${Number(
-          deposit.amount
-        ).toLocaleString()}\n` +
-
-        `🔖 <b>Reference:</b> ${deposit.reference}\n` +
-
-        `❌ <b>Status:</b> Rejected\n` +
-
-        `📝 <b>Reason:</b> ${deposit.reason || 'Payment proof was rejected.'}`
-
-      );
-
-    }
+    );
 
   } catch (err) {
 
@@ -5420,1092 +6131,23 @@ async function handleTelegramCallback(
       err
     );
 
-  }
-
-}
-
-// ======================================================
-// LEADERBOARD
-// ======================================================
-
-app.get(
-  '/api/leaderboard',
-  async (req, res) => {
-
-    try {
-
-      const {
-        data,
-        error
-      } = await supabase
-
-        .from('users')
-
-        .select(
-          'username,total_referrals,referral_earnings'
-        )
-
-        .gt(
-          'total_referrals',
-          0
-        )
-
-        .order(
-          'referral_earnings',
-          {
-            ascending:
-              false
-          }
-        )
-
-        .limit(10);
-
-      if (error) {
-        throw error;
-      }
-
-      return res.json({
-
-        success:
-          true,
-
-        leaderboard:
-          (
-            data || []
-          ).map(
-            user => ({
-
-              username:
-                user.username,
-
-              totalReferrals:
-                Number(
-                  user.total_referrals || 0
-                ),
-
-              referralEarnings:
-                Number(
-                  user.referral_earnings || 0
-                )
-
-            })
-          )
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Leaderboard error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        error:
-          'Failed to load leaderboard.'
-
-      });
-
-    }
-
-  }
-);
-
-// ======================================================
-// WEEKLY REFERRAL COMPETITION
-// ======================================================
-
-const WEEKLY_PRIZES = [
-
-  {
-    position:
-      1,
-
-    amount:
-      500,
-
-    description:
-      'Weekly Referral Challenge — 1st Place'
-  },
-
-  {
-    position:
-      2,
-
-    amount:
-      200,
-
-    description:
-      'Weekly Referral Challenge — 2nd Place'
-  },
-
-  {
-    position:
-      3,
-
-    amount:
-      50,
-
-    description:
-      'Weekly Referral Challenge — 3rd Place'
-  }
-
-];
-
-const WEEKLY_TIMEZONE =
-  'Africa/Lagos';
-
-// ======================================================
-// WEEKLY DATE HELPERS
-// ======================================================
-
-function getCompetitionStart(
-  date = new Date()
-) {
-
-  const now =
-    new Date(date);
-
-  const lagos =
-    new Date(
-      now.getTime() +
-      60 * 60 * 1000
-    );
-
-  const day =
-    lagos.getUTCDay();
-
-  const daysSinceMonday =
-    day === 0
-      ? 6
-      : day - 1;
-
-  lagos.setUTCDate(
-    lagos.getUTCDate() -
-    daysSinceMonday
-  );
-
-  lagos.setUTCHours(
-    0,
-    0,
-    0,
-    0
-  );
-
-  return new Date(
-    lagos.getTime() -
-    60 * 60 * 1000
-  );
-
-}
-
-function getCompetitionEnd(
-  startDate
-) {
-
-  const end =
-    new Date(
-      startDate
-    );
-
-  end.setUTCDate(
-    end.getUTCDate() +
-    7
-  );
-
-  return end;
-
-}
-
-function competitionFromStart(
-  start
-) {
-
-  const end =
-    getCompetitionEnd(
-      start
-    );
-
-  return {
-
-    competitionId:
-      `weekly_${start
-        .toISOString()
-        .slice(0, 10)}`,
-
-    startTime:
-      start.toISOString(),
-
-    endTime:
-      end.toISOString(),
-
-    status:
-      Date.now() >=
-      end.getTime()
-        ? 'completed'
-        : 'active'
-
-  };
-
-}
-
-function getCurrentCompetition() {
-
-  return competitionFromStart(
-    getCompetitionStart()
-  );
-
-}
-
-// ======================================================
-// WEEKLY REFERRALS FROM SUPABASE
-// ======================================================
-
-async function getWeeklyEligibleReferrals(
-  referrer,
-  competition
-) {
-
-  const {
-    data,
-    error
-  } = await supabase
-
-    .from('users')
-
-    .select(
-      'id,username,full_name,created_at'
-    )
-
-    .eq(
-      'referred_by',
-      referrer.referralCode
-    )
-
-    .gte(
-      'created_at',
-      competition.startTime
-    )
-
-    .lt(
-      'created_at',
-      competition.endTime
-    )
-
-    .order(
-      'created_at',
-      {
-        ascending:
-          true
-      }
-    );
-
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
-
-}
-
-// ======================================================
-// BUILD WEEKLY LEADERBOARD
-// ======================================================
-
-async function buildWeeklyLeaderboard(
-  competition
-) {
-
-  const {
-    data:
-      referrers,
-    error
-  } = await supabase
-
-    .from('users')
-
-    .select(
-      'id,username,full_name,referral_code'
-    )
-
-    .gt(
-      'total_referrals',
-      0
-    );
-
-  if (error) {
-    throw error;
-  }
-
-  const leaderboard =
-    [];
-
-  for (
-    const referrer of
-    referrers || []
-  ) {
-
-    const normalized =
-      normalizeUser(
-        referrer
-      );
-
-    const events =
-      await getWeeklyEligibleReferrals(
-        normalized,
-        competition
-      );
-
     if (
-      !events.length
-    ) {
-      continue;
-    }
-
-    const lastReferralAt =
-      events[
-        events.length - 1
-      ].created_at;
-
-    leaderboard.push({
-
-      userId:
-        referrer.id,
-
-      username:
-        referrer.username,
-
-      fullName:
-        referrer.full_name,
-
-      eligibleReferrals:
-        events.length,
-
-      lastReferralAt
-
-    });
-
-  }
-
-  leaderboard.sort(
-    (a, b) => {
-
-      if (
-        b.eligibleReferrals !==
-        a.eligibleReferrals
-      ) {
-
-        return (
-          b.eligibleReferrals -
-          a.eligibleReferrals
-        );
-
-      }
-
-      return (
-        new Date(
-          a.lastReferralAt
-        ).getTime() -
-        new Date(
-          b.lastReferralAt
-        ).getTime()
-      );
-
-    }
-  );
-
-  return leaderboard.map(
-    (
-      user,
-      index
-    ) => {
-
-      const position =
-        index + 1;
-
-      const prize =
-        WEEKLY_PRIZES.find(
-          p =>
-            p.position ===
-            position
-        );
-
-      return {
-
-        ...user,
-
-        position,
-
-        prize:
-          prize
-            ? prize.amount
-            : 0
-
-      };
-
-    }
-  );
-
-}
-
-// ======================================================
-// CHECK IF WEEKLY PRIZE ALREADY PAID
-// ======================================================
-
-async function hasWeeklyReward(
-  userId,
-  competitionId
-) {
-
-  const marker =
-    `[${competitionId}]`;
-
-  const {
-    data,
-    error
-  } = await supabase
-
-    .from('transactions')
-
-    .select('id')
-
-    .eq(
-      'user_id',
-      userId
-    )
-
-    .eq(
-      'type',
-      'weekly_referral_reward'
-    )
-
-    .ilike(
-      'description',
-      `%${marker}%`
-    )
-
-    .eq(
-      'status',
-      'completed'
-    )
-
-    .limit(1);
-
-  if (error) {
-    throw error;
-  }
-
-  return !!(
-    data &&
-    data.length
-  );
-
-}
-
-// ======================================================
-// FINALIZE WEEKLY COMPETITION
-// ======================================================
-
-async function finalizeWeeklyCompetition(
-  competition
-) {
-
-  if (
-    !competition ||
-    Date.now() <
-    new Date(
-      competition.endTime
-    ).getTime()
-  ) {
-
-    return;
-
-  }
-
-  const leaderboard =
-    await buildWeeklyLeaderboard(
-      competition
-    );
-
-  const winners =
-    [];
-
-  for (
-    const prize of
-    WEEKLY_PRIZES
-  ) {
-
-    const winner =
-      leaderboard.find(
-        user =>
-          user.position ===
-          prize.position
-      );
-
-    if (!winner) {
-      continue;
-    }
-
-    const alreadyPaid =
-      await hasWeeklyReward(
-        winner.userId,
-        competition.competitionId
-      );
-
-    if (!alreadyPaid) {
-
-      const targetUser =
-        await getUserById(
-          winner.userId
-        );
-
-      if (!targetUser) {
-        continue;
-      }
-
-      targetUser.withdrawableBalance =
-        Number(
-          targetUser.withdrawableBalance || 0
-        ) +
-        prize.amount;
-
-      await updateUser(
-        targetUser
-      );
-
-      await addTransaction(
-
-        targetUser.id,
-
-        {
-
-          id:
-            `tx_weekly_referral_${competition.competitionId}_${targetUser.id}`,
-
-          type:
-            'weekly_referral_reward',
-
-          amount:
-            prize.amount,
-
-          currency:
-            'NGN',
-
-          status:
-            'completed',
-
-          description:
-            `${prize.description} [${competition.competitionId}] Position ${prize.position} — ${winner.eligibleReferrals} referrals`
-
-        }
-
-      );
-
-    }
-
-    winners.push({
-
-      position:
-        prize.position,
-
-      userId:
-        winner.userId,
-
-      username:
-        winner.username,
-
-      eligibleReferrals:
-        winner.eligibleReferrals,
-
-      amount:
-        prize.amount
-
-    });
-
-  }
-
-  return winners;
-
-}
-
-// ======================================================
-// WEEKLY CHECK
-// ======================================================
-
-async function checkWeeklyCompetition() {
-
-  try {
-
-    const currentStart =
-      getCompetitionStart();
-
-    const previousStart =
-      new Date(
-        currentStart.getTime() -
-        7 * 24 * 60 * 60 * 1000
-      );
-
-    const previousCompetition =
-      competitionFromStart(
-        previousStart
-      );
-
-    if (
-      Date.now() >=
-      new Date(
-        previousCompetition.endTime
-      ).getTime()
+      callbackQuery?.id
     ) {
 
-      await finalizeWeeklyCompetition(
-        previousCompetition
+      await answerTelegramCallback(
+
+        callbackQuery.id,
+
+        'Could not process this deposit.'
+
       );
 
     }
-
-  } catch (err) {
-
-    console.error(
-      'Weekly competition error:',
-      err
-    );
 
   }
 
 }
-
-// ======================================================
-// WEEKLY COMPETITION API
-// ======================================================
-
-app.get(
-  '/api/weekly-competition',
-  async (req, res) => {
-
-    try {
-
-      const competition =
-        getCurrentCompetition();
-
-      const leaderboard =
-        await buildWeeklyLeaderboard(
-          competition
-        );
-
-      let userPosition =
-        null;
-
-      let userEligibleReferrals =
-        0;
-
-      if (
-        req.session &&
-        req.session.userId
-      ) {
-
-        const index =
-          leaderboard.findIndex(
-            user =>
-              user.userId ===
-              req.session.userId
-          );
-
-        if (
-          index !== -1
-        ) {
-
-          userPosition =
-            index + 1;
-
-          userEligibleReferrals =
-            leaderboard[index]
-              .eligibleReferrals;
-
-        } else {
-
-          const currentUser =
-            await getUserById(
-              req.session.userId
-            );
-
-          if (currentUser) {
-
-            userEligibleReferrals =
-              (
-                await getWeeklyEligibleReferrals(
-                  currentUser,
-                  competition
-                )
-              ).length;
-
-          }
-
-        }
-
-      }
-
-      const remainingMs =
-        Math.max(
-
-          0,
-
-          new Date(
-            competition.endTime
-          ).getTime() -
-          Date.now()
-
-        );
-
-      return res.json({
-
-        success:
-          true,
-
-        competition: {
-
-          competitionId:
-            competition.competitionId,
-
-          startTime:
-            competition.startTime,
-
-          endTime:
-            competition.endTime,
-
-          status:
-            competition.status,
-
-          timezone:
-            WEEKLY_TIMEZONE,
-
-          remainingMs
-
-        },
-
-        prizes:
-          WEEKLY_PRIZES,
-
-        leaderboard:
-          leaderboard.slice(
-            0,
-            10
-          ),
-
-        user: {
-
-          position:
-            userPosition,
-
-          eligibleReferrals:
-            userEligibleReferrals
-
-        },
-
-        rules: {
-
-          tieBreaker:
-            'If users have the same number of eligible referrals, the user who reached that count first ranks higher.',
-
-          eligibility:
-            'Only eligible referrals confirmed during the current competition period count.'
-
-        }
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Weekly leaderboard error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        error:
-          'Failed to load weekly competition.'
-
-      });
-
-    }
-
-  }
-);
-
-// ======================================================
-// WEEKLY HISTORY
-// ======================================================
-
-app.get(
-  '/api/weekly-competition/history',
-  async (req, res) => {
-
-    try {
-
-      const {
-        data,
-        error
-      } = await supabase
-
-        .from('transactions')
-
-        .select(
-          'user_id,description,amount,created_at'
-        )
-
-        .eq(
-          'type',
-          'weekly_referral_reward'
-        )
-
-        .eq(
-          'status',
-          'completed'
-        )
-
-        .order(
-          'created_at',
-          {
-            ascending:
-              false
-          }
-        );
-
-      if (error) {
-        throw error;
-      }
-
-      const groups =
-        new Map();
-
-      for (
-        const tx of
-        data || []
-      ) {
-
-        const match =
-          String(
-            tx.description || ''
-          ).match(
-            /\[(weekly_[^\]]+)\]/
-          );
-
-        if (!match) {
-          continue;
-        }
-
-        const competitionId =
-          match[1];
-
-        if (
-          !groups.has(
-            competitionId
-          )
-        ) {
-
-          groups.set(
-            competitionId,
-            []
-          );
-
-        }
-
-        const positionMatch =
-          String(
-            tx.description || ''
-          ).match(
-            /Position (\d+)/
-          );
-
-        const referralMatch =
-          String(
-            tx.description || ''
-          ).match(
-            /— (\d+) referrals/
-          );
-
-        groups
-          .get(
-            competitionId
-          )
-          .push({
-
-            position:
-              positionMatch
-                ? Number(
-                    positionMatch[1]
-                  )
-                : null,
-
-            userId:
-              tx.user_id,
-
-            amount:
-              Number(
-                tx.amount || 0
-              ),
-
-            eligibleReferrals:
-              referralMatch
-                ? Number(
-                    referralMatch[1]
-                  )
-                : 0
-
-          });
-
-      }
-
-      const history =
-        [];
-
-      for (
-        const [
-          competitionId,
-          winners
-        ] of groups.entries()
-      ) {
-
-        const datePart =
-          competitionId.replace(
-            'weekly_',
-            ''
-          );
-
-        const start =
-          new Date(
-            `${datePart}T00:00:00.000Z`
-          );
-
-        const end =
-          getCompetitionEnd(
-            start
-          );
-
-        const userIds =
-          winners.map(
-            w =>
-              w.userId
-          );
-
-        const {
-          data:
-            usersForHistory
-        } = await supabase
-
-          .from('users')
-
-          .select(
-            'id,username'
-          )
-
-          .in(
-            'id',
-            userIds
-          );
-
-        const usernames =
-          new Map(
-
-            (
-              usersForHistory ||
-              []
-            ).map(
-              u =>
-                [
-                  u.id,
-                  u.username
-                ]
-            )
-
-          );
-
-        winners.sort(
-          (a, b) =>
-            (
-              a.position || 99
-            ) -
-            (
-              b.position || 99
-            )
-        );
-
-        history.push({
-
-          competitionId,
-
-          startTime:
-            start.toISOString(),
-
-          endTime:
-            end.toISOString(),
-
-          winners:
-            winners.map(
-              w => ({
-
-                ...w,
-
-                username:
-                  usernames.get(
-                    w.userId
-                  ) ||
-                  'User'
-
-              })
-            )
-
-        });
-
-      }
-
-      history.sort(
-        (a, b) =>
-          new Date(
-            b.startTime
-          ).getTime() -
-          new Date(
-            a.startTime
-          ).getTime()
-      );
-
-      return res.json({
-
-        success:
-          true,
-
-        history
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Competition history error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        error:
-          'Failed to load competition history.'
-
-      });
-
-    }
-
-  }
-);
 
 // ======================================================
 // TELEGRAM POLLING
@@ -6513,24 +6155,17 @@ app.get(
 
 async function pollTelegramUpdates() {
 
+  if (!TELEGRAM_BOT_TOKEN) {
+
+    console.warn(
+      'Telegram polling disabled: TELEGRAM_BOT_TOKEN is missing.'
+    );
+
+    return;
+
+  }
+
   try {
-
-    if (
-      !TELEGRAM_BOT_TOKEN
-    ) {
-
-      console.warn(
-        'Telegram polling disabled: TELEGRAM_BOT_TOKEN is missing.'
-      );
-
-      setTimeout(
-        pollTelegramUpdates,
-        10000
-      );
-
-      return;
-
-    }
 
     const response =
       await fetch(
@@ -6542,21 +6177,17 @@ async function pollTelegramUpdates() {
     const data =
       await response.json();
 
-    if (
-      !data.ok
-    ) {
+    if (!data.ok) {
 
       console.error(
         'Telegram polling error:',
         data
       );
 
-      setTimeout(
+      return setTimeout(
         pollTelegramUpdates,
         5000
       );
-
-      return;
 
     }
 
@@ -6566,7 +6197,8 @@ async function pollTelegramUpdates() {
     ) {
 
       telegramUpdateOffset =
-        update.update_id + 1;
+        update.update_id +
+        1;
 
       if (
         update.callback_query
@@ -6597,17 +6229,6 @@ async function pollTelegramUpdates() {
 }
 
 // ======================================================
-// INITIALIZE
-// ======================================================
-
-setInterval(
-  checkWeeklyCompetition,
-  10000
-);
-
-pollTelegramUpdates();
-
-// ======================================================
 // HEALTH CHECK
 // ======================================================
 
@@ -6620,27 +6241,25 @@ app.get(
       const {
         count,
         error
-      } = await supabase
+      } =
+        await supabase
+          .from('users')
+          .select(
+            'id',
+            {
+              count:
+                'exact',
 
-        .from('users')
-
-        .select(
-          'id',
-          {
-            count:
-              'exact',
-
-            head:
-              true
-
-          }
-        );
+              head:
+                true
+            }
+          );
 
       if (error) {
         throw error;
       }
 
-      res.json({
+      return res.json({
 
         success:
           true,
@@ -6662,11 +6281,11 @@ app.get(
     } catch (err) {
 
       console.error(
-        'Health check database error:',
+        'Health database error:',
         err
       );
 
-      res.status(500).json({
+      return res.status(500).json({
 
         success:
           false,
@@ -6675,7 +6294,7 @@ app.get(
           'supabase',
 
         error:
-          'Database connection failed.'
+          err.message
 
       });
 
@@ -6683,6 +6302,35 @@ app.get(
 
   }
 );
+
+// ======================================================
+// START WEEKLY CHECK
+// ======================================================
+
+setInterval(
+
+  () => {
+
+    finalizeWeeklyCompetition()
+      .catch(
+        err =>
+          console.error(
+            'Weekly competition error:',
+            err
+          )
+      );
+
+  },
+
+  30000
+
+);
+
+// ======================================================
+// TELEGRAM POLLING
+// ======================================================
+
+pollTelegramUpdates();
 
 // ======================================================
 // START SERVER
@@ -6693,8 +6341,11 @@ const PORT =
   3000;
 
 app.listen(
+
   PORT,
+
   '0.0.0.0',
+
   () => {
 
     console.log(
@@ -6726,4 +6377,5 @@ app.listen(
     );
 
   }
+
 );
