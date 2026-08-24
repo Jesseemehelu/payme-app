@@ -497,7 +497,7 @@
         "weekly_2026-08-16": 11
       },
       "withdrawableBalance": 45,
-      "sessionVersion": 38,
+      "sessionVersion": 40,
       "depositBalance": 0,
       "telegramId": null,
       "freeSpins": 0,
@@ -3257,7 +3257,7 @@
       "deposits": [],
       "weeklyReferralEvents": [],
       "weeklyReferralHistory": {},
-      "sessionVersion": 51,
+      "sessionVersion": 54,
       "createdAt": "2026-08-22T20:51:56.680Z",
       "freeSpins": 0,
       "hasClaimedGiftBox": true,
@@ -3316,6 +3316,16 @@
           "3": "2026-08-22T08:39:41.930Z"
         }
       }
+    },
+    {
+      "competitionId": "weekly_2026-08-23",
+      "startTime": "2026-08-23T23:00:00.000Z",
+      "endTime": "2026-08-30T23:00:00.000Z",
+      "status": "active",
+      "winners": [],
+      "finalizedAt": null,
+      "referralCounts": {},
+      "referralFirstReachedAt": {}
     }
   ]
 }

@@ -2738,27 +2738,28 @@ for (let day = 1; day <= 7; day++) {
   card.className = `reward-card ${isDay7 ? "day-7-card" : ""}`;
   let statusText = "LOCKED";
 
-  /* DAYS THAT HAVE ACTUALLY BEEN CLAIMED */
-  if (claimedDays.has(day)) {
+  /* 1. ALL PREVIOUS DAYS (COMPLETED) */
+  if (day < currentDay) {
     card.classList.add("claimed");
     statusText = "COMPLETED ✓";
   } 
-  /* NEXT AVAILABLE DAY TO CLAIM */
+  /* 2. CURRENT DAY WHEN READY TO CLAIM */
   else if (day === currentDay && canClaim) {
     card.classList.add("claimable");
     statusText = "CLAIM NOW";
     card.onclick = () => claimDailyReward(day);
   } 
-  /* NEXT DAY SHOWING NEXT UP DURING COOLDOWN */
+  /* 3. CURRENT DAY WHEN ON 24-HOUR COOLDOWN */
   else if (day === currentDay && !canClaim) {
     card.classList.add("locked");
     statusText = "NEXT UP";
   } 
-  /* FUTURE DAYS */
+  /* 4. ALL FUTURE DAYS */
   else {
     card.classList.add("locked");
     statusText = "LOCKED";
   }
+
 
 
 /* DAY 7 */
