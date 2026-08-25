@@ -635,6 +635,392 @@ button {
 }
 
 .hidden { display: none !important; }
+
+/* ==================== MODERN TAP ARENA UI OVERRIDES ==================== */
+#gameScreen {
+    background:
+        radial-gradient(circle at 50% 18%, rgba(0, 242, 254, 0.10), transparent 34%),
+        radial-gradient(circle at 15% 85%, rgba(127, 0, 255, 0.12), transparent 35%),
+        linear-gradient(180deg, #070a12 0%, #05070c 100%);
+}
+
+.game-hud {
+    position: relative;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    padding: max(14px, env(safe-area-inset-top)) 16px 12px;
+}
+
+.game-hud::before {
+    content: '';
+    position: absolute;
+    inset: max(8px, env(safe-area-inset-top)) 12px 4px;
+    border-radius: 24px;
+    background: rgba(13, 18, 31, 0.72);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 14px 35px rgba(0,0,0,0.32), inset 0 1px rgba(255,255,255,0.04);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.hud-stat {
+    min-width: 0;
+    padding: 8px 12px;
+}
+
+.hud-stat small {
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    opacity: .72;
+}
+
+.hud-stat strong {
+    font-size: 23px;
+    letter-spacing: -0.6px;
+}
+
+.hud-stat.center-stat {
+    min-width: 82px;
+    padding: 7px 14px;
+    border-radius: 18px;
+    background: rgba(0,242,254,0.055);
+    border: 1px solid rgba(0,242,254,0.14);
+    box-shadow: inset 0 0 18px rgba(0,242,254,0.04);
+}
+
+.timer-val {
+    font-size: 25px !important;
+    line-height: 1;
+    text-shadow: 0 0 18px rgba(0,242,254,.55);
+}
+
+.game-stage {
+    margin: 2px 10px max(10px, env(safe-area-inset-bottom));
+    border-radius: 30px;
+    background:
+        radial-gradient(circle at 50% 45%, rgba(0,242,254,.055), transparent 42%),
+        linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
+    border: 1px solid rgba(255,255,255,.085);
+    box-shadow:
+        inset 0 0 80px rgba(0,242,254,.025),
+        inset 0 1px rgba(255,255,255,.05),
+        0 18px 45px rgba(0,0,0,.38);
+}
+
+.game-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+    pointer-events: none;
+    opacity: .55;
+}
+
+.game-stage::after {
+    content: 'TAP THE GLOW';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255,255,255,.055);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.target {
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 27%, #fff 0 7%, rgba(255,255,255,.9) 10%, transparent 23%),
+        radial-gradient(circle at 50% 50%, #61f7ff 0%, #00c8e8 35%, #5d2cff 72%, #1b123e 100%);
+    border: 2px solid rgba(255,255,255,.5);
+    box-shadow:
+        0 0 0 5px rgba(0,242,254,.045),
+        0 0 18px rgba(0,242,254,.75),
+        0 0 42px rgba(93,44,255,.38),
+        inset 0 0 16px rgba(255,255,255,.35);
+}
+
+.target::before {
+    content: '';
+    position: absolute;
+    inset: -9px;
+    border-radius: inherit;
+    border: 1px solid rgba(0,242,254,.26);
+    animation: targetRing 1s ease-out infinite;
+}
+
+.target::after {
+    inset: 20%;
+    border: 1px solid rgba(255,255,255,.75);
+    box-shadow: inset 0 0 10px rgba(255,255,255,.3);
+}
+
+@keyframes targetRing {
+    0% { transform: scale(.82); opacity: .9; }
+    100% { transform: scale(1.22); opacity: 0; }
+}
+
+.target.golden {
+    background:
+        radial-gradient(circle at 32% 27%, #fff 0 8%, #fff8bf 12%, transparent 25%),
+        radial-gradient(circle, #ffe45c 0%, #ffb300 42%, #ff5b00 78%, #5c2200 100%);
+    border-color: rgba(255,241,157,.9);
+    box-shadow:
+        0 0 0 6px rgba(255,183,3,.06),
+        0 0 24px rgba(255,193,7,.95),
+        0 0 55px rgba(255,115,0,.45);
+}
+
+.target.mega {
+    background:
+        radial-gradient(circle at 32% 27%, #fff 0 8%, #ffd5f4 13%, transparent 26%),
+        radial-gradient(circle, #ff6ec7 0%, #ff007f 42%, #7117c9 78%, #25052f 100%);
+    box-shadow:
+        0 0 0 6px rgba(255,0,127,.06),
+        0 0 25px rgba(255,0,127,.95),
+        0 0 58px rgba(127,0,255,.5);
+}
+
+.target.fake {
+    background:
+        radial-gradient(circle at 32% 27%, #fff 0 7%, #ffd2d2 12%, transparent 24%),
+        radial-gradient(circle, #ff5b6e 0%, #ff003d 45%, #72001f 80%, #24000b 100%);
+    border-color: rgba(255,100,120,.85);
+}
+
+.target.bonus {
+    background:
+        radial-gradient(circle at 32% 27%, #fff 0 8%, #d9fff8 13%, transparent 26%),
+        radial-gradient(circle, #57ffd8 0%, #00d6ad 45%, #087b9a 80%, #032e43 100%);
+    box-shadow:
+        0 0 0 6px rgba(0,245,212,.06),
+        0 0 24px rgba(0,245,212,.9),
+        0 0 52px rgba(0,180,255,.38);
+}
+
+.target.hit {
+    animation: targetHit .16s ease-out forwards;
+}
+
+@keyframes targetHit {
+    to {
+        opacity: 0;
+        transform: translate3d(-50%, -50%, 0) scale(1.65);
+        filter: brightness(1.7);
+    }
+}
+
+.feedback {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(5,8,15,.58);
+    border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    font-size: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+.final-rush-banner {
+    top: 44%;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: rgba(255,0,85,.12);
+    border: 1px solid rgba(255,0,85,.32);
+    box-shadow: 0 0 35px rgba(255,0,85,.18);
+    font-size: 25px;
+    letter-spacing: 1px;
+}
+
+.game-stage.final-rush {
+    border-color: rgba(255,0,85,.38);
+    box-shadow:
+        inset 0 0 110px rgba(255,0,85,.12),
+        0 0 35px rgba(255,0,85,.08);
+}
+
+/* Compact result screen: leaderboard + actions stay visible without excessive scrolling */
+#resultScreen {
+    padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
+}
+
+.result-card {
+    width: min(94%, 460px);
+    max-height: 96vh;
+    overflow: hidden;
+    padding: 18px 16px max(14px, env(safe-area-inset-bottom));
+    border-radius: 24px;
+}
+
+.result-header small {
+    font-size: 9px;
+    letter-spacing: 1.7px;
+}
+
+.result-header h1 {
+    font-size: 40px;
+    line-height: 1;
+}
+
+.rank-pill {
+    margin: 10px 0;
+    padding: 9px 12px;
+    border-radius: 14px;
+}
+
+.rank-pill strong {
+    font-size: 22px;
+}
+
+.stats-grid {
+    gap: 7px;
+    margin: 9px 0;
+}
+
+.stat-box {
+    padding: 8px 10px;
+    border-radius: 12px;
+}
+
+.stat-box small {
+    font-size: 8px;
+}
+
+.stat-box strong {
+    font-size: 15px;
+    margin-top: 2px;
+}
+
+#resultMessage {
+    margin-bottom: 7px !important;
+    font-size: 11px !important;
+}
+
+.leaderboard-container {
+    margin-top: 10px;
+}
+
+.leaderboard-title {
+    margin-bottom: 6px;
+    font-size: 11px;
+}
+
+#leaderboardRows {
+    max-height: 190px;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+}
+
+.rank-item {
+    grid-template-columns: 28px 1fr auto;
+    gap: 7px;
+    padding: 7px 9px;
+    margin-bottom: 4px;
+    border-radius: 11px;
+    min-height: 38px;
+}
+
+.rank-num {
+    font-size: 13px;
+}
+
+.rank-info strong {
+    font-size: 11px;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.rank-info small {
+    font-size: 7px;
+}
+
+.rank-val {
+    font-size: 12px;
+}
+
+.result-actions {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.result-actions .btn-primary,
+.result-actions .btn-secondary {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 7px;
+    border-radius: 12px;
+    font-size: 10px;
+    line-height: 1.15;
+}
+
+@media (max-width: 360px) {
+    .result-card {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    #leaderboardRows {
+        max-height: 165px;
+    }
+
+    .rank-info strong {
+        max-width: 155px;
+    }
+
+    .result-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .result-actions .btn-primary,
+    .result-actions .btn-secondary {
+        padding: 10px;
+    }
+}
+
+@media (min-height: 760px) and (max-width: 600px) {
+    #leaderboardRows {
+        max-height: 220px;
+    }
+}
+
+
+/* ==================== 2026 MODERN OVERHAUL ==================== */
+.home-inner{width:min(100%,520px);padding:24px 18px 28px;gap:14px}
+.logo-container{padding-top:8px;margin-bottom:2px}
+.logo-badge{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:30px;background:linear-gradient(145deg,rgba(0,242,254,.22),rgba(127,0,255,.28));border:1px solid rgba(255,255,255,.12);box-shadow:0 0 40px rgba(0,242,254,.16),inset 0 1px rgba(255,255,255,.16)}
+.logo-container h1{letter-spacing:3px;font-size:34px;margin:10px 0 2px}.logo-container p{font-size:11px;letter-spacing:.5px}
+.balance-mini{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);box-shadow:0 12px 35px rgba(0,0,0,.2)}
+.balance-mini .label{font-size:10px;color:var(--text-sub);font-weight:700;text-transform:uppercase;letter-spacing:1px}.balance-mini .value{font-size:18px;font-weight:900;color:#fff}.balance-mini .wallet-icon{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(0,242,254,.1);font-size:18px}
+.home-tools{display:grid;grid-template-columns:1fr 1fr;gap:9px}.home-tools button{padding:12px;border-radius:15px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);color:#fff;font-size:12px;font-weight:800}.home-tools button:active{transform:scale(.98)}
+.deposit-warning{display:none;margin-top:-3px;padding:9px 12px;border-radius:12px;background:rgba(255,0,85,.08);border:1px solid rgba(255,0,85,.16);color:#ff9ab7;font-size:10px;text-align:center}.deposit-warning.show{display:block}
+.entry-card{padding:14px}.entry-row{padding-bottom:10px}.entry-row strong{font-size:18px}
+.btn-primary{box-shadow:0 12px 34px rgba(0,242,254,.22)}
+.game-hud{padding:calc(12px + env(safe-area-inset-top)) 16px 10px}.hud-stat{padding:9px 12px;border-radius:15px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.055);backdrop-filter:blur(10px)}
+.game-stage{margin:0 10px 10px;border-radius:30px;background:radial-gradient(circle at 50% 45%,rgba(0,242,254,.07),transparent 48%),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),rgba(255,255,255,.012);background-size:auto,32px 32px,32px 32px,auto;box-shadow:inset 0 0 80px rgba(0,0,0,.28),0 18px 45px rgba(0,0,0,.22)}
+.countdown-overlay{position:absolute!important;inset:0!important;display:none!important;align-items:center!important;justify-content:center!important;text-align:center!important;z-index:100!important;background:radial-gradient(circle,rgba(0,0,0,.16),rgba(0,0,0,.45))!important}.countdown-overlay.show{display:flex!important}.countdown-num{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0!important;width:min(52vw,220px);height:min(52vw,220px);display:grid;place-items:center;font-size:clamp(72px,22vw,150px);font-weight:900;line-height:1;color:#fff;text-shadow:0 0 22px rgba(0,242,254,.7),0 0 60px rgba(127,0,255,.45)}
+/* Compact result layout */
+#resultScreen{padding:12px}.result-card{width:min(100%,520px);max-height:calc(100dvh - 24px);overflow:hidden;padding:14px}.result-header h1{font-size:40px;margin:1px 0}.rank-pill{padding:7px 12px}.leaderboard-container{margin-top:7px}.result-actions{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg-dark) 28%);padding-top:12px;margin-top:5px}.result-actions button{min-height:42px}
+/* Modal system */
+.modal-overlay{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,5,12,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}.modal-overlay.show{display:flex}.modern-modal{width:min(100%,390px);padding:24px;border-radius:26px;background:linear-gradient(160deg,rgba(25,32,51,.98),rgba(9,13,24,.98));border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 90px rgba(0,0,0,.55);animation:modalIn .28s cubic-bezier(.2,.8,.2,1)}.modal-icon{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;font-size:25px;background:rgba(0,242,254,.1);border:1px solid rgba(0,242,254,.2);margin-bottom:14px}.modern-modal h2{margin:0 0 7px;font-size:22px}.modern-modal p{margin:0;color:var(--text-sub);font-size:12px;line-height:1.65}.modal-actions{display:grid;gap:9px;margin-top:18px}.modal-secondary{padding:13px;border-radius:14px;color:#fff;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);font-weight:800;font-size:12px}.how-list{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}.how-list li{display:flex;gap:10px;align-items:flex-start;font-size:11px;color:#dbe5f5;line-height:1.45}.how-list b{flex:0 0 25px;width:25px;height:25px;border-radius:8px;display:grid;place-items:center;background:rgba(0,242,254,.1);color:var(--primary-cyan)}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+@media(max-width:380px){.result-actions{grid-template-columns:1fr 1fr 1fr}.result-actions button{font-size:9px}.home-inner{padding-left:12px;padding-right:12px}}
+
 </style>
 </head>
 
@@ -654,6 +1040,16 @@ button {
                 <div class="logo-badge">⚡</div>
                 <h1>TAP RUSH</h1>
                 <p>Ultra-Fast Precision Tapping</p>
+            </div>
+
+            <div class="balance-mini" aria-live="polite">
+                <div><div class="label">Available Balance</div><div class="value" id="currentBalance">₦0.00</div></div>
+                <div class="wallet-icon">💳</div>
+            </div>
+
+            <div class="home-tools">
+                <button id="howToPlayBtn" type="button">📖 HOW TO PLAY</button>
+                <button id="depositQuickBtn" type="button">＋ DEPOSIT</button>
             </div>
 
             <div class="glass-panel challenge-card">
@@ -691,6 +1087,7 @@ button {
                     <span>Entry Ticket</span>
                     <strong>₦100</strong>
                 </div>
+                <div id="depositWarning" class="deposit-warning">You need at least ₦100 to enter the arena.</div>
                 <button id="homePlayBtn" class="btn-primary">
                     ⚡ ENTER ARENA — ₦100
                 </button>
@@ -794,6 +1191,30 @@ button {
 </div>
 
 <div id="toast" class="toast-msg"></div>
+
+
+<div id="insufficientModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modern-modal">
+    <div class="modal-icon">💳</div><h2>Balance too low</h2>
+    <p>You need <strong>₦100</strong> to start a Tap Rush match. Deposit funds to keep playing and climb the leaderboard.</p>
+    <div class="modal-actions"><button id="depositBtn" class="btn-primary">DEPOSIT TO PLAY</button><button class="modal-secondary" data-close-modal="insufficientModal">Maybe later</button></div>
+  </div>
+</div>
+<div id="howToModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modern-modal">
+    <div class="modal-icon">⚡</div><h2>How to Play Tap Rush</h2>
+    <p>React quickly, tap accurately, and build your combo before the 20-second rush ends.</p>
+    <ul class="how-list">
+      <li><b>1</b><span>Tap <strong>normal targets</strong> as soon as they appear. Every successful hit increases your score.</span></li>
+      <li><b>2</b><span>Hit <strong>golden and special targets</strong> for bigger bonuses when they appear.</span></li>
+      <li><b>3</b><span>Keep hitting targets quickly to build your <strong>combo multiplier</strong>.</span></li>
+      <li><b>4</b><span>Avoid fake targets and missed targets — accuracy matters.</span></li>
+      <li><b>5</b><span>The match lasts <strong>20 seconds</strong>. Your verified score is submitted when the timer ends.</span></li>
+      <li><b>6</b><span>Your latest completed game replaces your previous leaderboard score for this challenge.</span></li>
+    </ul>
+    <div class="modal-actions"><button class="btn-primary" data-close-modal="howToModal">GOT IT — LET'S PLAY</button></div>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -926,7 +1347,7 @@ const state = {
     running: false, started: false, score: 0, combo: 1, successfulHits: 0, misses: 0,
     highestCombo: 0, goldenTargets: 0, megaTargets: 0, bonusTargets: 0, fakeTargetsHit: 0,
     totalEvents: 0, lastHitTime: 0, gameStartClient: 0, events: [], activeTargets: new Map(),
-    targetCounter: 0, frame: 0, challengeEnd: 0, result: null
+    targetCounter: 0, frame: 0, challengeEnd: 0, result: null, balance: null
 };
 
 function showScreen(name) {
@@ -964,6 +1385,34 @@ async function api(url, options = {}) {
     return data;
 }
 
+async function loadUserBalance() {
+    try {
+        const tgUser = tg?.initDataUnsafe?.user;
+        const data = await api("/api/user/dashboard", {
+            method: "POST",
+            body: JSON.stringify({
+                initData: tg?.initData || "",
+                telegramId: tgUser?.id,
+                username: tgUser?.username,
+                firstName: tgUser?.first_name,
+                lastName: tgUser?.last_name
+            })
+        });
+        if (!data.success || !data.user) throw new Error("Unable to load balance.");
+        state.balance = Number(data.user.balance ?? 0);
+        $("currentBalance").textContent = `₦${state.balance.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+        $("depositWarning").classList.toggle("show", state.balance < 100);
+        return state.balance;
+    } catch (err) {
+        console.error("Balance load failed:", err);
+        return null;
+    }
+}
+
+function openModal(id){ const el=$(id); if(el) el.classList.add("show"); }
+function closeModal(id){ const el=$(id); if(el) el.classList.remove("show"); }
+function showInsufficientBalance(){ openModal("insufficientModal"); }
+
 async function loadChallenge() {
     try {
         const data = await api(API.challenge);
@@ -997,7 +1446,18 @@ if (homeBackBtn) {
     homeBackBtn.addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "earn.html"; });
 }
 
-$("homePlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); audio.init(); showScreen("confirm"); });
+$("homePlayBtn").addEventListener("pointerdown", async e => {
+    e.preventDefault(); audio.init();
+    const balance = await loadUserBalance();
+    if (balance === null) { toast("Unable to verify your balance. Please try again."); return; }
+    if (balance < 100) { showInsufficientBalance(); return; }
+    showScreen("confirm");
+});
+$("howToPlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); openModal("howToModal"); });
+$("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
+$("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "deposit.html"; });
+document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("pointerdown", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
+document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("pointerdown", e => { if(e.target === overlay) closeModal(overlay.id); }));
 $("confirmBack").addEventListener("pointerdown", e => { e.preventDefault(); showScreen("home"); });
 
 $("confirmPlayBtn").addEventListener("pointerdown", async e => {
@@ -1023,7 +1483,14 @@ $("confirmPlayBtn").addEventListener("pointerdown", async e => {
         await countdown();
         beginGame();
     } catch (err) {
-        toast(err.message || "Failed to start match.");
+        const message = String(err.message || "Failed to start match.");
+        if (/insufficient|not enough|balance|deposit|fund/i.test(message)) {
+            showScreen("home");
+            await loadUserBalance();
+            showInsufficientBalance();
+        } else {
+            toast(message);
+        }
     } finally {
         btn.disabled = false;
         btn.textContent = "CONFIRM & START";
@@ -1322,6 +1789,7 @@ async function submitResult(completionTime) {
 
         if (!data.success) throw new Error(data.message || "Failed session verification.");
         state.result = data.result;
+        await loadUserBalance();
         renderResult(data.result);
         showScreen("result");
     } catch (err) {
@@ -1343,28 +1811,78 @@ function renderResult(res) {
     else if (res.rank && res.rank <= 3) msg = "🏆 YOU ARE IN THE PRIZE ZONE!";
     $("resultMessage").textContent = msg;
 
-    renderLeaderboard(res.leaderboard || []);
+    renderLeaderboard(res.leaderboard || [], res);
 }
 
-function renderLeaderboard(rows) {
+function renderLeaderboard(rows, result = null) {
     const container = $("leaderboardRows");
     container.innerHTML = "";
-    rows.slice(0, 10).forEach(row => {
+
+    // One leaderboard entry per username. IMPORTANT: when this player
+    // finishes again, their NEW score replaces their previous leaderboard row.
+    const uniquePlayers = new Map();
+    const inferredCurrentRow = (Array.isArray(rows) ? rows : []).find(r => r && r.isYou);
+    const latestUsername = String(result?.username || tg?.initDataUnsafe?.user?.username || inferredCurrentRow?.username || "").trim();
+    const latestKey = latestUsername.toLocaleLowerCase();
+
+    (Array.isArray(rows) ? rows : []).forEach((row, index) => {
+        const username = String(row.username || "Player").trim() || "Player";
+        const key = username.toLocaleLowerCase();
+        if (latestKey && key === latestKey) return;
+
+        const normalized = {
+            ...row,
+            username,
+            score: Number(row.score || 0),
+            originalIndex: index
+        };
+
+        const existing = uniquePlayers.get(key);
+
+        if (!existing || normalized.score > existing.score) {
+            uniquePlayers.set(key, normalized);
+        } else if (normalized.isYou) {
+            // Preserve the "YOU" marker if another duplicate row has it.
+            existing.isYou = true;
+        }
+    });
+
+    if (latestKey && result && Number.isFinite(Number(result.score))) {
+        uniquePlayers.set(latestKey, {
+            username: latestUsername || "You",
+            score: Number(result.score || 0),
+            isYou: true,
+            originalIndex: -1
+        });
+    }
+
+    // Re-sort after de-duplication so displayed ranks remain compact and correct.
+    const uniqueRows = Array.from(uniquePlayers.values())
+        .sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.originalIndex - b.originalIndex;
+        })
+        .slice(0, 10);
+
+    uniqueRows.forEach((row, index) => {
+        const displayRank = index + 1;
         const el = document.createElement("div");
         el.className = `rank-item ${row.isYou ? 'you' : ''}`;
-        let medal = row.rank;
-        if (row.rank === 1) medal = "🥇";
-        else if (row.rank === 2) medal = "🥈";
-        else if (row.rank === 3) medal = "🥉";
+
+        let medal = String(displayRank);
+        if (displayRank === 1) medal = "🥇";
+        else if (displayRank === 2) medal = "🥈";
+        else if (displayRank === 3) medal = "🥉";
 
         el.innerHTML = `
             <div class="rank-num">${medal}</div>
             <div class="rank-info">
-                <strong>${escapeHtml(row.username || "Player")}</strong>
+                <strong>${escapeHtml(row.username)}</strong>
                 ${row.isYou ? "<small>YOU</small>" : ""}
             </div>
-            <div class="rank-val">${Number(row.score || 0).toLocaleString()}</div>
+            <div class="rank-val">${row.score.toLocaleString()}</div>
         `;
+
         container.appendChild(el);
     });
 }
@@ -1373,13 +1891,19 @@ function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
 }
 
-$("playAgainBtn").addEventListener("pointerdown", e => { e.preventDefault(); showScreen("confirm"); });
+$("playAgainBtn").addEventListener("pointerdown", async e => {
+    e.preventDefault();
+    const balance = await loadUserBalance();
+    if (balance === null) { toast("Unable to verify your balance. Please try again."); return; }
+    if (balance < 100) { showScreen("home"); showInsufficientBalance(); return; }
+    showScreen("confirm");
+});
 $("homeBtn").addEventListener("pointerdown", e => { e.preventDefault(); resetGameState(); showScreen("home"); loadChallenge(); });
 $("leaderboardBtn").addEventListener("pointerdown", async e => {
     e.preventDefault();
     try {
         const data = await api(API.leaderboard);
-        renderLeaderboard(data.leaderboard || []);
+        renderLeaderboard(data.leaderboard || [], state.result);
         toast("Leaderboard updated!");
     } catch (_) {
         toast("Failed to update leaderboard.");
@@ -1392,11 +1916,16 @@ document.addEventListener("gesturestart", e => e.preventDefault(), { passive: fa
 document.addEventListener("touchmove", e => { if (state.running) e.preventDefault(); }, { passive: false });
 
 (async function init() {
-    try { await loadChallenge(); } finally { loading.classList.add("hidden"); }
+    try {
+        await Promise.all([loadChallenge(), loadUserBalance()]);
+    } finally {
+        loading.classList.add("hidden");
+    }
 })();
 
 })();
 </script>
 </body>
 </html>
+
 
