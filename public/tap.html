@@ -648,6 +648,7 @@ button {
 
     <!-- HOME SCREEN -->
     <section id="homeScreen" class="screen active home">
+        <button id="homeBackBtn" class="top-back-btn" onclick="window.location.href='earn.html'">‹</button>
         <div class="home-inner">
             <div class="logo-container">
                 <div class="logo-badge">⚡</div>
@@ -990,6 +991,11 @@ function updateChallengeCountdown() {
     challengeCountdown.textContent = `${String(hrs).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 setInterval(updateChallengeCountdown, 1000);
+
+const homeBackBtn = $("homeBackBtn");
+if (homeBackBtn) {
+    homeBackBtn.addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "earn.html"; });
+}
 
 $("homePlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); audio.init(); showScreen("confirm"); });
 $("confirmBack").addEventListener("pointerdown", e => { e.preventDefault(); showScreen("home"); });

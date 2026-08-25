@@ -788,6 +788,40 @@ margin:0 auto 12px;
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
+/* DASHBOARD DATA LOADING SKELETONS */
+.loading-skeleton{
+    position:relative;
+    display:inline-block;
+    overflow:hidden;
+    color:transparent !important;
+    background:linear-gradient(
+        90deg,
+        rgba(148,163,184,.18) 0%,
+        rgba(255,255,255,.55) 50%,
+        rgba(148,163,184,.18) 100%
+    );
+    background-size:200% 100%;
+    border-radius:7px;
+    vertical-align:middle;
+    animation:skeletonShimmer 1.35s ease-in-out infinite;
+    text-shadow:none !important;
+    box-shadow:none !important;
+    min-height:.9em;
+}
+.loading-skeleton::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+    transform:translateX(-100%);
+    animation:skeletonSweep 1.35s ease-in-out infinite;
+}
+.name-loading{width:105px;min-width:105px;height:1.15em;}
+.balance-loading{width:120px;min-width:120px;height:1em;}
+.total-balance .balance-loading{width:165px;min-width:165px;height:.85em;}
+@keyframes skeletonShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes skeletonSweep{100%{transform:translateX(100%)}}
+
 /* BONUS MODAL */
 .bonus-overlay{
 position:fixed;
@@ -1629,7 +1663,7 @@ stroke-width="2">
 <section class="welcome">
 <div class="welcome-small">WELCOME BACK</div>
 <h1 class="welcome-title">Hello, <span id="userNameText"
-class="user-name">User</span></h1>
+class="user-name loading-skeleton name-loading" aria-label="Loading user name"></span></h1>
 <p class="welcome-sub">Manage your wallet, earnings, deposits and referrals.</p>
 </section>
 
@@ -1651,7 +1685,7 @@ class="user-name">User</span></h1>
 
 <div class="verified">Verified</div>
 </div>
-<div class="total-balance">₦<span id="balanceText">0.00</span></div>
+<div class="total-balance"><span class="balance-currency" id="balanceCurrency">₦</span><span id="balanceText" class="loading-skeleton balance-loading" aria-label="Loading balance"></span></div>
 <div class="balance-caption">Available earnings for withdrawal</div>
 <div class="balance-breakdown">
 <div class="balance-box">
@@ -1660,16 +1694,16 @@ class="user-name">User</span></h1>
 <span class="balance-box-icon earnings-icon">★</span>
 <span class="balance-box-label">TOTAL EARNINGS</span>
 </div>
-<div class="balance-box-value earnings-value">₦<span
-id="earningsBalanceText">0.00</span></div>
+<div class="balance-box-value earnings-value"><span class="balance-currency" id="earningsCurrency">₦</span><span
+id="earningsBalanceText" class="loading-skeleton balance-loading" aria-label="Loading total earnings"></span></div>
 </div>
 <div class="balance-box">
 <div class="balance-box-header">
 <span class="balance-box-icon deposit-icon">+</span>
 <span class="balance-box-label">DEPOSIT BALANCE</span>
 </div>
-<div class="balance-box-value deposit-value">₦<span
-id="depositBalanceText">0.00</span></div>
+<div class="balance-box-value deposit-value"><span class="balance-currency" id="depositCurrency">₦</span><span
+id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loading deposit balance"></span></div>
 </div>
 </div>
 
@@ -2464,8 +2498,136 @@ list.innerHTML =
 
 }
 
+/* DASHBOARD DATA LOADING STATE */
+/*
+   The shimmer is intentionally shown only when the dashboard is entered
+   from another page. A normal browser/page refresh is detected separately,
+   and the last known dashboard values are restored immediately instead of
+   showing the shimmer again.
+*/
+let dashboardEntryLoading = false;
+
+function isDashboardPageRefresh(){
+    try{
+        const navigation =
+            performance.getEntriesByType("navigation")[0];
+
+        if(navigation){
+            return navigation.type === "reload";
+        }
+
+        /* Older browsers */
+        return performance.navigation &&
+               performance.navigation.type === 1;
+    }catch(error){
+        return false;
+    }
+}
+
+function restoreCachedDashboard(){
+    try{
+        const cached =
+            localStorage.getItem("paymeDashboardCache");
+
+        if(!cached) return false;
+
+        const data = JSON.parse(cached);
+        if(!data) return false;
+
+        const nameEl = document.getElementById("userNameText");
+        const balanceEl = document.getElementById("balanceText");
+        const earningsEl = document.getElementById("earningsBalanceText");
+        const depositEl = document.getElementById("depositBalanceText");
+
+        if(nameEl && data.name != null)
+            nameEl.innerText = data.name;
+
+        if(balanceEl && data.balance != null)
+            balanceEl.innerText = data.balance;
+
+        if(earningsEl && data.earnings != null)
+            earningsEl.innerText = data.earnings;
+
+        if(depositEl && data.deposit != null)
+            depositEl.innerText = data.deposit;
+
+        return true;
+    }catch(error){
+        console.warn("Unable to restore dashboard cache:", error);
+        return false;
+    }
+}
+
+function cacheDashboardData(name, balance, earnings, deposit){
+    try{
+        localStorage.setItem(
+            "paymeDashboardCache",
+            JSON.stringify({
+                name:name,
+                balance:balance,
+                earnings:earnings,
+                deposit:deposit
+            })
+        );
+    }catch(error){
+        console.warn("Unable to cache dashboard data:", error);
+    }
+}
+
+function setDashboardLoading(isLoading){
+    const nameEl = document.getElementById("userNameText");
+
+    const balanceEls = [
+        document.getElementById("balanceText"),
+        document.getElementById("earningsBalanceText"),
+        document.getElementById("depositBalanceText")
+    ];
+
+    const currencyEls = [
+        document.getElementById("balanceCurrency"),
+        document.getElementById("earningsCurrency"),
+        document.getElementById("depositCurrency")
+    ];
+
+    if(isLoading){
+        if(nameEl){
+            nameEl.classList.add("loading-skeleton","name-loading");
+            nameEl.innerText = "";
+        }
+
+        balanceEls.forEach(el=>{
+            if(!el) return;
+            el.classList.add("loading-skeleton","balance-loading");
+            el.innerText = "";
+        });
+
+        currencyEls.forEach(el=>{
+            if(el) el.style.visibility = "hidden";
+        });
+    }else{
+        if(nameEl){
+            nameEl.classList.remove("loading-skeleton","name-loading");
+        }
+
+        balanceEls.forEach(el=>{
+            if(!el) return;
+            el.classList.remove("loading-skeleton","balance-loading");
+        });
+
+        currencyEls.forEach(el=>{
+            if(el) el.style.visibility = "visible";
+        });
+    }
+}
+
 /* FETCH DASHBOARD DATA */
-async function fetchDashboardData(){
+async function fetchDashboardData(showLoading = false){
+
+/* Only the initial dashboard entry may trigger the shimmer.
+   Background refreshes every 5 seconds never touch the loading state. */
+if(showLoading){
+    setDashboardLoading(true);
+}
 
 try{
 
@@ -2518,12 +2680,15 @@ if(!data.success) return;
 const user =
 data.user;
 
+const resolvedName =
+    user.fullName ||
+    user.username ||
+    "User";
+
 document.getElementById(
 "userNameText"
 ).innerText =
-user.fullName ||
-user.username ||
-"User";
+resolvedName;
 
 const withdrawableBalance =
 Number(
@@ -2564,6 +2729,21 @@ document.getElementById(
 "referralCodeText"
 ).innerText =
 user.referralCode || "---";
+
+/* Save the latest values so a browser refresh can restore them
+   immediately without displaying the shimmer. */
+cacheDashboardData(
+    resolvedName,
+    availableBalance.toFixed(2),
+    withdrawableBalance.toFixed(2),
+    depositBalance.toFixed(2)
+);
+
+/* DATA IS READY: reveal the real name and balances only when
+   this dashboard entry was using the shimmer. */
+if(showLoading){
+    setDashboardLoading(false);
+}
 
 updateReferralLinkUI();
 
@@ -3614,7 +3794,21 @@ window.addEventListener(
 "DOMContentLoaded",
 ()=>{
 
-fetchDashboardData();
+/* A reload is not treated as a fresh dashboard entry.
+   Restore the previous values immediately and refresh them silently.
+   Navigating from another page (or opening the dashboard normally)
+   shows the shimmer once while the first request is loading. */
+const pageWasRefreshed = isDashboardPageRefresh();
+
+dashboardEntryLoading = !pageWasRefreshed;
+
+if(pageWasRefreshed){
+    restoreCachedDashboard();
+}
+
+fetchDashboardData(dashboardEntryLoading);
+
+dashboardEntryLoading = false;
 
 updateReferralLinkUI();
 
@@ -3637,3 +3831,4 @@ loadLeaderboard,
 
 </body>
 </html>
+
