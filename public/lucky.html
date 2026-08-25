@@ -548,7 +548,8 @@
       $('resultDetail').textContent=won
         ? (Number(data.freeSpinsAwarded)>0 ? `${data.freeSpinsAwarded} free spins added to your account.` : 'Winnings confirmed by the server and added to your wallet.')
         : `Your numbers: ${nums(state.selected)}. Winning numbers: ${nums(winning)}.`;
-      $('resultCard').classList.add('show',won?'win':'');
+      $('resultCard').classList.add('show');
+$('resultCard').classList.toggle('win', won);
       if(won) particles();
 
       if(Number.isFinite(Number(data.balance))){
