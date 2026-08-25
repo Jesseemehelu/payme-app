@@ -10,19 +10,20 @@
   <style>
     :root {
       --bg-dark: #0B1020;
-      --bg-light: #F6F8FC;
+      --bg-light: #F8FAFC;
       --accent-blue: #2563EB;
       --accent-blue-hover: #1D4ED8;
       --accent-cyan: #06B6D4;
+      --accent-purple: #8B5CF6;
       --text-main: #0F172A;
       --text-muted: #64748B;
       --border-color: #E2E8F0;
       --card-bg: #FFFFFF;
       --radius-sm: 12px;
       --radius-md: 20px;
-      --radius-lg: 28px;
-      --shadow-soft: 0 10px 30px -5px rgba(11, 16, 32, 0.05);
-      --shadow-card: 0 20px 40px -15px rgba(37, 99, 235, 0.07);
+      --radius-lg: 24px;
+      --shadow-soft: 0 10px 30px -5px rgba(11, 16, 32, 0.03);
+      --shadow-hover: 0 20px 35px -10px rgba(37, 99, 235, 0.12);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -40,7 +41,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border-color);
@@ -86,7 +87,7 @@
       max-width: 1000px;
       margin: 0 auto;
       padding: 24px 20px 32px;
-      animation: fadeIn 0.5s ease-out;
+      animation: fadeIn 0.4s ease-out;
     }
 
     /* BACK BUTTON */
@@ -97,8 +98,8 @@
       text-decoration: none;
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 0.9rem;
-      margin-bottom: 16px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
       transition: color 0.2s ease;
     }
     .back-link:hover {
@@ -106,17 +107,17 @@
     }
 
     .earn-header-section {
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
     .earn-title {
-      font-size: 2rem;
+      font-size: 2.25rem;
       font-weight: 800;
       color: var(--bg-dark);
       letter-spacing: -0.03em;
       margin-bottom: 6px;
     }
     .earn-sub {
-      font-size: 0.95rem;
+      font-size: 0.98rem;
       color: var(--text-muted);
       font-weight: 500;
     }
@@ -125,7 +126,7 @@
     .earn-cards-grid {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
     }
 
     /* EARN CARD */
@@ -139,45 +140,55 @@
       justify-content: space-between;
       position: relative;
       box-shadow: var(--shadow-soft);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       text-decoration: none;
       color: inherit;
     }
 
     /* Active cards styling */
     .earn-card-item.active-option {
-      border-color: #BFDBFE;
-      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+      border-color: #E2E8F0;
+      background: #FFFFFF;
       cursor: pointer;
     }
     .earn-card-item.active-option:hover {
       transform: translateY(-4px);
-      box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.12);
-      border-color: var(--accent-blue);
+      box-shadow: var(--shadow-hover);
+      border-color: #BFDBFE;
     }
     .earn-card-item.active-option:active {
-      transform: scale(0.98);
+      transform: scale(0.99);
+    }
+
+    /* Featured/Highlight Card (Lucky3) */
+    .earn-card-item.featured-option {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F3E8FF 100%);
+      border: 1px solid #DDD6FE;
+    }
+    .earn-card-item.featured-option:hover {
+      border-color: var(--accent-purple);
+      box-shadow: 0 20px 35px -10px rgba(139, 92, 246, 0.2);
     }
 
     /* Disabled cards styling */
     .earn-card-item.disabled-option {
-      opacity: 0.75;
+      opacity: 0.65;
       cursor: not-allowed;
       background: #FAFAFC;
     }
 
     .card-top-row {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .icon-wrapper {
       width: 52px;
       height: 52px;
       border-radius: var(--radius-md);
-      background: var(--bg-light);
+      background: #F1F5F9;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -185,18 +196,28 @@
       border: 1px solid var(--border-color);
     }
 
+    .featured-icon {
+      background: #F3E8FF;
+      border-color: #E9D5FF;
+    }
+
     .status-badge {
       font-size: 0.72rem;
       font-weight: 800;
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 99px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
     }
     .badge-available {
       background: #EFF6FF;
       color: var(--accent-blue);
       border: 1px solid #DBEAFE;
+    }
+    .badge-featured {
+      background: #F3E8FF;
+      color: var(--accent-purple);
+      border: 1px solid #E9D5FF;
     }
     .badge-coming {
       background: #F1F5F9;
@@ -205,16 +226,17 @@
     }
 
     .card-body h3 {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 800;
       color: var(--bg-dark);
       margin-bottom: 6px;
+      letter-spacing: -0.01em;
     }
     .card-body p {
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      line-height: 1.4;
-      margin-bottom: 20px;
+      line-height: 1.5;
+      margin-bottom: 24px;
     }
 
     .card-action-row {
@@ -222,8 +244,12 @@
       align-items: center;
       justify-content: space-between;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: var(--accent-blue);
+    }
+
+    .featured-action {
+      color: var(--accent-purple);
     }
 
     .arrow-btn {
@@ -235,16 +261,26 @@
       align-items: center;
       justify-content: center;
       color: var(--accent-blue);
-      transition: transform 0.2s ease;
+      transition: all 0.2s ease;
     }
+    .featured-arrow {
+      background: #F3E8FF;
+      color: var(--accent-purple);
+    }
+
     .earn-card-item.active-option:hover .arrow-btn {
       transform: translateX(4px);
       background: var(--accent-blue);
       color: #FFFFFF;
     }
 
-    /* DESKTOP LAYOUT (2x2 GRID) */
-    @media (min-width: 768px) {
+    .earn-card-item.featured-option:hover .featured-arrow {
+      background: var(--accent-purple);
+      color: #FFFFFF;
+    }
+
+    /* RESPONSIVE LAYOUT */
+    @media (min-width: 640px) {
       .earn-cards-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -293,13 +329,31 @@
     </a>
 
     <div class="earn-header-section">
-      <h1 class="earn-title">Earn</h1>
-      <p class="earn-sub">Choose how you want to earn with PAYME.</p>
+      <h1 class="earn-title">Earn Rewards</h1>
+      <p class="earn-sub">Select a game or task below to boost your earnings.</p>
     </div>
 
     <div class="earn-cards-grid">
 
-      <!-- CARD 1: REFERRAL (ACTIVE) -->
+      <!-- NEW CARD: LUCKY3 (ACTIVE) -->
+      <a href="lucky.html" class="earn-card-item active-option featured-option">
+        <div>
+          <div class="card-top-row">
+            <div class="icon-wrapper featured-icon">🎰</div>
+            <span class="status-badge badge-featured">Hot Game</span>
+          </div>
+          <div class="card-body">
+            <h3>Lucky3</h3>
+            <p>Pick your lucky combination and win big payouts.</p>
+          </div>
+        </div>
+        <div class="card-action-row featured-action">
+          <span>Play Lucky3</span>
+          <div class="arrow-btn featured-arrow">&rarr;</div>
+        </div>
+      </a>
+
+      <!-- CARD: REFERRAL (ACTIVE) -->
       <a href="/dashboard.html#referrals" class="earn-card-item active-option">
         <div>
           <div class="card-top-row">
@@ -308,7 +362,7 @@
           </div>
           <div class="card-body">
             <h3>Invite Friends</h3>
-            <p>Earn ₦15 for every eligible referral.</p>
+            <p>Earn ₦15 for every eligible referral you bring in.</p>
           </div>
         </div>
         <div class="card-action-row">
@@ -317,7 +371,7 @@
         </div>
       </a>
 
-      <!-- CARD 2: TAP PLAY (ACTIVE) -->
+      <!-- CARD: TAP PLAY (ACTIVE) -->
       <a href="tap.html" class="earn-card-item active-option">
         <div>
           <div class="card-top-row">
@@ -326,7 +380,7 @@
           </div>
           <div class="card-body">
             <h3>Tap Play</h3>
-            <p>Tap to accumulate points and claim real-time rewards.</p>
+            <p>Tap to accumulate points and claim instant rewards.</p>
           </div>
         </div>
         <div class="card-action-row">
@@ -335,7 +389,7 @@
         </div>
       </a>
 
-      <!-- CARD 3: GAMES (ACTIVE) -->
+      <!-- CARD: GAMES (ACTIVE) -->
       <a href="/game" class="earn-card-item active-option">
         <div>
           <div class="card-top-row">
@@ -344,7 +398,7 @@
           </div>
           <div class="card-body">
             <h3>PAYME Spin</h3>
-            <p>Spin the wheel for ₦50 and win exciting rewards.</p>
+            <p>Spin the wheel for ₦50 and win cash prizes.</p>
           </div>
         </div>
         <div class="card-action-row">
@@ -353,7 +407,7 @@
         </div>
       </a>
 
-      <!-- CARD 4: TASKS (COMING SOON) -->
+      <!-- CARD: TASKS (COMING SOON) -->
       <div class="earn-card-item disabled-option">
         <div>
           <div class="card-top-row">
@@ -362,12 +416,12 @@
           </div>
           <div class="card-body">
             <h3>Tasks</h3>
-            <p>Complete simple tasks and earn rewards.</p>
+            <p>Complete simple tasks and earn daily bonuses.</p>
           </div>
         </div>
       </div>
 
-      <!-- CARD 5: GIVEAWAYS (COMING SOON) -->
+      <!-- CARD: GIVEAWAYS (COMING SOON) -->
       <div class="earn-card-item disabled-option">
         <div>
           <div class="card-top-row">
@@ -376,7 +430,7 @@
           </div>
           <div class="card-body">
             <h3>Giveaways</h3>
-            <p>Take part in special PAYME giveaways and events.</p>
+            <p>Participate in special community giveaways and events.</p>
           </div>
         </div>
       </div>

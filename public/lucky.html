@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#05070d">
+<meta name="description" content="Lucky 3 — Pick 3 numbers and reveal your result instantly.">
+<title>Lucky 3 — PAYME</title>
+<style>
+:root{
+ --bg:#05070d;--bg2:#0b1020;--panel:rgba(15,20,35,.78);--panel2:rgba(20,27,48,.92);
+ --line:rgba(255,255,255,.09);--text:#f8fbff;--muted:#8f9ab2;
+ --cyan:#32e6ff;--blue:#5878ff;--violet:#a96cff;--pink:#ff4fd8;
+ --gold:#ffd45c;--green:#64f2a2;--red:#ff647f;--radius:20px;
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{
+ background:
+ radial-gradient(55vw 45vh at 8% 0%,rgba(50,230,255,.16),transparent 65%),
+ radial-gradient(55vw 50vh at 95% 15%,rgba(169,108,255,.18),transparent 62%),
+ radial-gradient(45vw 45vh at 50% 100%,rgba(255,79,216,.10),transparent 68%),
+ linear-gradient(135deg,#04060b,#090d18 55%,#060813);
+ color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ -webkit-font-smoothing:antialiased;
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;background-image:radial-gradient(#fff .7px,transparent .7px);background-size:24px 24px;mask-image:linear-gradient(#000,transparent 90%)}
+button{font:inherit;-webkit-tap-highlight-color:transparent}
+.app{height:100dvh;width:min(100%,760px);margin:auto;padding:8px 12px 74px;display:flex;flex-direction:column;gap:8px;position:relative}
+.topbar{height:48px;flex:0 0 48px;display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:8px;z-index:20}
+.icon-btn,.wallet{border:1px solid var(--line);background:rgba(10,14,25,.72);color:var(--text);border-radius:14px;height:40px;box-shadow:0 8px 24px rgba(0,0,0,.2);backdrop-filter:blur(14px)}
+.icon-btn{width:40px;display:grid;place-items:center;cursor:pointer}
+.hamb{width:17px;display:grid;gap:4px}.hamb i{height:2px;background:#fff;border-radius:4px}
+.brand{text-align:center;line-height:1}.brand strong{font-size:16px;letter-spacing:.18em}.brand span{display:block;margin-top:3px;color:#78839b;font-size:7px;letter-spacing:.2em;font-weight:800}
+.wallet{padding:5px 6px 5px 10px;display:flex;align-items:center;gap:7px;cursor:pointer}.wallet small{display:block;color:var(--muted);font-size:7px;letter-spacing:.08em;text-transform:uppercase}.wallet b{font-size:12px}.plus{width:26px;height:26px;border-radius:9px;border:0;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;font-weight:1000;box-shadow:0 0 18px rgba(50,230,255,.22)}
+.hero{
+ min-height:102px;flex:0 0 102px;position:relative;overflow:hidden;padding:15px 17px;border:1px solid rgba(88,120,255,.22);border-radius:22px;
+ background:linear-gradient(135deg,rgba(20,29,52,.96),rgba(11,15,27,.9));
+ box-shadow:0 16px 45px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.06);
+}
+.hero:after{content:"";position:absolute;width:170px;height:170px;right:-35px;top:-75px;border-radius:50%;background:radial-gradient(circle,rgba(50,230,255,.25),rgba(169,108,255,.08) 42%,transparent 70%);animation:orb 5s ease-in-out infinite}
+@keyframes orb{50%{transform:translate(-8px,8px) scale(1.12)}}
+.eyebrow{display:flex;align-items:center;gap:6px;color:var(--cyan);font-size:8px;font-weight:900;letter-spacing:.16em}.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+.hero h1{position:relative;margin:5px 0 4px;font-size:25px;letter-spacing:-.05em;line-height:.98}.hero p{position:relative;color:#b5bed0;margin:0;max-width:470px;font-size:10px;line-height:1.4}.trust-row{position:relative;display:flex;gap:5px;margin-top:7px}.pill{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);padding:4px 7px;border-radius:999px;color:#aeb8cb;font-size:7px;font-weight:900;letter-spacing:.06em}
+.main-grid{flex:1;min-height:0;display:grid;grid-template-columns:1.08fr .92fr;gap:8px}
+.panel{min-height:0;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(16,22,38,.9),rgba(9,13,24,.9));box-shadow:0 12px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.035);backdrop-filter:blur(12px);overflow:hidden}
+.pick-panel{padding:11px;display:flex;flex-direction:column}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:7px}.section-head h2{font-size:11px;margin:0;letter-spacing:.08em}.section-head p{margin:3px 0 0;color:var(--muted);font-size:8px}.clear{border:0;background:rgba(255,255,255,.04);color:var(--cyan);font-size:8px;font-weight:900;padding:6px 8px;border-radius:8px;cursor:pointer}
+.numbers{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;flex:1;align-content:center}.num{
+ aspect-ratio:1;border:1px solid rgba(255,255,255,.08);border-radius:11px;
+ background:linear-gradient(145deg,#1a2235,#0a0f1d);color:#dce5f7;font-weight:900;font-size:11px;cursor:pointer;
+ box-shadow:inset 0 1px rgba(255,255,255,.06),0 5px 10px rgba(0,0,0,.18);
+ transition:transform .16s,border-color .16s,box-shadow .16s,filter .16s;position:relative;
+}
+.num:before{content:"";position:absolute;inset:1px;border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 35%);pointer-events:none}
+.num:hover{transform:translateY(-2px) scale(1.03);border-color:rgba(50,230,255,.4)}.num:active{transform:translateY(2px) scale(.88);filter:brightness(1.3)}
+.num.selected{color:#06101b;background:linear-gradient(145deg,#fff08c,#ffb83e 55%,#ff5fd4);border-color:#fff1a4;box-shadow:0 0 0 2px rgba(255,210,92,.1),0 0 22px rgba(255,79,216,.22),inset 0 1px #fff;animation:numSelect .35s cubic-bezier(.2,.9,.2,1)}
+.num.selected:after{content:"✓";position:absolute;right:3px;top:2px;font-size:7px;font-weight:1000}
+@keyframes numSelect{40%{transform:scale(1.14) rotate(-3deg)}75%{transform:scale(.96) rotate(2deg)}}
+.selected-card{margin-top:7px;padding:8px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}.selected-label{font-size:7px;color:var(--muted);letter-spacing:.15em;font-weight:900}.selected-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px}.slot{height:31px;border-radius:9px;display:grid;place-items:center;background:#070b14;border:1px dashed rgba(255,255,255,.1);font-size:13px;font-weight:1000;color:#4f5b70;transition:.25s}.slot.filled{border-style:solid;border-color:rgba(50,230,255,.38);color:#fff;background:linear-gradient(135deg,rgba(50,230,255,.12),rgba(169,108,255,.12));box-shadow:inset 0 0 16px rgba(50,230,255,.06);animation:slotIn .25s ease-out}@keyframes slotIn{50%{transform:scale(1.08)}}
+.control-panel{padding:10px;display:flex;flex-direction:column;gap:7px;min-width:0}.mini-title{font-size:9px;letter-spacing:.1em;font-weight:900;color:#e9edf7}.mini-sub{font-size:7px;color:var(--muted);margin-top:2px}
+.games{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.game-card{padding:8px 5px;min-width:0;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);color:#fff;border-radius:12px;cursor:pointer;text-align:left;position:relative;transition:.2s}.game-card.active{border-color:rgba(50,230,255,.55);background:linear-gradient(145deg,rgba(50,230,255,.12),rgba(169,108,255,.09));box-shadow:0 0 18px rgba(50,230,255,.08)}.game-card.active:after{content:"✓";position:absolute;right:4px;top:4px;font-size:7px;color:#07111c;background:var(--cyan);width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-weight:1000}.game-top{display:block}.game-icon{font-size:15px;margin-bottom:3px}.game-card h3{margin:0;font-size:8px;white-space:nowrap}.game-card .desc{margin-top:2px;color:var(--muted);font-size:6px;white-space:nowrap}.payouts{margin-top:5px}.payout{font-size:6px;color:#b8c1d1}.payout b{display:block;color:var(--gold);font-size:7px;margin-top:2px}
+.stakes{display:grid;grid-template-columns:1fr 1fr;gap:5px}.stake-card{padding:8px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);color:#fff;border-radius:12px;cursor:pointer;text-align:left;position:relative;transition:.2s}.stake-card.active{border-color:rgba(255,212,92,.55);background:linear-gradient(145deg,rgba(255,212,92,.12),rgba(255,79,216,.05));box-shadow:0 0 18px rgba(255,212,92,.07)}.stake-card.active:after{content:"✓";position:absolute;right:5px;top:5px;color:#17120a;background:var(--gold);width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-size:7px;font-weight:1000}.stake-amount{font-size:15px;font-weight:1000}.stake-sub{font-size:6px;color:var(--muted);margin-top:2px}
+.summary{margin-top:auto;padding:8px;border-radius:13px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)}.summary-title{display:flex;justify-content:space-between;font-size:8px;margin-bottom:6px}.summary-title span{color:var(--green);font-size:7px;font-weight:900}.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}.sum-item{background:rgba(255,255,255,.035);border-radius:8px;padding:5px 6px;min-width:0}.sum-item small{display:block;color:var(--muted);font-size:6px;text-transform:uppercase;letter-spacing:.08em}.sum-item b{display:block;margin-top:2px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sum-item.win b{color:var(--gold);font-size:10px}
+.cta{width:100%;margin-top:6px;border:0;border-radius:11px;padding:9px 10px;min-height:36px;background:linear-gradient(100deg,#35e8ff,#6277ff 48%,#e75bff);color:#fff;font-weight:1000;font-size:9px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 8px 22px rgba(77,112,255,.22);transition:.16s}.cta:before{content:"";position:absolute;inset:-80% -20%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-70%) rotate(12deg);animation:shine 3s infinite}.cta:active{transform:scale(.98)}.cta[disabled]{opacity:.5}.cta span,.cta small{position:relative}.cta small{display:block;font-size:6px;opacity:.7;margin-top:2px}.info-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}.ghost{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);color:#aeb8cb;border-radius:9px;padding:7px;font-size:7px;font-weight:900;cursor:pointer}
+@keyframes shine{50%,100%{transform:translateX(100%) rotate(12deg)}}
+.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,760px);padding:5px 9px calc(5px + env(safe-area-inset-bottom));z-index:30;background:rgba(5,7,13,.9);backdrop-filter:blur(18px);border-top:1px solid var(--line)}.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav button{border:0;background:none;color:#69748a;font-size:7px;font-weight:900;cursor:pointer;padding:5px 2px;border-radius:10px}.nav button.active{color:#fff;background:linear-gradient(135deg,rgba(50,230,255,.1),rgba(169,108,255,.12))}.nav .ico{font-size:14px;display:block;margin-bottom:2px}
+.modal-wrap{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(2,4,9,.78);backdrop-filter:blur(12px);padding:14px}.modal-wrap.open{display:flex;animation:fade .18s ease}.modal{width:min(100%,500px);background:linear-gradient(145deg,#18223a,#0b1020);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:18px;box-shadow:0 30px 100px rgba(0,0,0,.65);animation:modalIn .28s cubic-bezier(.2,.8,.2,1)}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes modalIn{from{transform:translateY(22px) scale(.96);opacity:0}to{transform:none;opacity:1}}.modal h2{margin:0;font-size:20px}.modal p{color:var(--muted);font-size:10px;line-height:1.5}.confirm-list{margin:13px 0;display:grid;gap:6px}.confirm-row{display:flex;justify-content:space-between;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.04);font-size:10px}.confirm-row span{color:var(--muted)}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.primary,.secondary{border:0;border-radius:11px;padding:11px;font-weight:1000;cursor:pointer}.primary{background:linear-gradient(100deg,var(--cyan),var(--blue));color:#fff}.secondary{background:rgba(255,255,255,.06);color:#fff;border:1px solid var(--line)}
+.reveal-wrap{position:fixed;inset:0;z-index:80;display:none;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(50,230,255,.13),transparent 22%),radial-gradient(circle at 50% 60%,rgba(169,108,255,.12),transparent 30%),rgba(3,5,11,.98);overflow:hidden;padding:18px}.reveal-wrap.open{display:grid}.reveal-inner{width:min(100%,620px);text-align:center}.reveal-kicker{font-size:8px;letter-spacing:.22em;color:var(--cyan);font-weight:1000}.reveal-inner h2{font-size:29px;margin:7px 0 4px;letter-spacing:-.04em}.reveal-inner p{color:var(--muted);font-size:9px}.balls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:25px 0}.ball{aspect-ratio:1;border-radius:24%;display:grid;place-items:center;font-size:28px;font-weight:1000;color:#fff;background:linear-gradient(145deg,#1c2b50,#10182d 48%,#0a0e19);border:1px solid rgba(50,230,255,.28);box-shadow:inset 0 1px rgba(255,255,255,.14),0 0 45px rgba(50,230,255,.08);transform:rotateX(70deg) scale(.65);opacity:0;filter:blur(8px);transition:.55s cubic-bezier(.2,.9,.2,1);position:relative;overflow:hidden}.ball:before{content:"";position:absolute;inset:-50%;background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.22),transparent 65%);transform:translateX(-60%) rotate(20deg)}.ball.revealed{transform:rotateX(0) scale(1);opacity:1;filter:none;animation:revealPop .75s cubic-bezier(.15,.85,.2,1)}.ball.revealed:before{animation:ballShine .7s ease-out}@keyframes revealPop{30%{transform:rotateX(0) scale(1.18) rotateY(10deg)}60%{transform:scale(.96)}100%{transform:scale(1)}}@keyframes ballShine{to{transform:translateX(80%) rotate(20deg)}}.reveal-status{min-height:20px;color:#c9d2e5;font-size:10px}.result-card{display:none;margin-top:15px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.04)}.result-card.show{display:block;animation:modalIn .35s ease}.result-card.win{border-color:rgba(100,242,162,.4);box-shadow:0 0 70px rgba(100,242,162,.08)}.result-title{font-size:10px;letter-spacing:.14em;font-weight:1000}.result-match{font-size:32px;font-weight:1000;margin:4px}.result-payout{font-size:24px;color:var(--gold);font-weight:1000}.result-card p{color:var(--muted);font-size:9px}.toast{position:fixed;left:50%;bottom:70px;transform:translate(-50%,12px);z-index:100;background:#151d30;border:1px solid rgba(255,255,255,.1);box-shadow:0 15px 40px rgba(0,0,0,.4);padding:9px 12px;border-radius:10px;font-size:9px;font-weight:800;opacity:0;pointer-events:none;transition:.22s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+.particle{position:fixed;width:4px;height:4px;border-radius:50%;background:var(--cyan);pointer-events:none;z-index:90;animation:burst .8s ease-out forwards}@keyframes burst{to{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+.reduced *{animation:none!important;transition:none!important}
+@media(max-width:560px){.main-grid{grid-template-columns:1fr 1fr}.hero h1{font-size:22px}.hero{min-height:94px;flex-basis:94px}.numbers{gap:4px}.num{border-radius:9px;font-size:10px}.control-panel{padding:8px}.game-card{padding:7px 4px}.game-card .desc{display:none}}
+@media(max-width:390px){.app{padding-left:8px;padding-right:8px}.topbar{height:44px;flex-basis:44px}.hero{min-height:86px;flex-basis:86px;padding:12px}.hero h1{font-size:19px}.hero p{font-size:8px}.trust-row{display:none}.numbers{gap:3px}.num{font-size:9px;border-radius:8px}.selected-card{padding:6px}.slot{height:27px}.mini-title{font-size:8px}.games{gap:3px}.game-card{padding:6px 3px}.game-icon{font-size:12px}.game-card h3{font-size:7px}.stake-amount{font-size:13px}.summary{padding:6px}.sum-item{padding:4px}.cta{min-height:32px;padding:7px}.ghost{padding:6px;font-size:6px}}
+@media(max-height:650px){.app{gap:5px;padding-top:5px}.hero{min-height:78px;flex-basis:78px;padding:10px 14px}.hero h1{font-size:18px}.hero p{font-size:8px}.trust-row{display:none}.topbar{height:40px;flex-basis:40px}.icon-btn,.wallet{height:36px}.numbers{gap:3px}.selected-card{margin-top:4px}.slot{height:25px}.control-panel{gap:5px}.summary-grid{gap:3px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="topbar">
+<button class="icon-btn" aria-label="Open menu"><span class="hamb"><i></i><i></i><i></i></span></button>
+<div class="brand"><strong>LUCKY 3</strong><span>PICK 3 • WIN INSTANTLY</span></div>
+<button class="wallet" id="walletBtn" aria-label="Wallet balance"><div><small>Balance</small><b id="balance">₦—</b></div><span class="plus">+</span></button>
+</header>
+
+<section class="hero">
+<div class="eyebrow"><span class="dot"></span> LIVE • INSTANT RESULTS</div>
+<h1>Your luck. In three numbers.</h1>
+<p>Pick 3 numbers, choose your game and stake, then reveal your result instantly.</p>
+<div class="trust-row"><span class="pill">⚡ FAST</span><span class="pill">✦ FAIR PLAY</span><span class="pill">🔒 SECURE</span></div>
+</section>
+
+<div class="main-grid">
+<section class="panel pick-panel">
+<div class="section-head"><div><h2>PICK 3 NUMBERS</h2><p>Choose exactly 3</p></div><button class="clear" id="clearBtn">CLEAR</button></div>
+<div class="numbers" id="numbers"></div>
+<div class="selected-card"><div class="selected-label">YOUR NUMBERS</div><div class="selected-slots"><div class="slot" id="slot0">--</div><div class="slot" id="slot1">--</div><div class="slot" id="slot2">--</div></div></div>
+</section>
+
+<section class="panel control-panel">
+<div><div class="mini-title">CHOOSE YOUR GAME</div><div class="mini-sub">Match more, win more</div></div>
+<div class="games" id="games"></div>
+<div><div class="mini-title">CHOOSE STAKE</div><div class="mini-sub">Charged only after confirmation</div></div>
+<div class="stakes" id="stakes"></div>
+<div class="summary">
+<div class="summary-title"><strong>PLAY SUMMARY</strong><span>● READY</span></div>
+<div class="summary-grid">
+<div class="sum-item"><small>Game</small><b id="sumGame">3/3 JACKPOT</b></div>
+<div class="sum-item"><small>Numbers</small><b id="sumNumbers">-- • -- • --</b></div>
+<div class="sum-item"><small>Stake</small><b id="sumStake">₦200</b></div>
+<div class="sum-item win"><small>Potential win</small><b id="sumWin">₦4,000</b></div>
+</div>
+<button class="cta" id="playBtn"><span>CONFIRM &amp; PLAY →</span><small id="ctaSub">₦200 will be deducted from your balance</small></button>
+<div class="info-row"><button class="ghost" id="howBtn">HOW IT WORKS</button><button class="ghost" id="historyBtn">MY PLAYS</button></div>
+</div>
+</section>
+</div>
+</main>
+
+<nav class="bottom-nav" aria-label="Main navigation"><div class="nav">
+<button onclick="location.href='/dashboard.html'"><span class="ico">⌂</span>HOME</button>
+<button id="navHistory"><span class="ico">◷</span>MY PLAYS</button>
+<button class="active"><span class="ico">✦</span>LUCKY 3</button>
+<button onclick="location.href='/game'"><span class="ico">◉</span>RESULTS</button>
+<button onclick="location.href='/dashboard.html'"><span class="ico">○</span>PROFILE</button>
+</div></nav>
+
+<div class="modal-wrap" id="confirmModal"><div class="modal">
+<h2>READY TO PLAY?</h2><p>Review your entry before the server processes it.</p>
+<div class="confirm-list"><div class="confirm-row"><span>Your numbers</span><b id="confirmNumbers">-- • -- • --</b></div><div class="confirm-row"><span>Game</span><b id="confirmGame">3/3 JACKPOT</b></div><div class="confirm-row"><span>Stake</span><b id="confirmStake">₦200</b></div><div class="confirm-row"><span>Potential win</span><b id="confirmWin">₦4,000</b></div></div>
+<div class="modal-actions"><button class="secondary" id="cancelConfirm">CANCEL</button><button class="primary" id="playNow">PLAY NOW</button></div>
+</div></div>
+
+<div class="modal-wrap" id="howModal"><div class="modal">
+<h2>HOW IT WORKS</h2><p>Pick 3 unique numbers from 1–30, choose a game type and stake, then confirm. The final winning numbers are generated on the server and the match result is calculated there.</p>
+<div class="confirm-list"><div class="confirm-row"><span>₦200 · 3/3</span><b>₦4,000</b></div><div class="confirm-row"><span>₦200 · 2/3</span><b>₦1,200</b></div><div class="confirm-row"><span>₦200 · 1/3</span><b>5 FREE SPINS</b></div><div class="confirm-row"><span>₦500 · 3/3</span><b>₦10,000</b></div><div class="confirm-row"><span>₦500 · 2/3</span><b>₦3,000</b></div><div class="confirm-row"><span>₦500 · 1/3</span><b>5 FREE SPINS</b></div></div>
+<button class="primary" style="width:100%" id="closeHow">GOT IT</button></div></div>
+
+<div class="modal-wrap" id="historyModal"><div class="modal"><h2>MY PLAYS</h2><p id="historyText">Your completed Lucky 3 plays will appear here once the Lucky 3 backend endpoint is connected.</p><button class="primary" style="width:100%" id="closeHistory">CLOSE</button></div></div>
+
+<div class="reveal-wrap" id="reveal"><div class="reveal-inner">
+<div class="reveal-kicker">YOUR LUCKY DRAW</div><h2>REVEALING</h2><p>The server has already determined the result. Watch the numbers unlock one by one.</p>
+<div class="balls"><div class="ball" id="ball0">?</div><div class="ball" id="ball1">?</div><div class="ball" id="ball2">?</div></div>
+<div class="reveal-status" id="revealStatus">Securing your entry…</div>
+<div class="result-card" id="resultCard"><div class="result-title" id="resultTitle">RESULT</div><div class="result-match" id="resultMatch">0/3 MATCH</div><div class="result-payout" id="resultPayout">₦0</div><p id="resultDetail"></p><div class="modal-actions"><button class="secondary" id="backHome">BACK HOME</button><button class="primary" id="playAgain">PLAY AGAIN</button></div></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+  'use strict';
+
+  /*
+   * LUCKY 3 FRONTEND
+   * ----------------
+   * This page deliberately does NOT generate winning numbers.
+   * The final game request is expected at:
+   *
+   *   POST /api/games/lucky3/play
+   *
+   * The server should authenticate the signed session cookie, validate
+   * the submitted numbers/game/stake, atomically debit the wallet,
+   * generate 3 secure unique numbers, calculate the match count,
+   * apply the same payout configuration, award winnings/free spins,
+   * write the game + transaction records, and return the committed result.
+   *
+   * Existing server routes already expose /api/game/state for the real
+   * balance/free-spins state, and the app uses signed cookie sessions.
+   * See the existing Server Good.txt implementation before adding the
+   * Lucky 3 backend route.
+   */
+
+  const PAYOUTS = {
+    500: { jackpot: 10000, cash: 3000, bonus: { freeSpins: 5 } },
+    // Equivalent 40% of the ₦500 cash payouts. 1/3 keeps the same 5-spin reward.
+    200: { jackpot: 4000, cash: 1200, bonus: { freeSpins: 5 } }
+  };
+
+  const GAMES = {
+    jackpot: { title:'3/3 JACKPOT', icon:'♛', desc:'Match all 3 numbers', key:'jackpot' },
+    cash:    { title:'2/3 CASH', icon:'◈', desc:'Match at least 2 numbers', key:'cash' },
+    bonus:   { title:'1/3 BONUS', icon:'✦', desc:'Match at least 1 number', key:'bonus' }
+  };
+
+  const state = {
+    selected: [],
+    game: 'jackpot',
+    stake: 200,
+    balance: null,
+    busy: false
+  };
+
+  const $ = id => document.getElementById(id);
+  const money = n => `₦${Number(n || 0).toLocaleString('en-NG')}`;
+  const nums = a => a.length ? a.map(n => String(n).padStart(2,'0')).join(' • ') : '-- • -- • --';
+
+  function toast(message){
+    const el = $('toast'); el.textContent = message; el.classList.add('show');
+    clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  function renderNumbers(){
+    const root = $('numbers');
+    root.innerHTML = Array.from({length:30},(_,i)=>{
+      const n=i+1, active=state.selected.includes(n);
+      return `<button class="num ${active?'selected':''}" aria-label="Select number ${n}" aria-pressed="${active}" data-number="${n}">${String(n).padStart(2,'0')}</button>`;
+    }).join('');
+  }
+
+  function renderGames(){
+    $('games').innerHTML = Object.values(GAMES).map(g => {
+      const p = PAYOUTS[state.stake];
+      const payout = g.key === 'bonus' ? '5 FREE SPINS' : money(p[g.key]);
+      return `<button class="game-card ${state.game===g.key?'active':''}" data-game="${g.key}">
+        <div class="game-top"><div class="game-icon">${g.icon}</div><div><h3>${g.title}</h3><div class="desc">${g.desc}</div></div></div>
+        <div class="payouts"><span class="payout">${money(state.stake)} stake <b>${payout}</b></span></div>
+      </button>`;
+    }).join('');
+  }
+
+  function renderStakes(){
+    $('stakes').innerHTML = [200,500].map(s =>
+      `<button class="stake-card ${state.stake===s?'active':''}" data-stake="${s}">
+        <div class="stake-amount">${money(s)}</div><div class="stake-sub">Play for ${money(s)}</div>
+      </button>`
+    ).join('');
+  }
+
+  function payoutLabel(){
+    const p=PAYOUTS[state.stake][state.game];
+    return state.game==='bonus' ? '5 FREE SPINS' : money(p);
+  }
+
+  function render(){
+    renderNumbers(); renderGames(); renderStakes();
+    for(let i=0;i<3;i++){
+      const el=$(`slot${i}`), n=state.selected[i];
+      el.textContent=n ? String(n).padStart(2,'0') : '--';
+      el.classList.toggle('filled',!!n);
+    }
+    $('sumGame').textContent=GAMES[state.game].title;
+    $('sumNumbers').textContent=nums(state.selected);
+    $('sumStake').textContent=money(state.stake);
+    $('sumWin').textContent=payoutLabel();
+    $('ctaSub').textContent=`${money(state.stake)} will be deducted from your balance`;
+    $('playBtn').disabled=state.busy;
+  }
+
+  async function loadState(){
+    try{
+      const r=await fetch('/api/game/state',{credentials:'same-origin',headers:{'Accept':'application/json'}});
+      const data=await r.json();
+      if(!r.ok || !data.success) throw new Error(data.message || 'Unable to load game state.');
+      state.balance=Number(data.balance||0);
+      $('balance').textContent=money(state.balance);
+    }catch(err){
+      $('balance').textContent='₦—';
+      toast('Unable to load your wallet balance');
+      console.error(err);
+    }
+  }
+
+  function open(id){ $(id).classList.add('open'); }
+  function close(id){ $(id).classList.remove('open'); }
+
+  $('numbers').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-number]'); if(!btn || state.busy) return;
+    const n=Number(btn.dataset.number);
+    if(state.selected.includes(n)){
+      state.selected=state.selected.filter(x=>x!==n);
+    }else{
+      if(state.selected.length>=3){ toast('Choose only 3 numbers'); return; }
+      state.selected.push(n);
+    }
+    render();
+  });
+
+  $('games').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-game]'); if(!btn) return;
+    state.game=btn.dataset.game; render();
+  });
+
+  $('stakes').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-stake]'); if(!btn) return;
+    state.stake=Number(btn.dataset.stake); render();
+  });
+
+  $('clearBtn').onclick=()=>{ state.selected=[]; render(); };
+  $('howBtn').onclick=()=>open('howModal');
+  $('closeHow').onclick=()=>close('howModal');
+  $('historyBtn').onclick=()=>open('historyModal');
+  $('navHistory').onclick=()=>open('historyModal');
+  $('closeHistory').onclick=()=>close('historyModal');
+  $('walletBtn').onclick=()=>location.href='/deposit.html';
+
+  $('playBtn').onclick=()=>{
+    if(state.selected.length!==3){toast('Pick exactly 3 numbers first');return;}
+    open('confirmModal');
+    $('confirmNumbers').textContent=nums(state.selected);
+    $('confirmGame').textContent=GAMES[state.game].title;
+    $('confirmStake').textContent=money(state.stake);
+    $('confirmWin').textContent=payoutLabel();
+  };
+  $('cancelConfirm').onclick=()=>close('confirmModal');
+
+  function resetReveal(){
+    for(let i=0;i<3;i++){ $(`ball${i}`).classList.remove('revealed'); $(`ball${i}`).textContent='?'; }
+    $('resultCard').classList.remove('show','win');
+    $('resultDetail').textContent='';
+  }
+
+  function particles(){
+    for(let i=0;i<28;i++){
+      const p=document.createElement('i'); p.className='particle';
+      p.style.left='50%'; p.style.top='46%';
+      p.style.setProperty('--x',`${(Math.random()-.5)*260}px`);
+      p.style.setProperty('--y',`${(Math.random()-.5)*260}px`);
+      document.body.appendChild(p); setTimeout(()=>p.remove(),900);
+    }
+  }
+
+  /*
+   * Backend contract expected:
+   * POST /api/games/lucky3/play
+   * body:
+   * {
+   *   numbers: [7,14,26],
+   *   gameType: "jackpot" | "cash" | "bonus",
+   *   stake: 200 | 500
+   * }
+   *
+   * response:
+   * {
+   *   success: true,
+   *   gameId: "...",
+   *   selectedNumbers: [7,14,26],
+   *   winningNumbers: [7,11,26],
+   *   matchCount: 2,
+   *   payout: 3000,
+   *   freeSpinsAwarded: 0,
+   *   balance: 12345,
+   *   withdrawableBalance: 12345,
+   *   depositBalance: 0
+   * }
+   */
+  async function playLucky3(){
+    if(state.busy) return;
+    if(state.selected.length!==3){toast('Pick exactly 3 numbers first');return;}
+
+    state.busy=true; render(); close('confirmModal'); resetReveal(); open('reveal');
+    $('revealStatus').textContent='Securing your entry…';
+
+    try{
+      const r=await fetch('/api/games/lucky3/play',{
+        method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({
+          numbers:[...state.selected],
+          gameType:state.game,
+          stake:state.stake
+        })
+      });
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok || !data.success) throw new Error(data.message || data.error || 'Lucky 3 could not be completed.');
+
+      const winning=Array.isArray(data.winningNumbers) ? data.winningNumbers : [];
+      if(winning.length!==3) throw new Error('Unexpected Lucky 3 response.');
+
+      $('revealStatus').textContent='Drawing your numbers…';
+      for(let i=0;i<3;i++){
+        await new Promise(res=>setTimeout(res,430));
+        $(`ball${i}`).textContent=String(winning[i]).padStart(2,'0');
+        $(`ball${i}`).classList.add('revealed');
+        particles();
+      }
+
+      const matches=Number.isFinite(Number(data.matchCount))
+        ? Number(data.matchCount)
+        : state.selected.filter(n=>winning.includes(n)).length;
+
+      const won=(state.game==='jackpot' && matches===3) ||
+                (state.game==='cash' && matches>=2) ||
+                (state.game==='bonus' && matches>=1);
+
+      $('revealStatus').textContent=`${winning.map(n=>String(n).padStart(2,'0')).join(' • ')}`;
+      $('resultTitle').textContent=won ? '✦ YOU WON' : 'BETTER LUCK NEXT TIME';
+      $('resultMatch').textContent=`${matches}/3 MATCH`;
+      $('resultPayout').textContent=(Number(data.payout)>0 ? money(data.payout) : (Number(data.freeSpinsAwarded)>0 ? `${data.freeSpinsAwarded} FREE SPINS` : '₦0'));
+      $('resultDetail').textContent=won
+        ? (Number(data.freeSpinsAwarded)>0 ? `${data.freeSpinsAwarded} free spins added to your account.` : 'Winnings confirmed by the server and added to your wallet.')
+        : `Your numbers: ${nums(state.selected)}. Winning numbers: ${nums(winning)}.`;
+      $('resultCard').classList.add('show',won?'win':'');
+      if(won) particles();
+
+      if(Number.isFinite(Number(data.balance))){
+        state.balance=Number(data.balance); $('balance').textContent=money(state.balance);
+      }else{
+        await loadState();
+      }
+    }catch(err){
+      console.error('Lucky 3 error:',err);
+      close('reveal');
+      toast(err.message || 'Something went wrong. No play was completed.');
+    }finally{
+      state.busy=false; render();
+    }
+  }
+
+  $('playNow').onclick=playLucky3;
+  $('playAgain').onclick=()=>{
+    close('reveal'); state.selected=[]; render(); window.scrollTo({top:0,behavior:'smooth'});
+  };
+  $('backHome').onclick=()=>location.href='/dashboard.html';
+
+  document.querySelectorAll('.modal-wrap').forEach(w=>{
+    w.addEventListener('click',e=>{if(e.target===w)w.classList.remove('open')});
+  });
+
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.body.classList.add('reduced');
+
+  render();
+  loadState();
+})();
+</script>
+</body></html>

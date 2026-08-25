@@ -1000,6 +1000,114 @@ button {
 }
 
 
+/* ==================== FREE PLAY ==================== */
+.play-mode-buttons {
+    display: grid;
+    gap: 9px;
+}
+
+.btn-free-play {
+    width: 100%;
+    padding: 16px;
+    border-radius: 20px;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: .4px;
+    color: #07120f;
+    background: linear-gradient(135deg, #7dffcf, #00f5d4);
+    border: 1px solid rgba(255,255,255,.28);
+    box-shadow: 0 10px 30px rgba(0,245,212,.18);
+    transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.btn-free-play:active {
+    transform: scale(.97);
+    box-shadow: 0 5px 16px rgba(0,245,212,.16);
+    filter: brightness(.96);
+}
+
+.free-result-modal {
+    text-align: center;
+    overflow: hidden;
+}
+
+.free-result-kicker {
+    color: var(--accent-green);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.8px;
+    margin-bottom: 5px;
+}
+
+.free-result-modal h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.free-score-value {
+    margin: 8px 0 10px;
+    font-size: clamp(48px, 15vw, 72px);
+    line-height: .95;
+    font-weight: 900;
+    color: var(--primary-cyan);
+    text-shadow: 0 0 25px rgba(0,242,254,.45);
+    animation: freeScorePop .55s cubic-bezier(.2,.85,.2,1) both;
+}
+
+.free-result-modal > p {
+    margin: 0;
+}
+
+.free-result-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.free-result-stats > div {
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.06);
+}
+
+.free-result-stats small {
+    display: block;
+    color: var(--text-sub);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .8px;
+}
+
+.free-result-stats strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+@keyframes freeScorePop {
+    from { opacity: 0; transform: translateY(12px) scale(.88); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#scoreGeneratingOverlay.free-mode .score-generating-card {
+    border-color: rgba(0,245,212,.22);
+    box-shadow: 0 30px 100px rgba(0,0,0,.58), 0 0 45px rgba(0,245,212,.08);
+}
+
+#scoreGeneratingOverlay.free-mode .score-generating-icon {
+    background: rgba(0,245,212,.08);
+    border-color: rgba(0,245,212,.2);
+}
+
+#scoreGeneratingOverlay.free-mode .score-generating-spinner {
+    border-top-color: var(--accent-green);
+    border-right-color: var(--primary-cyan);
+}
+
 /* ==================== 2026 MODERN OVERHAUL ==================== */
 .home-inner{width:min(100%,520px);padding:24px 18px 28px;gap:14px}
 .logo-container{padding-top:8px;margin-bottom:2px}
@@ -1267,9 +1375,14 @@ button {
                     <strong>₦100</strong>
                 </div>
                 <div id="depositWarning" class="deposit-warning">You need at least ₦100 to enter the arena.</div>
-                <button id="homePlayBtn" class="btn-primary">
-                    ⚡ ENTER ARENA — ₦100
-                </button>
+                <div class="play-mode-buttons">
+                    <button id="homeFreePlayBtn" class="btn-free-play" type="button">
+                        🎮 PLAY FOR FREE
+                    </button>
+                    <button id="homePlayBtn" class="btn-primary" type="button">
+                        ⚡ ENTER ARENA — ₦100
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -1377,6 +1490,27 @@ button {
     <div class="score-generating-icon"><div class="score-generating-spinner"></div></div>
     <h2>Generating Scores<span class="score-dots"></span></h2>
     <p>Verifying your taps and updating the leaderboard. Please wait.</p>
+  </div>
+</div>
+
+<!-- Free-play score result popup -->
+<div id="freeResultModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="freeResultTitle">
+  <div class="modern-modal free-result-modal">
+    <div class="modal-icon">🎮</div>
+    <div class="free-result-kicker">FREE PLAY COMPLETE</div>
+    <h2 id="freeResultTitle">Your Score</h2>
+    <div class="free-score-value" id="freeFinalScore">0</div>
+    <p>Nice run! This free-play score is for practice only and is not added to the leaderboard.</p>
+    <div class="free-result-stats">
+      <div><small>MAX COMBO</small><strong id="freeResultCombo">x0</strong></div>
+      <div><small>ACCURACY</small><strong id="freeResultAccuracy">0%</strong></div>
+      <div><small>GOLDEN HITS</small><strong id="freeResultGolden">0</strong></div>
+      <div><small>TOTAL HITS</small><strong id="freeResultHits">0</strong></div>
+    </div>
+    <div class="modal-actions">
+      <button id="freePlayAgainBtn" class="btn-primary" type="button">🎮 PLAY FREE AGAIN</button>
+      <button id="freeResultCloseBtn" class="modal-secondary" type="button">BACK TO TAP RUSH</button>
+    </div>
   </div>
 </div>
 
@@ -1510,6 +1644,12 @@ const finalRushBanner = $("finalRushBanner");
 const toastEl = $("toast");
 const scoreGeneratingOverlay = $("scoreGeneratingOverlay");
 const homeLeaderboardModal = $("homeLeaderboardModal");
+const freeResultModal = $("freeResultModal");
+const freeFinalScore = $("freeFinalScore");
+const freeResultCombo = $("freeResultCombo");
+const freeResultAccuracy = $("freeResultAccuracy");
+const freeResultGolden = $("freeResultGolden");
+const freeResultHits = $("freeResultHits");
 
 /* Particle Effects Engine */
 let particles = [];
@@ -1562,7 +1702,8 @@ const state = {
     running: false, started: false, score: 0, combo: 1, successfulHits: 0, misses: 0,
     highestCombo: 0, goldenTargets: 0, megaTargets: 0, bonusTargets: 0, fakeTargetsHit: 0,
     totalEvents: 0, lastHitTime: 0, gameStartClient: 0, events: [], activeTargets: new Map(),
-    targetCounter: 0, frame: 0, challengeEnd: 0, result: null, balance: null
+    targetCounter: 0, frame: 0, challengeEnd: 0, result: null, balance: null,
+    mode: "paid"
 };
 
 function showScreen(name) {
@@ -1591,11 +1732,41 @@ function setButtonLoading(btn, label = "LOADING...", spinner = true) {
     };
 }
 
-function showScoreGenerating() {
-    if (scoreGeneratingOverlay) scoreGeneratingOverlay.classList.add("show");
+function showScoreGenerating(isFree = false) {
+    if (!scoreGeneratingOverlay) return;
+    scoreGeneratingOverlay.classList.toggle("free-mode", Boolean(isFree));
+    const title = scoreGeneratingOverlay.querySelector("h2");
+    const description = scoreGeneratingOverlay.querySelector("p");
+    if (isFree) {
+        if (title) title.innerHTML = 'Calculating Scores<span class="score-dots"></span>';
+        if (description) description.textContent = "Calculating your final free-play score. Please wait.";
+    } else {
+        if (title) title.innerHTML = 'Generating Scores<span class="score-dots"></span>';
+        if (description) description.textContent = "Verifying your taps and updating the leaderboard. Please wait.";
+    }
+    scoreGeneratingOverlay.classList.add("show");
 }
 function hideScoreGenerating() {
-    if (scoreGeneratingOverlay) scoreGeneratingOverlay.classList.remove("show");
+    if (scoreGeneratingOverlay) {
+        scoreGeneratingOverlay.classList.remove("show");
+        scoreGeneratingOverlay.classList.remove("free-mode");
+    }
+}
+
+function showFreeResult() {
+    if (!freeResultModal) return;
+    const hits = Number(state.successfulHits || 0);
+    const misses = Number(state.misses || 0);
+    const totalAttempts = hits + misses;
+    const accuracy = totalAttempts > 0 ? (hits / totalAttempts) * 100 : 0;
+
+    freeFinalScore.textContent = Number(state.score || 0).toLocaleString();
+    freeResultCombo.textContent = `x${state.highestCombo || 0}`;
+    freeResultAccuracy.textContent = `${accuracy.toFixed(0)}%`;
+    freeResultGolden.textContent = String(state.goldenTargets || 0);
+    freeResultHits.textContent = String(hits);
+
+    openModal("freeResultModal");
 }
 
 function getCurrentUsername(rows = []) {
@@ -1727,6 +1898,7 @@ if (homeBackBtn) {
 
 $("homePlayBtn").addEventListener("pointerdown", async e => {
     e.preventDefault();
+    state.mode = "paid";
     audio.init();
     const btn = $("homePlayBtn");
     const restore = setButtonLoading(btn, "CHECKING BALANCE...");
@@ -1739,8 +1911,40 @@ $("homePlayBtn").addEventListener("pointerdown", async e => {
         restore();
     }
 });
+$("homeFreePlayBtn").addEventListener("pointerdown", async e => {
+    e.preventDefault();
+    if (state.running) return;
+
+    audio.init();
+    const btn = $("homeFreePlayBtn");
+    const restoreButton = setButtonLoading(btn, "STARTING FREE GAME...");
+
+    try {
+        // Free play intentionally does not check balance and does not call the paid
+        // /start endpoint. It uses the exact same local target/scoring mechanics.
+        state.mode = "free";
+        state.sessionId = null;
+        state.seed = null;
+        state.serverStart = 0;
+        state.expiresAt = 0;
+        resetGameState();
+
+        showScreen("game");
+        resizeCanvas();
+        await countdown();
+        beginGame();
+    } catch (err) {
+        console.error("Free game start failed:", err);
+        state.mode = "paid";
+        showScreen("home");
+        toast("Unable to start free play. Please try again.");
+    } finally {
+        restoreButton();
+    }
+});
+
 $("howToPlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); openModal("howToModal"); });
-$("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "deposit.html"; });
+$("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
 $("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
 document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("pointerdown", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
 document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("pointerdown", e => { if(e.target === overlay) closeModal(overlay.id); }));
@@ -1782,7 +1986,8 @@ $("confirmPlayBtn").addEventListener("pointerdown", async e => {
     }
 });
 
-function resetGameState() {
+function resetGameState(keepMode = true) {
+    const currentMode = state.mode;
     state.running = false; state.started = false; state.score = 0; state.combo = 1;
     state.successfulHits = 0; state.misses = 0; state.highestCombo = 0; state.goldenTargets = 0;
     state.megaTargets = 0; state.bonusTargets = 0; state.fakeTargetsHit = 0; state.totalEvents = 0;
@@ -1797,6 +2002,8 @@ function resetGameState() {
     comboEl.textContent = "x1";
     timerEl.textContent = "20.0";
     timerEl.classList.remove("danger");
+    if (!keepMode) state.mode = "paid";
+    else state.mode = currentMode;
 }
 
 async function countdown() {
@@ -2056,13 +2263,30 @@ async function endGame() {
     const completionTime = Math.round(performance.now() - state.gameStartClient);
     timerEl.textContent = "0.0";
 
-    // Keep the player on the score-generation screen while the server
-    // verifies the match and calculates the final leaderboard position.
-    showScoreGenerating();
+    if (state.mode === "free") {
+        // Free play uses the same score that was calculated during the match,
+        // but never submits a paid session or leaderboard result.
+        showScoreGenerating(true);
+        await new Promise(resolve => setTimeout(resolve, 1400));
+        hideScoreGenerating();
+        showFreeResult();
+        return;
+    }
+
+    // Paid match: keep the existing server verification and leaderboard flow.
+    showScoreGenerating(false);
     await submitResult(completionTime);
 }
 
 async function submitResult(completionTime) {
+    if (state.mode === "free") {
+        showScoreGenerating(true);
+        await new Promise(resolve => setTimeout(resolve, 1400));
+        hideScoreGenerating();
+        showFreeResult();
+        return;
+    }
+
     try {
         const data = await api(API.finish, {
             method: "POST",
@@ -2255,6 +2479,27 @@ function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
 }
 
+$("freePlayAgainBtn").addEventListener("pointerdown", async e => {
+    e.preventDefault();
+    closeModal("freeResultModal");
+
+    audio.init();
+    state.mode = "free";
+    resetGameState();
+    showScreen("game");
+    resizeCanvas();
+    await countdown();
+    beginGame();
+});
+
+$("freeResultCloseBtn").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    closeModal("freeResultModal");
+    state.mode = "paid";
+    resetGameState();
+    showScreen("home");
+});
+
 $("playAgainBtn").addEventListener("pointerdown", async e => {
     e.preventDefault();
     const btn = $("playAgainBtn");
@@ -2273,8 +2518,10 @@ $("homeBtn").addEventListener("pointerdown", e => {
     e.preventDefault();
     const btn = $("homeBtn");
     const restore = setButtonLoading(btn, "MAIN MENU...");
+    state.mode = "paid";
     resetGameState();
     hideScoreGenerating();
+    closeModal("freeResultModal");
     showScreen("home");
     loadChallenge().finally(restore);
 });
