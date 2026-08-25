@@ -128,6 +128,7 @@ const MIN_DEPOSIT_AMOUNT = 200;
 
 const SPIN_COST = 50;
 
+
 // ======================================================
 // LUCKY 3 CONFIGURATION
 // ======================================================
@@ -137,10 +138,11 @@ const LUCKY3_CONFIG = {
   numberMin: 1,
   numberMax: 30,
   stakes: {
-    200: { jackpot: 4000, cash: 1200, bonusFreeSpins: 5 },
-    500: { jackpot: 10000, cash: 3000, bonusFreeSpins: 5 }
+    200: { jackpot: 5000, cash: 1500, bonusFreeSpins: 5 },
+    500: { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 }
   }
 };
+
 
 const LUCKY3_GAME_TYPES = new Set([
   'jackpot',
