@@ -1021,6 +1021,181 @@ button {
 @keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 @media(max-width:380px){.result-actions{grid-template-columns:1fr 1fr 1fr}.result-actions button{font-size:9px}.home-inner{padding-left:12px;padding-right:12px}}
 
+/* ==================== INTERACTION LOADING STATES ==================== */
+.btn-loading {
+    pointer-events: none !important;
+    opacity: .82;
+    cursor: wait !important;
+}
+.btn-loading .btn-spinner,
+.btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 7px;
+    vertical-align: -2px;
+    border: 2px solid rgba(255,255,255,.28);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .65s linear infinite;
+}
+.button-loading-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Score generation overlay shown immediately after the 20-second match ends. */
+#scoreGeneratingOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 6000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 50% 38%, rgba(0,242,254,.10), transparent 34%),
+        rgba(3,6,13,.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+#scoreGeneratingOverlay.show { display: flex; }
+.score-generating-card {
+    width: min(100%, 340px);
+    padding: 30px 24px;
+    text-align: center;
+    border-radius: 28px;
+    background: linear-gradient(160deg, rgba(24,31,49,.98), rgba(7,11,21,.98));
+    border: 1px solid rgba(0,242,254,.18);
+    box-shadow: 0 30px 100px rgba(0,0,0,.58), 0 0 45px rgba(0,242,254,.08);
+    animation: modalIn .25s ease-out;
+}
+.score-generating-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 22px;
+    background: rgba(0,242,254,.08);
+    border: 1px solid rgba(0,242,254,.2);
+}
+.score-generating-spinner {
+    width: 34px;
+    height: 34px;
+    border: 3px solid rgba(255,255,255,.10);
+    border-top-color: var(--primary-cyan);
+    border-right-color: var(--accent-purple);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+.score-generating-card h2 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: .2px;
+}
+.score-generating-card p {
+    margin: 8px 0 0;
+    color: var(--text-sub);
+    font-size: 12px;
+    line-height: 1.55;
+}
+.score-dots::after {
+    content: '';
+    animation: generatingDots 1.25s steps(4,end) infinite;
+}
+@keyframes generatingDots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75%,100% { content: '...'; }
+}
+
+/* Home leaderboard popup */
+#homeLeaderboardModal .modern-modal {
+    width: min(100%, 430px);
+    max-height: min(86vh, 650px);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+.leaderboard-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.leaderboard-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.leaderboard-modal-title .modal-icon {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    border-radius: 14px;
+    font-size: 21px;
+}
+.leaderboard-modal-title h2 { margin: 0; font-size: 20px; }
+.leaderboard-close {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #fff;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.09);
+    font-size: 20px;
+}
+.leaderboard-modal-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 14px 0 10px;
+    color: var(--text-sub);
+    font-size: 10px;
+    font-weight: 700;
+}
+.leaderboard-modal-meta strong { color: var(--primary-cyan); }
+#homeLeaderboardRows {
+    min-height: 90px;
+    max-height: 46vh;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+}
+.leaderboard-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+.leaderboard-modal-actions button {
+    min-height: 42px;
+    padding: 11px 8px;
+    border-radius: 13px;
+    font-size: 11px;
+}
+.lb-empty {
+    padding: 30px 10px;
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 12px;
+}
+@media(max-width:380px){
+    #homeLeaderboardModal { padding: 12px; }
+    #homeLeaderboardModal .modern-modal { padding: 16px; }
+    #homeLeaderboardRows { max-height: 52vh; }
+}
+
+
 </style>
 </head>
 
@@ -1081,6 +1256,10 @@ button {
                     <strong id="challengeCountdown">--:--:--</strong>
                 </div>
             </div>
+
+            <button id="viewLeaderboardBtn" class="btn-secondary" type="button">
+                🏆 VIEW LEADERBOARD
+            </button>
 
             <div class="glass-panel entry-card">
                 <div class="entry-row">
@@ -1192,6 +1371,40 @@ button {
 
 <div id="toast" class="toast-msg"></div>
 
+<!-- Score generation overlay -->
+<div id="scoreGeneratingOverlay" aria-live="polite" aria-busy="true">
+  <div class="score-generating-card">
+    <div class="score-generating-icon"><div class="score-generating-spinner"></div></div>
+    <h2>Generating Scores<span class="score-dots"></span></h2>
+    <p>Verifying your taps and updating the leaderboard. Please wait.</p>
+  </div>
+</div>
+
+<!-- Home leaderboard popup -->
+<div id="homeLeaderboardModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="homeLeaderboardTitle">
+  <div class="modern-modal">
+    <div class="leaderboard-modal-head">
+      <div class="leaderboard-modal-title">
+        <div class="modal-icon">🏆</div>
+        <div>
+          <h2 id="homeLeaderboardTitle">Current Leaderboard</h2>
+          <p>Live rankings for the 2-Day Challenge</p>
+        </div>
+      </div>
+      <button id="homeLeaderboardClose" class="leaderboard-close" type="button" aria-label="Close leaderboard">×</button>
+    </div>
+    <div class="leaderboard-modal-meta">
+      <span>Your current rank</span>
+      <strong id="homeLeaderboardUserRank">#--</strong>
+    </div>
+    <div id="homeLeaderboardRows"></div>
+    <div class="leaderboard-modal-actions">
+      <button id="homeLeaderboardRefresh" class="btn-primary" type="button">↻ REFRESH</button>
+      <button id="homeLeaderboardCloseBottom" class="modal-secondary" type="button">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 
 <div id="insufficientModal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modern-modal">
@@ -1295,6 +1508,8 @@ const countdownOverlay = $("countdownOverlay");
 const countdownNumber = $("countdownNumber");
 const finalRushBanner = $("finalRushBanner");
 const toastEl = $("toast");
+const scoreGeneratingOverlay = $("scoreGeneratingOverlay");
+const homeLeaderboardModal = $("homeLeaderboardModal");
 
 /* Particle Effects Engine */
 let particles = [];
@@ -1362,6 +1577,70 @@ function toast(msg) {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
+
+function setButtonLoading(btn, label = "LOADING...", spinner = true) {
+    if (!btn) return () => {};
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.classList.add("btn-loading");
+    btn.innerHTML = `<span class="button-loading-content">${spinner ? '<span class="btn-spinner"></span>' : ''}${escapeHtml(label)}</span>`;
+    return () => {
+        btn.disabled = false;
+        btn.classList.remove("btn-loading");
+        btn.innerHTML = original;
+    };
+}
+
+function showScoreGenerating() {
+    if (scoreGeneratingOverlay) scoreGeneratingOverlay.classList.add("show");
+}
+function hideScoreGenerating() {
+    if (scoreGeneratingOverlay) scoreGeneratingOverlay.classList.remove("show");
+}
+
+function getCurrentUsername(rows = []) {
+    const tgUsername = String(tg?.initDataUnsafe?.user?.username || "").trim();
+    const inferred = (Array.isArray(rows) ? rows : []).find(r => r && r.isYou);
+    return String(tgUsername || inferred?.username || state.result?.username || "").trim();
+}
+
+function getRowRank(rows, result = null) {
+    const currentUsername = getCurrentUsername(rows).toLocaleLowerCase();
+    const unique = new Map();
+
+    (Array.isArray(rows) ? rows : []).forEach((row, index) => {
+        const username = String(row?.username || "").trim();
+        if (!username) return;
+        const key = username.toLocaleLowerCase();
+        const score = Number(row?.score || 0);
+        const existing = unique.get(key);
+        if (!existing || score > existing.score) {
+            unique.set(key, { ...row, username, score, originalIndex: index });
+        }
+    });
+
+    const sorted = Array.from(unique.values()).sort((a,b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.originalIndex - b.originalIndex;
+    });
+
+    if (!currentUsername) return null;
+    const index = sorted.findIndex(r => String(r.username).toLocaleLowerCase() === currentUsername);
+    return index >= 0 ? index + 1 : null;
+}
+
+function resolveCurrentRank(data, result = null) {
+    const candidates = [
+        data?.userRank, data?.currentUserRank, data?.rank,
+        data?.you?.rank, data?.user?.rank, result?.userRank, result?.currentUserRank
+    ];
+    for (const value of candidates) {
+        const n = Number(value);
+        if (Number.isFinite(n) && n > 0) return n;
+    }
+    return getRowRank(data?.leaderboard || [], result);
+}
+
 
 function vibrate(ms) {
     try {
@@ -1447,15 +1726,22 @@ if (homeBackBtn) {
 }
 
 $("homePlayBtn").addEventListener("pointerdown", async e => {
-    e.preventDefault(); audio.init();
-    const balance = await loadUserBalance();
-    if (balance === null) { toast("Unable to verify your balance. Please try again."); return; }
-    if (balance < 100) { showInsufficientBalance(); return; }
-    showScreen("confirm");
+    e.preventDefault();
+    audio.init();
+    const btn = $("homePlayBtn");
+    const restore = setButtonLoading(btn, "CHECKING BALANCE...");
+    try {
+        const balance = await loadUserBalance();
+        if (balance === null) { toast("Unable to verify your balance. Please try again."); return; }
+        if (balance < 100) { showInsufficientBalance(); return; }
+        showScreen("confirm");
+    } finally {
+        restore();
+    }
 });
 $("howToPlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); openModal("howToModal"); });
-$("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
-$("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "deposit.html"; });
+$("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "deposit.html"; });
+$("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
 document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("pointerdown", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
 document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("pointerdown", e => { if(e.target === overlay) closeModal(overlay.id); }));
 $("confirmBack").addEventListener("pointerdown", e => { e.preventDefault(); showScreen("home"); });
@@ -1464,8 +1750,8 @@ $("confirmPlayBtn").addEventListener("pointerdown", async e => {
     e.preventDefault();
     if (state.running) return;
     const btn = $("confirmPlayBtn");
-    btn.disabled = true;
-    btn.textContent = "INITIALIZING...";
+    const restoreButton = setButtonLoading(btn, "INITIALIZING...");
+
 
     try {
         const data = await api(API.start, { method: "POST", body: JSON.stringify({ challengeId: state.challengeId }) });
@@ -1492,8 +1778,7 @@ $("confirmPlayBtn").addEventListener("pointerdown", async e => {
             toast(message);
         }
     } finally {
-        btn.disabled = false;
-        btn.textContent = "CONFIRM & START";
+        restoreButton();
     }
 });
 
@@ -1770,6 +2055,10 @@ async function endGame() {
 
     const completionTime = Math.round(performance.now() - state.gameStartClient);
     timerEl.textContent = "0.0";
+
+    // Keep the player on the score-generation screen while the server
+    // verifies the match and calculates the final leaderboard position.
+    showScoreGenerating();
     await submitResult(completionTime);
 }
 
@@ -1791,8 +2080,10 @@ async function submitResult(completionTime) {
         state.result = data.result;
         await loadUserBalance();
         renderResult(data.result);
+        hideScoreGenerating();
         showScreen("result");
     } catch (err) {
+        hideScoreGenerating();
         toast(err.message || "Result submission failed.");
         showScreen("home");
     }
@@ -1800,7 +2091,8 @@ async function submitResult(completionTime) {
 
 function renderResult(res) {
     $("finalScore").textContent = Number(res.score || 0).toLocaleString();
-    $("finalRank").textContent = res.rank ? `#${res.rank}` : "#--";
+    const resultRank = resolveCurrentRank(res, res);
+    $("finalRank").textContent = resultRank ? `#${resultRank}` : "#--";
     $("resultCombo").textContent = `x${res.highestCombo || 0}`;
     $("resultAccuracy").textContent = `${Number(res.accuracy || 0).toFixed(0)}%`;
     $("resultGolden").textContent = res.goldenTargets || 0;
@@ -1814,39 +2106,42 @@ function renderResult(res) {
     renderLeaderboard(res.leaderboard || [], res);
 }
 
-function renderLeaderboard(rows, result = null) {
+function renderLeaderboard(rows, result = null, rankOverride = null) {
     const container = $("leaderboardRows");
+    if (!container) return;
     container.innerHTML = "";
 
-    // One leaderboard entry per username. IMPORTANT: when this player
-    // finishes again, their NEW score replaces their previous leaderboard row.
     const uniquePlayers = new Map();
     const inferredCurrentRow = (Array.isArray(rows) ? rows : []).find(r => r && r.isYou);
-    const latestUsername = String(result?.username || tg?.initDataUnsafe?.user?.username || inferredCurrentRow?.username || "").trim();
+    const latestUsername = String(
+        result?.username ||
+        tg?.initDataUnsafe?.user?.username ||
+        inferredCurrentRow?.username ||
+        ""
+    ).trim();
     const latestKey = latestUsername.toLocaleLowerCase();
 
     (Array.isArray(rows) ? rows : []).forEach((row, index) => {
-        const username = String(row.username || "Player").trim() || "Player";
+        const username = String(row?.username || "Player").trim() || "Player";
         const key = username.toLocaleLowerCase();
         if (latestKey && key === latestKey) return;
 
         const normalized = {
             ...row,
             username,
-            score: Number(row.score || 0),
+            score: Number(row?.score || 0),
             originalIndex: index
         };
 
         const existing = uniquePlayers.get(key);
-
         if (!existing || normalized.score > existing.score) {
             uniquePlayers.set(key, normalized);
         } else if (normalized.isYou) {
-            // Preserve the "YOU" marker if another duplicate row has it.
             existing.isYou = true;
         }
     });
 
+    // Always replace the current player's displayed row with the latest score.
     if (latestKey && result && Number.isFinite(Number(result.score))) {
         uniquePlayers.set(latestKey, {
             username: latestUsername || "You",
@@ -1856,7 +2151,6 @@ function renderLeaderboard(rows, result = null) {
         });
     }
 
-    // Re-sort after de-duplication so displayed ranks remain compact and correct.
     const uniqueRows = Array.from(uniquePlayers.values())
         .sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
@@ -1867,7 +2161,7 @@ function renderLeaderboard(rows, result = null) {
     uniqueRows.forEach((row, index) => {
         const displayRank = index + 1;
         const el = document.createElement("div");
-        el.className = `rank-item ${row.isYou ? 'you' : ''}`;
+        el.className = `rank-item ${row.isYou ? "you" : ""}`;
 
         let medal = String(displayRank);
         if (displayRank === 1) medal = "🥇";
@@ -1882,7 +2176,77 @@ function renderLeaderboard(rows, result = null) {
             </div>
             <div class="rank-val">${row.score.toLocaleString()}</div>
         `;
+        container.appendChild(el);
+    });
 
+    const currentRank = Number(rankOverride || getRowRank(rows, result) || result?.rank || 0);
+    if (result && currentRank > 0) {
+        $("finalRank").textContent = `#${currentRank}`;
+    }
+}
+
+function renderHomeLeaderboard(rows, rank = null) {
+    const container = $("homeLeaderboardRows");
+    const rankEl = $("homeLeaderboardUserRank");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const uniquePlayers = new Map();
+    const currentUsername = getCurrentUsername(rows);
+    const currentKey = currentUsername.toLocaleLowerCase();
+
+    (Array.isArray(rows) ? rows : []).forEach((row, index) => {
+        const username = String(row?.username || "Player").trim() || "Player";
+        const key = username.toLocaleLowerCase();
+        const normalized = {
+            ...row,
+            username,
+            score: Number(row?.score || 0),
+            originalIndex: index,
+            isYou: Boolean(row?.isYou) || (currentKey && key === currentKey)
+        };
+        const existing = uniquePlayers.get(key);
+        if (!existing || normalized.score > existing.score) {
+            uniquePlayers.set(key, normalized);
+        } else if (normalized.isYou) {
+            existing.isYou = true;
+        }
+    });
+
+    const sorted = Array.from(uniquePlayers.values()).sort((a,b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.originalIndex - b.originalIndex;
+    });
+
+    if (rankEl) {
+        const resolved = Number(rank || getRowRank(rows, state.result) || 0);
+        rankEl.textContent = resolved > 0 ? `#${resolved}` : "#--";
+    }
+
+    if (!sorted.length) {
+        container.innerHTML = `<div class="lb-empty">No leaderboard data available yet.</div>`;
+        return;
+    }
+
+    sorted.slice(0, 10).forEach((row, index) => {
+        const displayRank = index + 1;
+        const el = document.createElement("div");
+        el.className = `rank-item ${row.isYou ? "you" : ""}`;
+
+        let medal = String(displayRank);
+        if (displayRank === 1) medal = "🥇";
+        else if (displayRank === 2) medal = "🥈";
+        else if (displayRank === 3) medal = "🥉";
+
+        el.innerHTML = `
+            <div class="rank-num">${medal}</div>
+            <div class="rank-info">
+                <strong>${escapeHtml(row.username)}</strong>
+                ${row.isYou ? "<small>YOU</small>" : ""}
+            </div>
+            <div class="rank-val">${row.score.toLocaleString()}</div>
+        `;
         container.appendChild(el);
     });
 }
@@ -1893,21 +2257,84 @@ function escapeHtml(str) {
 
 $("playAgainBtn").addEventListener("pointerdown", async e => {
     e.preventDefault();
-    const balance = await loadUserBalance();
-    if (balance === null) { toast("Unable to verify your balance. Please try again."); return; }
-    if (balance < 100) { showScreen("home"); showInsufficientBalance(); return; }
-    showScreen("confirm");
+    const btn = $("playAgainBtn");
+    const restore = setButtonLoading(btn, "CHECKING BALANCE...");
+    try {
+        const balance = await loadUserBalance();
+        if (balance === null) { toast("Unable to verify your balance. Please try again."); return; }
+        if (balance < 100) { showScreen("home"); showInsufficientBalance(); return; }
+        showScreen("confirm");
+    } finally {
+        restore();
+    }
 });
-$("homeBtn").addEventListener("pointerdown", e => { e.preventDefault(); resetGameState(); showScreen("home"); loadChallenge(); });
-$("leaderboardBtn").addEventListener("pointerdown", async e => {
+
+$("homeBtn").addEventListener("pointerdown", e => {
     e.preventDefault();
+    const btn = $("homeBtn");
+    const restore = setButtonLoading(btn, "MAIN MENU...");
+    resetGameState();
+    hideScoreGenerating();
+    showScreen("home");
+    loadChallenge().finally(restore);
+});
+
+async function fetchAndRenderHomeLeaderboard(btn = null) {
+    const restore = btn ? setButtonLoading(btn, "REFRESHING...") : () => {};
     try {
         const data = await api(API.leaderboard);
-        renderLeaderboard(data.leaderboard || [], state.result);
-        toast("Leaderboard updated!");
-    } catch (_) {
-        toast("Failed to update leaderboard.");
+        const rank = resolveCurrentRank(data, state.result);
+        renderHomeLeaderboard(data.leaderboard || [], rank);
+        return data;
+    } catch (err) {
+        renderHomeLeaderboard([], null);
+        toast(err.message || "Failed to load leaderboard.");
+        throw err;
+    } finally {
+        restore();
     }
+}
+
+$("leaderboardBtn").addEventListener("pointerdown", async e => {
+    e.preventDefault();
+    const btn = $("leaderboardBtn");
+    try {
+        const data = await fetchAndRenderHomeLeaderboard(btn);
+        const rank = resolveCurrentRank(data, state.result);
+        renderLeaderboard(data.leaderboard || [], state.result, rank);
+        if (state.result) $("finalRank").textContent = rank ? `#${rank}` : "#--";
+        toast("Leaderboard updated!");
+    } catch (_) {}
+});
+
+$("viewLeaderboardBtn").addEventListener("pointerdown", async e => {
+    e.preventDefault();
+    openModal("homeLeaderboardModal");
+    const rows = $("homeLeaderboardRows");
+    if (rows) rows.innerHTML = `<div class="lb-empty"><span class="btn-spinner"></span> Loading leaderboard...</div>`;
+    try {
+        await fetchAndRenderHomeLeaderboard($("homeLeaderboardRefresh"));
+    } catch (_) {}
+});
+
+$("homeLeaderboardRefresh").addEventListener("pointerdown", async e => {
+    e.preventDefault();
+    try {
+        await fetchAndRenderHomeLeaderboard($("homeLeaderboardRefresh"));
+        toast("Leaderboard refreshed!");
+    } catch (_) {}
+});
+
+$("homeLeaderboardClose").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    closeModal("homeLeaderboardModal");
+});
+$("homeLeaderboardCloseBottom").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    closeModal("homeLeaderboardModal");
+});
+$("homeLeaderboardModal").addEventListener("pointerdown", e => {
+    if (e.target === $("homeLeaderboardModal")) closeModal("homeLeaderboardModal");
 });
 
 function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }

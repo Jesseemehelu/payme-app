@@ -1628,6 +1628,66 @@ animation-iteration-count: 1 !important;
 transition-duration: 0.01ms !important;
 }
 }
+
+/* ==================== TAP RUSH + TRANSACTION UI POLISH ==================== */
+.modal-overlay.active{
+  background:rgba(5,10,22,.72);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+#transactionsModal .modal-card{
+  max-height:min(82dvh,620px);
+  overflow:hidden;
+  padding:18px;
+  border:1px solid rgba(37,99,235,.14);
+  background:linear-gradient(150deg,#ffffff 0%,#f8fbff 58%,#f5f3ff 100%);
+  box-shadow:0 35px 100px rgba(15,23,42,.25);
+}
+#transactionsList{
+  max-height:min(62dvh,470px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+.tap-tx{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:12px;
+  border-radius:15px;
+  border:1px solid #e6ebf3;
+  background:linear-gradient(135deg,#fff,#f8fafc);
+  box-shadow:0 7px 18px rgba(15,23,42,.045);
+  animation:txIn .24s ease both;
+}
+.tap-tx + .tap-tx{margin-top:7px}
+.tap-tx-icon{
+  width:36px;height:36px;flex:0 0 36px;
+  display:grid;place-items:center;
+  border-radius:12px;
+  font-size:16px;
+}
+.tap-tx-icon.entry{background:#fff1f2;color:#e11d48}
+.tap-tx-icon.win{background:#ecfdf5;color:#059669}
+.tap-tx-main{min-width:0;flex:1}
+.tap-tx-title{
+  font-size:.74rem;font-weight:900;color:#0f172a;
+}
+.tap-tx-sub{
+  margin-top:3px;color:#64748b;font-size:.58rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tap-tx-amount{font-size:.75rem;font-weight:900;white-space:nowrap}
+.tap-tx-amount.debit{color:#e11d48}
+.tap-tx-amount.credit{color:#059669}
+.tap-tx-badge{
+  display:inline-flex;align-items:center;margin-left:5px;
+  padding:3px 6px;border-radius:8px;
+  font-size:.48rem;font-weight:900;
+  background:#eef2ff;color:#4338ca;
+}
+@keyframes txIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
 </style>
 </head>
 <body>
@@ -3661,116 +3721,155 @@ window.location.href =
 }
 
 /* TRANSACTIONS */
-function openTransactionsModal(){
-
-const modal =
-document.getElementById(
-"transactionsModal"
-);
-
-modal.classList.add(
-"active"
-);
-
-const container =
-document.getElementById(
-"transactionsList"
-);
-
-container.innerHTML =
-`<p style="text-align:center; color:#64748b; font-size:.8rem;
-padding:20px;">Loading...</p>`;
-
-fetch(
-"/api/user/transactions",
-{
-method:"GET",
-credentials:"include"
-}
-)
-
-.then(res =>
-res.json()
-)
-
-.then(data=>{
-
-if(
-data.success &&
-data.transactions &&
-data.transactions.length
-){
-
-container.innerHTML =
-data.transactions.map(
-tx=>{
-
-const amount =
-Number(
-tx.amount || 0
-);
-
-return `
-<div style="display:flex; align-items:center; justify-content:space-between;
-gap:10px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:13px;">
-
-<div>
-
-<div style="font-weight:800; font-size:.78rem; color:#0f172a;">
-${tx.type || "Transaction"}
-</div>
-
-<div style="font-size:.65rem; color:#64748b; margin-top:3px;">
-${tx.bank || ""}
-${tx.date ? "(" + tx.date + ")" : ""}
-</div>
-
-</div>
-
-<div style="font-weight:800; font-size:.78rem;
-color:#ef4444;">
--₦${amount.toLocaleString()}
-</div>
-
-</div>
-`;
-
-}
-).join("");
-
-}else{
-
-container.innerHTML =
-`<p style="text-align:center; color:#64748b; font-size:.8rem;
-padding:20px;">No recent transactions found.</p>`;
-
+function getTapRushLocalTransactions(){
+  try{
+    const rows = JSON.parse(localStorage.getItem("paymeTapRushTransactionsV1") || "[]");
+    return Array.isArray(rows) ? rows : [];
+  }catch(_){
+    return [];
+  }
 }
 
-})
+function txTimestamp(tx){
+  const raw = tx.date || tx.createdAt || tx.created_at || tx.timestamp || tx.time;
+  const parsed = raw ? Date.parse(raw) : NaN;
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-.catch(error=>{
+function txIsCredit(tx){
+  const direction = String(tx.direction || tx.kind || tx.flow || "").toLowerCase();
+  if(["credit","credited","in","income","win","winning","winnings"].includes(direction)) return true;
+  if(["debit","debited","out","expense","entry","fee"].includes(direction)) return false;
 
-console.error(
-"Transaction error:",
-error
-);
+  const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""}`.toLowerCase();
+  return /(winning|winnings|win|prize|reward|bonus|credit|deposit|refund|cashback|earning)/.test(text);
+}
 
-container.innerHTML =
-`<p style="text-align:center; color:#ef4444; font-size:.8rem;
-padding:20px;">Failed to load transactions.</p>`;
+function txIsTapRush(tx){
+  const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""} ${tx.bank || ""}`.toLowerCase();
+  return /(tap[\s_-]*rush|taprush)/.test(text);
+}
 
-});
+function txTitle(tx){
+  const raw = String(tx.type || tx.description || tx.reason || "Transaction");
+  const lower = raw.toLowerCase();
+  if(txIsTapRush(tx)){
+    if(/entry|fee|ticket|join|start/.test(lower)) return "Tap Rush Entry Fee";
+    if(/winning|win|prize|payout|reward/.test(lower)) return "Tap Rush Winnings";
+    return "Tap Rush";
+  }
+  return raw;
+}
 
+function txDate(tx){
+  const raw = tx.date || tx.createdAt || tx.created_at || tx.timestamp || tx.time;
+  if(!raw) return "";
+  const d = new Date(raw);
+  if(Number.isNaN(d.getTime())) return String(raw);
+  return d.toLocaleString(undefined,{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+
+function renderTransactionRows(serverRows){
+  const localRows = getTapRushLocalTransactions();
+
+  const normalizedServer = (Array.isArray(serverRows) ? serverRows : []).map((tx,i)=>({
+    ...tx,
+    __source:"server",
+    __time:txTimestamp(tx),
+    __amount:Number(tx.amount || tx.value || tx.total || 0)
+  }));
+
+  const merged = [...normalizedServer];
+
+  localRows.forEach(local=>{
+    const amount = Number(local.amount || 0);
+    const time = txTimestamp(local);
+    const duplicate = normalizedServer.some(server=>{
+      const sameAmount = Math.abs(Number(server.__amount || 0) - amount) < 0.001;
+      const sameDirection = txIsCredit(server) === (local.direction === "credit");
+      const closeTime = Math.abs((server.__time || 0) - time) < 10 * 60 * 1000;
+      return txIsTapRush(server) && sameAmount && sameDirection && closeTime;
+    });
+    if(!duplicate){
+      merged.push({...local,__source:"local",__time:time,__amount:amount});
+    }
+  });
+
+  merged.sort((a,b)=>(b.__time||0)-(a.__time||0));
+
+  const rows = merged.slice(0,80);
+  if(!rows.length){
+    return `<div style="text-align:center;color:#64748b;font-size:.78rem;padding:28px 10px;">
+      No recent transactions found.
+    </div>`;
+  }
+
+  return rows.map((tx,index)=>{
+    const amount = Number(tx.__amount || 0);
+    const credit = txIsCredit(tx);
+    const title = txTitle(tx);
+    const icon = credit ? "↗" : "↘";
+    const bank = tx.bank || (txIsTapRush(tx) ? "Tap Rush" : "");
+    const status = tx.status ? String(tx.status) : "";
+    const date = txDate(tx);
+    const sign = credit ? "+" : "-";
+    const badge = txIsTapRush(tx) ? `<span class="tap-tx-badge">TAP RUSH</span>` : "";
+
+    return `
+      <div class="tap-tx" style="animation-delay:${Math.min(index,12)*25}ms">
+        <div class="tap-tx-icon ${credit ? "win" : "entry"}">${icon}</div>
+        <div class="tap-tx-main">
+          <div class="tap-tx-title">${escapeHtmlDashboard(title)}${badge}</div>
+          <div class="tap-tx-sub">${escapeHtmlDashboard([bank,date,status].filter(Boolean).join(" • "))}</div>
+        </div>
+        <div class="tap-tx-amount ${credit ? "credit" : "debit"}">${sign}₦${amount.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2})}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHtmlDashboard(value){
+  return String(value ?? "").replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+async function openTransactionsModal(){
+  const modal = document.getElementById("transactionsModal");
+  const container = document.getElementById("transactionsList");
+  if(!modal || !container) return;
+
+  modal.classList.add("active");
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;gap:9px;color:#64748b;font-size:.75rem;padding:25px;">
+      <span class="spinner" style="width:17px;height:17px;border-width:2px;"></span>
+      Loading transactions…
+    </div>`;
+
+  try{
+    const response = await fetch("/api/user/transactions",{method:"GET",credentials:"include"});
+    const data = await response.json();
+    const serverRows = data && Array.isArray(data.transactions) ? data.transactions : [];
+    container.innerHTML = renderTransactionRows(serverRows);
+
+    if(!serverRows.length && getTapRushLocalTransactions().length){
+      /* Local Tap Rush rows are still displayed if the server feed is temporarily empty. */
+      container.innerHTML = renderTransactionRows([]);
+    }
+  }catch(error){
+    console.error("Transaction error:",error);
+    const localRows = getTapRushLocalTransactions();
+    container.innerHTML = localRows.length
+      ? renderTransactionRows([])
+      : `<div style="text-align:center;color:#ef4444;font-size:.78rem;padding:24px;">
+           Failed to load transactions. Please try again.
+         </div>`;
+  }
 }
 
 function closeTransactionsModal(){
-
-document.getElementById(
-"transactionsModal"
-).classList.remove(
-"active"
-);
-
+  const modal = document.getElementById("transactionsModal");
+  if(modal) modal.classList.remove("active");
 }
 
 /* ESCAPE KEY */
