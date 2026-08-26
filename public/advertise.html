@@ -1832,6 +1832,157 @@ header {
 }
 
 
+
+/* =========================================================
+   MY CAMPAIGNS
+========================================================= */
+
+.my-campaigns { margin: 0 0 18px; }
+.section-card {
+  background: linear-gradient(145deg,#121e38,#0c1529);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 22px;
+  padding: 15px;
+  box-shadow: 0 20px 45px rgba(0,0,0,.25);
+}
+.section-head {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin-bottom:12px;
+}
+.section-head-left { display:flex; align-items:center; gap:10px; }
+.section-head-icon {
+  width:38px; height:38px; display:flex; align-items:center;
+  justify-content:center; border-radius:12px; background:#172642;
+}
+.section-head h3 { font-size:.82rem; font-weight:800; }
+.section-head p { margin-top:2px; color:var(--muted); font-size:.58rem; }
+.refresh-campaigns {
+  min-height:35px; padding:0 11px; border-radius:11px;
+  color:#cbd5e1; background:#17233d;
+  border:1px solid rgba(255,255,255,.08);
+  font-size:.58rem; font-weight:800;
+}
+.campaign-list { display:flex; flex-direction:column; gap:9px; }
+.campaign-empty {
+  padding:17px 10px; text-align:center; color:#71829a;
+  font-size:.62rem; line-height:1.5;
+  border:1px dashed rgba(255,255,255,.08); border-radius:14px;
+}
+.campaign-card {
+  padding:13px; border-radius:16px; background:#0b162a;
+  border:1px solid rgba(255,255,255,.07);
+}
+.campaign-top {
+  display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+}
+.campaign-community { min-width:0; }
+.campaign-community-name {
+  color:white; font-size:.72rem; font-weight:800;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.campaign-community-type {
+  margin-top:3px; color:#71829a; font-size:.54rem;
+  text-transform:uppercase; letter-spacing:.04em; font-weight:800;
+}
+.campaign-status {
+  flex:0 0 auto; padding:5px 8px; border-radius:999px;
+  font-size:.5rem; font-weight:800; text-transform:uppercase;
+}
+.campaign-status.active {
+  color:#6ee7b7; background:#073d32; border:1px solid rgba(16,185,129,.2);
+}
+.campaign-status.completed {
+  color:#93c5fd; background:#10294d; border:1px solid rgba(96,165,250,.15);
+}
+.campaign-status.cancelled {
+  color:#fca5a5; background:#45171c; border:1px solid rgba(239,68,68,.2);
+}
+.campaign-stats {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:7px; margin-top:11px;
+}
+.campaign-stat {
+  padding:9px; border-radius:11px; background:#0f1b31;
+  border:1px solid rgba(255,255,255,.05);
+}
+.campaign-stat-label { color:#64748b; font-size:.5rem; font-weight:700; }
+.campaign-stat-value { margin-top:3px; color:white; font-size:.68rem; font-weight:800; }
+.campaign-progress {
+  height:5px; margin-top:10px; background:#17233d;
+  border-radius:99px; overflow:hidden;
+}
+.campaign-progress > span {
+  display:block; height:100%; border-radius:inherit;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+}
+.campaign-actions { display:flex; gap:8px; margin-top:10px; }
+.campaign-open-btn,.campaign-cancel-btn {
+  flex:1; min-height:39px; border-radius:11px;
+  font-size:.58rem; font-weight:800; cursor:pointer;
+}
+.campaign-open-btn {
+  color:#cbd5e1; background:#17233d;
+  border:1px solid rgba(255,255,255,.08);
+}
+.campaign-cancel-btn {
+  color:#fecaca; background:#3a1720;
+  border:1px solid rgba(239,68,68,.18);
+}
+
+/* =========================================================
+   LOADING / CONFIRMATION POPUP
+========================================================= */
+
+.app-modal {
+  position:fixed; inset:0; z-index:9999; display:none;
+  align-items:center; justify-content:center; padding:20px;
+  background:rgba(2,6,23,.78); backdrop-filter:blur(9px);
+}
+.app-modal.show { display:flex; animation:modalFade .2s ease both; }
+@keyframes modalFade { from{opacity:0} to{opacity:1} }
+.app-modal-card {
+  width:min(100%,390px); padding:20px; text-align:center;
+  border-radius:22px; background:linear-gradient(145deg,#121e38,#0b1428);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 25px 70px rgba(0,0,0,.48);
+  animation:modalPop .25s cubic-bezier(.2,.9,.3,1.15) both;
+}
+@keyframes modalPop {
+  from{opacity:0;transform:translateY(12px) scale(.94)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.modal-icon {
+  width:62px; height:62px; margin:0 auto 13px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:19px; background:#172642; font-size:1.65rem;
+}
+.modal-icon.success { background:#073d32; }
+.modal-icon.error { background:#45171c; }
+.modal-spinner {
+  width:28px; height:28px; border:3px solid rgba(255,255,255,.16);
+  border-top-color:#67e8f9; border-radius:50%;
+  animation:spin .75s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+.app-modal h3 { font-size:.95rem; font-weight:800; }
+.app-modal p {
+  margin:7px auto 0; max-width:320px; color:var(--muted);
+  font-size:.63rem; line-height:1.55;
+}
+.modal-actions { display:flex; gap:8px; margin-top:17px; }
+.modal-actions button {
+  flex:1; min-height:45px; border-radius:13px; border:none;
+  font-family:inherit; font-size:.64rem; font-weight:800; cursor:pointer;
+}
+.modal-cancel {
+  color:#cbd5e1; background:#17233d;
+  border:1px solid rgba(255,255,255,.08)!important;
+}
+.modal-confirm {
+  color:white; background:linear-gradient(135deg,#2563eb,#06b6d4);
+}
+.modal-confirm.danger { background:linear-gradient(135deg,#dc2626,#f97316); }
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -1961,6 +2112,32 @@ header {
     </p>
 
   </section>
+  <!-- ======================================================
+       MY CAMPAIGNS
+  ======================================================= -->
+
+  <section class="my-campaigns">
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-head-icon">📊</div>
+          <div>
+            <h3>My campaigns</h3>
+            <p>Track your ads and manage active campaigns.</p>
+          </div>
+        </div>
+        <button class="refresh-campaigns" id="refreshCampaignsBtn" type="button">
+          Refresh
+        </button>
+      </div>
+
+      <div class="campaign-list" id="campaignList">
+        <div class="campaign-empty">Loading your campaigns…</div>
+      </div>
+    </div>
+  </section>
+
+
 
 
 
@@ -2582,34 +2759,11 @@ header {
 
 
       <div class="amount-summary">
-
-        <div class="summary-box">
-
-          <div class="summary-label">
-            Cost per member
-          </div>
-
-          <div class="summary-value price">
-            ₦50
-          </div>
-
+        <div class="summary-box" style="grid-column:1 / -1;">
+          <div class="summary-label">Cost per join</div>
+          <div class="summary-value price">₦50</div>
         </div>
-
-
-        <div class="summary-box">
-
-          <div class="summary-label">
-            Member reward
-          </div>
-
-          <div class="summary-value">
-            ₦25
-          </div>
-
-        </div>
-
       </div>
-
 
       <div class="live-preview">
 
@@ -2667,16 +2821,7 @@ header {
 
         <div class="info-text">
 
-          Every verified member receives
-          <strong>
-            ₦25
-          </strong>
-          from your ₦50 campaign fee.
-
-          <br>
-
-          The remaining ₦25 is retained by PAYME
-          as the platform fee.
+          You are charged <strong>₦50 per verified join</strong>.<br>PAYME handles member rewards and the platform fee automatically after each verified join.
 
         </div>
 
@@ -2890,18 +3035,17 @@ header {
 
 
         <h2>
-          Campaign Submitted!
+          Campaign Live!
         </h2>
 
 
         <p>
-          Your Telegram advertising campaign has been
-          successfully prepared.
+          Your Telegram advertising campaign is now live and available to PAYME users.
         </p>
 
 
         <div class="live-badge">
-          ● Campaign Ready
+          ● Campaign Active
         </div>
 
 
@@ -2938,17 +3082,7 @@ header {
           </div>
 
 
-          <div class="preview-row">
-
-            <span>
-              Reward per join
-            </span>
-
-            <strong>
-              ₦25
-            </strong>
-
-          </div>
+          
 
         </div>
 
@@ -2991,6 +3125,233 @@ let selectedMembers = 0;
 let telegramLink = "";
 
 let verified = false;
+
+/* =========================================================
+   POPUP HELPERS
+========================================================= */
+
+const appModal = document.getElementById("appModal");
+const modalIcon = document.getElementById("modalIcon");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalActions = document.getElementById("modalActions");
+const modalCancelBtn = document.getElementById("modalCancelBtn");
+const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+
+function closeAppModal() {
+  appModal.classList.remove("show");
+  appModal.setAttribute("aria-hidden","true");
+  modalConfirmBtn.onclick = null;
+  modalCancelBtn.onclick = null;
+}
+
+function showLoadingModal(title,message) {
+  modalIcon.className = "modal-icon";
+  modalIcon.innerHTML = '<div class="modal-spinner"></div>';
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  modalActions.style.display = "none";
+  appModal.classList.add("show");
+  appModal.setAttribute("aria-hidden","false");
+}
+
+function showMessageModal(title,message,type="success") {
+  modalIcon.className = "modal-icon " + type;
+  modalIcon.textContent = type === "success" ? "✓" : "!";
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  modalActions.style.display = "flex";
+  modalCancelBtn.style.display = "none";
+  modalConfirmBtn.textContent = "OK";
+  modalConfirmBtn.className = "modal-confirm";
+  modalConfirmBtn.onclick = closeAppModal;
+  appModal.classList.add("show");
+  appModal.setAttribute("aria-hidden","false");
+}
+
+function showConfirmModal(title,message,onConfirm) {
+  modalIcon.className = "modal-icon error";
+  modalIcon.textContent = "?";
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  modalActions.style.display = "flex";
+  modalCancelBtn.style.display = "block";
+  modalConfirmBtn.textContent = "Cancel campaign";
+  modalConfirmBtn.className = "modal-confirm danger";
+  modalCancelBtn.onclick = closeAppModal;
+  modalConfirmBtn.onclick = async function() {
+    closeAppModal();
+    await onConfirm();
+  };
+  appModal.classList.add("show");
+  appModal.setAttribute("aria-hidden","false");
+}
+
+
+/* =========================================================
+   MY CAMPAIGNS
+========================================================= */
+
+const campaignList = document.getElementById("campaignList");
+const refreshCampaignsBtn = document.getElementById("refreshCampaignsBtn");
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function renderCampaigns(campaigns) {
+  if (!campaigns.length) {
+    campaignList.innerHTML =
+      '<div class="campaign-empty">You have not created any Telegram campaigns yet.</div>';
+    return;
+  }
+
+  campaignList.innerHTML = campaigns.map(ad => {
+    const target = Number(ad.target_members || 0);
+    const completed = Number(ad.completed_members || 0);
+    const price = Number(ad.price_per_join || 50);
+    const total = Number(ad.total_cost || target * price);
+    const progress = target > 0 ? Math.min(100,(completed / target) * 100) : 0;
+    const type = ad.telegram_type === "channel" ? "Telegram Channel" : "Telegram Group";
+    const name = ad.telegram_username
+      ? "@" + String(ad.telegram_username).replace(/^@/,"")
+      : type;
+    const status = ad.status || "active";
+    const label = status === "completed" ? "Completed"
+      : status === "cancelled" ? "Cancelled" : "Active";
+    const canCancel = status === "active" && completed < target;
+
+    return `
+      <div class="campaign-card">
+        <div class="campaign-top">
+          <div class="campaign-community">
+            <div class="campaign-community-name">${escapeHtml(name)}</div>
+            <div class="campaign-community-type">${escapeHtml(type)}</div>
+          </div>
+          <span class="campaign-status ${escapeHtml(status)}">${label}</span>
+        </div>
+
+        <div class="campaign-stats">
+          <div class="campaign-stat">
+            <div class="campaign-stat-label">Joined</div>
+            <div class="campaign-stat-value">${completed} / ${target}</div>
+          </div>
+          <div class="campaign-stat">
+            <div class="campaign-stat-label">Cost / join</div>
+            <div class="campaign-stat-value">₦${price.toLocaleString("en-NG")}</div>
+          </div>
+          <div class="campaign-stat">
+            <div class="campaign-stat-label">Budget</div>
+            <div class="campaign-stat-value">₦${total.toLocaleString("en-NG")}</div>
+          </div>
+        </div>
+
+        <div class="campaign-progress">
+          <span style="width:${progress}%"></span>
+        </div>
+
+        <div class="campaign-actions">
+          <button class="campaign-open-btn" type="button"
+            onclick="openCampaign('${escapeHtml(ad.telegram_link || "")}')">
+            Open community
+          </button>
+          ${canCancel ? `
+            <button class="campaign-cancel-btn" type="button"
+              onclick="confirmCancelCampaign('${escapeHtml(ad.id)}')">
+              Cancel campaign
+            </button>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openCampaign(link) {
+  if (link) window.open(link,"_blank");
+}
+
+async function loadMyCampaigns() {
+  campaignList.innerHTML =
+    '<div class="campaign-empty">Loading your campaigns…</div>';
+
+  refreshCampaignsBtn.disabled = true;
+  refreshCampaignsBtn.textContent = "Loading…";
+
+  try {
+    const response = await fetch("/api/telegram-ads/my-campaigns");
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Unable to load campaigns.");
+    }
+
+    renderCampaigns(Array.isArray(data.campaigns) ? data.campaigns : []);
+
+  } catch (error) {
+    console.error("loadMyCampaigns:",error);
+    campaignList.innerHTML =
+      '<div class="campaign-empty">Unable to load your campaigns. Tap Refresh to try again.</div>';
+  } finally {
+    refreshCampaignsBtn.disabled = false;
+    refreshCampaignsBtn.textContent = "Refresh";
+  }
+}
+
+async function confirmCancelCampaign(adId) {
+  showConfirmModal(
+    "Cancel this campaign?",
+    "Only the unused campaign budget is eligible for a refund. PAYME will return 85% of the unused amount to your deposit balance. The remaining 15% is the cancellation fee.",
+    async function() {
+      showLoadingModal(
+        "Cancelling campaign",
+        "Please wait while PAYME stops the campaign and calculates your refund."
+      );
+
+      try {
+        const response = await fetch("/api/telegram-ads/cancel",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({adId})
+        });
+
+        const data = await response.json();
+        closeAppModal();
+
+        if (response.ok && data.success) {
+          showMessageModal(
+            "Campaign cancelled",
+            `Your campaign has been cancelled. ₦${Number(data.refund || 0).toLocaleString("en-NG")} has been returned to your deposit balance.`,
+            "success"
+          );
+          await loadMyCampaigns();
+        } else {
+          showMessageModal(
+            "Could not cancel campaign",
+            data.message || "The campaign could not be cancelled.",
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error("cancel campaign:",error);
+        closeAppModal();
+        showMessageModal(
+          "Connection problem",
+          "We could not cancel the campaign right now. Please try again.",
+          "error"
+        );
+      }
+    }
+  );
+}
+
+refreshCampaignsBtn.addEventListener("click",loadMyCampaigns);
+loadMyCampaigns();
+
 
 
 /* =========================================================
@@ -3211,48 +3572,33 @@ verifyBtn.addEventListener(
   "click",
   async function() {
 
-    if (
-      !validTelegramLink(telegramLink)
-    ) {
-
+    if (!validTelegramLink(telegramLink)) {
       showVerification(
         "Please go back and enter a valid Telegram link.",
         "error"
       );
-
       return;
-
     }
-
 
     verifyBtn.disabled = true;
 
-    verifyBtn.textContent =
-      "Checking Telegram…";
-
-
-    verificationStatus
-      .className =
-        "verification-status show";
-
-
-    verificationStatus.textContent =
-      "Checking your Telegram community. Please wait…";
-
+    showLoadingModal(
+      "Checking your Telegram community",
+      "Please wait while PAYME confirms the community, your admin access and the PAYME bot administrator status."
+    );
 
     try {
-      const response = await fetch("/api/telegram-ads/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          telegramLink: telegramLink,
-          telegramType: selectedType
+      const response = await fetch("/api/telegram-ads/verify",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          telegramLink,
+          telegramType:selectedType
         })
       });
 
       const data = await response.json();
+      closeAppModal();
 
       if (response.ok && data.success) {
         verified = true;
@@ -3262,33 +3608,48 @@ verifyBtn.addEventListener(
           "success"
         );
 
-        verifyBtn.textContent =
-          "Continue →";
+        verifyBtn.textContent = "Continue →";
+        verifyBtn.disabled = false;
+        verifyBtn.onclick = function(){ goToStep(4); };
 
-        verifyBtn.disabled =
-          false;
-
-        verifyBtn.onclick =
-          function() {
-            goToStep(4);
-          };
+        showMessageModal(
+          "Telegram community verified",
+          "Your community and the PAYME bot administrator status have been confirmed. You can now choose your campaign size.",
+          "success"
+        );
       } else {
         showVerification(
-          data.message || "Verification failed. Please ensure the bot is added as an admin.",
+          data.message || "Verification failed. Please ensure the bot is added as an administrator.",
           "error"
         );
+
         verifyBtn.textContent = "Verify Group/Channel";
         verifyBtn.disabled = false;
+
+        showMessageModal(
+          "Verification failed",
+          data.message || "Please make sure @paymeoobot is an administrator of your Telegram community and try again.",
+          "error"
+        );
       }
+
     } catch (err) {
+      console.error("Telegram verification:",err);
+      closeAppModal();
+      verifyBtn.textContent = "Verify Group/Channel";
+      verifyBtn.disabled = false;
+
       showVerification(
         "Network error. Please try again.",
         "error"
       );
-      verifyBtn.textContent = "Verify Group/Channel";
-      verifyBtn.disabled = false;
-    }
 
+      showMessageModal(
+        "Connection problem",
+        "We could not reach the server. Please check your connection and try again.",
+        "error"
+      );
+    }
   }
 );
 
@@ -3458,54 +3819,68 @@ publishBtn.addEventListener(
   "click",
   async function() {
 
-    publishBtn.disabled =
-      true;
+    if (!selectedMembers || !verified) {
+      showMessageModal(
+        "Campaign not ready",
+        "Please complete Telegram verification and select the number of members you want.",
+        "error"
+      );
+      return;
+    }
 
-    publishBtn.textContent =
-      "Publishing…";
+    publishBtn.disabled = true;
+    publishBtn.textContent = "Publishing…";
 
+    const total = selectedMembers * 50;
+
+    showLoadingModal(
+      "Publishing your campaign",
+      `Please wait while PAYME verifies your community again and creates your ₦${total.toLocaleString("en-NG")} campaign.`
+    );
 
     try {
-      const response = await fetch("/api/telegram-ads/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-body: JSON.stringify({
-  telegramLink: telegramLink,
-  telegramType: selectedType,
-  targetMembers: selectedMembers
-})
+      const response = await fetch("/api/telegram-ads/create",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          telegramLink:telegramLink,
+          telegramType:selectedType,
+          targetMembers:selectedMembers
+        })
       });
 
       const data = await response.json();
+      closeAppModal();
 
       if (response.ok && data.success) {
-        const total =
-          selectedMembers * 50;
-
-        document.getElementById(
-          "successMembers"
-        ).textContent =
-          selectedMembers;
-
-        document.getElementById(
-          "successTotal"
-        ).textContent =
-          formatNaira(total);
-
+        document.getElementById("successMembers").textContent = selectedMembers;
+        document.getElementById("successTotal").textContent = formatNaira(total);
         goToSuccess();
+        await loadMyCampaigns();
       } else {
-        alert(data.message || "Failed to publish campaign. Please check your balance or try again.");
         publishBtn.disabled = false;
         publishBtn.textContent = "Publish Campaign";
+
+        showMessageModal(
+          "Campaign not published",
+          data.message || "Failed to publish campaign. Please check your balance and try again.",
+          "error"
+        );
       }
+
     } catch (err) {
-      alert("Network error. Please check your connection and try again.");
+      console.error("Publish campaign:",err);
+      closeAppModal();
+
       publishBtn.disabled = false;
       publishBtn.textContent = "Publish Campaign";
-    }
 
+      showMessageModal(
+        "Connection problem",
+        "We could not reach the server. Please check your connection and try again.",
+        "error"
+      );
+    }
   }
 );
 
@@ -3634,5 +4009,21 @@ document
 
 </script>
 
+
+<div class="app-modal" id="appModal" aria-hidden="true">
+  <div class="app-modal-card">
+    <div class="modal-icon" id="modalIcon">
+      <div class="modal-spinner"></div>
+    </div>
+    <h3 id="modalTitle">Please wait</h3>
+    <p id="modalMessage">Processing your request…</p>
+    <div class="modal-actions" id="modalActions" style="display:none;">
+      <button class="modal-cancel" id="modalCancelBtn" type="button">Cancel</button>
+      <button class="modal-confirm" id="modalConfirmBtn" type="button">Continue</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
+
