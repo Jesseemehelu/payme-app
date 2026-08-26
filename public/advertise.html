@@ -3110,6 +3110,20 @@ header {
 
 
 
+<div class="app-modal" id="appModal" aria-hidden="true">
+  <div class="app-modal-card">
+    <div class="modal-icon" id="modalIcon">
+      <div class="modal-spinner"></div>
+    </div>
+    <h3 id="modalTitle">Please wait</h3>
+    <p id="modalMessage">Processing your request…</p>
+    <div class="modal-actions" id="modalActions" style="display:none;">
+      <button class="modal-cancel" id="modalCancelBtn" type="button">Cancel</button>
+      <button class="modal-confirm" id="modalConfirmBtn" type="button">Continue</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
 /* =========================================================
@@ -4009,20 +4023,6 @@ document
 
 </script>
 
-
-<div class="app-modal" id="appModal" aria-hidden="true">
-  <div class="app-modal-card">
-    <div class="modal-icon" id="modalIcon">
-      <div class="modal-spinner"></div>
-    </div>
-    <h3 id="modalTitle">Please wait</h3>
-    <p id="modalMessage">Processing your request…</p>
-    <div class="modal-actions" id="modalActions" style="display:none;">
-      <button class="modal-cancel" id="modalCancelBtn" type="button">Cancel</button>
-      <button class="modal-confirm" id="modalConfirmBtn" type="button">Continue</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
