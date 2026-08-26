@@ -2559,292 +2559,312 @@ app.get(
 
 
 // ======================================================
-// GET LOGGED-IN USER'S TELEGRAM AD CAMPAIGNS
-// ======================================================
-
-app.get(
-  '/api/telegram-ads/my-campaigns',
-  requireLogin,
-  async (
-    req,
-    res
-  ) => {
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabase
-          .from('telegram_ads')
-          .select(`
-            id,
-            telegram_type,
-            telegram_link,
-            telegram_username,
-            target_members,
-            completed_members,
-            price_per_join,
-            total_cost,
-            status,
-            created_at,
-            updated_at
-          `)
-          .eq(
-            'advertiser_id',
-            String(req.user.id)
-          )
-          .order(
-            'created_at',
-            {
-              ascending: false
-            }
-          );
-
-
-      if (error) {
-        throw error;
-      }
-
-
-      return res.json({
-
-        success: true,
-
-        campaigns:
-          data || []
-
-      });
-
-
-    } catch (error) {
-
-      console.error(
-        'GET /api/telegram-ads/my-campaigns error:',
-        error
-      );
-
-
-      return res.status(500).json({
-
-        success: false,
-
-        message:
-          'Unable to load your Telegram campaigns.'
-
-      });
-
-    }
-
-  }
-);
-
-
-// ======================================================
-// CANCEL TELEGRAM AD CAMPAIGN
+// CLAIM TELEGRAM AD REWARD
 // ======================================================
 
 app.post(
-  '/api/telegram-ads/cancel',
+  '/api/telegram-ads/claim',
   requireLogin,
-  async (
-    req,
-    res
-  ) => {
+  async (req, res) => {
 
     try {
 
       const {
         adId
-      } =
-        req.body || {};
-
+      } = req.body || {};
 
       if (!adId) {
-
         return res.status(400).json({
-
           success: false,
-
-          message:
-            'Advertisement ID is required.'
-
+          message: 'Advertisement ID is required.'
         });
-
       }
 
+      const user = req.user;
 
-      if (!req.user) {
-
+      if (!user) {
         return res.status(401).json({
-
           success: false,
-
-          message:
-            'Please log in again.'
-
+          message: 'Please log in again.'
         });
-
       }
 
+      if (!user.telegramId) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Your Telegram account could not be found. Please open PAYME through Telegram.'
+        });
+      }
+
+      if (!TELEGRAM_BOT_TOKEN) {
+        return res.status(500).json({
+          success: false,
+          message:
+            'Telegram bot is not configured on the server.'
+        });
+      }
+
+      // --------------------------------------------------
+      // GET ACTIVE AD
+      // --------------------------------------------------
 
       const {
-        data,
-        error
-      } =
-        await supabase.rpc(
-          'cancel_telegram_ad_campaign',
-          {
-            p_ad_id:
-              adId,
+        data: ad,
+        error: adError
+      } = await supabase
+        .from('telegram_ads')
+        .select(`
+          id,
+          advertiser_id,
+          telegram_type,
+          telegram_link,
+          telegram_chat_id,
+          telegram_username,
+          target_members,
+          completed_members,
+          member_reward,
+          status
+        `)
+        .eq('id', adId)
+        .maybeSingle();
 
-            p_advertiser_id:
-              String(
-                req.user.id
-              )
+      if (adError) {
+        throw adError;
+      }
+
+      if (!ad) {
+        return res.status(404).json({
+          success: false,
+          message: 'Advertisement not found.'
+        });
+      }
+
+      if (ad.status !== 'active') {
+        return res.status(400).json({
+          success: false,
+          message:
+            'This advertisement is no longer active.'
+        });
+      }
+
+      if (
+        Number(ad.completed_members || 0) >=
+        Number(ad.target_members || 0)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'This advertisement has already reached its target.'
+        });
+      }
+
+      if (!ad.telegram_chat_id) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'This advertisement cannot be verified because its Telegram chat ID is missing.'
+        });
+      }
+
+      // --------------------------------------------------
+      // VERIFY MEMBERSHIP WITH TELEGRAM
+      // --------------------------------------------------
+
+      let member;
+
+      try {
+
+        member = await telegramApi(
+          'getChatMember',
+          {
+            chat_id:
+              ad.telegram_chat_id,
+
+            user_id:
+              Number(user.telegramId)
           }
         );
 
-
-      if (error) {
+      } catch (telegramError) {
 
         console.error(
-          'Telegram ad cancellation RPC error:',
-          error
+          'Telegram getChatMember error:',
+          telegramError.telegramResponse ||
+          telegramError
         );
 
+        const telegramDescription =
+          telegramError.telegramResponse?.description ||
+          telegramError.message ||
+          '';
 
-        const message =
-          String(
-            error.message ||
-            ''
-          );
-
-
-        if (
-          message
-            .toLowerCase()
-            .includes(
-              'not allowed'
-            )
-        ) {
-
-          return res.status(403).json({
-
-            success: false,
-
-            message:
-              'You are not allowed to cancel this campaign.'
-
-          });
-
-        }
-
-
-        if (
-          message
-            .toLowerCase()
-            .includes(
-              'no longer active'
-            )
-        ) {
-
-          return res.status(400).json({
-
-            success: false,
-
-            message:
-              'This campaign is no longer active and cannot be cancelled.'
-
-          });
-
-        }
-
-
-        if (
-          message
-            .toLowerCase()
-            .includes(
-              'not found'
-            )
-        ) {
-
-          return res.status(404).json({
-
-            success: false,
-
-            message:
-              'Advertisement not found.'
-
-          });
-
-        }
-
-
-        return res.status(500).json({
-
+        return res.status(400).json({
           success: false,
-
+          joined: false,
           message:
-            'Unable to cancel the campaign right now.'
-
+            'We could not verify your Telegram membership right now. Please make sure you joined the group/channel and try again.',
+          telegramError:
+            process.env.NODE_ENV === 'production'
+              ? undefined
+              : telegramDescription
         });
 
       }
 
+      const memberStatus =
+        member?.status;
+
+      const isMember =
+        [
+          'creator',
+          'administrator',
+          'member'
+        ].includes(memberStatus)
+        ||
+        (
+          memberStatus === 'restricted' &&
+          member?.is_member === true
+        );
+
+      if (!isMember) {
+
+        return res.status(400).json({
+          success: false,
+          joined: false,
+          message:
+            'You have not joined this Telegram group/channel yet. Please join it first, then tap Earn again.'
+        });
+
+      }
+
+      // --------------------------------------------------
+      // ATOMIC REWARD PAYMENT
+      // --------------------------------------------------
+
+      const {
+        data: result,
+        error: claimError
+      } = await supabase.rpc(
+        'claim_telegram_ad_reward',
+        {
+          p_ad_id:
+            ad.id,
+
+          p_user_id:
+            String(user.id),
+
+          p_telegram_user_id:
+            Number(user.telegramId)
+        }
+      );
+
+      if (claimError) {
+
+        console.error(
+          'claim_telegram_ad_reward RPC error:',
+          claimError
+        );
+
+        const message =
+          String(
+            claimError.message ||
+            ''
+          );
+
+        if (
+          message
+            .toLowerCase()
+            .includes('already earned')
+        ) {
+          return res.status(400).json({
+            success: false,
+            alreadyClaimed: true,
+            message:
+              'You have already earned from this advertisement.'
+          });
+        }
+
+        if (
+          message
+            .toLowerCase()
+            .includes('already been processed')
+        ) {
+          return res.status(400).json({
+            success: false,
+            alreadyClaimed: true,
+            message:
+              'Your reward has already been processed.'
+          });
+        }
+
+        if (
+          message
+            .toLowerCase()
+            .includes('target')
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              'This advertisement has already reached its target.'
+          });
+        }
+
+        if (
+          message
+            .toLowerCase()
+            .includes('transaction_type')
+          ||
+          message
+            .toLowerCase()
+            .includes('check constraint')
+        ) {
+          return res.status(500).json({
+            success: false,
+            message:
+              'Membership was verified, but the reward transaction could not be recorded. Please contact PAYME support.'
+          });
+        }
+
+        return res.status(500).json({
+          success: false,
+          message:
+            'Your membership was verified, but we could not process the reward. Please try again.'
+        });
+
+      }
+
+      const reward =
+        Number(
+          result?.reward ||
+          ad.member_reward ||
+          25
+        );
 
       return res.json({
-
         success: true,
-
-        adId:
-          data?.ad_id,
-
-        completedMembers:
+        joined: true,
+        reward,
+        completed_members:
           Number(
-            data?.completed_members || 0
+            result?.completed_members ||
+            Number(ad.completed_members || 0) + 1
           ),
-
-        unusedMembers:
-          Number(
-            data?.unused_members || 0
-          ),
-
-        unusedAmount:
-          Number(
-            data?.unused_amount || 0
-          ),
-
-        refund:
-          Number(
-            data?.refund || 0
-          ),
-
-        status:
-          'cancelled',
-
         message:
-          'Campaign cancelled and eligible refund returned to your deposit balance.'
-
+          `You joined successfully. ₦${reward.toLocaleString('en-NG')} has been added to your balance.`
       });
-
 
     } catch (error) {
 
       console.error(
-        'POST /api/telegram-ads/cancel error:',
+        'POST /api/telegram-ads/claim error:',
         error
       );
 
-
       return res.status(500).json({
-
         success: false,
-
         message:
-          'Unable to cancel the campaign right now.'
-
+          'Unable to verify your Telegram membership right now.'
       });
 
     }
