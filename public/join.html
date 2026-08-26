@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+  <meta name="theme-color" content="#07111f">
+  <title>Join Groups & Earn • PAYME</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050b14;
+      color: #f8fafc;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    button, a {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .bg-orb {
+      position: fixed;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .18;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb-blue {
+      background: #2563eb;
+      top: -100px;
+      left: -90px;
+    }
+
+    .orb-purple {
+      background: #7c3aed;
+      right: -120px;
+      top: 35%;
+    }
+
+    .orb-cyan {
+      background: #06b6d4;
+      left: 20%;
+      bottom: -150px;
+    }
+
+    header {
+      position: relative;
+      z-index: 5;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(5,11,20,.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-container {
+      max-width: 900px;
+      margin: 0 auto;
+      min-height: 64px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      font-size: 1.05rem;
+    }
+
+    .brand-logo span {
+      color: #60a5fa;
+    }
+
+    .support-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #cbd5e1;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 18px 16px 60px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: .82rem;
+      margin: 4px 0 24px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #6ee7b7;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 0 5px rgba(52,211,153,.08);
+    }
+
+    h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(2rem, 8vw, 3.4rem);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 620px;
+      color: #94a3b8;
+      line-height: 1.55;
+      font-size: .9rem;
+    }
+
+    .earn-banner {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 14px;
+      margin: 20px 0 22px;
+      border-radius: 17px;
+      border: 1px solid rgba(52,211,153,.16);
+      background: linear-gradient(
+        135deg,
+        rgba(16,185,129,.10),
+        rgba(59,130,246,.06)
+      );
+    }
+
+    .earn-icon {
+      width: 43px;
+      height: 43px;
+      flex: 0 0 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: rgba(52,211,153,.12);
+      font-size: 1.25rem;
+    }
+
+    .earn-banner strong {
+      display: block;
+      font-size: .88rem;
+      margin-bottom: 3px;
+    }
+
+    .earn-banner span {
+      color: #94a3b8;
+      font-size: .73rem;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: .78rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      font-weight: 800;
+    }
+
+    .ads-list {
+      display: grid;
+      gap: 11px;
+    }
+
+    .ad-card {
+      width: 100%;
+      text-align: left;
+      color: inherit;
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 20px;
+      padding: 16px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(17,30,48,.96),
+          rgba(8,17,29,.96)
+        );
+      box-shadow: 0 14px 45px rgba(0,0,0,.18);
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    .ad-card:active {
+      transform: scale(.985);
+    }
+
+    .ad-card:hover {
+      border-color: rgba(96,165,250,.24);
+    }
+
+    .ad-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .community-icon {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(
+        135deg,
+        rgba(59,130,246,.18),
+        rgba(124,58,237,.18)
+      );
+      font-size: 1.35rem;
+    }
+
+    .ad-title-wrap {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .ad-title {
+      margin: 0 0 4px;
+      font-size: .98rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ad-type {
+      color: #64748b;
+      font-size: .7rem;
+      text-transform: capitalize;
+    }
+
+    .reward-pill {
+      white-space: nowrap;
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: #6ee7b7;
+      background: rgba(52,211,153,.09);
+      border: 1px solid rgba(52,211,153,.12);
+      font-size: .65rem;
+      font-weight: 900;
+    }
+
+    .ad-progress {
+      margin-top: 14px;
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #64748b;
+      font-size: .66rem;
+      margin-bottom: 7px;
+    }
+
+    .progress-track {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #34d399, #60a5fa);
+    }
+
+    .ad-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .ad-footer span {
+      color: #64748b;
+      font-size: .67rem;
+    }
+
+    .view-btn {
+      color: #bfdbfe;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+
+    .state {
+      padding: 28px 16px;
+      text-align: center;
+      color: #64748b;
+      border: 1px dashed rgba(255,255,255,.08);
+      border-radius: 18px;
+      font-size: .8rem;
+    }
+
+    .spinner {
+      width: 25px;
+      height: 25px;
+      margin: 0 auto 11px;
+      border: 3px solid rgba(255,255,255,.08);
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* MODAL */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0,0,0,.66);
+      backdrop-filter: blur(7px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(100%, 560px);
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,.08);
+      border-bottom: 0;
+      border-radius: 25px 25px 0 0;
+      background: #0a1422;
+      padding: 20px 17px 24px;
+      box-shadow: 0 -25px 80px rgba(0,0,0,.45);
+      animation: slideUp .2s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(25px);
+        opacity: .6;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-handle {
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: #334155;
+      margin: 0 auto 19px;
+    }
+
+    .modal-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .modal-title {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .modal-title h2 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+    }
+
+    .modal-title p {
+      margin: 0;
+      color: #64748b;
+      font-size: .72rem;
+    }
+
+    .close-btn {
+      width: 35px;
+      height: 35px;
+      border: 0;
+      border-radius: 11px;
+      background: rgba(255,255,255,.06);
+      color: #94a3b8;
+      font-size: 1.25rem;
+    }
+
+    .detail-box {
+      margin: 18px 0;
+      padding: 15px;
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.025);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 8px 0;
+      font-size: .75rem;
+    }
+
+    .detail-row + .detail-row {
+      border-top: 1px solid rgba(255,255,255,.045);
+    }
+
+    .detail-row span:first-child {
+      color: #64748b;
+    }
+
+    .detail-row strong {
+      text-align: right;
+      color: #e2e8f0;
+    }
+
+    .steps {
+      margin: 18px 0;
+      display: grid;
+      gap: 9px;
+    }
+
+    .step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: #94a3b8;
+      font-size: .73rem;
+      line-height: 1.45;
+    }
+
+    .step-number {
+      width: 23px;
+      height: 23px;
+      flex: 0 0 23px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #bfdbfe;
+      background: rgba(59,130,246,.12);
+      font-size: .65rem;
+      font-weight: 900;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 9px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      width: 100%;
+      min-height: 50px;
+      border-radius: 15px;
+      font-weight: 900;
+      font-size: .84rem;
+      border: 1px solid transparent;
+    }
+
+    .primary-btn {
+      color: #03130d;
+      background: linear-gradient(135deg, #6ee7b7, #34d399);
+      box-shadow: 0 10px 30px rgba(52,211,153,.14);
+    }
+
+    .primary-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .secondary-btn {
+      color: #cbd5e1;
+      border-color: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+    }
+
+    .verification-note {
+      display: none;
+      margin-top: 11px;
+      padding: 11px 12px;
+      border-radius: 13px;
+      font-size: .7rem;
+      line-height: 1.45;
+    }
+
+    .verification-note.show {
+      display: block;
+    }
+
+    .verification-note.success {
+      color: #86efac;
+      background: rgba(34,197,94,.08);
+      border: 1px solid rgba(34,197,94,.13);
+    }
+
+    .verification-note.error {
+      color: #fca5a5;
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.13);
+    }
+
+    .verification-note.info {
+      color: #93c5fd;
+      background: rgba(59,130,246,.08);
+      border: 1px solid rgba(59,130,246,.13);
+    }
+
+    @media (min-width: 650px) {
+      main {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      .ads-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .modal-backdrop {
+        align-items: center;
+      }
+
+      .modal {
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        border-radius: 25px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-orb orb-blue"></div>
+  <div class="bg-orb orb-purple"></div>
+  <div class="bg-orb orb-cyan"></div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/dashboard.html" class="brand-logo">
+        PAYME<span>.</span>
+      </a>
+
+      <a
+        href="https://wa.me/+2348034399095"
+        target="_blank"
+        rel="noopener"
+        class="support-btn"
+        aria-label="Contact support"
+      >
+        ?
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <a href="/earn.html" class="back-link">
+      <span>←</span>
+      <span>Back to Earn</span>
+    </a>
+
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Telegram Rewards
+      </div>
+
+      <h1>Join & earn.</h1>
+
+      <p>
+        Join promoted Telegram groups and channels, then verify your
+        membership to receive your reward.
+      </p>
+    </section>
+
+    <div class="earn-banner">
+      <div class="earn-icon">₦</div>
+      <div>
+        <strong>Earn ₦25 per verified join</strong>
+        <span>
+          Your reward is added only after PAYME confirms that you joined
+          the advertised Telegram community.
+        </span>
+      </div>
+    </div>
+
+    <h2 class="section-title">Available Telegram tasks</h2>
+
+    <section id="adsList" class="ads-list" aria-live="polite">
+      <div class="state">
+        <div class="spinner"></div>
+        Loading available tasks...
+      </div>
+    </section>
+  </main>
+
+  <!-- TASK DETAILS MODAL -->
+  <div
+    class="modal-backdrop"
+    id="taskModal"
+    aria-hidden="true"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <div class="modal-handle"></div>
+
+      <div class="modal-header">
+        <div class="community-icon" id="modalIcon">👥</div>
+
+        <div class="modal-title">
+          <h2 id="modalTitle">Telegram community</h2>
+          <p id="modalType">Telegram group</p>
+        </div>
+
+        <button
+          class="close-btn"
+          id="closeModal"
+          type="button"
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="detail-box">
+        <div class="detail-row">
+          <span>Reward</span>
+          <strong id="modalReward">₦25</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Members needed</span>
+          <strong id="modalProgress">0 / 0</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Community</span>
+          <strong id="modalUsername">Telegram</strong>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <span>Tap <strong>Join Now</strong> and join the Telegram group or channel.</span>
+        </div>
+
+        <div class="step">
+          <span class="step-number">2</span>
+          <span>Return to PAYME after you have joined.</span>
+        </div>
+
+        <div class="step">
+          <span class="step-number">3</span>
+          <span>Tap <strong>Earn ₦25</strong>. PAYME will verify your Telegram membership.</span>
+        </div>
+      </div>
+
+      <div class="action-stack">
+        <button
+          id="joinNowBtn"
+          class="primary-btn"
+          type="button"
+        >
+          Join Now
+        </button>
+
+        <button
+          id="earnBtn"
+          class="secondary-btn"
+          type="button"
+          style="display:none;"
+        >
+          Earn ₦25
+        </button>
+      </div>
+
+      <div
+        id="verificationNote"
+        class="verification-note"
+        role="status"
+        aria-live="polite"
+      ></div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      ==========================================================
+      PAYME — JOIN GROUPS & EARN
+
+      This page uses the existing server endpoint:
+
+        GET /api/telegram-ads
+
+      The "Earn ₦25" button expects this server endpoint:
+
+        POST /api/telegram-ads/claim
+
+      Body:
+        { "adId": "<telegram_ads.id>" }
+
+      The claim endpoint must verify the logged-in user's Telegram
+      membership with Telegram's getChatMember API before paying.
+
+      It should return JSON such as:
+
+        {
+          "success": true,
+          "reward": 25,
+          "message": "₦25 has been added to your balance."
+        }
+
+      or:
+
+        {
+          "success": false,
+          "message": "You have not joined this Telegram community yet."
+        }
+
+      The current server.js supplied with the project already has
+      GET /api/telegram-ads, but it does not yet contain the
+      /api/telegram-ads/claim route. Therefore the page is ready
+      for that route, but the actual payment verification will
+      remain unavailable until that server route is added.
+      ==========================================================
+    */
+
+    const adsList = document.getElementById('adsList');
+
+    const taskModal = document.getElementById('taskModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalType = document.getElementById('modalType');
+    const modalReward = document.getElementById('modalReward');
+    const modalProgress = document.getElementById('modalProgress');
+    const modalUsername = document.getElementById('modalUsername');
+
+    const joinNowBtn = document.getElementById('joinNowBtn');
+    const earnBtn = document.getElementById('earnBtn');
+    const verificationNote =
+      document.getElementById('verificationNote');
+
+    let ads = [];
+    let selectedAd = null;
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function naira(value) {
+      return '₦' + Number(value || 0).toLocaleString('en-NG');
+    }
+
+    function typeLabel(type) {
+      return type === 'channel'
+        ? 'Telegram channel'
+        : 'Telegram group';
+    }
+
+    function communityIcon(type) {
+      return type === 'channel' ? '📢' : '👥';
+    }
+
+    function showState(message, loading = false) {
+      adsList.innerHTML = `
+        <div class="state">
+          ${loading ? '<div class="spinner"></div>' : ''}
+          ${escapeHtml(message)}
+        </div>
+      `;
+    }
+
+    function renderAds() {
+      if (!ads.length) {
+        showState(
+          'There are no Telegram join tasks available right now.'
+        );
+        return;
+      }
+
+      adsList.innerHTML = ads.map((ad, index) => {
+        const target = Number(ad.target_members || 0);
+        const completed = Number(ad.completed_members || 0);
+        const reward = Number(ad.member_reward || 25);
+
+        const percentage = target > 0
+          ? Math.min(100, Math.round((completed / target) * 100))
+          : 0;
+
+        const title =
+          ad.telegram_username ||
+          (ad.telegram_type === 'channel'
+            ? 'Telegram Channel'
+            : 'Telegram Group');
+
+        return `
+          <button
+            type="button"
+            class="ad-card"
+            data-index="${index}"
+          >
+            <div class="ad-top">
+              <div class="community-icon">
+                ${communityIcon(ad.telegram_type)}
+              </div>
+
+              <div class="ad-title-wrap">
+                <h3 class="ad-title">
+                  ${escapeHtml(title)}
+                </h3>
+
+                <div class="ad-type">
+                  ${escapeHtml(typeLabel(ad.telegram_type))}
+                </div>
+              </div>
+
+              <div class="reward-pill">
+                ${escapeHtml(naira(reward))}
+              </div>
+            </div>
+
+            <div class="ad-progress">
+              <div class="progress-head">
+                <span>Members completed</span>
+                <span>${completed} / ${target}</span>
+              </div>
+
+              <div class="progress-track">
+                <div
+                  class="progress-fill"
+                  style="width:${percentage}%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="ad-footer">
+              <span>
+                Earn ${escapeHtml(naira(reward))} after verification
+              </span>
+
+              <span class="view-btn">
+                View task →
+              </span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.ad-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const index = Number(card.dataset.index);
+          openTask(ads[index]);
+        });
+      });
+    }
+
+    function setNote(message, type) {
+      verificationNote.textContent = message;
+      verificationNote.className =
+        'verification-note show ' + type;
+    }
+
+    function clearNote() {
+      verificationNote.textContent = '';
+      verificationNote.className = 'verification-note';
+    }
+
+    function openTask(ad) {
+      selectedAd = ad;
+      clearNote();
+
+      const reward = Number(ad.member_reward || 25);
+      const target = Number(ad.target_members || 0);
+      const completed = Number(ad.completed_members || 0);
+
+      modalIcon.textContent =
+        communityIcon(ad.telegram_type);
+
+      modalTitle.textContent =
+        ad.telegram_username ||
+        (ad.telegram_type === 'channel'
+          ? 'Telegram Channel'
+          : 'Telegram Group');
+
+      modalType.textContent =
+        typeLabel(ad.telegram_type);
+
+      modalReward.textContent =
+        naira(reward);
+
+      modalProgress.textContent =
+        `${completed} / ${target}`;
+
+      modalUsername.textContent =
+        ad.telegram_username || 'Telegram community';
+
+      joinNowBtn.style.display = '';
+      joinNowBtn.disabled = false;
+      joinNowBtn.textContent = 'Join Now';
+
+      earnBtn.style.display = 'none';
+      earnBtn.disabled = false;
+      earnBtn.textContent = `Earn ${naira(reward)}`;
+
+      taskModal.classList.add('open');
+      taskModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTask() {
+      taskModal.classList.remove('open');
+      taskModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      selectedAd = null;
+      clearNote();
+    }
+
+    closeModalBtn.addEventListener('click', closeTask);
+
+    taskModal.addEventListener('click', event => {
+      if (event.target === taskModal) {
+        closeTask();
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' &&
+          taskModal.classList.contains('open')) {
+        closeTask();
+      }
+    });
+
+    joinNowBtn.addEventListener('click', () => {
+      if (!selectedAd || !selectedAd.telegram_link) {
+        setNote(
+          'This Telegram advertisement does not have a valid link.',
+          'error'
+        );
+        return;
+      }
+
+      /*
+        Open Telegram first. We intentionally do not mark the user
+        as joined here because the server must verify membership.
+      */
+      window.open(
+        selectedAd.telegram_link,
+        '_blank',
+        'noopener'
+      );
+
+      joinNowBtn.textContent = 'Joined? Check & Earn ↓';
+      earnBtn.style.display = '';
+      setNote(
+        'After joining the Telegram community, return here and tap Earn ₦25.',
+        'info'
+      );
+    });
+
+    earnBtn.addEventListener('click', async () => {
+      if (!selectedAd) return;
+
+      earnBtn.disabled = true;
+      joinNowBtn.disabled = true;
+
+      setNote(
+        'Checking your Telegram membership…',
+        'info'
+      );
+
+      try {
+        const response = await fetch(
+          '/api/telegram-ads/claim',
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              adId: selectedAd.id
+            })
+          }
+        );
+
+        const data = await response.json()
+          .catch(() => ({}));
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message ||
+            'We could not verify your Telegram membership.'
+          );
+        }
+
+        const reward =
+          Number(data.reward || selectedAd.member_reward || 25);
+
+        setNote(
+          data.message ||
+          `${naira(reward)} has been added to your balance.`,
+          'success'
+        );
+
+        earnBtn.textContent =
+          `✓ Earned ${naira(reward)}`;
+
+        /*
+          Remove the completed ad from the visible list after
+          a successful claim. This prevents the user from trying
+          to claim it again from this page.
+        */
+        ads = ads.filter(
+          ad => String(ad.id) !== String(selectedAd.id)
+        );
+
+        setTimeout(() => {
+          closeTask();
+          renderAds();
+        }, 1300);
+
+      } catch (error) {
+        setNote(
+          error.message ||
+          'You have not joined this Telegram community yet.',
+          'error'
+        );
+
+        earnBtn.disabled = false;
+        joinNowBtn.disabled = false;
+      }
+    });
+
+    async function loadAds() {
+      showState(
+        'Loading available tasks...',
+        true
+      );
+
+      try {
+        const response = await fetch(
+          '/api/telegram-ads',
+          {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json'
+            }
+          }
+        );
+
+        const data = await response.json()
+          .catch(() => ({}));
+
+        if (response.status === 401) {
+          showState(
+            'Please log in to PAYME before completing Telegram tasks.'
+          );
+          return;
+        }
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message ||
+            'Unable to load Telegram tasks.'
+          );
+        }
+
+        ads = Array.isArray(data.ads)
+          ? data.ads
+          : [];
+
+        renderAds();
+
+      } catch (error) {
+        console.error(
+          'Join & Earn load error:',
+          error
+        );
+
+        showState(
+          error.message ||
+          'Unable to load Telegram tasks right now.'
+        );
+      }
+    }
+
+    /*
+      If PAYME is opened inside Telegram WebApp, expand it for a
+      better mobile experience. This does not replace the server
+      session authentication.
+    */
+    try {
+      if (
+        window.Telegram &&
+        window.Telegram.WebApp
+      ) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+      }
+    } catch (error) {
+      console.warn(
+        'Telegram WebApp setup skipped:',
+        error
+      );
+    }
+
+    loadAds();
+  </script>
+</body>
+</html>
+
