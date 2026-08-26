@@ -3471,11 +3471,11 @@ publishBtn.addEventListener(
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          telegramLink: telegramLink,
-          telegramType: selectedType,
-          memberCount: selectedMembers
-        })
+body: JSON.stringify({
+  telegramLink: telegramLink,
+  telegramType: selectedType,
+  targetMembers: selectedMembers
+})
       });
 
       const data = await response.json();
