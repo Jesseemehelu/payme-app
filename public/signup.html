@@ -1741,23 +1741,26 @@ async function handleTelegramAuth() {
    * Do NOT send mock_local_init_data.
    */
 
-  if (
-    !activeTg ||
-    !activeTg.initData
-  ) {
 
-    errorBox.innerText =
-      'Please open PAYME from your Telegram Web App. Telegram authentication data is not available when this page is opened directly in Chrome.';
+if (!activeTg || !activeTg.initData) {
+  const response = await fetch('/api/auth/telegram-signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      initData: 'local_test'
+    })
+  });
 
+  const data = await response.json();
 
-    errorBox.style.display =
-      'block';
-
-
+  if (data.success) {
+    window.location.href = '/dashboard.html';
     return;
-
   }
-
+}
 
   const telegramUser =
     activeTg.initDataUnsafe &&

@@ -1,442 +1,1927 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PAYME — Earn</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-dark: #0B1020;
-      --bg-light: #F8FAFC;
-      --accent-blue: #2563EB;
-      --accent-blue-hover: #1D4ED8;
-      --accent-cyan: #06B6D4;
-      --accent-purple: #8B5CF6;
-      --text-main: #0F172A;
-      --text-muted: #64748B;
-      --border-color: #E2E8F0;
-      --card-bg: #FFFFFF;
-      --radius-sm: 12px;
-      --radius-md: 20px;
-      --radius-lg: 24px;
-      --shadow-soft: 0 10px 30px -5px rgba(11, 16, 32, 0.03);
-      --shadow-hover: 0 20px 35px -10px rgba(37, 99, 235, 0.12);
-    }
+<meta charset="UTF-8">
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-light);
-      color: var(--text-main);
-      line-height: 1.5;
-      padding-bottom: 40px;
-    }
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+>
 
-    /* TOP HEADER */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border-color);
-    }
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .brand-logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--bg-dark);
-      text-decoration: none;
-      letter-spacing: -0.03em;
-    }
-    .brand-logo span { color: var(--accent-blue); }
+<title>PAYME — Earn</title>
 
-    .desktop-nav { display: none; }
-    .header-actions { display: flex; align-items: center; gap: 12px; }
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--text-main);
-      text-decoration: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    }
-    .icon-btn:hover { background: #F1F5F9; border-color: #CBD5E1; transform: translateY(-1px); }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    /* PAGE LAYOUT */
-    .earn-container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px 20px 32px;
-      animation: fadeIn 0.4s ease-out;
-    }
+<link
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet"
+>
 
-    /* BACK BUTTON */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-weight: 700;
-      font-size: 0.88rem;
-      margin-bottom: 20px;
-      transition: color 0.2s ease;
-    }
-    .back-link:hover {
-      color: var(--accent-blue);
-    }
+<style>
 
-    .earn-header-section {
-      margin-bottom: 32px;
-    }
-    .earn-title {
-      font-size: 2.25rem;
-      font-weight: 800;
-      color: var(--bg-dark);
-      letter-spacing: -0.03em;
-      margin-bottom: 6px;
-    }
-    .earn-sub {
-      font-size: 0.98rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
+/* =========================================================
+   ROOT
+========================================================= */
 
-    /* EARN GRID */
-    .earn-cards-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
+:root {
 
-    /* EARN CARD */
-    .earn-card-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      box-shadow: var(--shadow-soft);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-      color: inherit;
-    }
+  --bg: #050816;
+  --bg2: #091126;
 
-    /* Active cards styling */
-    .earn-card-item.active-option {
-      border-color: #E2E8F0;
-      background: #FFFFFF;
-      cursor: pointer;
-    }
-    .earn-card-item.active-option:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-hover);
-      border-color: #BFDBFE;
-    }
-    .earn-card-item.active-option:active {
-      transform: scale(0.99);
-    }
+  --card: #101a32;
+  --card2: #14203b;
 
-    /* Featured/Highlight Card (Lucky3) */
-    .earn-card-item.featured-option {
-      background: linear-gradient(135deg, #FFFFFF 0%, #F3E8FF 100%);
-      border: 1px solid #DDD6FE;
-    }
-    .earn-card-item.featured-option:hover {
-      border-color: var(--accent-purple);
-      box-shadow: 0 20px 35px -10px rgba(139, 92, 246, 0.2);
-    }
+  --blue: #3b82f6;
+  --cyan: #06d6e8;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --orange: #f97316;
 
-    /* Disabled cards styling */
-    .earn-card-item.disabled-option {
-      opacity: 0.65;
-      cursor: not-allowed;
-      background: #FAFAFC;
-    }
+  --white: #ffffff;
+  --text: #f8fafc;
+  --muted: #94a3b8;
 
-    .card-top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
+  --border: rgba(255,255,255,.08);
 
-    .icon-wrapper {
-      width: 52px;
-      height: 52px;
-      border-radius: var(--radius-md);
-      background: #F1F5F9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      border: 1px solid var(--border-color);
-    }
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 
-    .featured-icon {
-      background: #F3E8FF;
-      border-color: #E9D5FF;
-    }
 
-    .status-badge {
-      font-size: 0.72rem;
-      font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 99px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .badge-available {
-      background: #EFF6FF;
-      color: var(--accent-blue);
-      border: 1px solid #DBEAFE;
-    }
-    .badge-featured {
-      background: #F3E8FF;
-      color: var(--accent-purple);
-      border: 1px solid #E9D5FF;
-    }
-    .badge-coming {
-      background: #F1F5F9;
-      color: var(--text-muted);
-      border: 1px solid var(--border-color);
-    }
+/* =========================================================
+   RESET
+========================================================= */
 
-    .card-body h3 {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--bg-dark);
-      margin-bottom: 6px;
-      letter-spacing: -0.01em;
-    }
-    .card-body p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 
-    .card-action-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: var(--accent-blue);
-    }
+  -webkit-tap-highlight-color: transparent;
 
-    .featured-action {
-      color: var(--accent-purple);
-    }
+  user-select: none;
+  -webkit-user-select: none;
 
-    .arrow-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #EFF6FF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-blue);
-      transition: all 0.2s ease;
-    }
-    .featured-arrow {
-      background: #F3E8FF;
-      color: var(--accent-purple);
-    }
+  touch-action: manipulation;
+}
 
-    .earn-card-item.active-option:hover .arrow-btn {
-      transform: translateX(4px);
-      background: var(--accent-blue);
-      color: #FFFFFF;
-    }
 
-    .earn-card-item.featured-option:hover .featured-arrow {
-      background: var(--accent-purple);
-      color: #FFFFFF;
-    }
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
 
-    /* RESPONSIVE LAYOUT */
-    @media (min-width: 640px) {
-      .earn-cards-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-      }
-    }
 
-    @media (min-width: 1024px) {
-      .desktop-nav { display: flex; gap: 32px; list-style: none; }
-      .desktop-nav a { text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.92rem; transition: color 0.2s; }
-      .desktop-nav a.active, .desktop-nav a:hover { color: var(--accent-blue); }
-    }
+body {
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+  font-family:
+    'Plus Jakarta Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  color: var(--text);
+
+  background:
+
+    radial-gradient(
+      circle at 5% 0%,
+      rgba(59,130,246,.25),
+      transparent 28%
+    ),
+
+    radial-gradient(
+      circle at 95% 10%,
+      rgba(139,92,246,.24),
+      transparent 27%
+    ),
+
+    radial-gradient(
+      circle at 20% 100%,
+      rgba(6,214,232,.14),
+      transparent 30%
+    ),
+
+    linear-gradient(
+      145deg,
+      #040611,
+      #071027 50%,
+      #050816
+    );
+
+  overflow-x: hidden;
+
+  padding-bottom:
+    calc(30px + var(--safe-bottom));
+}
+
+
+/* =========================================================
+   BACKGROUND ORBS
+========================================================= */
+
+.bg-orb {
+
+  position: fixed;
+
+  width: 210px;
+  height: 210px;
+
+  border-radius: 50%;
+
+  filter: blur(65px);
+
+  opacity: .18;
+
+  pointer-events: none;
+
+  z-index: -1;
+
+  animation:
+    orbMove 8s ease-in-out infinite alternate;
+}
+
+
+.orb-blue {
+
+  top: 15%;
+  left: -100px;
+
+  background: var(--blue);
+}
+
+
+.orb-purple {
+
+  right: -100px;
+  top: 42%;
+
+  background: var(--purple);
+
+  animation-delay: -3s;
+}
+
+
+.orb-cyan {
+
+  bottom: -100px;
+  left: 35%;
+
+  background: var(--cyan);
+
+  animation-delay: -5s;
+}
+
+
+@keyframes orbMove {
+
+  from {
+    transform:
+      translate(0,0)
+      scale(1);
+  }
+
+  to {
+    transform:
+      translate(20px,-20px)
+      scale(1.12);
+  }
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 100;
+
+  background:
+    #070d1d;
+
+  border-bottom:
+    1px solid rgba(255,255,255,.06);
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.18);
+}
+
+
+.nav-container {
+
+  max-width: 900px;
+
+  margin: auto;
+
+  padding:
+    calc(12px + var(--safe-top))
+    15px
+    12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+
+.brand-logo {
+
+  color: white;
+
+  text-decoration: none;
+
+  font-size: 1.25rem;
+
+  font-weight: 800;
+
+  letter-spacing: -.05em;
+}
+
+
+.brand-logo span {
+
+  color: var(--cyan);
+
+  text-shadow:
+    0 0 15px rgba(6,214,232,.8);
+}
+
+
+.icon-btn {
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 13px;
+
+  color: white;
+
+  text-decoration: none;
+
+  background:
+    #121d36;
+
+  border:
+    1px solid rgba(255,255,255,.09);
+
+  box-shadow:
+    0 7px 18px rgba(0,0,0,.25);
+
+  transition:
+    .2s ease;
+}
+
+
+.icon-btn:active {
+  transform: scale(.9);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.earn-container {
+
+  width: 100%;
+
+  max-width: 900px;
+
+  margin: auto;
+
+  padding:
+    20px
+    15px
+    35px;
+
+  animation:
+    pageEnter .5s ease both;
+}
+
+
+@keyframes pageEnter {
+
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   BACK LINK
+========================================================= */
+
+.back-link {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: #94a3b8;
+
+  text-decoration: none;
+
+  font-size: .78rem;
+
+  font-weight: 700;
+
+  margin-bottom: 18px;
+
+  transition: .2s ease;
+}
+
+
+.back-link:active {
+
+  color: white;
+
+  transform:
+    translateX(-3px);
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.earn-header-section {
+
+  margin-bottom: 22px;
+}
+
+
+.earn-eyebrow {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding:
+    6px
+    10px;
+
+  margin-bottom: 10px;
+
+  border-radius: 999px;
+
+  background:
+    #101e3b;
+
+  border:
+    1px solid rgba(59,130,246,.25);
+
+  color:
+    #60a5fa;
+
+  font-size: .62rem;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: .08em;
+}
+
+
+.eyebrow-dot {
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background:
+    var(--cyan);
+
+  box-shadow:
+    0 0 12px var(--cyan);
+
+  animation:
+    dotPulse 1.5s infinite;
+}
+
+
+@keyframes dotPulse {
+
+  0%,
+  100% {
+    transform: scale(.8);
+    opacity: .6;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+
+.earn-title {
+
+  font-size:
+    clamp(1.8rem, 8vw, 2.5rem);
+
+  line-height: 1.04;
+
+  font-weight: 800;
+
+  letter-spacing: -.055em;
+
+  background:
+    linear-gradient(
+      110deg,
+      #ffffff,
+      #60a5fa 45%,
+      #c084fc 80%,
+      #67e8f9
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+
+.earn-sub {
+
+  margin-top: 9px;
+
+  max-width: 520px;
+
+  color: var(--muted);
+
+  font-size: .8rem;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   CARD GRID
+========================================================= */
+
+.earn-cards-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0,1fr));
+
+  gap: 12px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.earn-card-item {
+
+  position: relative;
+
+  min-height: 185px;
+
+  overflow: hidden;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: space-between;
+
+  padding: 15px;
+
+  text-decoration: none;
+
+  color: white;
+
+  border-radius: 21px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #14213e,
+      #0c152a
+    );
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  box-shadow:
+
+    0 16px 30px rgba(0,0,0,.35),
+
+    inset 0 1px 0
+      rgba(255,255,255,.05);
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+
+.earn-card-item::before {
+
+  content: "";
+
+  position: absolute;
+
+  width: 130px;
+  height: 130px;
+
+  right: -65px;
+  top: -65px;
+
+  border-radius: 50%;
+
+  background:
+    var(--blue);
+
+  opacity: .15;
+
+  filter: blur(25px);
+}
+
+
+.earn-card-item:active {
+
+  transform:
+    scale(.96)
+    translateY(2px);
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.4);
+
+  border-color:
+    rgba(96,165,250,.35);
+}
+
+
+/* =========================================================
+   GAMES CARD
+========================================================= */
+
+.games-card {
+
+  grid-column:
+    span 2;
+
+  min-height:
+    215px;
+
+  background:
+
+    linear-gradient(
+      135deg,
+      #25174f 0%,
+      #172b60 45%,
+      #073f50 100%
+    );
+
+  border:
+    1px solid
+    rgba(139,92,246,.4);
+
+  box-shadow:
+
+    0 20px 45px
+      rgba(77,43,150,.28),
+
+    inset 0 1px 0
+      rgba(255,255,255,.08);
+}
+
+
+.games-card::before {
+
+  width: 220px;
+  height: 220px;
+
+  right: -80px;
+  top: -100px;
+
+  background:
+    #8b5cf6;
+
+  opacity: .28;
+
+  filter: blur(35px);
+}
+
+
+.games-card::after {
+
+  content: "";
+
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  left: -50px;
+  bottom: -50px;
+
+  border-radius: 50%;
+
+  background:
+    #06d6e8;
+
+  opacity: .18;
+
+  filter: blur(25px);
+}
+
+
+/* =========================================================
+   CARD TOP
+========================================================= */
+
+.card-top-row {
+
+  position: relative;
+
+  z-index: 2;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 8px;
+
+  margin-bottom: 16px;
+}
+
+
+.icon-wrapper {
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 15px;
+
+  font-size: 1.4rem;
+
+  background:
+    #172746;
+
+  border:
+    1px solid rgba(255,255,255,.1);
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.3),
+
+    inset 0 1px 0
+      rgba(255,255,255,.08);
+
+  animation:
+    iconFloat 4s ease-in-out infinite;
+}
+
+
+@keyframes iconFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.status-badge {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  white-space: nowrap;
+
+  padding:
+    5px 8px;
+
+  border-radius: 999px;
+
+  font-size: .57rem;
+
+  font-weight: 800;
+
+  letter-spacing: .04em;
+
+  text-transform: uppercase;
+}
+
+
+.badge-hot {
+
+  color:
+    #f5d0fe;
+
+  background:
+    #4c1d73;
+
+  border:
+    1px solid #7e22ce;
+
+  box-shadow:
+    0 0 18px rgba(168,85,247,.2);
+}
+
+
+.badge-available {
+
+  color:
+    #99f6e4;
+
+  background:
+    #063d45;
+
+  border:
+    1px solid #0e7490;
+}
+
+
+.badge-coming {
+
+  color:
+    #94a3b8;
+
+  background:
+    #182237;
+
+  border:
+    1px solid rgba(255,255,255,.07);
+}
+
+
+/* =========================================================
+   CARD BODY
+========================================================= */
+
+.card-body {
+
+  position: relative;
+
+  z-index: 2;
+}
+
+
+.card-body h3 {
+
+  font-size:
+    1rem;
+
+  font-weight:
+    800;
+
+  margin-bottom:
+    5px;
+
+  letter-spacing:
+    -.025em;
+}
+
+
+.card-body p {
+
+  color:
+    #9aa9c0;
+
+  font-size:
+    .7rem;
+
+  line-height:
+    1.45;
+
+  max-width:
+    300px;
+}
+
+
+/* =========================================================
+   ACTION
+========================================================= */
+
+.card-action-row {
+
+  position: relative;
+
+  z-index: 2;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-top:
+    14px;
+
+  font-size:
+    .73rem;
+
+  font-weight:
+    800;
+
+  color:
+    #93c5fd;
+}
+
+
+.games-card .card-action-row {
+  color: #d8b4fe;
+}
+
+
+.arrow-btn {
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background:
+    rgba(255,255,255,.09);
+
+  border:
+    1px solid rgba(255,255,255,.1);
+
+  font-size:
+    .9rem;
+}
+
+
+.earn-card-item:active .arrow-btn {
+
+  transform:
+    translateX(4px);
+
+  background:
+    rgba(255,255,255,.16);
+}
+
+
+/* =========================================================
+   REFERRAL CARD
+========================================================= */
+
+.referral-card {
+
+  background:
+    linear-gradient(
+      145deg,
+      #073d4c,
+      #0d2742
+    );
+
+  border-color:
+    rgba(6,214,232,.22);
+}
+
+
+.referral-card::before {
+
+  background:
+    var(--cyan);
+
+  opacity:
+    .17;
+}
+
+
+.referral-card .icon-wrapper {
+
+  background:
+    #0d5260;
+
+  border-color:
+    rgba(6,214,232,.2);
+}
+
+
+/* =========================================================
+   GET MORE TELEGRAM USERS
+========================================================= */
+
+.advertise-card {
+
+  background:
+    linear-gradient(
+      145deg,
+      #40200d,
+      #30182b
+    );
+
+  border-color:
+    rgba(249,115,22,.28);
+}
+
+
+.advertise-card::before {
+
+  background:
+    var(--orange);
+
+  opacity:
+    .24;
+}
+
+
+.advertise-card .icon-wrapper {
+
+  background:
+    #5a2b16;
+
+  border-color:
+    rgba(249,115,22,.3);
+
+  box-shadow:
+    0 8px 20px
+      rgba(249,115,22,.12);
+}
+
+
+.advertise-card .card-action-row {
+
+  color:
+    #fdba74;
+}
+
+
+/* =========================================================
+   JOIN GROUPS & EARN
+========================================================= */
+
+.join-card {
+
+  background:
+    linear-gradient(
+      145deg,
+      #073f36,
+      #092c3e
+    );
+
+  border-color:
+    rgba(16,185,129,.28);
+}
+
+
+.join-card::before {
+
+  background:
+    var(--green);
+
+  opacity:
+    .2;
+}
+
+
+.join-card .icon-wrapper {
+
+  background:
+    #0c5144;
+
+  border-color:
+    rgba(16,185,129,.3);
+
+  box-shadow:
+    0 8px 20px
+      rgba(16,185,129,.12);
+}
+
+
+.join-card .card-action-row {
+
+  color:
+    #6ee7b7;
+}
+
+
+/* =========================================================
+   COMING SOON
+========================================================= */
+
+.disabled-option {
+
+  opacity:
+    .55;
+
+  cursor:
+    not-allowed;
+}
+
+
+.disabled-option:active {
+
+  transform:
+    none;
+
+  border-color:
+    rgba(255,255,255,.08);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .earn-container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .earn-cards-grid {
+    gap: 9px;
+  }
+
+  .earn-card-item {
+    min-height: 175px;
+    padding: 13px;
+  }
+
+  .games-card {
+    min-height: 205px;
+  }
+
+  .icon-wrapper {
+    width: 43px;
+    height: 43px;
+    border-radius: 13px;
+  }
+
+  .card-body h3 {
+    font-size: .92rem;
+  }
+
+  .card-body p {
+    font-size: .65rem;
+  }
+
+  .status-badge {
+    font-size: .51rem;
+    padding: 4px 6px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL SCREENS
+========================================================= */
+
+@media (max-width: 350px) {
+
+  .earn-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .games-card {
+    grid-column: span 1;
+  }
+
+  .earn-card-item[style] {
+    grid-column: span 1 !important;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+
+    animation-duration:
+      .01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      .01ms !important;
+  }
+
+}
+
+</style>
 </head>
+
+
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <div class="nav-container">
-      <a href="/dashboard.html" class="brand-logo">PAYME<span>.</span></a>
 
-      <!-- Desktop Navbar -->
-      <ul class="desktop-nav">
-        <li><a href="/dashboard.html">Dashboard</a></li>
-        <li><a href="/earn" class="active">Earn</a></li>
-        <li><a href="/dashboard.html#referrals">Referrals</a></li>
-        <li><a href="/dashboard.html#leaderboard">Leaderboard</a></li>
-      </ul>
+<!-- ========================================================
+     BACKGROUND
+========================================================= -->
 
-      <div class="header-actions">
-        <!-- Support Button -->
-        <a href="https://wa.me/+2348034399095" target="_blank" class="icon-btn" title="Contact Support on WhatsApp">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        </a>
-      </div>
-    </div>
-  </header>
+<div class="bg-orb orb-blue"></div>
+<div class="bg-orb orb-purple"></div>
+<div class="bg-orb orb-cyan"></div>
 
-  <!-- MAIN EARN CONTENT -->
-  <main class="earn-container">
-    <!-- BACK TO DASHBOARD LINK -->
-    <a href="/dashboard.html" class="back-link">
-      &larr; Back to Dashboard
+
+
+<!-- ========================================================
+     HEADER
+========================================================= -->
+
+<header>
+
+  <div class="nav-container">
+
+    <a
+      href="/dashboard.html"
+      class="brand-logo"
+    >
+      PAYME<span>.</span>
     </a>
 
-    <div class="earn-header-section">
-      <h1 class="earn-title">Earn Rewards</h1>
-      <p class="earn-sub">Select a game or task below to boost your earnings.</p>
-    </div>
 
-    <div class="earn-cards-grid">
+    <a
+      href="https://wa.me/+2348034399095"
+      target="_blank"
+      class="icon-btn"
+      aria-label="Contact Support"
+    >
 
-      <!-- NEW CARD: LUCKY3 (ACTIVE) -->
-      <a href="lucky.html" class="earn-card-item active-option featured-option">
-        <div>
-          <div class="card-top-row">
-            <div class="icon-wrapper featured-icon">🎰</div>
-            <span class="status-badge badge-featured">Hot Game</span>
-          </div>
-          <div class="card-body">
-            <h3>Lucky3</h3>
-            <p>Pick your lucky combination and win big payouts.</p>
-          </div>
-        </div>
-        <div class="card-action-row featured-action">
-          <span>Play Lucky3</span>
-          <div class="arrow-btn featured-arrow">&rarr;</div>
-        </div>
-      </a>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
 
-      <!-- CARD: REFERRAL (ACTIVE) -->
-      <a href="/dashboard.html#referrals" class="earn-card-item active-option">
-        <div>
-          <div class="card-top-row">
-            <div class="icon-wrapper">🔗</div>
-            <span class="status-badge badge-available">Available</span>
-          </div>
-          <div class="card-body">
-            <h3>Invite Friends</h3>
-            <p>Earn ₦15 for every eligible referral you bring in.</p>
-          </div>
-        </div>
-        <div class="card-action-row">
-          <span>Start Referring</span>
-          <div class="arrow-btn">&rarr;</div>
-        </div>
-      </a>
+        <path
+          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+        />
 
-      <!-- CARD: TAP PLAY (ACTIVE) -->
-      <a href="tap.html" class="earn-card-item active-option">
-        <div>
-          <div class="card-top-row">
-            <div class="icon-wrapper">👆</div>
-            <span class="status-badge badge-available">Available</span>
-          </div>
-          <div class="card-body">
-            <h3>Tap Play</h3>
-            <p>Tap to accumulate points and claim instant rewards.</p>
-          </div>
-        </div>
-        <div class="card-action-row">
-          <span>Start Tapping</span>
-          <div class="arrow-btn">&rarr;</div>
-        </div>
-      </a>
+      </svg>
 
-      <!-- CARD: GAMES (ACTIVE) -->
-      <a href="/game" class="earn-card-item active-option">
-        <div>
-          <div class="card-top-row">
-            <div class="icon-wrapper">🎮</div>
-            <span class="status-badge badge-available">Available</span>
-          </div>
-          <div class="card-body">
-            <h3>PAYME Spin</h3>
-            <p>Spin the wheel for ₦50 and win cash prizes.</p>
-          </div>
-        </div>
-        <div class="card-action-row">
-          <span>Play Now</span>
-          <div class="arrow-btn">&rarr;</div>
-        </div>
-      </a>
+    </a>
 
-      <!-- CARD: TASKS (COMING SOON) -->
-      <div class="earn-card-item disabled-option">
-        <div>
-          <div class="card-top-row">
-            <div class="icon-wrapper">✓</div>
-            <span class="status-badge badge-coming">Coming Soon</span>
-          </div>
-          <div class="card-body">
-            <h3>Tasks</h3>
-            <p>Complete simple tasks and earn daily bonuses.</p>
-          </div>
-        </div>
-      </div>
+  </div>
 
-      <!-- CARD: GIVEAWAYS (COMING SOON) -->
-      <div class="earn-card-item disabled-option">
-        <div>
-          <div class="card-top-row">
-            <div class="icon-wrapper">🎁</div>
-            <span class="status-badge badge-coming">Coming Soon</span>
-          </div>
-          <div class="card-body">
-            <h3>Giveaways</h3>
-            <p>Participate in special community giveaways and events.</p>
-          </div>
-        </div>
-      </div>
+</header>
+
+
+
+<!-- ========================================================
+     MAIN
+========================================================= -->
+
+<main class="earn-container">
+
+
+  <!-- BACK -->
+
+  <a
+    href="/dashboard.html"
+    class="back-link"
+  >
+
+    <span>←</span>
+
+    <span>
+      Back to Dashboard
+    </span>
+
+  </a>
+
+
+
+  <!-- HERO -->
+
+  <section class="earn-header-section">
+
+    <div class="earn-eyebrow">
+
+      <span class="eyebrow-dot"></span>
+
+      Earn & Rewards
 
     </div>
-  </main>
+
+
+    <h1 class="earn-title">
+
+      Turn your activity
+      <br>
+      into rewards.
+
+    </h1>
+
+
+    <p class="earn-sub">
+
+      Play games, invite friends, promote
+      communities and earn rewards on PAYME.
+
+    </p>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       EARN CARDS
+  ======================================================= -->
+
+  <div class="earn-cards-grid">
+
+
+    <!-- ====================================================
+         GAMES
+    ===================================================== -->
+
+    <div
+      class="earn-card-item games-card"
+      id="openGamesModal"
+      role="button"
+      tabindex="0"
+      aria-label="Open arcade games"
+    >
+
+      <div>
+
+        <div class="card-top-row">
+
+          <div class="icon-wrapper">
+            🎮
+          </div>
+
+
+          <span class="status-badge badge-hot">
+            3 Games Active
+          </span>
+
+        </div>
+
+
+        <div class="card-body">
+
+          <h3>
+            Arcade Games
+          </h3>
+
+
+          <p>
+            Tap, spin and match lucky combinations
+            for PAYME rewards.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="card-action-row">
+
+        <span>
+          View Games & Rewards
+        </span>
+
+
+        <div class="arrow-btn">
+          →
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         REFERRAL
+    ===================================================== -->
+
+    <a
+      href="/dashboard.html#referrals"
+      class="earn-card-item referral-card"
+    >
+
+      <div>
+
+        <div class="card-top-row">
+
+          <div class="icon-wrapper">
+            🔗
+          </div>
+
+
+          <span class="status-badge badge-available">
+            Earn ₦15
+          </span>
+
+        </div>
+
+
+        <div class="card-body">
+
+          <h3>
+            Invite Friends
+          </h3>
+
+
+          <p>
+            Invite friends and earn ₦15 for every
+            active referral.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="card-action-row">
+
+        <span>
+          Invite & Earn
+        </span>
+
+
+        <div class="arrow-btn">
+          →
+        </div>
+
+      </div>
+
+    </a>
+
+
+
+    <!-- ====================================================
+         GET MORE TELEGRAM USERS
+    ===================================================== -->
+
+    <a
+      href="/advertise.html"
+      class="earn-card-item advertise-card"
+    >
+
+      <div>
+
+        <div class="card-top-row">
+
+          <div class="icon-wrapper">
+            📣
+          </div>
+
+
+          <span class="status-badge badge-available">
+            Earn More
+          </span>
+
+        </div>
+
+
+        <div class="card-body">
+
+          <h3>
+            Get More Telegram Users
+          </h3>
+
+
+          <p>
+            Promote your Telegram group or channel
+            and get real members.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="card-action-row">
+
+        <span>
+          Advertise Now
+        </span>
+
+
+        <div class="arrow-btn">
+          →
+        </div>
+
+      </div>
+
+    </a>
+
+
+
+    <!-- ====================================================
+         JOIN GROUPS & EARN
+    ===================================================== -->
+
+    <a
+      href="/join.html"
+      class="earn-card-item join-card"
+    >
+
+      <div>
+
+        <div class="card-top-row">
+
+          <div class="icon-wrapper">
+            💰
+          </div>
+
+
+          <span class="status-badge badge-available">
+            ₦25 / Join
+          </span>
+
+        </div>
+
+
+        <div class="card-body">
+
+          <h3>
+            Join Groups & Earn
+          </h3>
+
+
+          <p>
+            Join promoted Telegram communities
+            and earn ₦25 for every verified join.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="card-action-row">
+
+        <span>
+          Find Groups & Earn
+        </span>
+
+
+        <div class="arrow-btn">
+          →
+        </div>
+
+      </div>
+
+    </a>
+
+
+
+    <!-- ====================================================
+         COMMUNITY GIVEAWAYS
+    ===================================================== -->
+
+    <div
+      class="earn-card-item disabled-option"
+      style="grid-column: span 2;"
+    >
+
+      <div>
+
+        <div class="card-top-row">
+
+          <div class="icon-wrapper">
+            🎁
+          </div>
+
+
+          <span class="status-badge badge-coming">
+            Soon
+          </span>
+
+        </div>
+
+
+        <div class="card-body">
+
+          <h3>
+            Community Giveaways
+          </h3>
+
+
+          <p>
+            Join future community reward pools
+            and special PAYME cash drops.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="card-action-row"
+        style="color:#64748b;"
+      >
+
+        <span>
+          Coming Soon
+        </span>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+</main>
+
+
+
+<!-- ========================================================
+     GAME POPUP
+========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="gamesModal"
+  aria-hidden="true"
+>
+
+  <div
+    class="modal-content"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="gamesModalTitle"
+  >
+
+    <div class="modal-header">
+
+      <div class="modal-heading">
+
+        <div class="modal-main-icon">
+          🎮
+        </div>
+
+
+        <div>
+
+          <h3
+            class="modal-title"
+            id="gamesModalTitle"
+          >
+            Choose Your Game
+          </h3>
+
+
+          <p class="modal-subtitle">
+            Select a game and start earning.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="close-btn"
+        id="closeGamesModal"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="reward-info">
+
+      <div class="reward-info-icon">
+        ₦
+      </div>
+
+
+      <div class="reward-info-text">
+
+        <strong>
+          See the reward opportunity first.
+        </strong>
+
+        <br>
+
+        Each game has its own reward system.
+
+      </div>
+
+    </div>
+
+
+    <div class="game-list">
+
+
+      <!-- TAP PLAY -->
+
+      <a
+        href="tap.html"
+        class="game-item"
+      >
+
+        <div class="game-info">
+
+          <div class="game-icon">
+            👆
+          </div>
+
+
+          <div class="game-details">
+
+            <h4>
+              Tap Play
+            </h4>
+
+
+            <p>
+              Tap to gather points and submit
+              your score for rewards.
+            </p>
+
+
+            <span class="game-reward">
+              ⚡ Score based rewards
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="game-arrow">
+          →
+        </div>
+
+      </a>
+
+
+
+      <!-- PAYME SPIN -->
+
+      <a
+        href="/game"
+        class="game-item"
+      >
+
+        <div class="game-info">
+
+          <div class="game-icon">
+            🎡
+          </div>
+
+
+          <div class="game-details">
+
+            <h4>
+              PAYME Spin
+            </h4>
+
+
+            <p>
+              Spin the wheel and try your luck
+              for instant cash prizes.
+            </p>
+
+
+            <span class="game-reward">
+              🎯 Up to ₦50 prize opportunity
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="game-arrow">
+          →
+        </div>
+
+      </a>
+
+
+
+      <!-- LUCKY3 -->
+
+      <a
+        href="lucky.html"
+        class="game-item"
+      >
+
+        <div class="game-info">
+
+          <div class="game-icon">
+            🎰
+          </div>
+
+
+          <div class="game-details">
+
+            <h4>
+              Lucky3
+            </h4>
+
+
+            <p>
+              Match lucky combinations and
+              chase bigger payouts.
+            </p>
+
+
+            <span class="game-reward">
+              🍀 Lucky combination rewards
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="game-arrow">
+          →
+        </div>
+
+      </a>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   GAME MODAL
+========================================================= */
+
+const modal =
+  document.getElementById('gamesModal');
+
+const openBtn =
+  document.getElementById('openGamesModal');
+
+const closeBtn =
+  document.getElementById('closeGamesModal');
+
+
+function openGamesModal() {
+
+  modal.classList.add('active');
+
+  modal.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+  document.body.classList.add(
+    'modal-open'
+  );
+
+}
+
+
+function closeGamesModal() {
+
+  modal.classList.remove('active');
+
+  modal.setAttribute(
+    'aria-hidden',
+    'true'
+  );
+
+  document.body.classList.remove(
+    'modal-open'
+  );
+
+}
+
+
+openBtn.addEventListener(
+  'click',
+  openGamesModal
+);
+
+
+openBtn.addEventListener(
+  'keydown',
+  function(event) {
+
+    if (
+      event.key === 'Enter' ||
+      event.key === ' '
+    ) {
+
+      event.preventDefault();
+
+      openGamesModal();
+
+    }
+
+  }
+);
+
+
+closeBtn.addEventListener(
+  'click',
+  closeGamesModal
+);
+
+
+modal.addEventListener(
+  'click',
+  function(event) {
+
+    if (
+      event.target === modal
+    ) {
+
+      closeGamesModal();
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  'keydown',
+  function(event) {
+
+    if (
+      event.key === 'Escape' &&
+      modal.classList.contains('active')
+    ) {
+
+      closeGamesModal();
+
+    }
+
+  }
+);
+
+</script>
 
 </body>
 </html>

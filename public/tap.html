@@ -1945,7 +1945,7 @@ $("homeFreePlayBtn").addEventListener("pointerdown", async e => {
 
 $("howToPlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); openModal("howToModal"); });
 $("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
-$("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
+$("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "deposit.html"; });
 document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("pointerdown", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
 document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("pointerdown", e => { if(e.target === overlay) closeModal(overlay.id); }));
 $("confirmBack").addEventListener("pointerdown", e => { e.preventDefault(); showScreen("home"); });

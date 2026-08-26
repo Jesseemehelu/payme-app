@@ -1473,6 +1473,1091 @@ async function requireLogin(
 
 }
 
+
+
+
+// ======================================================
+// TELEGRAM ADVERTISING SYSTEM
+// ======================================================
+
+const TELEGRAM_AD_PRICE_PER_JOIN = 50;
+const TELEGRAM_AD_MEMBER_REWARD = 25;
+const TELEGRAM_AD_PLATFORM_FEE = 25;
+
+
+// ======================================================
+// TELEGRAM API HELPER
+// ======================================================
+
+async function telegramApi(
+  method,
+  params = {}
+) {
+
+  if (!TELEGRAM_BOT_TOKEN) {
+
+    throw new Error(
+      'TELEGRAM_BOT_TOKEN is not configured.'
+    );
+
+  }
+
+
+  const response =
+    await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${method}`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify(params)
+      }
+    );
+
+
+  const data =
+    await response.json();
+
+
+  if (!data.ok) {
+
+    const description =
+      data.description ||
+      'Telegram API request failed.';
+
+
+    const error =
+      new Error(description);
+
+
+    error.telegramResponse =
+      data;
+
+
+    throw error;
+
+  }
+
+
+  return data.result;
+
+}
+
+
+// ======================================================
+// PARSE TELEGRAM PUBLIC LINK
+// ======================================================
+
+function parseTelegramLink(
+  value
+) {
+
+  const raw =
+    String(value || '')
+      .trim();
+
+
+  if (!raw) {
+
+    return null;
+
+  }
+
+
+  let url;
+
+
+  try {
+
+    url =
+      new URL(raw);
+
+  } catch {
+
+    return null;
+
+  }
+
+
+  const hostname =
+    url.hostname
+      .toLowerCase()
+      .replace(/^www\./, '');
+
+
+  if (
+    hostname !== 't.me' &&
+    hostname !== 'telegram.me'
+  ) {
+
+    return null;
+
+  }
+
+
+  const parts =
+    url.pathname
+      .split('/')
+      .filter(Boolean);
+
+
+  if (!parts.length) {
+
+    return null;
+
+  }
+
+
+  /*
+    For this first version we intentionally support
+    public Telegram usernames:
+
+      https://t.me/examplegroup
+      https://t.me/examplechannel
+
+    Private invite links such as:
+
+      https://t.me/+ABC123...
+
+    will be added separately because Telegram's Bot API
+    cannot simply resolve an arbitrary private invite link
+    with getChat().
+  */
+
+
+  const username =
+    parts[0];
+
+
+  if (
+    username.startsWith('+') ||
+    username.startsWith('joinchat')
+  ) {
+
+    return {
+      valid: false,
+      reason:
+        'Private Telegram invite links are not supported yet. Please use your public @username link.'
+    };
+
+  }
+
+
+  if (
+    !/^[a-zA-Z0-9_]{5,32}$/
+      .test(username)
+  ) {
+
+    return {
+      valid: false,
+      reason:
+        'Invalid Telegram username.'
+    };
+
+  }
+
+
+  return {
+
+    valid: true,
+
+    username:
+      '@' + username
+
+  };
+
+}
+
+
+// ======================================================
+// VERIFY TELEGRAM COMMUNITY
+// ======================================================
+
+async function verifyTelegramAdvertisingCommunity(
+  telegramLink,
+  expectedType,
+  advertiserTelegramId
+) {
+
+  const parsed =
+    parseTelegramLink(
+      telegramLink
+    );
+
+
+  if (!parsed || !parsed.valid) {
+
+    return {
+
+      success: false,
+
+      message:
+        parsed?.reason ||
+        'Invalid Telegram link.'
+
+    };
+
+  }
+
+
+  if (!advertiserTelegramId) {
+
+    return {
+
+      success: false,
+
+      message:
+        'Your Telegram account is not connected to PAYME.'
+
+    };
+
+  }
+
+
+  try {
+
+    // ----------------------------------------------------
+    // GET COMMUNITY
+    // ----------------------------------------------------
+
+    const chat =
+      await telegramApi(
+        'getChat',
+        {
+          chat_id:
+            parsed.username
+        }
+      );
+
+
+    // ----------------------------------------------------
+    // CHECK TYPE
+    // ----------------------------------------------------
+
+    let actualType;
+
+
+    if (
+      chat.type === 'channel'
+    ) {
+
+      actualType =
+        'channel';
+
+    } else if (
+      chat.type === 'group' ||
+      chat.type === 'supergroup'
+    ) {
+
+      actualType =
+        'group';
+
+    } else {
+
+      return {
+
+        success: false,
+
+        message:
+          'That Telegram link is not a group or channel.'
+
+      };
+
+    }
+
+
+    if (
+      actualType !==
+      expectedType
+    ) {
+
+      return {
+
+        success: false,
+
+        message:
+          `You selected a Telegram ${expectedType}, but this link belongs to a Telegram ${actualType}.`
+
+      };
+
+    }
+
+
+    // ----------------------------------------------------
+    // GET BOT INFORMATION
+    // ----------------------------------------------------
+
+    const bot =
+      await telegramApi(
+        'getMe'
+      );
+
+
+    // ----------------------------------------------------
+    // CHECK BOT ADMIN STATUS
+    // ----------------------------------------------------
+
+    const botMember =
+      await telegramApi(
+        'getChatMember',
+        {
+
+          chat_id:
+            chat.id,
+
+          user_id:
+            bot.id
+
+        }
+      );
+
+
+    const botIsAdmin =
+      [
+        'administrator',
+        'creator'
+      ].includes(
+        botMember.status
+      );
+
+
+    if (!botIsAdmin) {
+
+      return {
+
+        success: false,
+
+        message:
+          'PAYME Bot has not been added as an administrator of this Telegram community.'
+
+      };
+
+    }
+
+
+    // ----------------------------------------------------
+    // CHECK ADVERTISER ADMIN STATUS
+    // ----------------------------------------------------
+
+    const advertiserMember =
+      await telegramApi(
+        'getChatMember',
+        {
+
+          chat_id:
+            chat.id,
+
+          user_id:
+            Number(
+              advertiserTelegramId
+            )
+
+        }
+      );
+
+
+    const advertiserIsAdmin =
+      [
+        'administrator',
+        'creator'
+      ].includes(
+        advertiserMember.status
+      );
+
+
+    if (!advertiserIsAdmin) {
+
+      return {
+
+        success: false,
+
+        message:
+          'You must be an administrator of this Telegram community.'
+
+      };
+
+    }
+
+
+    // ----------------------------------------------------
+    // SUCCESS
+    // ----------------------------------------------------
+
+    return {
+
+      success: true,
+
+      chatId:
+        String(chat.id),
+
+      username:
+        chat.username
+          ? '@' + chat.username
+          : parsed.username,
+
+      title:
+        chat.title ||
+        parsed.username,
+
+      telegramType:
+        actualType,
+
+      botIsAdmin: true,
+
+      advertiserIsAdmin: true
+
+    };
+
+
+  } catch (error) {
+
+    console.error(
+      'Telegram advertising verification error:',
+      error
+    );
+
+
+    return {
+
+      success: false,
+
+      message:
+        error.message ||
+        'Telegram verification failed.'
+
+    };
+
+  }
+
+}
+
+
+// ======================================================
+// VERIFY ADVERTISER TELEGRAM COMMUNITY
+// ======================================================
+
+app.post(
+  '/api/telegram-ads/verify',
+  requireLogin,
+  async (
+    req,
+    res
+  ) => {
+
+    try {
+
+      const {
+        telegramType,
+        telegramLink
+      } =
+        req.body || {};
+
+
+      if (
+        ![
+          'group',
+          'channel'
+        ].includes(
+          telegramType
+        )
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Please select a Telegram group or channel.'
+
+        });
+
+      }
+
+
+      if (
+        !telegramLink
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Telegram link is required.'
+
+        });
+
+      }
+
+
+      if (
+        !req.user.telegramId
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Your Telegram account could not be found. Please open PAYME through Telegram.'
+
+        });
+
+      }
+
+
+      const result =
+        await verifyTelegramAdvertisingCommunity(
+
+          telegramLink,
+
+          telegramType,
+
+          req.user.telegramId
+
+        );
+
+
+      if (!result.success) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          verified: false,
+
+          message:
+            result.message
+
+        });
+
+      }
+
+
+      /*
+        Do not create the campaign yet.
+
+        Verification only proves that:
+
+        - community exists
+        - correct type
+        - advertiser is admin
+        - PAYME bot is admin
+
+        The actual campaign is created after the
+        advertiser chooses the number of members.
+      */
+
+
+      return res.json({
+
+        success: true,
+
+        verified: true,
+
+        chatId:
+          result.chatId,
+
+        username:
+          result.username,
+
+        title:
+          result.title,
+
+        telegramType:
+          result.telegramType,
+
+        botIsAdmin:
+          result.botIsAdmin,
+
+        advertiserIsAdmin:
+          result.advertiserIsAdmin,
+
+        message:
+          'Telegram community verified successfully.'
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'POST /api/telegram-ads/verify error:',
+        error
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        verified: false,
+
+        message:
+          'Unable to verify the Telegram community right now.'
+
+      });
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// CREATE TELEGRAM AD
+// ======================================================
+
+app.post(
+  '/api/telegram-ads/create',
+  requireLogin,
+  async (
+    req,
+    res
+  ) => {
+
+    try {
+
+      const {
+
+        telegramType,
+
+        telegramLink,
+
+        telegramChatId,
+
+        telegramUsername,
+
+        targetMembers
+
+      } =
+        req.body || {};
+
+
+      // --------------------------------------------------
+      // BASIC VALIDATION
+      // --------------------------------------------------
+
+      if (
+        ![
+          'group',
+          'channel'
+        ].includes(
+          telegramType
+        )
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Invalid Telegram community type.'
+
+        });
+
+      }
+
+
+      if (
+        !telegramLink
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Telegram link is required.'
+
+        });
+
+      }
+
+
+      const members =
+        Number(
+          targetMembers
+        );
+
+
+      const allowedMemberAmounts = [
+
+        10,
+        25,
+        50,
+        100,
+        250,
+        500
+
+      ];
+
+
+      if (
+        !Number.isInteger(members) ||
+        !allowedMemberAmounts.includes(
+          members
+        )
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Invalid member amount.'
+
+        });
+
+      }
+
+
+      // --------------------------------------------------
+      // CALCULATE PRICE ON SERVER
+      // --------------------------------------------------
+
+      const totalCost =
+        members *
+        TELEGRAM_AD_PRICE_PER_JOIN;
+
+
+      // --------------------------------------------------
+      // RE-VERIFY TELEGRAM
+      //
+      // Never trust the verification result sent by
+      // advertise.html.
+      // --------------------------------------------------
+
+      const verification =
+        await verifyTelegramAdvertisingCommunity(
+
+          telegramLink,
+
+          telegramType,
+
+          req.user.telegramId
+
+        );
+
+
+      if (
+        !verification.success
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            verification.message
+
+        });
+
+      }
+
+
+      // --------------------------------------------------
+      // USE VERIFIED TELEGRAM INFORMATION
+      // --------------------------------------------------
+
+      const verifiedChatId =
+        verification.chatId;
+
+
+      const verifiedUsername =
+        verification.username;
+
+
+      // --------------------------------------------------
+      // ATOMIC PAYMENT + AD CREATION
+      // --------------------------------------------------
+
+      const {
+        data,
+        error
+      } =
+        await supabase.rpc(
+          'create_telegram_ad_campaign',
+          {
+
+            p_advertiser_id:
+              String(
+                req.user.id
+              ),
+
+            p_telegram_type:
+              telegramType,
+
+            p_telegram_link:
+              telegramLink,
+
+            p_telegram_chat_id:
+              verifiedChatId,
+
+            p_telegram_username:
+              verifiedUsername,
+
+            p_target_members:
+              members,
+
+            p_total_cost:
+              totalCost
+
+          }
+        );
+
+
+      if (error) {
+
+        console.error(
+          'Telegram ad creation RPC error:',
+          error
+        );
+
+
+        const message =
+          String(
+            error.message ||
+            ''
+          );
+
+
+        if (
+          message
+            .toLowerCase()
+            .includes(
+              'insufficient balance'
+            )
+        ) {
+
+          return res.status(400).json({
+
+            success: false,
+
+            message:
+              `You need ${formatNairaForAds(totalCost)} to run this campaign.`
+
+          });
+
+        }
+
+
+        return res.status(500).json({
+
+          success: false,
+
+          message:
+            'Unable to create advertising campaign.'
+
+        });
+
+      }
+
+
+      // --------------------------------------------------
+      // SUCCESS
+      // --------------------------------------------------
+
+      return res.json({
+
+        success: true,
+
+        adId:
+          data?.ad_id,
+
+        targetMembers:
+          members,
+
+        pricePerJoin:
+          TELEGRAM_AD_PRICE_PER_JOIN,
+
+        memberReward:
+          TELEGRAM_AD_MEMBER_REWARD,
+
+        platformFee:
+          TELEGRAM_AD_PLATFORM_FEE,
+
+        totalCost:
+          totalCost,
+
+        depositUsed:
+          Number(
+            data?.deposit_used || 0
+          ),
+
+        withdrawableUsed:
+          Number(
+            data?.withdrawable_used || 0
+          ),
+
+        remainingDeposit:
+          Number(
+            data?.remaining_deposit || 0
+          ),
+
+        remainingWithdrawable:
+          Number(
+            data?.remaining_withdrawable || 0
+          ),
+
+        status:
+          'active',
+
+        message:
+          'Your Telegram advertising campaign is now live.'
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'POST /api/telegram-ads/create error:',
+        error
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          'Unable to create advertising campaign right now.'
+
+      });
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// FORMAT NAIRA FOR ADVERTISING
+// ======================================================
+
+function formatNairaForAds(
+  amount
+) {
+
+  return (
+    '₦' +
+    Number(
+      amount || 0
+    ).toLocaleString(
+      'en-NG'
+    )
+  );
+
+}
+
+
+
+
+// ======================================================
+// GET ACTIVE TELEGRAM ADS
+// ======================================================
+
+app.get(
+  '/api/telegram-ads',
+  requireLogin,
+  async (
+    req,
+    res
+  ) => {
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            'telegram_ads'
+          )
+          .select(
+            [
+              'id',
+              'telegram_type',
+              'telegram_link',
+              'telegram_username',
+              'target_members',
+              'completed_members',
+              'price_per_join',
+              'member_reward',
+              'created_at'
+            ].join(',')
+          )
+          .eq(
+            'status',
+            'active'
+          )
+          .order(
+            'created_at',
+            {
+              ascending: false
+            }
+          );
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      const ads =
+        (data || [])
+          .filter(
+            ad =>
+              Number(
+                ad.completed_members || 0
+              ) <
+              Number(
+                ad.target_members || 0
+              )
+          );
+
+
+      return res.json({
+
+        success: true,
+
+        ads
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'GET /api/telegram-ads error:',
+        error
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          'Unable to load Telegram advertisements.'
+
+      });
+
+    }
+
+  }
+);
+
+
 // ======================================================
 // TELEGRAM NOTIFICATION
 // ======================================================

@@ -1,0 +1,3638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+>
+
+<title>PAYME — Advertise</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet"
+>
+
+<style>
+
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root {
+
+  --bg: #050816;
+  --bg2: #091126;
+
+  --card: #101a32;
+  --card2: #14213d;
+
+  --blue: #3b82f6;
+  --cyan: #06d6e8;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --orange: #f97316;
+  --red: #ef4444;
+
+  --white: #ffffff;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+
+  --border: rgba(255,255,255,.08);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
+  -webkit-tap-highlight-color: transparent;
+
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+
+body {
+
+  font-family:
+    'Plus Jakarta Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  color: var(--text);
+
+  background:
+
+    radial-gradient(
+      circle at 0% 0%,
+      rgba(59,130,246,.22),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at 100% 20%,
+      rgba(139,92,246,.20),
+      transparent 28%
+    ),
+
+    linear-gradient(
+      145deg,
+      #040611,
+      #071027 50%,
+      #050816
+    );
+
+  min-height: 100vh;
+
+  overflow-x: hidden;
+
+  padding-bottom:
+    calc(25px + var(--safe-bottom));
+}
+
+
+button,
+input {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   BACKGROUND
+========================================================= */
+
+.bg-orb {
+
+  position: fixed;
+
+  width: 220px;
+  height: 220px;
+
+  border-radius: 50%;
+
+  filter: blur(70px);
+
+  opacity: .16;
+
+  pointer-events: none;
+
+  z-index: -1;
+
+  animation:
+    floatingOrb 8s ease-in-out infinite alternate;
+}
+
+
+.orb-one {
+  top: 10%;
+  left: -110px;
+  background: var(--blue);
+}
+
+
+.orb-two {
+  top: 50%;
+  right: -120px;
+  background: var(--purple);
+  animation-delay: -3s;
+}
+
+
+.orb-three {
+  bottom: -120px;
+  left: 30%;
+  background: var(--cyan);
+  animation-delay: -5s;
+}
+
+
+@keyframes floatingOrb {
+
+  from {
+    transform: translate(0,0) scale(1);
+  }
+
+  to {
+    transform: translate(25px,-20px) scale(1.12);
+  }
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 100;
+
+  background:
+    #070d1d;
+
+  border-bottom:
+    1px solid rgba(255,255,255,.06);
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.22);
+}
+
+
+.nav {
+
+  max-width: 650px;
+
+  margin: auto;
+
+  padding:
+    calc(11px + var(--safe-top))
+    15px
+    11px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+
+.logo {
+
+  color: white;
+
+  text-decoration: none;
+
+  font-size: 1.2rem;
+
+  font-weight: 800;
+
+  letter-spacing: -.05em;
+}
+
+
+.logo span {
+
+  color: var(--cyan);
+
+  text-shadow:
+    0 0 15px rgba(6,214,232,.8);
+}
+
+
+.help-btn {
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: white;
+
+  background:
+    #121d36;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  text-decoration: none;
+
+  font-size: .9rem;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.page {
+
+  width: 100%;
+
+  max-width: 650px;
+
+  margin: auto;
+
+  padding:
+    18px 15px
+    40px;
+
+  animation:
+    pageIn .45s ease both;
+}
+
+
+@keyframes pageIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   BACK
+========================================================= */
+
+.back {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: var(--muted);
+
+  text-decoration: none;
+
+  font-size: .76rem;
+
+  font-weight: 700;
+
+  margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+
+  margin-bottom: 20px;
+}
+
+
+.eyebrow {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding:
+    6px 10px;
+
+  border-radius: 999px;
+
+  background:
+    #10203d;
+
+  border:
+    1px solid rgba(59,130,246,.25);
+
+  color:
+    #60a5fa;
+
+  font-size: .59rem;
+
+  font-weight: 800;
+
+  letter-spacing: .08em;
+
+  text-transform: uppercase;
+
+  margin-bottom: 10px;
+}
+
+
+.eyebrow-dot {
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--cyan);
+
+  box-shadow:
+    0 0 12px var(--cyan);
+
+  animation:
+    pulse 1.5s infinite;
+}
+
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(.8);
+    opacity: .65;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+
+.hero h1 {
+
+  font-size:
+    clamp(1.8rem, 8vw, 2.35rem);
+
+  line-height: 1.05;
+
+  letter-spacing: -.055em;
+
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      110deg,
+      #fff,
+      #60a5fa 45%,
+      #c084fc 80%,
+      #67e8f9
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+
+.hero p {
+
+  color: var(--muted);
+
+  font-size: .78rem;
+
+  line-height: 1.55;
+
+  margin-top: 9px;
+
+  max-width: 510px;
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.progress-wrap {
+
+  margin-bottom: 18px;
+}
+
+
+.progress-top {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 8px;
+}
+
+
+.progress-label {
+
+  color: #94a3b8;
+
+  font-size: .63rem;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: .05em;
+}
+
+
+.progress-count {
+
+  color: white;
+
+  font-size: .65rem;
+
+  font-weight: 800;
+}
+
+
+.progress {
+
+  height: 6px;
+
+  background:
+    #14203a;
+
+  border-radius: 99px;
+
+  overflow: hidden;
+}
+
+
+.progress-bar {
+
+  height: 100%;
+
+  width: 20%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--blue),
+      var(--cyan)
+    );
+
+  box-shadow:
+    0 0 12px rgba(6,214,232,.45);
+
+  transition:
+    width .35s ease;
+}
+
+
+/* =========================================================
+   STEP
+========================================================= */
+
+.step {
+  display: none;
+}
+
+.step.active {
+
+  display: block;
+
+  animation:
+    stepIn .35s ease both;
+}
+
+
+@keyframes stepIn {
+
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.main-card {
+
+  background:
+    linear-gradient(
+      145deg,
+      #121e38,
+      #0c1529
+    );
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  border-radius: 22px;
+
+  padding: 17px;
+
+  box-shadow:
+    0 20px 45px rgba(0,0,0,.32),
+
+    inset 0 1px 0
+      rgba(255,255,255,.04);
+}
+
+
+.card-heading {
+
+  display: flex;
+
+  gap: 12px;
+
+  align-items: center;
+
+  margin-bottom: 17px;
+}
+
+
+.heading-icon {
+
+  width: 46px;
+  height: 46px;
+
+  flex: 0 0 46px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 14px;
+
+  font-size: 1.35rem;
+
+  background:
+    #1a2948;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.25);
+}
+
+
+.card-heading h2 {
+
+  font-size: .98rem;
+
+  font-weight: 800;
+
+  letter-spacing: -.025em;
+}
+
+
+.card-heading p {
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: .67rem;
+
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   TYPE SELECTOR
+========================================================= */
+
+.type-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 10px;
+}
+
+
+.type-option {
+
+  position: relative;
+
+  cursor: pointer;
+
+  padding: 15px 12px;
+
+  border-radius: 17px;
+
+  background:
+    #0c172d;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  transition:
+    .2s ease;
+}
+
+
+.type-option input {
+  display: none;
+}
+
+
+.type-option:hover {
+
+  border-color:
+    rgba(96,165,250,.35);
+}
+
+
+.type-option.selected {
+
+  background:
+    linear-gradient(
+      145deg,
+      #102b52,
+      #10213e
+    );
+
+  border-color:
+    rgba(59,130,246,.65);
+
+  box-shadow:
+    0 0 0 1px
+      rgba(59,130,246,.12),
+
+    0 12px 25px
+      rgba(59,130,246,.12);
+}
+
+
+.type-icon {
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 13px;
+
+  font-size: 1.25rem;
+
+  background:
+    #172642;
+
+  margin-bottom: 11px;
+}
+
+
+.type-option.selected .type-icon {
+
+  background:
+    #17437a;
+
+  box-shadow:
+    0 6px 18px
+      rgba(59,130,246,.18);
+}
+
+
+.type-name {
+
+  font-size: .78rem;
+
+  font-weight: 800;
+}
+
+
+.type-desc {
+
+  margin-top: 4px;
+
+  color: var(--muted);
+
+  font-size: .61rem;
+
+  line-height: 1.4;
+}
+
+
+.check {
+
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: .65rem;
+
+  opacity: 0;
+
+  transform: scale(.7);
+
+  background:
+    var(--blue);
+
+  transition: .2s ease;
+}
+
+
+.type-option.selected .check {
+
+  opacity: 1;
+
+  transform: scale(1);
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+.field-label {
+
+  display: block;
+
+  color: #cbd5e1;
+
+  font-size: .68rem;
+
+  font-weight: 800;
+
+  margin-bottom: 8px;
+}
+
+
+.input-wrap {
+
+  position: relative;
+}
+
+
+.input {
+
+  width: 100%;
+
+  height: 52px;
+
+  border-radius: 14px;
+
+  outline: none;
+
+  border:
+    1px solid rgba(255,255,255,.09);
+
+  background:
+    #091326;
+
+  color: white;
+
+  padding:
+    0 13px;
+
+  font-size: .75rem;
+
+  transition:
+    .2s ease;
+}
+
+
+.input::placeholder {
+  color: #52627a;
+}
+
+
+.input:focus {
+
+  border-color:
+    rgba(59,130,246,.65);
+
+  box-shadow:
+    0 0 0 3px
+      rgba(59,130,246,.08);
+}
+
+
+.input-hint {
+
+  margin-top: 7px;
+
+  color: #64748b;
+
+  font-size: .59rem;
+
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.button-row {
+
+  display: flex;
+
+  gap: 9px;
+
+  margin-top: 18px;
+}
+
+
+.btn {
+
+  min-height: 49px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  font-size: .72rem;
+
+  font-weight: 800;
+
+  transition:
+    transform .18s ease,
+    opacity .18s ease,
+    box-shadow .18s ease;
+}
+
+
+.btn:active {
+
+  transform:
+    scale(.96);
+}
+
+
+.btn-primary {
+
+  flex: 1;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #06b6d4
+    );
+
+  box-shadow:
+    0 10px 24px
+      rgba(37,99,235,.25);
+}
+
+
+.btn-primary:disabled {
+
+  opacity: .45;
+
+  cursor: not-allowed;
+
+  box-shadow: none;
+}
+
+
+.btn-secondary {
+
+  padding:
+    0 17px;
+
+  color:
+    #cbd5e1;
+
+  background:
+    #17233d;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+}
+
+
+/* =========================================================
+   INFO BOX
+========================================================= */
+
+.info-box {
+
+  margin-top: 13px;
+
+  padding: 13px;
+
+  border-radius: 15px;
+
+  background:
+    #0c1930;
+
+  border:
+    1px solid rgba(59,130,246,.14);
+
+  display: flex;
+
+  gap: 10px;
+}
+
+
+.info-icon {
+
+  width: 27px;
+  height: 27px;
+
+  flex: 0 0 27px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background:
+    #16376a;
+
+  font-size: .75rem;
+}
+
+
+.info-text {
+
+  color: #8fa2be;
+
+  font-size: .61rem;
+
+  line-height: 1.5;
+}
+
+
+.info-text strong {
+  color: #dbeafe;
+}
+
+
+/* =========================================================
+   ADMIN INSTRUCTIONS
+========================================================= */
+
+.instructions {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-top: 4px;
+}
+
+
+.instruction {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+  padding: 11px;
+
+  border-radius: 13px;
+
+  background:
+    #0b162a;
+
+  border:
+    1px solid rgba(255,255,255,.06);
+}
+
+
+.instruction-number {
+
+  width: 25px;
+  height: 25px;
+
+  flex: 0 0 25px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 8px;
+
+  color: white;
+
+  font-size: .62rem;
+
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed
+    );
+}
+
+
+.instruction-text {
+
+  color: #a8b5c9;
+
+  font-size: .64rem;
+
+  line-height: 1.5;
+}
+
+
+.instruction-text strong {
+  color: white;
+}
+
+
+/* =========================================================
+   BOT CARD
+========================================================= */
+
+.bot-card {
+
+  margin:
+    13px 0;
+
+  padding:
+    14px;
+
+  border-radius:
+    16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #172b52,
+      #192342
+    );
+
+  border:
+    1px solid
+    rgba(96,165,250,.18);
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    10px;
+}
+
+
+.bot-info {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+}
+
+
+.bot-icon {
+
+  width: 42px;
+  height: 42px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    13px;
+
+  background:
+    #2188d0;
+
+  font-size:
+    1.2rem;
+}
+
+
+.bot-name {
+
+  font-size:
+    .75rem;
+
+  font-weight:
+    800;
+}
+
+
+.bot-desc {
+
+  color:
+    #8092ad;
+
+  font-size:
+    .57rem;
+
+  margin-top:
+    2px;
+}
+
+
+.bot-tag {
+
+  padding:
+    5px 8px;
+
+  border-radius:
+    999px;
+
+  color:
+    #93c5fd;
+
+  background:
+    #10294d;
+
+  border:
+    1px solid
+    rgba(96,165,250,.15);
+
+  font-size:
+    .52rem;
+
+  font-weight:
+    800;
+}
+
+
+/* =========================================================
+   VERIFY
+========================================================= */
+
+.verify-box {
+
+  text-align:
+    center;
+
+  padding:
+    10px 4px 4px;
+}
+
+
+.verify-icon {
+
+  width: 74px;
+  height: 74px;
+
+  margin:
+    0 auto 15px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    24px;
+
+  font-size:
+    2rem;
+
+  background:
+    linear-gradient(
+      145deg,
+      #17355f,
+      #13284a
+    );
+
+  border:
+    1px solid
+    rgba(96,165,250,.2);
+
+  box-shadow:
+    0 15px 30px
+      rgba(0,0,0,.25);
+
+  animation:
+    verifyFloat 3s ease-in-out infinite;
+}
+
+
+@keyframes verifyFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
+}
+
+
+.verify-title {
+
+  font-size:
+    1.05rem;
+
+  font-weight:
+    800;
+
+  margin-bottom:
+    6px;
+}
+
+
+.verify-description {
+
+  color:
+    var(--muted);
+
+  font-size:
+    .67rem;
+
+  line-height:
+    1.5;
+
+  max-width:
+    430px;
+
+  margin:
+    auto;
+}
+
+
+.verification-status {
+
+  display:
+    none;
+
+  margin-top:
+    14px;
+
+  padding:
+    12px;
+
+  border-radius:
+    13px;
+
+  font-size:
+    .64rem;
+
+  line-height:
+    1.45;
+}
+
+
+.verification-status.show {
+  display: block;
+}
+
+
+.verification-status.success {
+
+  color:
+    #a7f3d0;
+
+  background:
+    #073d32;
+
+  border:
+    1px solid
+    rgba(16,185,129,.25);
+}
+
+
+.verification-status.error {
+
+  color:
+    #fecaca;
+
+  background:
+    #45171c;
+
+  border:
+    1px solid
+    rgba(239,68,68,.25);
+}
+
+
+/* =========================================================
+   BUDGET
+========================================================= */
+
+.amount-summary {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(2,1fr);
+
+  gap:
+    9px;
+
+  margin-top:
+    15px;
+}
+
+
+.summary-box {
+
+  padding:
+    13px;
+
+  border-radius:
+    14px;
+
+  background:
+    #0b162a;
+
+  border:
+    1px solid
+    rgba(255,255,255,.06);
+}
+
+
+.summary-label {
+
+  color:
+    #71829a;
+
+  font-size:
+    .55rem;
+
+  font-weight:
+    700;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .04em;
+}
+
+
+.summary-value {
+
+  margin-top:
+    5px;
+
+  font-size:
+    .95rem;
+
+  font-weight:
+    800;
+
+  color:
+    white;
+}
+
+
+.price {
+
+  color:
+    #67e8f9;
+}
+
+
+/* =========================================================
+   MEMBER SELECTOR
+========================================================= */
+
+.member-grid {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:
+    8px;
+
+  margin-top:
+    10px;
+}
+
+
+.member-option {
+
+  position:
+    relative;
+
+  text-align:
+    center;
+
+  padding:
+    13px 7px;
+
+  border-radius:
+    13px;
+
+  background:
+    #0b162a;
+
+  border:
+    1px solid
+    rgba(255,255,255,.07);
+
+  cursor:
+    pointer;
+
+  transition:
+    .2s ease;
+}
+
+
+.member-option input {
+  display: none;
+}
+
+
+.member-option.selected {
+
+  border-color:
+    rgba(6,214,232,.6);
+
+  background:
+    #0d2939;
+
+  box-shadow:
+    0 8px 20px
+      rgba(6,214,232,.1);
+}
+
+
+.member-number {
+
+  display:
+    block;
+
+  font-size:
+    .88rem;
+
+  font-weight:
+    800;
+}
+
+
+.member-cost {
+
+  display:
+    block;
+
+  margin-top:
+    3px;
+
+  color:
+    #67e8f9;
+
+  font-size:
+    .54rem;
+
+  font-weight:
+    700;
+}
+
+
+/* =========================================================
+   LIVE PREVIEW
+========================================================= */
+
+.live-preview {
+
+  margin-top:
+    14px;
+
+  padding:
+    15px;
+
+  border-radius:
+    17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #102d2b,
+      #10203a
+    );
+
+  border:
+    1px solid
+    rgba(16,185,129,.18);
+}
+
+
+.preview-title {
+
+  color:
+    #6ee7b7;
+
+  font-size:
+    .58rem;
+
+  font-weight:
+    800;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .06em;
+
+  margin-bottom:
+    7px;
+}
+
+
+.preview-row {
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  margin-top:
+    7px;
+
+  color:
+    #91a2b8;
+
+  font-size:
+    .63rem;
+}
+
+
+.preview-row strong {
+  color: white;
+}
+
+
+.preview-total {
+
+  padding-top:
+    10px;
+
+  margin-top:
+    10px;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.07);
+
+  font-size:
+    .75rem;
+}
+
+
+.preview-total strong {
+
+  color:
+    #6ee7b7;
+
+  font-size:
+    1rem;
+}
+
+
+/* =========================================================
+   SUCCESS
+========================================================= */
+
+.success-screen {
+
+  text-align:
+    center;
+
+  padding:
+    15px 5px;
+}
+
+
+.success-icon {
+
+  width:
+    86px;
+
+  height:
+    86px;
+
+  margin:
+    0 auto 17px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    28px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #064e3b,
+      #065f46
+    );
+
+  border:
+    1px solid
+    rgba(52,211,153,.25);
+
+  font-size:
+    2.4rem;
+
+  box-shadow:
+    0 18px 40px
+      rgba(16,185,129,.15);
+
+  animation:
+    successPop .5s cubic-bezier(.2,.9,.3,1.2);
+}
+
+
+@keyframes successPop {
+
+  from {
+    opacity: 0;
+    transform: scale(.5) rotate(-10deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+
+.success-screen h2 {
+
+  font-size:
+    1.25rem;
+
+  font-weight:
+    800;
+}
+
+
+.success-screen p {
+
+  margin:
+    7px auto 0;
+
+  max-width:
+    400px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    .67rem;
+
+  line-height:
+    1.5;
+}
+
+
+.live-badge {
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  gap:
+    6px;
+
+  margin-top:
+    14px;
+
+  padding:
+    7px 11px;
+
+  border-radius:
+    999px;
+
+  color:
+    #6ee7b7;
+
+  background:
+    #073d32;
+
+  border:
+    1px solid
+    rgba(16,185,129,.2);
+
+  font-size:
+    .58rem;
+
+  font-weight:
+    800;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 400px) {
+
+  .page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .main-card {
+    padding: 14px;
+  }
+
+  .type-grid {
+    gap: 8px;
+  }
+
+  .member-grid {
+    gap: 6px;
+  }
+
+  .member-option {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+}
+
+
+@media (max-width: 340px) {
+
+  .type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .member-grid {
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="bg-orb orb-one"></div>
+<div class="bg-orb orb-two"></div>
+<div class="bg-orb orb-three"></div>
+
+
+<!-- ========================================================
+     HEADER
+========================================================= -->
+
+<header>
+
+  <nav class="nav">
+
+    <a
+      href="/dashboard.html"
+      class="logo"
+    >
+      PAYME<span>.</span>
+    </a>
+
+
+    <a
+      href="/dashboard.html"
+      class="help-btn"
+      aria-label="Back"
+    >
+      ✕
+    </a>
+
+  </nav>
+
+</header>
+
+
+
+<main class="page">
+
+
+  <!-- ======================================================
+       BACK
+  ======================================================= -->
+
+  <a
+    href="/earn.html"
+    class="back"
+  >
+    ← Back to Earn
+  </a>
+
+
+
+  <!-- ======================================================
+       HERO
+  ======================================================= -->
+
+  <section class="hero">
+
+    <div class="eyebrow">
+
+      <span class="eyebrow-dot"></span>
+
+      Telegram Advertising
+
+    </div>
+
+
+    <h1>
+      Grow your Telegram
+      <br>
+      community.
+    </h1>
+
+
+    <p>
+      Promote your Telegram group or channel to PAYME
+      users and get new members for your community.
+    </p>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       PROGRESS
+  ======================================================= -->
+
+  <div class="progress-wrap">
+
+    <div class="progress-top">
+
+      <span class="progress-label">
+        Campaign setup
+      </span>
+
+      <span
+        class="progress-count"
+        id="progressCount"
+      >
+        1 of 5
+      </span>
+
+    </div>
+
+
+    <div class="progress">
+
+      <div
+        class="progress-bar"
+        id="progressBar"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ======================================================
+       STEP 1
+  ======================================================= -->
+
+  <section
+    class="step active"
+    id="step1"
+  >
+
+    <div class="main-card">
+
+      <div class="card-heading">
+
+        <div class="heading-icon">
+          📣
+        </div>
+
+        <div>
+
+          <h2>
+            What do you want to promote?
+          </h2>
+
+          <p>
+            Choose the type of Telegram community.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="type-grid">
+
+
+        <label
+          class="type-option"
+          id="channelOption"
+        >
+
+          <input
+            type="radio"
+            name="telegramType"
+            value="channel"
+          >
+
+          <span class="check">
+            ✓
+          </span>
+
+          <div class="type-icon">
+            📢
+          </div>
+
+          <div class="type-name">
+            Telegram Channel
+          </div>
+
+          <div class="type-desc">
+            Grow your channel with new subscribers.
+          </div>
+
+        </label>
+
+
+
+        <label
+          class="type-option"
+          id="groupOption"
+        >
+
+          <input
+            type="radio"
+            name="telegramType"
+            value="group"
+          >
+
+          <span class="check">
+            ✓
+          </span>
+
+          <div class="type-icon">
+            👥
+          </div>
+
+          <div class="type-name">
+            Telegram Group
+          </div>
+
+          <div class="type-desc">
+            Bring new members into your community.
+          </div>
+
+        </label>
+
+      </div>
+
+
+      <div class="button-row">
+
+        <button
+          class="btn btn-primary"
+          id="step1Next"
+          disabled
+          type="button"
+        >
+          Continue →
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       STEP 2
+  ======================================================= -->
+
+  <section
+    class="step"
+    id="step2"
+  >
+
+    <div class="main-card">
+
+      <div class="card-heading">
+
+        <div class="heading-icon">
+          🔗
+        </div>
+
+        <div>
+
+          <h2>
+            Add your Telegram link
+          </h2>
+
+          <p id="linkDescription">
+            Enter the link to your Telegram community.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <label
+        class="field-label"
+        for="telegramLink"
+      >
+        Telegram link
+      </label>
+
+
+      <input
+        type="url"
+        id="telegramLink"
+        class="input"
+        placeholder="https://t.me/yourcommunity"
+        autocomplete="off"
+        spellcheck="false"
+      >
+
+
+      <div class="input-hint">
+
+        Example:
+        <strong>
+          https://t.me/example
+        </strong>
+
+        <br>
+
+        Make sure you are an administrator of this
+        Telegram community.
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-icon">
+          ℹ️
+        </div>
+
+        <div class="info-text">
+
+          <strong>
+            Why do we need your link?
+          </strong>
+
+          <br>
+
+          PAYME uses your Telegram community to verify
+          successful joins. Your link will be checked
+          before the campaign can go live.
+
+        </div>
+
+      </div>
+
+
+      <div class="button-row">
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          onclick="goToStep(1)"
+        >
+          Back
+        </button>
+
+
+        <button
+          class="btn btn-primary"
+          id="step2Next"
+          type="button"
+        >
+          Continue →
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       STEP 3
+  ======================================================= -->
+
+  <section
+    class="step"
+    id="step3"
+  >
+
+    <div class="main-card">
+
+      <div class="card-heading">
+
+        <div class="heading-icon">
+          🤖
+        </div>
+
+        <div>
+
+          <h2>
+            Add PAYME Bot
+          </h2>
+
+          <p>
+            The bot must be an administrator to verify joins.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="bot-card">
+
+        <div class="bot-info">
+
+          <div class="bot-icon">
+            🤖
+          </div>
+
+          <div>
+
+            <div class="bot-name">
+              @paymeoobot
+            </div>
+
+            <div class="bot-desc">
+              PAYME verification bot
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <span class="bot-tag">
+          REQUIRED
+        </span>
+
+      </div>
+
+
+      <div class="instructions">
+
+
+        <div class="instruction">
+
+          <div class="instruction-number">
+            1
+          </div>
+
+          <div class="instruction-text">
+
+            Open your Telegram
+            <strong>
+              group or channel
+            </strong>
+            and open its settings.
+
+          </div>
+
+        </div>
+
+
+        <div class="instruction">
+
+          <div class="instruction-number">
+            2
+          </div>
+
+          <div class="instruction-text">
+
+            Open
+            <strong>
+              Administrators
+            </strong>
+            and choose
+            <strong>
+              Add Administrator
+            </strong>.
+
+          </div>
+
+        </div>
+
+
+        <div class="instruction">
+
+          <div class="instruction-number">
+            3
+          </div>
+
+          <div class="instruction-text">
+
+            Search for
+            <strong>
+              @paymeoobot
+            </strong>
+            and select the official PAYME bot.
+
+          </div>
+
+        </div>
+
+
+        <div class="instruction">
+
+          <div class="instruction-number">
+            4
+          </div>
+
+          <div class="instruction-text">
+
+            Give the bot the required permissions,
+            then save the administrator settings.
+
+          </div>
+
+        </div>
+
+
+        <div class="instruction">
+
+          <div class="instruction-number">
+            5
+          </div>
+
+          <div class="instruction-text">
+
+            Return to PAYME and press
+            <strong>
+              Verify Group/Channel
+            </strong>.
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="verification-status"
+        id="verificationStatus"
+      ></div>
+
+
+      <div class="button-row">
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          onclick="goToStep(2)"
+        >
+          Back
+        </button>
+
+
+        <button
+          class="btn btn-primary"
+          id="verifyBtn"
+          type="button"
+        >
+          Verify Group/Channel
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       STEP 4
+  ======================================================= -->
+
+  <section
+    class="step"
+    id="step4"
+  >
+
+    <div class="main-card">
+
+      <div class="card-heading">
+
+        <div class="heading-icon">
+          👥
+        </div>
+
+        <div>
+
+          <h2>
+            Choose your audience
+          </h2>
+
+          <p>
+            Select how many new members you want.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <label class="field-label">
+        Number of members
+      </label>
+
+
+      <div class="member-grid">
+
+
+        <label class="member-option">
+
+          <input
+            type="radio"
+            name="memberCount"
+            value="10"
+          >
+
+          <span class="member-number">
+            10
+          </span>
+
+          <span class="member-cost">
+            ₦500
+          </span>
+
+        </label>
+
+
+        <label class="member-option">
+
+          <input
+            type="radio"
+            name="memberCount"
+            value="25"
+          >
+
+          <span class="member-number">
+            25
+          </span>
+
+          <span class="member-cost">
+            ₦1,250
+          </span>
+
+        </label>
+
+
+        <label class="member-option">
+
+          <input
+            type="radio"
+            name="memberCount"
+            value="50"
+          >
+
+          <span class="member-number">
+            50
+          </span>
+
+          <span class="member-cost">
+            ₦2,500
+          </span>
+
+        </label>
+
+
+        <label class="member-option">
+
+          <input
+            type="radio"
+            name="memberCount"
+            value="100"
+          >
+
+          <span class="member-number">
+            100
+          </span>
+
+          <span class="member-cost">
+            ₦5,000
+          </span>
+
+        </label>
+
+
+        <label class="member-option">
+
+          <input
+            type="radio"
+            name="memberCount"
+            value="250"
+          >
+
+          <span class="member-number">
+            250
+          </span>
+
+          <span class="member-cost">
+            ₦12,500
+          </span>
+
+        </label>
+
+
+        <label class="member-option">
+
+          <input
+            type="radio"
+            name="memberCount"
+            value="500"
+          >
+
+          <span class="member-number">
+            500
+          </span>
+
+          <span class="member-cost">
+            ₦25,000
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <div class="amount-summary">
+
+        <div class="summary-box">
+
+          <div class="summary-label">
+            Cost per member
+          </div>
+
+          <div class="summary-value price">
+            ₦50
+          </div>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <div class="summary-label">
+            Member reward
+          </div>
+
+          <div class="summary-value">
+            ₦25
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="live-preview">
+
+        <div class="preview-title">
+          Campaign estimate
+        </div>
+
+
+        <div class="preview-row">
+
+          <span>
+            Members requested
+          </span>
+
+          <strong id="previewMembers">
+            0
+          </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+          <span>
+            Price per join
+          </span>
+
+          <strong>
+            ₦50
+          </strong>
+
+        </div>
+
+
+        <div class="preview-row preview-total">
+
+          <span>
+            Total campaign cost
+          </span>
+
+          <strong id="previewTotal">
+            ₦0
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-icon">
+          💡
+        </div>
+
+        <div class="info-text">
+
+          Every verified member receives
+          <strong>
+            ₦25
+          </strong>
+          from your ₦50 campaign fee.
+
+          <br>
+
+          The remaining ₦25 is retained by PAYME
+          as the platform fee.
+
+        </div>
+
+      </div>
+
+
+      <div class="button-row">
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          onclick="goToStep(3)"
+        >
+          Back
+        </button>
+
+
+        <button
+          class="btn btn-primary"
+          id="step4Next"
+          disabled
+          type="button"
+        >
+          Review Campaign →
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       STEP 5
+  ======================================================= -->
+
+  <section
+    class="step"
+    id="step5"
+  >
+
+    <div class="main-card">
+
+      <div class="card-heading">
+
+        <div class="heading-icon">
+          🚀
+        </div>
+
+        <div>
+
+          <h2>
+            Review your campaign
+          </h2>
+
+          <p>
+            Check everything before publishing.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="live-preview">
+
+        <div class="preview-title">
+          Campaign details
+        </div>
+
+
+        <div class="preview-row">
+
+          <span>
+            Community type
+          </span>
+
+          <strong id="reviewType">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+          <span>
+            Telegram link
+          </span>
+
+          <strong
+            id="reviewLink"
+            style="
+              max-width:190px;
+              overflow:hidden;
+              text-overflow:ellipsis;
+              white-space:nowrap;
+            "
+          >
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+          <span>
+            Members requested
+          </span>
+
+          <strong id="reviewMembers">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+          <span>
+            Price per member
+          </span>
+
+          <strong>
+            ₦50
+          </strong>
+
+        </div>
+
+
+        <div class="preview-row preview-total">
+
+          <span>
+            Total to pay
+          </span>
+
+          <strong id="reviewTotal">
+            ₦0
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-icon">
+          🔐
+        </div>
+
+        <div class="info-text">
+
+          Your campaign will only go live after
+          <strong>
+            PAYME verifies your Telegram community
+          </strong>
+          and confirms the campaign payment.
+
+        </div>
+
+      </div>
+
+
+      <div class="button-row">
+
+        <button
+          class="btn btn-secondary"
+          type="button"
+          onclick="goToStep(4)"
+        >
+          Back
+        </button>
+
+
+        <button
+          class="btn btn-primary"
+          id="publishBtn"
+          type="button"
+        >
+          Publish Campaign
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       SUCCESS
+  ======================================================= -->
+
+  <section
+    class="step"
+    id="stepSuccess"
+  >
+
+    <div class="main-card">
+
+      <div class="success-screen">
+
+        <div class="success-icon">
+          ✓
+        </div>
+
+
+        <h2>
+          Campaign Submitted!
+        </h2>
+
+
+        <p>
+          Your Telegram advertising campaign has been
+          successfully prepared.
+        </p>
+
+
+        <div class="live-badge">
+          ● Campaign Ready
+        </div>
+
+
+        <div class="live-preview" style="text-align:left;">
+
+          <div class="preview-title">
+            Your campaign
+          </div>
+
+
+          <div class="preview-row">
+
+            <span>
+              Members
+            </span>
+
+            <strong id="successMembers">
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="preview-row">
+
+            <span>
+              Campaign cost
+            </span>
+
+            <strong id="successTotal">
+              —
+            </strong>
+
+          </div>
+
+
+          <div class="preview-row">
+
+            <span>
+              Reward per join
+            </span>
+
+            <strong>
+              ₦25
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="button-row">
+
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick="window.location.href='/earn.html'"
+          >
+            Back to Earn
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+</main>
+
+
+
+<script>
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentStep = 1;
+
+let selectedType = null;
+
+let selectedMembers = 0;
+
+let telegramLink = "";
+
+let verified = false;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const progressBar =
+  document.getElementById("progressBar");
+
+const progressCount =
+  document.getElementById("progressCount");
+
+const channelOption =
+  document.getElementById("channelOption");
+
+const groupOption =
+  document.getElementById("groupOption");
+
+const step1Next =
+  document.getElementById("step1Next");
+
+const step2Next =
+  document.getElementById("step2Next");
+
+const telegramInput =
+  document.getElementById("telegramLink");
+
+const verifyBtn =
+  document.getElementById("verifyBtn");
+
+const verificationStatus =
+  document.getElementById("verificationStatus");
+
+const step4Next =
+  document.getElementById("step4Next");
+
+const publishBtn =
+  document.getElementById("publishBtn");
+
+
+/* =========================================================
+   TYPE SELECTION
+========================================================= */
+
+document
+  .querySelectorAll(
+    'input[name="telegramType"]'
+  )
+  .forEach(input => {
+
+    input.addEventListener(
+      "change",
+      function() {
+
+        selectedType =
+          this.value;
+
+        channelOption
+          .classList
+          .remove("selected");
+
+        groupOption
+          .classList
+          .remove("selected");
+
+
+        if (
+          selectedType === "channel"
+        ) {
+
+          channelOption
+            .classList
+            .add("selected");
+
+        } else {
+
+          groupOption
+            .classList
+            .add("selected");
+
+        }
+
+
+        step1Next.disabled = false;
+
+      });
+
+  });
+
+
+/* =========================================================
+   STEP 1
+========================================================= */
+
+step1Next.addEventListener(
+  "click",
+  function() {
+
+    if (!selectedType) return;
+
+    const description =
+      document.getElementById(
+        "linkDescription"
+      );
+
+    if (
+      selectedType === "channel"
+    ) {
+
+      description.textContent =
+        "Enter the link to the Telegram channel you want to grow.";
+
+      telegramInput.placeholder =
+        "https://t.me/yourchannel";
+
+    } else {
+
+      description.textContent =
+        "Enter the link to the Telegram group you want to grow.";
+
+      telegramInput.placeholder =
+        "https://t.me/yourgroup";
+
+    }
+
+
+    goToStep(2);
+
+  }
+);
+
+
+/* =========================================================
+   TELEGRAM LINK VALIDATION
+========================================================= */
+
+function validTelegramLink(value) {
+
+  const trimmed =
+    value.trim();
+
+  if (!trimmed) {
+    return false;
+  }
+
+
+  try {
+
+    const url =
+      new URL(trimmed);
+
+    return (
+      (
+        url.protocol === "https:" ||
+        url.protocol === "http:"
+      ) &&
+      (
+        url.hostname === "t.me" ||
+        url.hostname === "telegram.me" ||
+        url.hostname === "www.t.me"
+      ) &&
+      url.pathname.length > 1
+    );
+
+  } catch {
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   STEP 2
+========================================================= */
+
+step2Next.addEventListener(
+  "click",
+  function() {
+
+    telegramLink =
+      telegramInput.value.trim();
+
+
+    if (
+      !validTelegramLink(telegramLink)
+    ) {
+
+      telegramInput.focus();
+
+      telegramInput.style.borderColor =
+        "#ef4444";
+
+      setTimeout(() => {
+
+        telegramInput.style.borderColor =
+          "";
+
+      }, 1000);
+
+      return;
+
+    }
+
+
+    goToStep(3);
+
+  }
+);
+
+
+/* =========================================================
+   VERIFY
+========================================================= */
+
+verifyBtn.addEventListener(
+  "click",
+  async function() {
+
+    if (
+      !validTelegramLink(telegramLink)
+    ) {
+
+      showVerification(
+        "Please go back and enter a valid Telegram link.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    verifyBtn.disabled = true;
+
+    verifyBtn.textContent =
+      "Checking Telegram…";
+
+
+    verificationStatus
+      .className =
+        "verification-status show";
+
+
+    verificationStatus.textContent =
+      "Checking your Telegram community. Please wait…";
+
+
+    try {
+      const response = await fetch("/api/telegram-ads/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          telegramLink: telegramLink,
+          telegramType: selectedType
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        verified = true;
+
+        showVerification(
+          "✓ Verification successful! Bot admin status confirmed.",
+          "success"
+        );
+
+        verifyBtn.textContent =
+          "Continue →";
+
+        verifyBtn.disabled =
+          false;
+
+        verifyBtn.onclick =
+          function() {
+            goToStep(4);
+          };
+      } else {
+        showVerification(
+          data.message || "Verification failed. Please ensure the bot is added as an admin.",
+          "error"
+        );
+        verifyBtn.textContent = "Verify Group/Channel";
+        verifyBtn.disabled = false;
+      }
+    } catch (err) {
+      showVerification(
+        "Network error. Please try again.",
+        "error"
+      );
+      verifyBtn.textContent = "Verify Group/Channel";
+      verifyBtn.disabled = false;
+    }
+
+  }
+);
+
+
+/* =========================================================
+   VERIFICATION MESSAGE
+========================================================= */
+
+function showVerification(
+  message,
+  type
+) {
+
+  verificationStatus
+    .className =
+      "verification-status show " + type;
+
+  verificationStatus.textContent =
+    message;
+
+}
+
+
+/* =========================================================
+   MEMBER SELECTION
+========================================================= */
+
+document
+  .querySelectorAll(
+    'input[name="memberCount"]'
+  )
+  .forEach(input => {
+
+    input.addEventListener(
+      "change",
+      function() {
+
+        selectedMembers =
+          Number(this.value);
+
+
+        document
+          .querySelectorAll(
+            ".member-option"
+          )
+          .forEach(
+            option =>
+              option.classList.remove(
+                "selected"
+              )
+          );
+
+
+        this
+          .closest(".member-option")
+          .classList.add("selected");
+
+
+        updateBudget();
+
+        step4Next.disabled =
+          false;
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   BUDGET
+========================================================= */
+
+function updateBudget() {
+
+  const total =
+    selectedMembers * 50;
+
+
+  document.getElementById(
+    "previewMembers"
+  ).textContent =
+    selectedMembers;
+
+
+  document.getElementById(
+    "previewTotal"
+  ).textContent =
+    formatNaira(total);
+
+}
+
+
+/* =========================================================
+   NAIRA FORMAT
+========================================================= */
+
+function formatNaira(amount) {
+
+  return "₦" +
+    Number(amount)
+      .toLocaleString(
+        "en-NG"
+      );
+
+}
+
+
+/* =========================================================
+   STEP 4 → REVIEW
+========================================================= */
+
+step4Next.addEventListener(
+  "click",
+  function() {
+
+    if (
+      !selectedMembers
+    ) {
+
+      return;
+
+    }
+
+
+    const total =
+      selectedMembers * 50;
+
+
+    document.getElementById(
+      "reviewType"
+    ).textContent =
+      selectedType === "channel"
+        ? "Telegram Channel"
+        : "Telegram Group";
+
+
+    document.getElementById(
+      "reviewLink"
+    ).textContent =
+      telegramLink;
+
+
+    document.getElementById(
+      "reviewMembers"
+    ).textContent =
+      selectedMembers;
+
+
+    document.getElementById(
+      "reviewTotal"
+    ).textContent =
+      formatNaira(total);
+
+
+    goToStep(5);
+
+  }
+);
+
+
+/* =========================================================
+   PUBLISH
+========================================================= */
+
+publishBtn.addEventListener(
+  "click",
+  async function() {
+
+    publishBtn.disabled =
+      true;
+
+    publishBtn.textContent =
+      "Publishing…";
+
+
+    try {
+      const response = await fetch("/api/telegram-ads/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          telegramLink: telegramLink,
+          telegramType: selectedType,
+          memberCount: selectedMembers
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        const total =
+          selectedMembers * 50;
+
+        document.getElementById(
+          "successMembers"
+        ).textContent =
+          selectedMembers;
+
+        document.getElementById(
+          "successTotal"
+        ).textContent =
+          formatNaira(total);
+
+        goToSuccess();
+      } else {
+        alert(data.message || "Failed to publish campaign. Please check your balance or try again.");
+        publishBtn.disabled = false;
+        publishBtn.textContent = "Publish Campaign";
+      }
+    } catch (err) {
+      alert("Network error. Please check your connection and try again.");
+      publishBtn.disabled = false;
+      publishBtn.textContent = "Publish Campaign";
+    }
+
+  }
+);
+
+
+/* =========================================================
+   STEP NAVIGATION
+========================================================= */
+
+function goToStep(step) {
+
+  currentStep =
+    step;
+
+
+  document
+    .querySelectorAll(".step")
+    .forEach(
+      element =>
+        element.classList.remove(
+          "active"
+        )
+    );
+
+
+  const target =
+    document.getElementById(
+      "step" + step
+    );
+
+
+  if (target) {
+
+    target.classList.add(
+      "active"
+    );
+
+  }
+
+
+  updateProgress();
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =========================================================
+   SUCCESS
+========================================================= */
+
+function goToSuccess() {
+
+  document
+    .querySelectorAll(".step")
+    .forEach(
+      element =>
+        element.classList.remove(
+          "active"
+        )
+    );
+
+
+  document
+    .getElementById(
+      "stepSuccess"
+    )
+    .classList.add(
+      "active"
+    );
+
+
+  progressBar.style.width =
+    "100%";
+
+
+  progressCount.textContent =
+    "Complete";
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+function updateProgress() {
+
+  const percentage =
+    (currentStep / 5) * 100;
+
+
+  progressBar.style.width =
+    percentage + "%";
+
+
+  progressCount.textContent =
+    currentStep + " of 5";
+
+}
+
+
+/* =========================================================
+   PREVENT FORM SUBMISSION
+========================================================= */
+
+document
+  .querySelectorAll("form")
+  .forEach(
+    form =>
+      form.addEventListener(
+        "submit",
+        event =>
+          event.preventDefault()
+      )
+  );
+
+</script>
+
+</body>
+</html>
