@@ -3212,10 +3212,39 @@ window.addEventListener(
    Keep live rankings updated.
 */
 
-setInterval(
-    loadLeaderboardData,
-    5000
+let leaderboardRefreshTimer = null;
+
+function startLeaderboardRefresh() {
+    if (leaderboardRefreshTimer !== null) {
+        clearInterval(leaderboardRefreshTimer);
+    }
+
+    leaderboardRefreshTimer = setInterval(
+        loadLeaderboardData,
+        60000
+    );
+}
+
+function stopLeaderboardRefresh() {
+    if (leaderboardRefreshTimer !== null) {
+        clearInterval(leaderboardRefreshTimer);
+        leaderboardRefreshTimer = null;
+    }
+}
+
+document.addEventListener(
+    'visibilitychange',
+    () => {
+        if (document.hidden) {
+            stopLeaderboardRefresh();
+        } else {
+            loadLeaderboardData();
+            startLeaderboardRefresh();
+        }
+    }
 );
+
+startLeaderboardRefresh();
 
 </script>
 
