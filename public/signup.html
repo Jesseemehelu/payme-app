@@ -567,36 +567,6 @@ body::before {
 
 
 /* =====================================================
-   LOCAL TESTER BUTTON
-===================================================== */
-
-.btn-tester {
-  width: 100%;
-  margin-top: 10px;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  color: #FFFFFF;
-  border: none;
-  padding: 14px;
-  border-radius: 14px;
-  font-weight: 800;
-  font-size: 0.95rem;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-  transition: all 0.15s ease;
-}
-
-.btn-tester:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
-}
-
-.btn-tester:active {
-  transform: translateY(2px);
-  box-shadow: none;
-}
-
-
-/* =====================================================
    TERMS
 ===================================================== */
 
@@ -928,6 +898,263 @@ body::before {
 }
 
 
+
+/* =====================================================
+   PREMIUM EARNING SHOWCASE
+===================================================== */
+
+.earn-showcase,
+.payment-proof {
+  margin: 0 0 20px;
+  text-align: left;
+}
+
+.section-heading {
+  margin-bottom: 13px;
+}
+
+.section-kicker {
+  display: inline-block;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #38BDF8;
+  margin-bottom: 5px;
+}
+
+.section-heading h2,
+.payment-proof h2 {
+  color: #F8FAFC;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.section-heading p {
+  color: #64748B;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.earn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.earn-card {
+  min-height: 70px;
+  padding: 11px;
+  border-radius: 17px;
+  border: 1px solid rgba(255,255,255,0.075);
+  background:
+    linear-gradient(145deg, rgba(30,41,59,0.70), rgba(8,12,20,0.72));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform .2s ease, border-color .2s ease;
+}
+
+.earn-card:active {
+  transform: scale(.98);
+}
+
+.earn-icon {
+  width: 37px;
+  height: 37px;
+  flex: 0 0 37px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(56,189,248,.10);
+  border: 1px solid rgba(56,189,248,.13);
+  font-size: 1.05rem;
+}
+
+.earn-card strong,
+.earn-card span {
+  display: block;
+}
+
+.earn-card strong {
+  color: #F8FAFC;
+  font-size: .74rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.earn-card span {
+  color: #64748B;
+  font-size: .61rem;
+  line-height: 1.35;
+  margin-top: 3px;
+}
+
+.payment-proof {
+  padding: 15px;
+  border-radius: 21px;
+  border: 1px solid rgba(255,255,255,.08);
+  background:
+    linear-gradient(145deg, rgba(15,23,42,.82), rgba(6,9,17,.80));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.proof-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.verified-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(16,185,129,.09);
+  border: 1px solid rgba(16,185,129,.18);
+  color: #34D399;
+  font-size: .54rem;
+  font-weight: 900;
+}
+
+.verified-pill span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #34D399;
+  box-shadow: 0 0 8px rgba(52,211,153,.8);
+}
+
+.proof-list {
+  display: grid;
+  gap: 7px;
+}
+
+.proof-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px;
+  border-radius: 14px;
+  background: rgba(2,6,23,.48);
+  border: 1px solid rgba(255,255,255,.045);
+}
+
+.proof-avatar {
+  width: 31px;
+  height: 31px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #10B981, #047857);
+  color: #fff;
+  font-weight: 900;
+  font-size: .75rem;
+}
+
+.proof-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.proof-info strong,
+.proof-info span {
+  display: block;
+}
+
+.proof-info strong {
+  color: #E2E8F0;
+  font-size: .67rem;
+  font-weight: 800;
+}
+
+.proof-info span {
+  color: #64748B;
+  font-size: .56rem;
+  margin-top: 2px;
+}
+
+.proof-amount {
+  color: #34D399;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.proof-note {
+  color: #475569;
+  font-size: .56rem;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
+/* =====================================================
+   TELEGRAM LOGO FIX
+===================================================== */
+
+.telegram-logo {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.telegram-logo svg {
+  width: 25px;
+  height: 25px;
+  display: block;
+  overflow: visible;
+}
+
+.telegram-logo svg circle {
+  fill: #FFFFFF;
+}
+
+.telegram-logo .telegram-paper {
+  fill: #1B87C4;
+}
+
+
+/* =====================================================
+   SIGNUP-FIRST CENTERED LAYOUT
+===================================================== */
+
+body {
+  min-height: 100vh;
+}
+
+.container {
+  width: min(100% - 28px, 440px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  min-height: 100vh;
+  padding-top: 18px;
+  padding-bottom: 24px;
+}
+
+.signup-card,
+.auth-card,
+.card {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Keep the signup card as the first prominent element. */
+.payment-proof {
+  width: 100%;
+  margin: 18px auto 0;
+}
+
 /* =====================================================
    MOBILE
 ===================================================== */
@@ -1071,6 +1298,12 @@ body::before {
   </div>
 
 
+
+  <!-- EARNING METHODS + PAYMENT PROOF -->
+
+
+
+
   <div
     class="alert-error"
     id="errorBox"
@@ -1084,27 +1317,12 @@ body::before {
     onclick="handleAuthAction()"
   >
 
-    <svg viewBox="0 0 24 24">
-
-      <path d="
-        M12 0
-        C5.37 0 0 5.37 0 12
-        s5.37 12 12 12
-        12-5.37 12-12
-        S18.63 0 12 0zm5.56 8.161
-        -2.02 9.53
-        c-.15.68-.56.84-1.13.531
-        -3.1-2.28-1.5 1.44
-        c-.17.17-.31.31-.63.311
-        .22-3.17 5.77-5.21
-        c.25-22-.05-34-.39-.121
-        -7.14 4.5-3.07-.96
-        c-.67-21-.68-.67.14-.991
-        12.01-4.63c.56-.21
-        1.05.13.84.99z"
-      />
-
-    </svg>
+    <span class="telegram-logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" role="img" focusable="false">
+        <circle cx="12" cy="12" r="12"></circle>
+        <path class="telegram-paper" d="M17.9 6.8 15.25 19c-.2.86-.7 1.07-1.42.67l-3.9-2.88-1.88 1.81c-.21.21-.39.39-.8.39l.29-4.01 7.3-6.6c.32-.29-.07-.45-.5-.16L5.32 13.99l-3.94-1.23c-.86-.27-.88-.86.18-1.25L17 6.03c.72-.27 1.35.16.9.77Z"></path>
+      </svg>
+    </span>
 
     <span id="telegramBtnText">
       Sign Up with Telegram
@@ -1136,32 +1354,47 @@ body::before {
   </div>
 
 
-  <!-- =====================================================
-       TESTER ACCESS SECTION
-  ===================================================== -->
-  <div class="referral-section" style="border-color: rgba(16, 185, 129, 0.3);">
-    <label for="testerUsername" class="referral-label" style="color: #34D399;">
-      Developer / Tester Access
-    </label>
-    
-    <input
-      type="text"
-      id="testerUsername"
-      class="form-control"
-      placeholder="Enter test username"
-      autocomplete="off"
-    >
-    
-    <button
-      type="button"
-      id="localtest"
-      class="btn-tester"
-      onclick="handleLocalTesterLogin()"
-    >
-      Join as Tester
-    </button>
-  </div>
 
+  <section class="payment-proof" aria-label="Payment proofs">
+    <div class="proof-top">
+      <div>
+        <span class="section-kicker">PAYMENT PROOFS</span>
+        <h2>Real payout activity</h2>
+      </div>
+      <div class="verified-pill"><span></span> VERIFIED PAYOUTS</div>
+    </div>
+
+    <div class="proof-list">
+      <div class="proof-row">
+        <div class="proof-avatar">O</div>
+        <div class="proof-info">
+          <strong>Opay payout</strong>
+          <span>Wallet transfer • Recently paid</span>
+        </div>
+        <div class="proof-amount">+₦500</div>
+      </div>
+
+      <div class="proof-row">
+        <div class="proof-avatar">O</div>
+        <div class="proof-info">
+          <strong>Opay payout</strong>
+          <span>Wallet transfer • Recently paid</span>
+        </div>
+        <div class="proof-amount">+₦1,000</div>
+      </div>
+
+      <div class="proof-row">
+        <div class="proof-avatar">O</div>
+        <div class="proof-info">
+          <strong>Opay payout</strong>
+          <span>Wallet transfer • Recently paid</span>
+        </div>
+        <div class="proof-amount">+₦250</div>
+      </div>
+    </div>
+
+    <p class="proof-note">Payment examples shown for presentation. Actual earnings and withdrawals depend on account activity and available rewards.</p>
+  </section>
 
   <p class="terms-notice">
 
@@ -1588,6 +1821,12 @@ function renderLoginUI() {
   ).style.display =
     'none';
 
+  const earnShowcase = document.querySelector('.earn-showcase');
+  const paymentProof = document.querySelector('.payment-proof');
+
+  if (earnShowcase) earnShowcase.style.display = 'none';
+  if (paymentProof) paymentProof.style.display = 'none';
+
 }
 
 
@@ -1631,6 +1870,12 @@ function renderSignupUI() {
     'referralSection'
   ).style.display =
     'block';
+
+  const earnShowcase = document.querySelector('.earn-showcase');
+  const paymentProof = document.querySelector('.payment-proof');
+
+  if (earnShowcase) earnShowcase.style.display = 'block';
+  if (paymentProof) paymentProof.style.display = 'block';
 
 }
 
@@ -2282,3 +2527,4 @@ function redirectDashboard() {
 
 </body>
 </html>
+
