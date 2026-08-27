@@ -1851,13 +1851,12 @@ header {
 .campaigns-modal-title{display:flex;align-items:center;gap:10px}.campaigns-modal-title-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:#172642;font-size:1.05rem}.campaigns-modal-title h3{font-size:.9rem;font-weight:800}.campaigns-modal-title p{margin-top:2px;color:var(--muted);font-size:.56rem}
 .campaigns-modal-close{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:11px;color:#cbd5e1;background:#17233d;font-size:1rem;cursor:pointer}
 .campaigns-modal-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 17px}.campaigns-modal-tools span{color:#71829a;font-size:.56rem;font-weight:700}
-.refresh-campaigns{min-height:34px;padding:0 11px;border-radius:10px;color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08);font-size:.56rem;font-weight:800;cursor:pointer}.campaigns-topup-bar{padding:0 17px 12px}.campaigns-topup-launcher{width:100%;min-height:43px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(16,185,129,.22);border-radius:12px;color:#a7f3d0;background:linear-gradient(135deg,#073d32,#0b5a48);font-size:.6rem;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.18);transition:transform .18s ease,filter .18s ease}.campaigns-topup-launcher:hover{transform:translateY(-1px);filter:brightness(1.08)}.campaigns-topup-launcher:active{transform:scale(.985)}.campaigns-topup-launcher[disabled]{opacity:.45;cursor:not-allowed;transform:none;filter:none}
-.campaign-list{min-height:120px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:0 17px 17px;overscroll-behavior:contain}.campaign-empty{padding:22px 12px;text-align:center;color:#71829a;font-size:.62rem;line-height:1.5;border:1px dashed rgba(255,255,255,.08);border-radius:14px}
+.refresh-campaigns{min-height:34px;padding:0 11px;border-radius:10px;color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08);font-size:.56rem;font-weight:800;cursor:pointer}.campaign-list{min-height:120px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:0 17px 17px;overscroll-behavior:contain}.campaign-empty{padding:22px 12px;text-align:center;color:#71829a;font-size:.62rem;line-height:1.5;border:1px dashed rgba(255,255,255,.08);border-radius:14px}
 .campaign-card{padding:13px;border-radius:16px;background:#0b162a;border:1px solid rgba(255,255,255,.07);animation:campaignRowIn .25s ease both}@keyframes campaignRowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 .campaign-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.campaign-community{min-width:0}.campaign-community-name{color:white;font-size:.72rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.campaign-community-type{margin-top:3px;color:#71829a;font-size:.54rem;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
 .campaign-status{flex:0 0 auto;padding:5px 8px;border-radius:999px;font-size:.5rem;font-weight:800;text-transform:uppercase}.campaign-status.active{color:#6ee7b7;background:#073d32;border:1px solid rgba(16,185,129,.2)}.campaign-status.completed{color:#93c5fd;background:#10294d;border:1px solid rgba(96,165,250,.15)}.campaign-status.cancelled{color:#fca5a5;background:#45171c;border:1px solid rgba(239,68,68,.2)}
 .campaign-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.campaign-stat{padding:9px;border-radius:11px;background:#0f1b31;border:1px solid rgba(255,255,255,.05)}.campaign-stat-label{color:#64748b;font-size:.5rem;font-weight:700}.campaign-stat-value{margin-top:3px;color:white;font-size:.68rem;font-weight:800}.campaign-progress{height:5px;margin-top:10px;background:#17233d;border-radius:99px;overflow:hidden}.campaign-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--cyan))}
-.campaign-actions{display:flex;gap:8px;margin-top:10px}.campaign-open-btn,.campaign-cancel-btn,.campaign-topup-btn{flex:1;min-height:39px;border-radius:11px;font-size:.58rem;font-weight:800;cursor:pointer}.campaign-open-btn{color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08)}.campaign-cancel-btn{color:#fecaca;background:#3a1720;border:1px solid rgba(239,68,68,.18)}.campaign-topup-btn{color:#a7f3d0;background:#073d32;border:1px solid rgba(16,185,129,.2)}
+.campaign-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.campaign-open-btn,.campaign-cancel-btn,.campaign-topup-btn{flex:1;min-height:39px;border-radius:11px;font-size:.58rem;font-weight:800;cursor:pointer}.campaign-open-btn{color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08)}.campaign-cancel-btn{color:#fecaca;background:#3a1720;border:1px solid rgba(239,68,68,.18)}.campaign-topup-btn{color:#a7f3d0;background:#073d32;border:1px solid rgba(16,185,129,.2)}
 /* =========================================================
    LOADING / CONFIRMATION POPUP
 ========================================================= */
@@ -3058,9 +3057,6 @@ header {
       <span>Manage your advertising campaigns</span>
       <button class="refresh-campaigns" id="refreshCampaignsBtn" type="button">Refresh</button>
     </div>
-    <div class="campaigns-topup-bar">
-      <button class="campaigns-topup-launcher" id="campaignsTopupBtn" type="button">↗&nbsp; Top up a campaign</button>
-    </div>
     <div class="campaign-list" id="campaignList">
       <div class="campaign-empty">Open the campaigns panel to load your campaigns.</div>
     </div>
@@ -3218,13 +3214,13 @@ function renderCampaigns(campaigns){
         <div class="campaign-stat"><div class="campaign-stat-label">Budget</div><div class="campaign-stat-value">₦${total.toLocaleString("en-NG")}</div></div>
       </div>
       <div class="campaign-progress"><span style="width:${progress}%"></span></div>
-      <div class="campaign-actions"><button class="campaign-open-btn" type="button" onclick="openCampaign('${escapeHtml(ad.telegram_link||"")}')">Open community</button>
+      <div class="campaign-actions">
       ${(status==="active"||status==="completed")?`<button class="campaign-topup-btn" type="button" onclick="openTopupCampaign('${escapeHtml(ad.id)}',${target},${completed},'${escapeHtml(ad.telegram_username||"")}')">Top up campaign</button>`:""}
-      ${canCancel?`<button class="campaign-cancel-btn" type="button" onclick="confirmCancelCampaign('${escapeHtml(ad.id)}')">Cancel campaign</button>`:""}</div>
+      ${canCancel?`<button class="campaign-cancel-btn" type="button" onclick="confirmCancelCampaign('${escapeHtml(ad.id)}')">Cancel campaign</button>`:""}
+      </div>
     </div>`;
   }).join("");
 }
-function openCampaign(link){ if(link) window.open(link,"_blank"); }
 async function loadMyCampaigns(){
   campaignList.innerHTML='<div class="campaign-empty"><span class="modal-spinner" style="display:inline-block;width:20px;height:20px;border-width:2px;vertical-align:middle;margin-right:7px;"></span>Loading your campaigns…</div>';
   refreshCampaignsBtn.disabled=true; refreshCampaignsBtn.textContent="Loading…";
@@ -3290,32 +3286,9 @@ function openTopupCampaign(adId,target,completed,username){
   setTimeout(() => topupMembersInput.focus(), 120);
 }
 
-function openTopupFromCampaigns(){
-  const cards = Array.from(document.querySelectorAll("#campaignList .campaign-card"));
-  const eligible = cards.find(card => {
-    const status = card.querySelector(".campaign-status");
-    const value = status ? status.textContent.trim().toLowerCase() : "";
-    return value === "active" || value === "completed";
-  });
-
-  if(!eligible){
-    showMessageModal("No campaign available","You can top up an active or completed campaign. Cancelled campaigns cannot be topped up.","error");
-    return;
-  }
-
-  const topupButton = eligible.querySelector(".campaign-topup-btn");
-  if(topupButton){
-    topupButton.click();
-    return;
-  }
-
-  showMessageModal("No campaign available","Please choose an active or completed campaign to top up.","error");
-}
-
 topupMembersInput.addEventListener("input",updateTopupEstimate);
 closeTopupBtn.addEventListener("click",closeTopupModal);
 cancelTopupBtn.addEventListener("click",closeTopupModal);
-campaignsTopupBtn.addEventListener("click",openTopupFromCampaigns);
 topupModal.addEventListener("click",event=>{if(event.target===topupModal)closeTopupModal();});
 
 confirmTopupBtn.addEventListener("click",async()=>{
