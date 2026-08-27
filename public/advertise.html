@@ -1858,6 +1858,234 @@ header {
 .campaign-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.campaign-stat{padding:9px;border-radius:11px;background:#0f1b31;border:1px solid rgba(255,255,255,.05)}.campaign-stat-label{color:#64748b;font-size:.5rem;font-weight:700}.campaign-stat-value{margin-top:3px;color:white;font-size:.68rem;font-weight:800}.campaign-progress{height:5px;margin-top:10px;background:#17233d;border-radius:99px;overflow:hidden}.campaign-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--cyan))}
 .campaign-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.campaign-open-btn,.campaign-cancel-btn,.campaign-topup-btn{flex:1;min-height:39px;border-radius:11px;font-size:.58rem;font-weight:800;cursor:pointer}.campaign-open-btn{color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08)}.campaign-cancel-btn{color:#fecaca;background:#3a1720;border:1px solid rgba(239,68,68,.18)}.campaign-topup-btn{color:#a7f3d0;background:#073d32;border:1px solid rgba(16,185,129,.2)}
 /* =========================================================
+   PREMIUM TOP-UP MODAL
+   ========================================================= */
+.topup-modal-card{
+  width:min(100%,410px)!important;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(16,185,129,.16),transparent 34%),
+    radial-gradient(circle at 0% 100%,rgba(59,130,246,.10),transparent 38%),
+    linear-gradient(145deg,#14233f,#091326)!important;
+  border:1px solid rgba(110,231,183,.16)!important;
+  box-shadow:
+    0 35px 100px rgba(0,0,0,.62),
+    inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+.topup-modal-card .campaigns-modal-head{
+  padding:18px 18px 15px;
+}
+.topup-modal-card .campaigns-modal-title-icon{
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  color:#a7f3d0;
+  background:linear-gradient(145deg,#0c5a47,#123c3d);
+  border:1px solid rgba(110,231,183,.18);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  font-size:1.25rem;
+}
+.topup-modal-card .campaigns-modal-title h3{
+  font-size:1rem;
+  font-weight:900;
+  letter-spacing:-.035em;
+}
+.topup-modal-card .campaigns-modal-title p{
+  color:#8fa2be;
+  font-size:.58rem;
+  margin-top:4px;
+}
+.topup-body{
+  padding:18px;
+}
+.topup-summary{
+  position:relative;
+  overflow:hidden;
+  padding:14px;
+  margin-bottom:17px;
+  border-radius:17px;
+  background:
+    linear-gradient(145deg,#102d2b,#0d1e32);
+  border:1px solid rgba(110,231,183,.14);
+  box-shadow:
+    0 12px 25px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+.topup-summary:after{
+  content:"";
+  position:absolute;
+  width:90px;
+  height:90px;
+  right:-42px;
+  top:-42px;
+  border-radius:50%;
+  background:rgba(16,185,129,.12);
+  filter:blur(4px);
+}
+.topup-summary-label{
+  color:#6ee7b7;
+  font-size:.53rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+}
+.topup-summary strong{
+  display:block;
+  margin-top:5px;
+  color:white;
+  font-size:.82rem;
+  font-weight:900;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.topup-explainer{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:16px;
+  padding:12px;
+  border-radius:14px;
+  background:#0b172b;
+  border:1px solid rgba(255,255,255,.06);
+}
+.topup-explainer-icon{
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:#16376a;
+  color:#93c5fd;
+  font-size:.72rem;
+  box-shadow:0 6px 15px rgba(0,0,0,.2);
+}
+.topup-explainer strong{
+  display:block;
+  color:white;
+  font-size:.64rem;
+  font-weight:900;
+  line-height:1.35;
+}
+.topup-explainer span{
+  display:block;
+  margin-top:3px;
+  color:#8193ac;
+  font-size:.56rem;
+  line-height:1.45;
+}
+.topup-input-label{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.topup-input-label .field-label{
+  margin:0;
+  color:white;
+  font-size:.67rem;
+  font-weight:900;
+}
+.topup-rate{
+  color:#6ee7b7;
+  font-size:.54rem;
+  font-weight:900;
+}
+.topup-number-wrap{
+  position:relative;
+}
+.topup-number-wrap .input{
+  height:58px;
+  padding:0 76px 0 15px;
+  border-radius:16px;
+  background:#071123;
+  border:1px solid rgba(110,231,183,.12);
+  font-size:1rem;
+  font-weight:900;
+}
+.topup-number-wrap .input:focus{
+  border-color:rgba(110,231,183,.55);
+  box-shadow:0 0 0 4px rgba(16,185,129,.08),0 10px 25px rgba(0,0,0,.18);
+}
+.topup-number-suffix{
+  position:absolute;
+  right:15px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#6ee7b7;
+  font-size:.56rem;
+  font-weight:900;
+  pointer-events:none;
+}
+.topup-shortcuts{
+  display:flex;
+  gap:7px;
+  margin-top:9px;
+}
+.topup-shortcut{
+  flex:1;
+  min-height:31px;
+  border-radius:9px;
+  color:#9fb0c7;
+  background:#101e35;
+  border:1px solid rgba(255,255,255,.07);
+  font-size:.54rem;
+  font-weight:900;
+  cursor:pointer;
+}
+.topup-shortcut:active{transform:scale(.96)}
+.topup-estimate{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:15px;
+  padding:15px;
+  border-radius:17px;
+  background:linear-gradient(145deg,#073d32,#0a2d32);
+  border:1px solid rgba(110,231,183,.17);
+  box-shadow:
+    0 12px 25px rgba(0,0,0,.2),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+.topup-estimate span{
+  color:#9ab5ad;
+  font-size:.58rem;
+  font-weight:800;
+}
+.topup-estimate strong{
+  color:#6ee7b7;
+  font-size:1.12rem;
+  font-weight:900;
+  letter-spacing:-.035em;
+}
+.topup-total-note{
+  margin-top:6px;
+  color:#71829a;
+  text-align:right;
+  font-size:.5rem;
+  font-weight:700;
+}
+.topup-actions{
+  margin-top:15px;
+}
+.topup-actions .btn{
+  min-height:51px;
+  border-radius:15px;
+  font-weight:900;
+}
+.topup-actions .btn-primary{
+  box-shadow:0 12px 25px rgba(16,185,129,.18);
+  background:linear-gradient(135deg,#059669,#06b6d4);
+}
+.topup-actions .btn-secondary{
+  min-width:92px;
+}
+
+/* =========================================================
    LOADING / CONFIRMATION POPUP
 ========================================================= */
 
@@ -3069,25 +3297,56 @@ header {
     <div class="campaigns-modal-head">
       <div class="campaigns-modal-title">
         <div class="campaigns-modal-title-icon">↗</div>
-        <div><h3 id="topupModalTitle">Top up campaign</h3><p>Start another batch for this Telegram community</p></div>
+        <div>
+          <h3 id="topupModalTitle">Extend Campaign</h3>
+          <p>Add more members to this same campaign</p>
+        </div>
       </div>
       <button class="campaigns-modal-close" id="closeTopupBtn" type="button" aria-label="Close">×</button>
     </div>
+
     <div class="topup-body">
       <div class="topup-summary">
-        <div class="topup-summary-label">Community</div>
+        <div class="topup-summary-label">Existing campaign</div>
         <strong id="topupCommunity">Telegram community</strong>
       </div>
-      <label class="field-label" for="topupMembersInput">Additional members</label>
-      <input class="input" id="topupMembersInput" type="number" min="20" step="1" inputmode="numeric" placeholder="Minimum 20 members" autocomplete="off">
-      <div class="input-hint">Minimum 20 members. Cost is ₦50 per member.</div>
+
+      <div class="topup-explainer">
+        <div class="topup-explainer-icon">↗</div>
+        <div>
+          <strong>Your campaign will be extended — not duplicated.</strong>
+          <span>The extra members will be added to your existing campaign target and the same campaign will continue running.</span>
+        </div>
+      </div>
+
+      <div class="topup-input-label">
+        <label class="field-label" for="topupMembersInput">How many more members?</label>
+        <span class="topup-rate">₦50 / member</span>
+      </div>
+
+      <div class="topup-number-wrap">
+        <input class="input" id="topupMembersInput" type="number" min="20" step="1" inputmode="numeric" placeholder="Enter members" autocomplete="off">
+        <span class="topup-number-suffix">MEMBERS</span>
+      </div>
+
+      <div class="topup-shortcuts">
+        <button class="topup-shortcut" type="button" data-topup-members="20">+20</button>
+        <button class="topup-shortcut" type="button" data-topup-members="50">+50</button>
+        <button class="topup-shortcut" type="button" data-topup-members="100">+100</button>
+        <button class="topup-shortcut" type="button" data-topup-members="200">+200</button>
+      </div>
+
+      <div class="input-hint">Minimum top-up: 20 members. Your balance is charged only for the additional members.</div>
+
       <div class="topup-estimate">
-        <span>Total cost</span>
+        <span>Amount to pay</span>
         <strong id="topupTotal">₦0</strong>
       </div>
+      <div class="topup-total-note">The existing campaign target will increase by the amount above.</div>
+
       <div class="button-row topup-actions">
         <button class="btn btn-secondary" id="cancelTopupBtn" type="button">Cancel</button>
-        <button class="btn btn-primary" id="confirmTopupBtn" type="button">Top up campaign</button>
+        <button class="btn btn-primary" id="confirmTopupBtn" type="button">Extend Campaign</button>
       </div>
     </div>
   </div>
@@ -3215,7 +3474,7 @@ function renderCampaigns(campaigns){
       </div>
       <div class="campaign-progress"><span style="width:${progress}%"></span></div>
       <div class="campaign-actions">
-      ${(status==="active"||status==="completed")?`<button class="campaign-topup-btn" type="button" onclick="openTopupCampaign('${escapeHtml(ad.id)}',${target},${completed},'${escapeHtml(ad.telegram_username||"")}')">Top up campaign</button>`:""}
+      ${(status==="active"||status==="completed")?`<button class="campaign-topup-btn" type="button" onclick="openTopupCampaign('${escapeHtml(ad.id)}',${target},${completed},'${escapeHtml(ad.telegram_username||"")}')">Extend campaign</button>`:""}
       ${canCancel?`<button class="campaign-cancel-btn" type="button" onclick="confirmCancelCampaign('${escapeHtml(ad.id)}')">Cancel campaign</button>`:""}
       </div>
     </div>`;
@@ -3252,8 +3511,8 @@ campaignsModal.addEventListener("click",event=>{if(event.target===campaignsModal
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&campaignsModal.classList.contains("show"))closeCampaignsModal();});
 
 /* =========================================================
-   TOP UP CAMPAIGN
-========================================================= */
+   TOP UP / EXTEND EXISTING CAMPAIGN
+   ========================================================= */
 const topupModal = document.getElementById("topupModal");
 const closeTopupBtn = document.getElementById("closeTopupBtn");
 const cancelTopupBtn = document.getElementById("cancelTopupBtn");
@@ -3261,38 +3520,70 @@ const confirmTopupBtn = document.getElementById("confirmTopupBtn");
 const topupMembersInput = document.getElementById("topupMembersInput");
 const topupTotal = document.getElementById("topupTotal");
 const topupCommunity = document.getElementById("topupCommunity");
-const campaignsTopupBtn = document.getElementById("campaignsTopupBtn");
+const topupShortcutButtons = document.querySelectorAll("[data-topup-members]");
 let topupCampaignId = "";
 
 function closeTopupModal(){
   topupModal.classList.remove("show");
   topupModal.setAttribute("aria-hidden","true");
   topupCampaignId = "";
+  document.body.style.overflow = "";
 }
+
 function updateTopupEstimate(){
   const members = Number(topupMembersInput.value);
-  topupTotal.textContent = Number.isInteger(members) && members >= 20
+  const valid = Number.isInteger(members) && members >= 20;
+
+  topupTotal.textContent = valid
     ? formatNaira(members * 50)
     : "₦0";
+
+  topupMembersInput.classList.toggle(
+    "invalid",
+    topupMembersInput.value !== "" && !valid
+  );
+
+  confirmTopupBtn.disabled = !valid || !topupCampaignId;
 }
+
 function openTopupCampaign(adId,target,completed,username){
   topupCampaignId = String(adId || "");
-  topupCommunity.textContent = username ? "@" + String(username).replace(/^@/,"") : "Telegram community";
+
+  topupCommunity.textContent =
+    username
+      ? "@" + String(username).replace(/^@/,"")
+      : "Telegram community";
+
   topupMembersInput.value = "";
   updateTopupEstimate();
+
   topupModal.classList.add("show");
   topupModal.setAttribute("aria-hidden","false");
   document.body.style.overflow = "hidden";
+
   setTimeout(() => topupMembersInput.focus(), 120);
 }
 
 topupMembersInput.addEventListener("input",updateTopupEstimate);
+
+topupShortcutButtons.forEach(button=>{
+  button.addEventListener("click",()=>{
+    topupMembersInput.value = button.dataset.topupMembers || "";
+    updateTopupEstimate();
+    topupMembersInput.focus();
+  });
+});
+
 closeTopupBtn.addEventListener("click",closeTopupModal);
 cancelTopupBtn.addEventListener("click",closeTopupModal);
-topupModal.addEventListener("click",event=>{if(event.target===topupModal)closeTopupModal();});
+
+topupModal.addEventListener("click",event=>{
+  if(event.target===topupModal) closeTopupModal();
+});
 
 confirmTopupBtn.addEventListener("click",async()=>{
   const members = Number(topupMembersInput.value);
+
   if(!Number.isInteger(members) || members < 20){
     topupMembersInput.classList.add("invalid");
     topupMembersInput.focus();
@@ -3300,32 +3591,63 @@ confirmTopupBtn.addEventListener("click",async()=>{
   }
 
   const adId = topupCampaignId;
+
   if(!adId){
-    showMessageModal("Campaign not selected","Please choose an active or completed campaign to top up.","error");
+    showMessageModal(
+      "Campaign not selected",
+      "Please choose the campaign you want to extend.",
+      "error"
+    );
     return;
   }
 
+  const totalCost = members * 50;
+
   closeTopupModal();
-  showLoadingModal("Topping up campaign","Please verify the community and process your campaign payment.");
+
+  showLoadingModal(
+    "Extending your campaign",
+    `Adding ${members.toLocaleString("en-NG")} more members to your existing campaign. You will be charged ${formatNaira(totalCost)}.`
+  );
+
   try{
     const response = await fetch("/api/telegram-ads/top-up",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       credentials:"include",
-      body:JSON.stringify({adId,members})
+      body:JSON.stringify({
+        adId,
+        members
+      })
     });
+
     const data = await response.json();
     closeAppModal();
+
     if(response.ok && data.success){
       await loadMyCampaigns();
-      showMessageModal("Campaign topped up",`${members.toLocaleString("en-NG")} added to campaign. ${formatNaira(data.totalCost || members * 50)} was charged.` ,"success");
+
+      showMessageModal(
+        "Campaign Extended ✓",
+        `${members.toLocaleString("en-NG")} more members were added to your existing campaign. Your new target is ${Number(data.targetMembers || 0).toLocaleString("en-NG")} members. ${formatNaira(data.additionalCost || totalCost)} was charged.`,
+        "success"
+      );
     }else{
-      showMessageModal("Could not top up campaign",data.message || "The campaign could not be topped up.","error");
+      showMessageModal(
+        "Could Not Extend Campaign",
+        data.message || "The campaign could not be extended.",
+        "error"
+      );
     }
   }catch(error){
-    console.error("top up campaign:",error);
+    console.error("extend campaign:",error);
     closeAppModal();
-    showMessageModal("Connection problem","We could not top up the campaign right now. Please try again.","error");
+
+    showMessageModal(
+      "Connection Problem",
+      "We could not extend the campaign right now. Please try again.",
+      "error"
+    );
   }
 });
 

@@ -2461,32 +2461,83 @@ app.get('/api/telegram-ads/my-campaigns',requireLogin,async(req,res)=>{
 // ======================================================
 // TOP UP ADVERTISER CAMPAIGN
 // ======================================================
-// A top-up uses the same verified Telegram community and creates
-// a fresh active campaign for the requested additional members.
-// This reuses the existing atomic payment + campaign-creation RPC.
+// TOP-UP EXTENDS THE EXISTING CAMPAIGN.
+// It NEVER creates a second/duplicate campaign.
+//
+// The advertiser pays for the extra members, then the existing
+// telegram_ads row is extended by increasing target_members and
+// total_cost. A completed campaign is reactivated when topped up.
+// ======================================================
 app.post('/api/telegram-ads/top-up',requireLogin,async(req,res)=>{
   try{
     const adId=String(req.body?.adId||'').trim();
     const members=Number(req.body?.members);
 
-    if(!adId) return res.status(400).json({success:false,message:'Campaign ID is required.'});
-    if(!Number.isInteger(members)||members<20){
-      return res.status(400).json({success:false,message:'Minimum campaign size is 20 members.'});
+    if(!adId){
+      return res.status(400).json({
+        success:false,
+        message:'Campaign ID is required.'
+      });
     }
 
-    const {data:ad,error:adError}=await supabase.from('telegram_ads').select(`
-      id, advertiser_id, telegram_type, telegram_link, telegram_chat_id, telegram_username,
-      target_members, completed_members, price_per_join, total_cost, status
-    `).eq('id',adId).eq('advertiser_id',String(req.user.id)).maybeSingle();
+    if(!Number.isInteger(members)||members<20){
+      return res.status(400).json({
+        success:false,
+        message:'Minimum campaign top-up is 20 members.'
+      });
+    }
+
+    // --------------------------------------------------
+    // LOAD THE EXISTING CAMPAIGN
+    // --------------------------------------------------
+    const {data:ad,error:adError}=await supabase
+      .from('telegram_ads')
+      .select(`
+        id,
+        advertiser_id,
+        telegram_type,
+        telegram_link,
+        telegram_chat_id,
+        telegram_username,
+        target_members,
+        completed_members,
+        price_per_join,
+        total_cost,
+        status
+      `)
+      .eq('id',adId)
+      .eq('advertiser_id',String(req.user.id))
+      .maybeSingle();
+
     if(adError) throw adError;
-    if(!ad) return res.status(404).json({success:false,message:'Campaign not found.'});
+
+    if(!ad){
+      return res.status(404).json({
+        success:false,
+        message:'Campaign not found.'
+      });
+    }
+
+    if(ad.status==='cancelled'){
+      return res.status(400).json({
+        success:false,
+        message:'Cancelled campaigns cannot be topped up.'
+      });
+    }
 
     const target=Number(ad.target_members||0);
     const completed=Number(ad.completed_members||0);
-    if(ad.status==='cancelled'){
-      return res.status(400).json({success:false,message:'Cancelled campaigns cannot be topped up.'});
-    }
+    const pricePerJoin=Number(
+      ad.price_per_join || TELEGRAM_AD_PRICE_PER_JOIN
+    );
+    const additionalCost=members*pricePerJoin;
+    const currentTotalCost=Number(
+      ad.total_cost || target*pricePerJoin
+    );
 
+    // --------------------------------------------------
+    // VERIFY THE SAME TELEGRAM COMMUNITY
+    // --------------------------------------------------
     const verification=await verifyTelegramAdvertisingCommunity(
       ad.telegram_link,
       ad.telegram_type,
@@ -2494,58 +2545,191 @@ app.post('/api/telegram-ads/top-up',requireLogin,async(req,res)=>{
     );
 
     if(!verification.success){
-      return res.status(400).json({success:false,message:verification.message});
+      return res.status(400).json({
+        success:false,
+        message:verification.message
+      });
     }
 
     const verifiedChatId=verification.chatId;
     const verifiedUsername=verification.username;
-    const totalCost=members*TELEGRAM_AD_PRICE_PER_JOIN;
 
-    const {data,error}=await supabase.rpc('create_telegram_ad_campaign',{
-      p_advertiser_id:String(req.user.id),
-      p_telegram_type:ad.telegram_type,
-      p_telegram_link:ad.telegram_link,
-      p_telegram_chat_id:verifiedChatId,
-      p_telegram_username:verifiedUsername,
-      p_target_members:members,
-      p_total_cost:totalCost
-    });
+    // --------------------------------------------------
+    // CHECK CURRENT BALANCE
+    // --------------------------------------------------
+    const freshUser=await getUserById(req.user.id);
 
-    if(error){
-      console.error('Telegram ad top-up RPC error:',error);
-      const message=String(error.message||'');
-      if(message.toLowerCase().includes('insufficient balance')){
-        return res.status(400).json({success:false,message:`You need ${formatNairaForAds(totalCost)} to top up this campaign.`});
-      }
-      return res.status(500).json({success:false,message:'Unable to top up advertising campaign.'});
+    if(!freshUser){
+      return res.status(401).json({
+        success:false,
+        message:'User account could not be found.'
+      });
     }
 
+    syncUserBalance(freshUser);
+
+    const availableDeposit=getDepositBalance(freshUser);
+    const availableWithdrawable=getWithdrawableBalance(freshUser);
+    const availableTotal=availableDeposit+availableWithdrawable;
+
+    if(availableTotal<additionalCost){
+      return res.status(400).json({
+        success:false,
+        message:`You need ${formatNairaForAds(additionalCost)} to top up this campaign.`
+      });
+    }
+
+    // --------------------------------------------------
+    // DEBIT THE ADVERTISER BALANCE
+    // Deposit balance is used first, then withdrawable balance.
+    // --------------------------------------------------
+    let remainingCharge=additionalCost;
+
+    const depositUsed=Math.min(
+      availableDeposit,
+      remainingCharge
+    );
+
+    remainingCharge-=depositUsed;
+
+    const withdrawableUsed=Math.min(
+      availableWithdrawable,
+      remainingCharge
+    );
+
+    const newDepositBalance=availableDeposit-depositUsed;
+    const newWithdrawableBalance=availableWithdrawable-withdrawableUsed;
+
+    const {data:updatedUser,error:balanceError}=await supabase
+      .from('users')
+      .update({
+        balance:newDepositBalance+newWithdrawableBalance,
+        deposit_balance:newDepositBalance,
+        withdrawable_balance:newWithdrawableBalance
+      })
+      .eq('id',String(req.user.id))
+      .eq('deposit_balance',availableDeposit)
+      .eq('withdrawable_balance',availableWithdrawable)
+      .select('*')
+      .maybeSingle();
+
+    if(balanceError) throw balanceError;
+
+    // The conditional balance check protects against two top-ups
+    // spending the same balance at the same time.
+    if(!updatedUser){
+      return res.status(409).json({
+        success:false,
+        message:'Your balance changed. Please refresh and try the top-up again.'
+      });
+    }
+
+    // --------------------------------------------------
+    // EXTEND THE EXISTING CAMPAIGN — NO NEW ROW
+    // --------------------------------------------------
+    const newTarget=target+members;
+    const newTotalCost=currentTotalCost+additionalCost;
+
+    const {data:updatedAd,error:updateError}=await supabase
+      .from('telegram_ads')
+      .update({
+        telegram_chat_id:verifiedChatId || ad.telegram_chat_id,
+        telegram_username:verifiedUsername || ad.telegram_username,
+        target_members:newTarget,
+        total_cost:newTotalCost,
+        status:'active'
+      })
+      .eq('id',adId)
+      .eq('advertiser_id',String(req.user.id))
+      .in('status',['active','completed'])
+      .select(`
+        id,
+        target_members,
+        completed_members,
+        total_cost,
+        price_per_join,
+        status
+      `)
+      .maybeSingle();
+
+    if(updateError || !updatedAd){
+      // Refund the balance if extending the campaign failed.
+      try{
+        await supabase
+          .from('users')
+          .update({
+            balance:availableDeposit+availableWithdrawable,
+            deposit_balance:availableDeposit,
+            withdrawable_balance:availableWithdrawable
+          })
+          .eq('id',String(req.user.id))
+          .eq('deposit_balance',newDepositBalance)
+          .eq('withdrawable_balance',newWithdrawableBalance);
+      }catch(refundError){
+        console.error(
+          'Telegram ad top-up refund error:',
+          refundError
+        );
+      }
+
+      if(updateError){
+        console.error(
+          'Telegram ad top-up campaign update error:',
+          updateError
+        );
+      }
+
+      return res.status(500).json({
+        success:false,
+        message:'Unable to extend the existing campaign. Your balance was not charged.'
+      });
+    }
+
+    // --------------------------------------------------
+    // RECORD THE TOP-UP TRANSACTION
+    // --------------------------------------------------
     try{
       await addTransaction(req.user.id,{
         id:generateTransactionId('tx_ad_topup'),
         type:'Telegram Advertising Top Up',
-        description:`Telegram advertising campaign top up${verifiedUsername ? ` — @${String(verifiedUsername).replace(/^@/,'')}` : ''}`,
-        amount:totalCost,
+        description:`Telegram advertising campaign top up — ${members.toLocaleString('en-NG')} additional members${verifiedUsername ? ` — @${String(verifiedUsername).replace(/^@/,'')}` : ''}`,
+        amount:additionalCost,
         status:'completed'
       });
     }catch(transactionError){
-      console.error('Telegram advertising top-up transaction error:',transactionError);
+      console.error(
+        'Telegram advertising top-up transaction error:',
+        transactionError
+      );
     }
 
     return res.json({
       success:true,
-      adId:data?.ad_id,
-      targetMembers:members,
-      pricePerJoin:TELEGRAM_AD_PRICE_PER_JOIN,
+      adId:updatedAd.id,
+      addedMembers:members,
+      targetMembers:Number(updatedAd.target_members||newTarget),
+      completedMembers:Number(updatedAd.completed_members||completed),
+      pricePerJoin:Number(updatedAd.price_per_join||pricePerJoin),
       memberReward:TELEGRAM_AD_MEMBER_REWARD,
       platformFee:TELEGRAM_AD_PLATFORM_FEE,
-      totalCost,
-      status:'active',
-      message:'Your campaign top-up is now live.'
+      additionalCost,
+      totalCost:Number(updatedAd.total_cost||newTotalCost),
+      depositUsed,
+      withdrawableUsed,
+      status:updatedAd.status||'active',
+      message:'Your existing campaign has been extended successfully.'
     });
+
   }catch(error){
-    console.error('POST /api/telegram-ads/top-up error:',error);
-    return res.status(500).json({success:false,message:'Unable to top up the campaign right now.'});
+    console.error(
+      'POST /api/telegram-ads/top-up error:',
+      error
+    );
+
+    return res.status(500).json({
+      success:false,
+      message:'Unable to top up the campaign right now.'
+    });
   }
 });
 
@@ -10692,6 +10876,7 @@ app.listen(
   }
 
 );
+
 
 
 
