@@ -1579,6 +1579,13 @@ header {
 }
 
 
+.custom-member-box{grid-column:1 / -1;margin-top:3px;padding:13px;border-radius:15px;background:#0b162a;border:1px solid rgba(255,255,255,.07)}
+.custom-member-box .field-label{margin-bottom:7px}
+.custom-member-input-wrap{position:relative}
+.custom-member-input{padding-right:76px}
+.custom-member-suffix{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:#71829a;font-size:.57rem;font-weight:800;pointer-events:none}
+.custom-member-input.invalid{border-color:rgba(239,68,68,.75);box-shadow:0 0 0 3px rgba(239,68,68,.08)}
+
 /* =========================================================
    LIVE PREVIEW
 ========================================================= */
@@ -1850,7 +1857,7 @@ header {
 .campaign-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.campaign-community{min-width:0}.campaign-community-name{color:white;font-size:.72rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.campaign-community-type{margin-top:3px;color:#71829a;font-size:.54rem;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
 .campaign-status{flex:0 0 auto;padding:5px 8px;border-radius:999px;font-size:.5rem;font-weight:800;text-transform:uppercase}.campaign-status.active{color:#6ee7b7;background:#073d32;border:1px solid rgba(16,185,129,.2)}.campaign-status.completed{color:#93c5fd;background:#10294d;border:1px solid rgba(96,165,250,.15)}.campaign-status.cancelled{color:#fca5a5;background:#45171c;border:1px solid rgba(239,68,68,.2)}
 .campaign-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.campaign-stat{padding:9px;border-radius:11px;background:#0f1b31;border:1px solid rgba(255,255,255,.05)}.campaign-stat-label{color:#64748b;font-size:.5rem;font-weight:700}.campaign-stat-value{margin-top:3px;color:white;font-size:.68rem;font-weight:800}.campaign-progress{height:5px;margin-top:10px;background:#17233d;border-radius:99px;overflow:hidden}.campaign-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--cyan))}
-.campaign-actions{display:flex;gap:8px;margin-top:10px}.campaign-open-btn,.campaign-cancel-btn{flex:1;min-height:39px;border-radius:11px;font-size:.58rem;font-weight:800;cursor:pointer}.campaign-open-btn{color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08)}.campaign-cancel-btn{color:#fecaca;background:#3a1720;border:1px solid rgba(239,68,68,.18)}
+.campaign-actions{display:flex;gap:8px;margin-top:10px}.campaign-open-btn,.campaign-cancel-btn,.campaign-topup-btn{flex:1;min-height:39px;border-radius:11px;font-size:.58rem;font-weight:800;cursor:pointer}.campaign-open-btn{color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08)}.campaign-cancel-btn{color:#fecaca;background:#3a1720;border:1px solid rgba(239,68,68,.18)}.campaign-topup-btn{color:#a7f3d0;background:#073d32;border:1px solid rgba(16,185,129,.2)}
 /* =========================================================
    LOADING / CONFIRMATION POPUP
 ========================================================= */
@@ -2044,7 +2051,7 @@ header {
       <span class="campaign-launcher-icon">📊</span>
       <span class="campaign-launcher-copy">
         <strong>My campaigns</strong>
-        <small>View and manage your active and cancelled campaigns.</small>
+        <small>View, manage, cancel and top up your campaigns.</small>
       </span>
       <span class="campaign-launcher-arrow">›</span>
     </button>
@@ -2561,25 +2568,6 @@ header {
           <input
             type="radio"
             name="memberCount"
-            value="10"
-          >
-
-          <span class="member-number">
-            10
-          </span>
-
-          <span class="member-cost">
-            ₦500
-          </span>
-
-        </label>
-
-
-        <label class="member-option">
-
-          <input
-            type="radio"
-            name="memberCount"
             value="25"
           >
 
@@ -2668,6 +2656,24 @@ header {
           </span>
 
         </label>
+
+        <div class="custom-member-box">
+          <label class="field-label" for="customMemberCount">Or enter your own amount</label>
+          <div class="custom-member-input-wrap">
+            <input
+              class="input custom-member-input"
+              id="customMemberCount"
+              type="number"
+              min="20"
+              step="1"
+              inputmode="numeric"
+              placeholder="Enter number of members (minimum 20)"
+              autocomplete="off"
+            >
+            <span class="custom-member-suffix">members</span>
+          </div>
+          <div class="input-hint">Minimum 20 members. You can enter any whole number from 20 upward.</div>
+        </div>
 
       </div>
 
@@ -3058,6 +3064,36 @@ header {
   </div>
 </div>
 
+<!-- TOP UP COMPLETED CAMPAIGN MODAL -->
+<div class="campaigns-modal" id="topupModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="topupModalTitle">
+  <div class="campaigns-modal-card topup-modal-card">
+    <div class="campaigns-modal-head">
+      <div class="campaigns-modal-title">
+        <div class="campaigns-modal-title-icon">↗</div>
+        <div><h3 id="topupModalTitle">Top up campaign</h3><p>Start another batch for this Telegram community</p></div>
+      </div>
+      <button class="campaigns-modal-close" id="closeTopupBtn" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="topup-body">
+      <div class="topup-summary">
+        <div class="topup-summary-label">Community</div>
+        <strong id="topupCommunity">Telegram community</strong>
+      </div>
+      <label class="field-label" for="topupMembersInput">Additional members</label>
+      <input class="input" id="topupMembersInput" type="number" min="20" step="1" inputmode="numeric" placeholder="Minimum 20 members" autocomplete="off">
+      <div class="input-hint">Minimum 20 members. Cost is ₦50 per member.</div>
+      <div class="topup-estimate">
+        <span>Total cost</span>
+        <strong id="topupTotal">₦0</strong>
+      </div>
+      <div class="button-row topup-actions">
+        <button class="btn btn-secondary" id="cancelTopupBtn" type="button">Cancel</button>
+        <button class="btn btn-primary" id="confirmTopupBtn" type="button">Top up campaign</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 
 /* =========================================================
@@ -3180,6 +3216,7 @@ function renderCampaigns(campaigns){
       </div>
       <div class="campaign-progress"><span style="width:${progress}%"></span></div>
       <div class="campaign-actions"><button class="campaign-open-btn" type="button" onclick="openCampaign('${escapeHtml(ad.telegram_link||"")}')">Open community</button>
+      ${status==="completed"?`<button class="campaign-topup-btn" type="button" onclick="openTopupCampaign('${escapeHtml(ad.id)}',${target},${completed},'${escapeHtml(ad.telegram_username||"")}')">Top up campaign</button>`:""}
       ${canCancel?`<button class="campaign-cancel-btn" type="button" onclick="confirmCancelCampaign('${escapeHtml(ad.id)}')">Cancel campaign</button>`:""}</div>
     </div>`;
   }).join("");
@@ -3214,6 +3251,87 @@ closeCampaignsBtn.addEventListener("click",closeCampaignsModal);
 refreshCampaignsBtn.addEventListener("click",loadMyCampaigns);
 campaignsModal.addEventListener("click",event=>{if(event.target===campaignsModal)closeCampaignsModal();});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&campaignsModal.classList.contains("show"))closeCampaignsModal();});
+
+/* =========================================================
+   TOP UP COMPLETED CAMPAIGN
+========================================================= */
+const topupModal = document.getElementById("topupModal");
+const closeTopupBtn = document.getElementById("closeTopupBtn");
+const cancelTopupBtn = document.getElementById("cancelTopupBtn");
+const confirmTopupBtn = document.getElementById("confirmTopupBtn");
+const topupMembersInput = document.getElementById("topupMembersInput");
+const topupTotal = document.getElementById("topupTotal");
+const topupCommunity = document.getElementById("topupCommunity");
+let topupCampaignId = "";
+
+function closeTopupModal(){
+  topupModal.classList.remove("show");
+  topupModal.setAttribute("aria-hidden","true");
+  topupCampaignId = "";
+}
+
+function updateTopupEstimate(){
+  const members = Number(topupMembersInput.value);
+  topupTotal.textContent = Number.isInteger(members) && members >= 20
+    ? formatNaira(members * 50)
+    : "₦0";
+}
+
+function openTopupCampaign(adId,target,completed,username){
+  topupCampaignId = String(adId || "");
+  topupCommunity.textContent = username ? "@" + String(username).replace(/^@/,"") : "Telegram community";
+  topupMembersInput.value = "";
+  updateTopupEstimate();
+  topupModal.classList.add("show");
+  topupModal.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => topupMembersInput.focus(), 120);
+}
+
+topupMembersInput.addEventListener("input",updateTopupEstimate);
+closeTopupBtn.addEventListener("click",closeTopupModal);
+cancelTopupBtn.addEventListener("click",closeTopupModal);
+topupModal.addEventListener("click",event=>{if(event.target===topupModal)closeTopupModal();});
+
+confirmTopupBtn.addEventListener("click",async()=>{
+  const members = Number(topupMembersInput.value);
+  if(!Number.isInteger(members) || members < 20){
+    topupMembersInput.classList.add("invalid");
+    topupMembersInput.focus();
+    return;
+  }
+
+  const adId = topupCampaignId;
+  closeTopupModal();
+  showConfirmModal(
+    "Confirm campaign top up?",
+    `You are about to add ${members.toLocaleString("en-NG")} new members for ${formatNaira(members * 50)}. This will start a new active campaign for the same Telegram community.`,
+    async function(){
+      showLoadingModal("Topping up campaign","Please verify the community and process your campaign payment.");
+      try{
+        const response = await fetch("/api/telegram-ads/top-up",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          credentials:"include",
+          body:JSON.stringify({adId,members})
+        });
+        const data = await response.json();
+        closeAppModal();
+        if(response.ok && data.success){
+          await loadMyCampaigns();
+          showMessageModal("Campaign topped up",`Your new ${members.toLocaleString("en-NG")} member campaign is now active. ${formatNaira(data.totalCost || members * 50)} was charged.` ,"success");
+        }else{
+          showMessageModal("Could not top up campaign",data.message || "The campaign could not be topped up.","error");
+        }
+      }catch(error){
+        console.error("top up campaign:",error);
+        closeAppModal();
+        showMessageModal("Connection problem","We could not top up the campaign right now. Please try again.","error");
+      }
+    }
+  );
+});
+
 
 /* =========================================================
    PAYME BOT COPY
@@ -3263,6 +3381,9 @@ const step4Next =
 
 const publishBtn =
   document.getElementById("publishBtn");
+
+const customMemberCount =
+  document.getElementById("customMemberCount");
 
 
 /* =========================================================
@@ -3555,36 +3676,48 @@ document
       "change",
       function() {
 
-        selectedMembers =
-          Number(this.value);
-
+        selectedMembers = Number(this.value);
 
         document
-          .querySelectorAll(
-            ".member-option"
-          )
-          .forEach(
-            option =>
-              option.classList.remove(
-                "selected"
-              )
-          );
+          .querySelectorAll(".member-option")
+          .forEach(option => option.classList.remove("selected"));
 
+        this.closest(".member-option").classList.add("selected");
 
-        this
-          .closest(".member-option")
-          .classList.add("selected");
-
+        if (customMemberCount) {
+          customMemberCount.value = "";
+          customMemberCount.classList.remove("invalid");
+        }
 
         updateBudget();
-
-        step4Next.disabled =
-          false;
-
+        step4Next.disabled = selectedMembers < 20;
       }
     );
 
   });
+
+if (customMemberCount) {
+  customMemberCount.addEventListener("input", function() {
+    const value = Number(this.value);
+    const valid = Number.isInteger(value) && value >= 20;
+
+    document
+      .querySelectorAll(".member-option")
+      .forEach(option => option.classList.remove("selected"));
+
+    this.classList.toggle("invalid", this.value !== "" && !valid);
+
+    if (valid) {
+      selectedMembers = value;
+      updateBudget();
+      step4Next.disabled = false;
+    } else {
+      selectedMembers = 0;
+      updateBudget();
+      step4Next.disabled = true;
+    }
+  });
+}
 
 
 /* =========================================================
@@ -3635,7 +3768,8 @@ step4Next.addEventListener(
   function() {
 
     if (
-      !selectedMembers
+      !Number.isInteger(selectedMembers) ||
+      selectedMembers < 20
     ) {
 
       return;
@@ -3687,7 +3821,7 @@ publishBtn.addEventListener(
   "click",
   async function() {
 
-    if (!selectedMembers || !verified) {
+    if (!Number.isInteger(selectedMembers) || selectedMembers < 20 || !verified) {
       showMessageModal(
         "Campaign not ready",
         "Please complete Telegram verification and select the number of members you want.",
@@ -3880,6 +4014,7 @@ document
 
 </body>
 </html>
+
 
 
 

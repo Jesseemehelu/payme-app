@@ -2186,23 +2186,9 @@ app.post(
         );
 
 
-      const allowedMemberAmounts = [
-
-        10,
-        25,
-        50,
-        100,
-        250,
-        500
-
-      ];
-
-
       if (
         !Number.isInteger(members) ||
-        !allowedMemberAmounts.includes(
-          members
-        )
+        members < 20
       ) {
 
         return res.status(400).json({
@@ -2210,7 +2196,7 @@ app.post(
           success: false,
 
           message:
-            'Invalid member amount.'
+            'Minimum campaign size is 20 members.'
 
         });
 
@@ -2473,6 +2459,98 @@ app.get('/api/telegram-ads/my-campaigns',requireLogin,async(req,res)=>{
 
 
 // ======================================================
+// TOP UP COMPLETED ADVERTISER CAMPAIGN
+// ======================================================
+// A top-up uses the same verified Telegram community and creates
+// a fresh active campaign for the requested additional members.
+// This reuses the existing atomic payment + campaign-creation RPC.
+app.post('/api/telegram-ads/top-up',requireLogin,async(req,res)=>{
+  try{
+    const adId=String(req.body?.adId||'').trim();
+    const members=Number(req.body?.members);
+
+    if(!adId) return res.status(400).json({success:false,message:'Campaign ID is required.'});
+    if(!Number.isInteger(members)||members<20){
+      return res.status(400).json({success:false,message:'Minimum campaign size is 20 members.'});
+    }
+
+    const {data:ad,error:adError}=await supabase.from('telegram_ads').select(`
+      id, advertiser_id, telegram_type, telegram_link, telegram_chat_id, telegram_username,
+      target_members, completed_members, price_per_join, total_cost, status
+    `).eq('id',adId).eq('advertiser_id',String(req.user.id)).maybeSingle();
+    if(adError) throw adError;
+    if(!ad) return res.status(404).json({success:false,message:'Campaign not found.'});
+
+    const target=Number(ad.target_members||0);
+    const completed=Number(ad.completed_members||0);
+    if(ad.status!=='completed' && completed<target){
+      return res.status(400).json({success:false,message:'Only completed campaigns can be topped up.'});
+    }
+
+    const verification=await verifyTelegramAdvertisingCommunity(
+      ad.telegram_link,
+      ad.telegram_type,
+      req.user.telegramId
+    );
+
+    if(!verification.success){
+      return res.status(400).json({success:false,message:verification.message});
+    }
+
+    const verifiedChatId=verification.chatId;
+    const verifiedUsername=verification.username;
+    const totalCost=members*TELEGRAM_AD_PRICE_PER_JOIN;
+
+    const {data,error}=await supabase.rpc('create_telegram_ad_campaign',{
+      p_advertiser_id:String(req.user.id),
+      p_telegram_type:ad.telegram_type,
+      p_telegram_link:ad.telegram_link,
+      p_telegram_chat_id:verifiedChatId,
+      p_telegram_username:verifiedUsername,
+      p_target_members:members,
+      p_total_cost:totalCost
+    });
+
+    if(error){
+      console.error('Telegram ad top-up RPC error:',error);
+      const message=String(error.message||'');
+      if(message.toLowerCase().includes('insufficient balance')){
+        return res.status(400).json({success:false,message:`You need ${formatNairaForAds(totalCost)} to top up this campaign.`});
+      }
+      return res.status(500).json({success:false,message:'Unable to top up advertising campaign.'});
+    }
+
+    try{
+      await addTransaction(req.user.id,{
+        id:generateTransactionId('tx_ad_topup'),
+        type:'Telegram Advertising Top Up',
+        description:`Telegram advertising campaign top up${verifiedUsername ? ` — @${String(verifiedUsername).replace(/^@/,'')}` : ''}`,
+        amount:totalCost,
+        status:'completed'
+      });
+    }catch(transactionError){
+      console.error('Telegram advertising top-up transaction error:',transactionError);
+    }
+
+    return res.json({
+      success:true,
+      adId:data?.ad_id,
+      targetMembers:members,
+      pricePerJoin:TELEGRAM_AD_PRICE_PER_JOIN,
+      memberReward:TELEGRAM_AD_MEMBER_REWARD,
+      platformFee:TELEGRAM_AD_PLATFORM_FEE,
+      totalCost,
+      status:'active',
+      message:'Your campaign top-up is now live.'
+    });
+  }catch(error){
+    console.error('POST /api/telegram-ads/top-up error:',error);
+    return res.status(500).json({success:false,message:'Unable to top up the campaign right now.'});
+  }
+});
+
+
+// ======================================================
 // CANCEL ADVERTISER CAMPAIGN
 // ======================================================
 
@@ -2593,13 +2671,54 @@ app.get(
             }
           );
 
-
       if (error) {
-
         throw error;
-
       }
 
+      // --------------------------------------------------
+      // NEVER SHOW AN AD THE USER HAS ALREADY COMPLETED
+      // --------------------------------------------------
+      // The claim RPC already prevents a second payment, but
+      // the available-ads endpoint must also hide an ad after
+      // the user has successfully earned from it. This is read
+      // from the existing telegram_ad_joins records, so the
+      // exclusion survives page reloads, closing/reopening the
+      // page, and logging in from another device.
+      let completedAdIds = new Set();
+
+      try {
+        const {
+          data: joins,
+          error: joinsError
+        } = await supabase
+          .from('telegram_ad_joins')
+          .select('ad_id')
+          .eq('user_id', String(req.user.id));
+
+        if (joinsError) {
+          throw joinsError;
+        }
+
+        completedAdIds = new Set(
+          (joins || [])
+            .map(join => String(join.ad_id || '').trim())
+            .filter(Boolean)
+        );
+      } catch (joinLookupError) {
+        // Do not silently show previously completed ads if the
+        // completion lookup fails. The claim endpoint remains
+        // protected by the atomic database RPC, while this request
+        // fails safely instead of exposing completed tasks.
+        console.error(
+          'GET /api/telegram-ads completed-join lookup error:',
+          joinLookupError
+        );
+
+        return res.status(500).json({
+          success: false,
+          message: 'Unable to load Telegram advertisements right now.'
+        });
+      }
 
       const ads =
         (data || [])
@@ -2611,17 +2730,17 @@ app.get(
               Number(
                 ad.target_members || 0
               )
+          )
+          .filter(
+            ad => !completedAdIds.has(String(ad.id))
           );
-
 
       return res.json({
 
         success: true,
-
         ads
 
       });
-
 
     } catch (error) {
 
@@ -2630,11 +2749,9 @@ app.get(
         error
       );
 
-
       return res.status(500).json({
 
         success: false,
-
         message:
           'Unable to load Telegram advertisements.'
 
@@ -10575,6 +10692,8 @@ app.listen(
   }
 
 );
+
+
 
 
 
