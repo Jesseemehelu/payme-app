@@ -3742,6 +3742,20 @@ function txIsCredit(tx){
   if(["debit","debited","out","expense","entry","fee"].includes(direction)) return false;
 
   const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""}`.toLowerCase();
+
+  if(
+    /telegram/.test(text) &&
+    /(join|reward|member|earning)/.test(text)
+  ){
+    return true;
+  }
+
+  if(
+    /join_reward|member_reward|telegram_join_reward/.test(text)
+  ){
+    return true;
+  }
+
   return /(winning|winnings|win|prize|reward|bonus|credit|deposit|refund|cashback|earning)/.test(text);
 }
 
@@ -3753,11 +3767,26 @@ function txIsTapRush(tx){
 function txTitle(tx){
   const raw = String(tx.type || tx.description || tx.reason || "Transaction");
   const lower = raw.toLowerCase();
+
+  if(
+    /telegram/.test(lower) &&
+    /(join|reward|member|earning)/.test(lower)
+  ){
+    return "Telegram Join Reward";
+  }
+
+  if(
+    /join_reward|member_reward|telegram_join_reward/.test(lower)
+  ){
+    return "Telegram Join Reward";
+  }
+
   if(txIsTapRush(tx)){
     if(/entry|fee|ticket|join|start/.test(lower)) return "Tap Rush Entry Fee";
     if(/winning|win|prize|payout|reward/.test(lower)) return "Tap Rush Winnings";
     return "Tap Rush";
   }
+
   return raw;
 }
 
@@ -3930,4 +3959,5 @@ loadLeaderboard,
 
 </body>
 </html>
+
 

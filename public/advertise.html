@@ -3297,7 +3297,17 @@ async function loadMyCampaigns() {
   refreshCampaignsBtn.textContent = "Loading…";
 
   try {
-    const response = await fetch("/api/telegram-ads/my-campaigns");
+    const response = await fetch(
+      "/api/telegram-ads/my-campaigns",
+      {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Accept": "application/json"
+        }
+      }
+    );
     const data = await response.json();
 
     if (!response.ok || !data.success) {
@@ -4026,4 +4036,5 @@ document
 
 </body>
 </html>
+
 

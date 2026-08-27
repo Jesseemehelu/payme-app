@@ -588,7 +588,100 @@
         transition-duration: .01ms !important;
       }
     }
-  </style>
+  
+/* ===== TELEGRAM CLAIM STATUS MODAL ===== */
+.claim-status-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(2,8,23,.76);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .22s ease,visibility .22s ease;
+}
+.claim-status-backdrop.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+.claim-status-card{
+  width:min(100%,390px);
+  padding:28px 22px 22px;
+  text-align:center;
+  border-radius:26px;
+  background:linear-gradient(145deg,#101c34,#07111f);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 30px 90px rgba(0,0,0,.58);
+  transform:translateY(12px) scale(.96);
+  transition:transform .24s cubic-bezier(.2,.8,.2,1);
+}
+.claim-status-backdrop.open .claim-status-card{
+  transform:translateY(0) scale(1);
+}
+.claim-status-icon{
+  width:70px;
+  height:70px;
+  margin:0 auto 15px;
+  border-radius:22px;
+  display:grid;
+  place-items:center;
+  font-size:30px;
+}
+.claim-status-icon.loading{
+  background:rgba(6,182,212,.11);
+  border:1px solid rgba(103,232,249,.16);
+}
+.claim-status-icon.success{
+  background:rgba(16,185,129,.12);
+  border:1px solid rgba(52,211,153,.18);
+}
+.claim-status-icon.error{
+  background:rgba(239,68,68,.11);
+  border:1px solid rgba(248,113,113,.18);
+}
+.claim-spinner{
+  width:34px;
+  height:34px;
+  border:3px solid rgba(255,255,255,.12);
+  border-top-color:#67e8f9;
+  border-radius:50%;
+  animation:claimSpin .75s linear infinite;
+}
+@keyframes claimSpin{to{transform:rotate(360deg)}}
+.claim-status-title{
+  margin:0;
+  color:#f8fafc;
+  font-size:1rem;
+  font-weight:850;
+}
+.claim-status-message{
+  margin:9px auto 0;
+  max-width:320px;
+  color:#94a3b8;
+  font-size:.7rem;
+  line-height:1.55;
+}
+.claim-status-btn{
+  width:100%;
+  min-height:45px;
+  margin-top:19px;
+  border:0;
+  border-radius:14px;
+  color:#fff;
+  font-weight:800;
+  font-size:.7rem;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  cursor:pointer;
+}
+
+</style>
 </head>
 
 <body>
@@ -749,6 +842,42 @@
     </div>
   </div>
 
+
+  <!-- TELEGRAM CLAIM STATUS -->
+  <div
+    class="claim-status-backdrop"
+    id="claimStatusModal"
+    aria-hidden="true"
+  >
+    <div
+      class="claim-status-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="claimStatusTitle"
+    >
+      <div class="claim-status-icon loading" id="claimStatusIcon">
+        <div class="claim-spinner"></div>
+      </div>
+
+      <h3 class="claim-status-title" id="claimStatusTitle">
+        Checking your Telegram membership
+      </h3>
+
+      <p class="claim-status-message" id="claimStatusMessage">
+        Please wait while PAYME verifies that you joined the community.
+      </p>
+
+      <button
+        type="button"
+        class="claim-status-btn"
+        id="claimStatusOk"
+        style="display:none;"
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+
   <script>
     /*
       ==========================================================
@@ -810,6 +939,90 @@
 
     let ads = [];
     let selectedAd = null;
+
+    const claimStatusModal =
+      document.getElementById('claimStatusModal');
+
+    const claimStatusIcon =
+      document.getElementById('claimStatusIcon');
+
+    const claimStatusTitle =
+      document.getElementById('claimStatusTitle');
+
+    const claimStatusMessage =
+      document.getElementById('claimStatusMessage');
+
+    const claimStatusOk =
+      document.getElementById('claimStatusOk');
+
+    function openClaimStatus() {
+      claimStatusModal.classList.add('open');
+      claimStatusModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeClaimStatus() {
+      claimStatusModal.classList.remove('open');
+      claimStatusModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function showClaimLoading() {
+      claimStatusIcon.className =
+        'claim-status-icon loading';
+
+      claimStatusIcon.innerHTML =
+        '<div class="claim-spinner"></div>';
+
+      claimStatusTitle.textContent =
+        'Checking your Telegram membership';
+
+      claimStatusMessage.textContent =
+        'Please wait while PAYME verifies that you joined the community.';
+
+      claimStatusOk.style.display = 'none';
+
+      openClaimStatus();
+    }
+
+    function showClaimResult(success, message, reward) {
+      claimStatusIcon.className =
+        'claim-status-icon ' +
+        (success ? 'success' : 'error');
+
+      claimStatusIcon.textContent =
+        success ? '✓' : '!';
+
+      claimStatusTitle.textContent =
+        success ? 'You earned ' + naira(reward) : 'Verification failed';
+
+      claimStatusMessage.textContent =
+        message ||
+        (
+          success
+            ? naira(reward) + ' has been added to your balance.'
+            : 'We could not verify your Telegram membership.'
+        );
+
+      claimStatusOk.textContent =
+        success ? 'Done' : 'Try Again';
+
+      claimStatusOk.style.display = 'block';
+
+      openClaimStatus();
+    }
+
+    claimStatusOk.addEventListener('click', () => {
+      closeClaimStatus();
+    });
+
+    claimStatusModal.addEventListener('click', event => {
+      if (
+        event.target === claimStatusModal &&
+        claimStatusOk.style.display !== 'none'
+      ) {
+        closeClaimStatus();
+      }
+    });
+
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -1036,10 +1249,7 @@
       earnBtn.disabled = true;
       joinNowBtn.disabled = true;
 
-      setNote(
-        'Checking your Telegram membership…',
-        'info'
-      );
+      showClaimLoading();
 
       try {
         const response = await fetch(
@@ -1056,8 +1266,8 @@
           }
         );
 
-        const data = await response.json()
-          .catch(() => ({}));
+        const data =
+          await response.json().catch(() => ({}));
 
         if (!response.ok || !data.success) {
           throw new Error(
@@ -1067,40 +1277,52 @@
         }
 
         const reward =
-          Number(data.reward || selectedAd.member_reward || 25);
+          Number(
+            data.reward ||
+            selectedAd.member_reward ||
+            25
+          );
 
-        setNote(
+        showClaimResult(
+          true,
           data.message ||
           `${naira(reward)} has been added to your balance.`,
-          'success'
+          reward
         );
 
         earnBtn.textContent =
           `✓ Earned ${naira(reward)}`;
 
-        /*
-          Remove the completed ad from the visible list after
-          a successful claim. This prevents the user from trying
-          to claim it again from this page.
-        */
         ads = ads.filter(
           ad => String(ad.id) !== String(selectedAd.id)
         );
 
-        setTimeout(() => {
+        claimStatusOk.onclick = () => {
+          closeClaimStatus();
           closeTask();
           renderAds();
-        }, 1300);
+        };
 
       } catch (error) {
-        setNote(
-          error.message ||
-          'You have not joined this Telegram community yet.',
-          'error'
+        console.error(
+          'Telegram join verification error:',
+          error
         );
 
-        earnBtn.disabled = false;
-        joinNowBtn.disabled = false;
+        showClaimResult(
+          false,
+          error.message ||
+          'We could not verify your Telegram membership.'
+        );
+
+        /*
+         * Try Again closes the popup and restores the buttons.
+         */
+        claimStatusOk.onclick = () => {
+          closeClaimStatus();
+          earnBtn.disabled = false;
+          joinNowBtn.disabled = false;
+        };
       }
     });
 
@@ -1182,4 +1404,5 @@
   </script>
 </body>
 </html>
+
 
