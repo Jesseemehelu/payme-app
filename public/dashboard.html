@@ -3751,6 +3751,14 @@ function txIsCredit(tx){
   }
 
   if(
+    /telegram/.test(text) &&
+    /(advertising|campaign)/.test(text) &&
+    /(debit|spend|cost|fee)/.test(text)
+  ){
+    return false;
+  }
+
+  if(
     /join_reward|member_reward|telegram_join_reward/.test(text)
   ){
     return true;
@@ -3779,6 +3787,14 @@ function txTitle(tx){
     /join_reward|member_reward|telegram_join_reward/.test(lower)
   ){
     return "Telegram Join Reward";
+  }
+
+  if(/telegram/.test(lower) && /(advertising|campaign)/.test(lower) && /(refund|cancel)/.test(lower)){
+    return "Telegram Advertising Refund";
+  }
+
+  if(/telegram/.test(lower) && /(advertising|campaign)/.test(lower)){
+    return "Telegram Advertising";
   }
 
   if(txIsTapRush(tx)){
@@ -3959,5 +3975,6 @@ loadLeaderboard,
 
 </body>
 </html>
+
 
 

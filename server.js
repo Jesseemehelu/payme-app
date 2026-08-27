@@ -2360,6 +2360,22 @@ app.post(
 
 
       // --------------------------------------------------
+      // RECORD THE ADVERTISING DEBIT
+      // --------------------------------------------------
+
+      try {
+        await addTransaction(req.user.id,{
+          id:generateTransactionId('tx_ad'),
+          type:'Telegram Advertising Debit',
+          description:`Telegram advertising campaign${verifiedUsername ? ` — @${String(verifiedUsername).replace(/^@/,'')}` : ''}`,
+          amount:totalCost,
+          status:'completed'
+        });
+      } catch (transactionError) {
+        console.error('Telegram advertising debit transaction error:',transactionError);
+      }
+
+      // --------------------------------------------------
       // SUCCESS
       // --------------------------------------------------
 
@@ -2435,6 +2451,78 @@ app.post(
 
   }
 );
+
+
+// ======================================================
+// ADVERTISER CAMPAIGNS
+// ======================================================
+
+app.get('/api/telegram-ads/my-campaigns',requireLogin,async(req,res)=>{
+  try{
+    const {data,error}=await supabase.from('telegram_ads').select(`
+      id, advertiser_id, telegram_type, telegram_link, telegram_username,
+      target_members, completed_members, price_per_join, total_cost, status, created_at
+    `).eq('advertiser_id',String(req.user.id)).order('created_at',{ascending:false});
+    if(error) throw error;
+    return res.json({success:true,campaigns:data||[]});
+  }catch(error){
+    console.error('GET /api/telegram-ads/my-campaigns error:',error);
+    return res.status(500).json({success:false,message:'Unable to load your campaigns.'});
+  }
+});
+
+
+// ======================================================
+// CANCEL ADVERTISER CAMPAIGN
+// ======================================================
+
+app.post('/api/telegram-ads/cancel',requireLogin,async(req,res)=>{
+  try{
+    const adId=String(req.body?.adId||'').trim();
+    if(!adId) return res.status(400).json({success:false,message:'Campaign ID is required.'});
+
+    const {data:ad,error:adError}=await supabase.from('telegram_ads').select(`
+      id, advertiser_id, telegram_type, telegram_link, telegram_username,
+      target_members, completed_members, price_per_join, total_cost, status
+    `).eq('id',adId).eq('advertiser_id',String(req.user.id)).maybeSingle();
+    if(adError) throw adError;
+    if(!ad) return res.status(404).json({success:false,message:'Campaign not found.'});
+    if(ad.status!=='active') return res.status(400).json({success:false,message:'This campaign is no longer active.'});
+
+    const target=Number(ad.target_members||0);
+    const completed=Number(ad.completed_members||0);
+    if(completed>=target) return res.status(400).json({success:false,message:'This campaign has already reached its target.'});
+
+    const pricePerJoin=Number(ad.price_per_join||TELEGRAM_AD_PRICE_PER_JOIN);
+    const totalCost=Number(ad.total_cost||target*pricePerJoin);
+    const usedBudget=Math.min(totalCost,completed*pricePerJoin);
+    const unusedBudget=Math.max(0,totalCost-usedBudget);
+    const refund=Math.floor(unusedBudget*.85);
+
+    const {error:updateError}=await supabase.from('telegram_ads').update({status:'cancelled'})
+      .eq('id',adId).eq('advertiser_id',String(req.user.id)).eq('status','active');
+    if(updateError) throw updateError;
+
+    if(refund>0){
+      req.user.depositBalance=getDepositBalance(req.user)+refund;
+      await updateUser(req.user);
+      try{
+        await addTransaction(req.user.id,{
+          id:generateTransactionId('tx_ad_refund'),
+          type:'Telegram Advertising Refund',
+          description:`85% unused budget refund${ad.telegram_username?` — @${String(ad.telegram_username).replace(/^@/,'')}`:''}`,
+          amount:refund,
+          status:'completed'
+        });
+      }catch(transactionError){console.error('Telegram advertising refund transaction error:',transactionError);}
+    }
+
+    return res.json({success:true,refund,status:'cancelled',depositBalance:req.user.depositBalance});
+  }catch(error){
+    console.error('POST /api/telegram-ads/cancel error:',error);
+    return res.status(500).json({success:false,message:'Unable to cancel the campaign right now.'});
+  }
+});
 
 
 // ======================================================
@@ -10487,6 +10575,7 @@ app.listen(
   }
 
 );
+
 
 
 
