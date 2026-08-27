@@ -1290,6 +1290,53 @@
           reward
         );
 
+        /*
+         * Keep a local transaction record as well as the server-side balance.
+         * The dashboard transaction modal reads this record immediately, so
+         * the Telegram join reward appears as a CREDIT even if the server's
+         * transaction-history endpoint has not been updated yet.
+         */
+        try {
+          const storageKey = 'paymeLocalTransactionsV1';
+          const existing = JSON.parse(
+            localStorage.getItem(storageKey) || '[]'
+          );
+          const rows = Array.isArray(existing) ? existing : [];
+          const claimId =
+            data.transactionId ||
+            data.transaction_id ||
+            `telegram-join-${selectedAd.id}-${Date.now()}`;
+
+          const alreadyRecorded = rows.some(row =>
+            String(row.id || '') === String(claimId)
+          );
+
+          if (!alreadyRecorded) {
+            rows.unshift({
+              id: claimId,
+              type: 'telegram_join_reward',
+              description: 'Telegram Join Reward',
+              reason: `Joined ${selectedAd.telegram_username || 'Telegram community'}`,
+              category: 'telegram_join_reward',
+              direction: 'credit',
+              amount: reward,
+              status: 'Completed',
+              date: new Date().toISOString(),
+              bank: 'Telegram Rewards'
+            });
+
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify(rows.slice(0, 100))
+            );
+          }
+        } catch (storageError) {
+          console.warn(
+            'Unable to save Telegram reward transaction locally:',
+            storageError
+          );
+        }
+
         earnBtn.textContent =
           `✓ Earned ${naira(reward)}`;
 
@@ -1404,5 +1451,6 @@
   </script>
 </body>
 </html>
+
 
 

@@ -3723,8 +3723,28 @@ window.location.href =
 /* TRANSACTIONS */
 function getTapRushLocalTransactions(){
   try{
-    const rows = JSON.parse(localStorage.getItem("paymeTapRushTransactionsV1") || "[]");
-    return Array.isArray(rows) ? rows : [];
+    const tapRushRows = JSON.parse(
+      localStorage.getItem("paymeTapRushTransactionsV1") || "[]"
+    );
+    const localRows = JSON.parse(
+      localStorage.getItem("paymeLocalTransactionsV1") || "[]"
+    );
+
+    const combined = [
+      ...(Array.isArray(tapRushRows) ? tapRushRows : []),
+      ...(Array.isArray(localRows) ? localRows : [])
+    ];
+
+    /* Remove accidental duplicate local records by transaction id. */
+    const seen = new Set();
+    return combined.filter(row => {
+      const key = row && row.id != null
+        ? String(row.id)
+        : `${row?.type || ''}|${row?.amount || 0}|${row?.date || ''}`;
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }catch(_){
     return [];
   }
@@ -3833,7 +3853,10 @@ function renderTransactionRows(serverRows){
       const sameAmount = Math.abs(Number(server.__amount || 0) - amount) < 0.001;
       const sameDirection = txIsCredit(server) === (local.direction === "credit");
       const closeTime = Math.abs((server.__time || 0) - time) < 10 * 60 * 1000;
-      return txIsTapRush(server) && sameAmount && sameDirection && closeTime;
+      const sameTelegramReward =
+        /telegram/.test(String(local.type || local.description || local.reason || local.category || '').toLowerCase()) &&
+        /join|reward|member|earning/.test(String(local.type || local.description || local.reason || local.category || '').toLowerCase());
+      return (txIsTapRush(server) || sameTelegramReward) && sameAmount && sameDirection && closeTime;
     });
     if(!duplicate){
       merged.push({...local,__source:"local",__time:time,__amount:amount});
