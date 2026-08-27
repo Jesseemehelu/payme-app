@@ -142,12 +142,7 @@ font-weight:800;
 letter-spacing:.08em;
 }
 .welcome-small::before{
-content:"";
-width:7px;
-height:7px;
-border-radius:50%;
-background:#22c55e;
-box-shadow:0 0 0 4px rgba(34,197,94,.12);
+display:none;
 }
 .welcome-title{
 margin-top:7px;
@@ -544,6 +539,26 @@ text-decoration: none;
 .link-copy-mini{border:0;background:#e0e7ff;color:#4338ca;border-radius:9px;padding:6px 9px;font-size:.57rem;font-weight:900;cursor:pointer}.link-copy-mini.copied{background:#dcfce7;color:#047857}
 .referral-link{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#334155;font-size:.62rem;font-weight:800;background:#fff;border:1px solid #e2e8f0;border-radius:11px;padding:10px}
 .referral-card .reward-tag{background:linear-gradient(135deg,#dbeafe,#ede9fe);border-color:#c7d2fe}
+
+
+/* DAILY CLAIM BUTTONS */
+.daily-claim-button{
+    appearance:none;
+    -webkit-appearance:none;
+    border:0;
+    font-family:inherit;
+    cursor:default;
+    text-align:center;
+}
+.reward-card.claimable .daily-claim-button{
+    cursor:pointer;
+}
+.daily-claim-button:not(:disabled):active{
+    transform:scale(.96);
+}
+.daily-claim-button .button-loader-dots{
+    color:inherit;
+}
 
 /* DAILY MODERN POLISH */
 .daily-overlay{background:radial-gradient(circle at 50% 25%,rgba(59,130,246,.22),transparent 30%),rgba(3,7,18,.86);}
@@ -1688,6 +1703,187 @@ transition-duration: 0.01ms !important;
 }
 @keyframes txIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
+
+/* =========================================================
+   BUTTON / NAVIGATION LOADING FEEDBACK
+   ========================================================= */
+.button-loading{
+    pointer-events:none !important;
+    opacity:.88;
+    position:relative;
+}
+.button-loader-dots{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    min-width:34px;
+    height:18px;
+}
+.button-loader-dots i{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+    display:block;
+    animation:buttonDots 1s ease-in-out infinite;
+}
+.button-loader-dots i:nth-child(2){animation-delay:.15s}
+.button-loader-dots i:nth-child(3){animation-delay:.3s}
+@keyframes buttonDots{
+    0%,70%,100%{transform:translateY(0) scale(.72);opacity:.48}
+    35%{transform:translateY(-4px) scale(1);opacity:1}
+}
+
+/* =========================================================
+   LUCKY ARCADE FLOATING WIDGET
+   ========================================================= */
+.lucky-floating-widget{
+    position:fixed;
+    left:10px;
+    bottom:92px;
+    z-index:4500;
+    width:62px;
+    height:62px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(255,255,255,.48);
+    border-radius:20px;
+    cursor:pointer;
+    background:
+        radial-gradient(circle at 30% 20%,rgba(255,255,255,.55),transparent 24%),
+        linear-gradient(145deg,#8b5cf6 0%,#6366f1 45%,#2563eb 100%);
+    box-shadow:
+        0 18px 35px rgba(37,99,235,.34),
+        0 8px 16px rgba(79,70,229,.2),
+        inset 0 2px 0 rgba(255,255,255,.5),
+        inset 0 -7px 14px rgba(15,23,42,.18);
+    transform:translateZ(0);
+    animation:luckyFloat 2.8s ease-in-out infinite;
+    transition:transform .2s ease,filter .2s ease;
+}
+.lucky-floating-widget::before{
+    content:"";
+    position:absolute;
+    inset:-5px;
+    border-radius:24px;
+    border:1px solid rgba(129,140,248,.24);
+    box-shadow:0 0 24px rgba(99,102,241,.22);
+    pointer-events:none;
+}
+.lucky-floating-widget:active{
+    transform:scale(.91) rotate(-2deg);
+}
+.lucky-arcade-orb{
+    position:relative;
+    width:45px;
+    height:45px;
+    display:grid;
+    place-items:center;
+    border-radius:15px;
+    background:linear-gradient(145deg,#111827,#1e293b);
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow:
+        inset 0 2px 5px rgba(255,255,255,.12),
+        inset 0 -6px 10px rgba(0,0,0,.4),
+        0 5px 10px rgba(0,0,0,.25);
+    transform:perspective(150px) rotateX(8deg) rotateY(-8deg);
+}
+.lucky-arcade-orb span{
+    font-size:1.65rem;
+    line-height:1;
+    filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
+}
+.lucky-neon-dot{
+    position:absolute;
+    right:4px;
+    top:4px;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#facc15;
+    box-shadow:0 0 9px rgba(250,204,21,.95);
+    animation:luckyDotPulse 1.3s ease-in-out infinite;
+}
+.lucky-message{
+    position:absolute;
+    left:54px;
+    bottom:8px;
+    width:max-content;
+    max-width:190px;
+    padding:9px 12px;
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:13px 15px 15px 13px;
+    background:rgba(255,255,255,.96);
+    color:#0f172a;
+    box-shadow:0 12px 30px rgba(15,23,42,.2);
+    font-size:.62rem;
+    font-weight:900;
+    letter-spacing:-.01em;
+    white-space:nowrap;
+    opacity:0;
+    transform:translateX(-10px) scale(.94);
+    transform-origin:left center;
+    pointer-events:none;
+    transition:opacity .28s ease,transform .28s cubic-bezier(.16,1,.3,1);
+}
+.lucky-message::before{
+    content:"";
+    position:absolute;
+    left:-6px;
+    bottom:13px;
+    width:10px;
+    height:10px;
+    background:rgba(255,255,255,.96);
+    border-left:1px solid rgba(255,255,255,.7);
+    border-bottom:1px solid rgba(255,255,255,.7);
+    transform:rotate(45deg);
+}
+.lucky-floating-widget.message-visible .lucky-message{
+    opacity:1;
+    transform:translateX(0) scale(1);
+}
+.lucky-message strong{
+    color:#4f46e5;
+}
+@keyframes luckyFloat{
+    0%,100%{transform:translateY(0) rotate(-1deg)}
+    50%{transform:translateY(-7px) rotate(1deg)}
+}
+@keyframes luckyDotPulse{
+    0%,100%{transform:scale(.8);opacity:.7}
+    50%{transform:scale(1.15);opacity:1}
+}
+@media(max-width:480px){
+    .lucky-floating-widget{
+        left:8px;
+        bottom:91px;
+        width:58px;
+        height:58px;
+        border-radius:18px;
+    }
+    .lucky-arcade-orb{width:42px;height:42px}
+    .lucky-arcade-orb span{font-size:1.5rem}
+    .lucky-message{
+        left:50px;
+        max-width:170px;
+        font-size:.59rem;
+    }
+}
+@media(min-width:900px){
+    .lucky-floating-widget{
+        left:16px;
+        bottom:24px;
+    }
+}
+@media(prefers-reduced-motion:reduce){
+    .lucky-floating-widget,
+    .lucky-neon-dot,
+    .button-loader-dots i{
+        animation:none !important;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -1787,7 +1983,7 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
 
 <button id="withdrawBtn"
         class="action-btn withdraw-btn"
-        onclick="handleWithdrawal()">
+        onclick="handleWithdrawal(this)">
 
     <svg class="action-btn-icon"
          viewBox="0 0 24 24"
@@ -1943,6 +2139,20 @@ onclick="openDailyModal()"
 title="Daily Rewards">
 <span class="daily-widget-icon">📅</span>
 <div class="daily-widget-badge" id="dailyWidgetBadge"></div>
+</div>
+
+<!-- FLOATING LUCKY ARCADE GAME WIDGET -->
+<div class="lucky-floating-widget"
+     id="luckyFloatingWidget"
+     role="button"
+     tabindex="0"
+     aria-label="Play Lucky number game"
+     onclick="openLuckyGame(this)">
+    <div class="lucky-arcade-orb">
+        <span>🎯</span>
+        <i class="lucky-neon-dot"></i>
+    </div>
+    <div class="lucky-message" id="luckyMessage">Try your <strong>Luck</strong></div>
 </div>
 
 <!-- DAILY REWARDS MODAL -->
@@ -2274,6 +2484,114 @@ lastClaimedDay: null
 let timerInterval = null;
 let isClaimingInProgress = false;
 
+/* =========================================================
+   BUTTON LOADING HELPERS
+   ========================================================= */
+const buttonOriginalContent = new WeakMap();
+
+function setButtonLoading(button){
+    if(!button || button.classList.contains("button-loading")) return;
+    buttonOriginalContent.set(button, button.innerHTML);
+    button.classList.add("button-loading");
+    button.setAttribute("aria-busy","true");
+    button.innerHTML = `
+        <span class="button-loader-dots" aria-hidden="true">
+            <i></i><i></i><i></i>
+        </span>`;
+}
+
+function restoreButton(button){
+    if(!button) return;
+    const original = buttonOriginalContent.get(button);
+    if(original !== undefined){
+        button.innerHTML = original;
+    }
+    button.classList.remove("button-loading");
+    button.removeAttribute("aria-busy");
+}
+
+function waitForButtonLoader(ms=360){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/* Internal page links get the same small loading feedback. */
+document.addEventListener("click", function(e){
+    const link = e.target.closest("a[href]");
+    if(!link) return;
+
+    const href = link.getAttribute("href");
+    if(!href || href.startsWith("#")) return;
+    if(link.target === "_blank") return;
+    if(href.startsWith("http://") || href.startsWith("https://")) return;
+
+    /* Let the browser handle modified clicks normally. */
+    if(e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+    e.preventDefault();
+    if(link.classList.contains("button-loading")) return;
+
+    setButtonLoading(link);
+
+    setTimeout(()=>{
+        window.location.href = href;
+    },360);
+});
+
+/* LUCKY ARCADE WIDGET */
+const luckyMessages = [
+    "Try your <strong>Luck</strong>",
+    "Users are <strong>winning</strong>",
+    "Play <strong>now</strong>",
+    "Win <strong>₦15,000</strong>",
+    "Feeling <strong>lucky?</strong>",
+    "Pick a number. <strong>Take a chance.</strong>"
+];
+let luckyMessageIndex = 0;
+let luckyMessageTimer = null;
+
+function cycleLuckyMessage(){
+    const widget = document.getElementById("luckyFloatingWidget");
+    const message = document.getElementById("luckyMessage");
+    if(!widget || !message) return;
+
+    widget.classList.remove("message-visible");
+
+    setTimeout(()=>{
+        luckyMessageIndex =
+            (luckyMessageIndex + 1) % luckyMessages.length;
+        message.innerHTML = luckyMessages[luckyMessageIndex];
+        widget.classList.add("message-visible");
+    },260);
+}
+
+function startLuckyMessages(){
+    const widget = document.getElementById("luckyFloatingWidget");
+    if(!widget) return;
+
+    widget.classList.add("message-visible");
+
+    if(luckyMessageTimer) clearInterval(luckyMessageTimer);
+    luckyMessageTimer = setInterval(cycleLuckyMessage,3200);
+}
+
+async function openLuckyGame(widget){
+    if(widget?.classList.contains("button-loading")) return;
+
+    if(widget){
+        widget.classList.add("button-loading");
+        widget.innerHTML = `
+            <div class="lucky-arcade-orb">
+                <span class="button-loader-dots" aria-hidden="true">
+                    <i></i><i></i><i></i>
+                </span>
+            </div>`;
+        widget.setAttribute("aria-busy","true");
+    }
+
+    await waitForButtonLoader(360);
+    window.location.href = "/lucky.html";
+}
+
 /* SOUND EFFECT */
 function playCheeringSound(){
 try{
@@ -2413,17 +2731,15 @@ whatsappUrl,
 }
 
 /* LEADERBOARD */
-function goToLeaderboard(btn){
+async function goToLeaderboard(btn){
 
 if(btn){
-btn.style.transform="scale(.94)";
-btn.style.opacity=".7";
+setButtonLoading(btn);
+await waitForButtonLoader(360);
 }
 
-setTimeout(()=>{
 window.location.href =
 "/leaderboard.html";
-},150);
 
 }
 
@@ -2987,7 +3303,6 @@ for (let day = 1; day <= 7; day++) {
   else if (day === currentDay && canClaim) {
     card.classList.add("claimable");
     statusText = "CLAIM NOW";
-    card.onclick = () => claimDailyReward(day);
   } 
   /* 3. CURRENT DAY WHEN ON 24-HOUR COOLDOWN */
   else if (day === currentDay && !canClaim) {
@@ -3021,9 +3336,12 @@ DAY 7 • SPECIAL BONUS
 
 <div>
 
-<span class="day-status">
+<button class="day-status daily-claim-button"
+        type="button"
+        ${statusText !== "CLAIM NOW" ? "disabled" : ""}
+        ${statusText === "CLAIM NOW" ? `onclick="claimDailyReward(${day}, this)"` : ""}>
 ${statusText}
-</span>
+</button>
 
 </div>
 
@@ -3041,9 +3359,12 @@ DAY ${day}
 ₦10
 </div>
 
-<span class="day-status">
+<button class="day-status daily-claim-button"
+        type="button"
+        ${statusText !== "CLAIM NOW" ? "disabled" : ""}
+        ${statusText === "CLAIM NOW" ? `onclick="claimDailyReward(${day}, this)"` : ""}>
 ${statusText}
-</span>
+</button>
 
 `;
 
@@ -3059,13 +3380,18 @@ card
 
 
 
-async function claimDailyReward(day){
+async function claimDailyReward(day, triggerButton){
 
 if(isClaimingInProgress)
 return;
 
 isClaimingInProgress =
 true;
+
+if(triggerButton){
+    setButtonLoading(triggerButton);
+    await waitForButtonLoader(360);
+}
 
 try{
 
@@ -3274,7 +3600,13 @@ document.getElementById(
 }
 
 /* WITHDRAWAL & ALERT HANDLERS */
-function handleWithdrawal(){
+async function handleWithdrawal(btn){
+
+if(btn){
+setButtonLoading(btn);
+await waitForButtonLoader(360);
+restoreButton(btn);
+}
 
 if(currentEarnings < 100){
 
@@ -3918,10 +4250,16 @@ function escapeHtmlDashboard(value){
   }[m]));
 }
 
-async function openTransactionsModal(){
+async function openTransactionsModal(trigger){
   const modal = document.getElementById("transactionsModal");
   const container = document.getElementById("transactionsList");
   if(!modal || !container) return;
+
+  if(trigger){
+    setButtonLoading(trigger);
+    await waitForButtonLoader(360);
+    restoreButton(trigger);
+  }
 
   modal.classList.add("active");
   container.innerHTML = `
@@ -3976,6 +4314,16 @@ closeStreakCongratsModal();
 window.addEventListener(
 "DOMContentLoaded",
 ()=>{
+    const luckyWidget = document.getElementById("luckyFloatingWidget");
+    if(luckyWidget){
+        luckyWidget.addEventListener("keydown", e=>{
+            if(e.key === "Enter" || e.key === " "){
+                e.preventDefault();
+                openLuckyGame(luckyWidget);
+            }
+        });
+        startLuckyMessages();
+    }
 
 /* A reload is not treated as a fresh dashboard entry.
    Restore the previous values immediately and refresh them silently.
@@ -4014,6 +4362,7 @@ loadLeaderboard,
 
 </body>
 </html>
+
 
 
 
