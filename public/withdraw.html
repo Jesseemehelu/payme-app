@@ -274,25 +274,12 @@ let currentEarnings = 0;
 
 async function fetchDashboardData() {
   try {
-    // 1. Extract Telegram Mini App native authentication context
-    const tg = window.Telegram?.WebApp;
-    const initData = tg?.initData || "";
-    const tgUser = tg?.initDataUnsafe?.user;
-
-    // 2. Fetch dashboard data using POST to transmit Telegram session proof
-    const response = await fetch("/api/user/dashboard", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+    // The lightweight balance endpoint uses the existing authenticated
+    // session cookie and returns only the values this page needs.
+    const response = await fetch("/api/user/balance", {
+      method: "GET",
       credentials: "include",
-      body: JSON.stringify({
-        initData: initData,
-        telegramId: tgUser?.id,
-        username: tgUser?.username,
-        firstName: tgUser?.first_name,
-        lastName: tgUser?.last_name
-      })
+      cache: "no-store"
     });
 
     const data = await response.json();

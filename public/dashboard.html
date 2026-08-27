@@ -3442,7 +3442,7 @@ renderDailyGrid();
 
 startCountdownTimer();
 
-fetchDashboardData();
+refreshDashboardBalance();
 
 if(day === 7){
 
@@ -3596,6 +3596,145 @@ document.getElementById(
 ).classList.remove(
 "show"
 );
+
+}
+
+/* LIGHTWEIGHT BALANCE REFRESH
+   Background updates only fetch the small balance payload.
+   The full dashboard payload is loaded on entry/actions. */
+let balanceRefreshInFlight = false;
+
+async function refreshDashboardBalance(){
+
+    if(balanceRefreshInFlight || document.hidden){
+        return;
+    }
+
+    balanceRefreshInFlight = true;
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/user/balance",
+                {
+                    method:"GET",
+                    credentials:"include",
+                    cache:"no-store"
+                }
+            );
+
+        if(!response.ok){
+            return;
+        }
+
+        const data =
+            await response.json();
+
+        if(!data.success || !data.user){
+            return;
+        }
+
+        const user =
+            data.user;
+
+        const resolvedName =
+            user.fullName ||
+            user.username ||
+            "User";
+
+        const availableBalance =
+            Number(user.balance ?? 0);
+
+        const withdrawableBalance =
+            Number(user.withdrawableBalance ?? 0);
+
+        const depositBalance =
+            Number(user.depositBalance ?? 0);
+
+        const nameEl =
+            document.getElementById("userNameText");
+
+        if(nameEl){
+            nameEl.innerText =
+                resolvedName;
+        }
+
+        const balanceEl =
+            document.getElementById("balanceText");
+
+        if(balanceEl){
+            balanceEl.innerText =
+                availableBalance.toFixed(2);
+        }
+
+        const earningsEl =
+            document.getElementById("earningsBalanceText");
+
+        if(earningsEl){
+            earningsEl.innerText =
+                withdrawableBalance.toFixed(2);
+        }
+
+        const depositEl =
+            document.getElementById("depositBalanceText");
+
+        if(depositEl){
+            depositEl.innerText =
+                depositBalance.toFixed(2);
+        }
+
+        currentEarnings =
+            withdrawableBalance;
+
+        cacheDashboardData(
+            resolvedName,
+            availableBalance.toFixed(2),
+            withdrawableBalance.toFixed(2),
+            depositBalance.toFixed(2)
+        );
+
+        const totalRefersEl =
+            document.getElementById("totalRefersText");
+
+        if(totalRefersEl){
+            totalRefersEl.innerText =
+                user.totalReferrals || 0;
+        }
+
+        const activeRefersEl =
+            document.getElementById("activeRefersText");
+
+        if(activeRefersEl){
+            activeRefersEl.innerText =
+                user.successfulReferrals || 0;
+        }
+
+        const refEarningsEl =
+            document.getElementById("refEarningsText");
+
+        if(refEarningsEl){
+            refEarningsEl.innerText =
+                "₦ " +
+                Number(
+                    user.referralEarnings || 0
+                ).toLocaleString();
+        }
+
+        updateReferralLinkUI();
+
+    }catch(err){
+
+        console.warn(
+            "Lightweight balance refresh failed:",
+            err
+        );
+
+    }finally{
+
+        balanceRefreshInFlight = false;
+
+    }
 
 }
 
@@ -4345,14 +4484,32 @@ updateReferralLinkUI();
 
 loadLeaderboard();
 
+/* Keep background traffic small:
+   - balances refresh every 30 seconds
+   - leaderboard refreshes every 60 seconds
+   - hidden tabs do not make background requests */
 setInterval(
-fetchDashboardData,
-5000
+refreshDashboardBalance,
+30000
 );
 
 setInterval(
 loadLeaderboard,
-5000
+60000
+);
+
+document.addEventListener(
+"visibilitychange",
+() => {
+
+    if(!document.hidden){
+
+        refreshDashboardBalance();
+        loadLeaderboard();
+
+    }
+
+}
 );
 
 }
