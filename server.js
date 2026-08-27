@@ -100,8 +100,15 @@ const TELEGRAM_CHAT_ID =
   ).trim();
 
 const SESSION_SECRET =
-  process.env.PAYME_SESSION_SECRET ||
-  'sess_sec_9qW2$vL5%nQ8@wZ3_8f8b2c7d4';
+  String(
+    process.env.PAYME_SESSION_SECRET || ''
+  ).trim();
+
+if (!SESSION_SECRET) {
+  throw new Error(
+    'PAYME_SESSION_SECRET must be configured in the environment.'
+  );
+}
 
 const SESSION_MAX_AGE =
   10 *
@@ -505,7 +512,6 @@ async function updateUser(user) {
   syncUserBalance(user);
 
   const {
-    data,
     error
   } =
     await supabase
@@ -516,15 +522,15 @@ async function updateUser(user) {
       .eq(
         'id',
         user.id
-      )
-      .select('*')
-      .single();
+      );
 
   if (error) {
     throw error;
   }
 
-  return mapUser(data);
+  // The caller already has the updated user object.
+  // Avoid selecting the entire row again just to return it.
+  return user;
 
 }
 
@@ -751,27 +757,31 @@ async function addTransaction(
   };
 
   const {
-    data,
     error
   } =
     await supabase
       .from('transactions')
-      .insert(row)
-      .select('*')
-      .single();
+      .insert(row);
 
   if (error) {
     throw error;
   }
 
-  return data;
+  // The inserted row is already available locally.
+  // Do not download it back from Supabase.
+  return row;
 
 }
 
 async function getTransactions(
   userId,
-  limit = 200
+  limit = 25
 ) {
+
+  const safeLimit = Math.min(
+    Math.max(Number(limit) || 25, 1),
+    50
+  );
 
   const {
     data,
@@ -779,7 +789,18 @@ async function getTransactions(
   } =
     await supabase
       .from('transactions')
-      .select('*')
+      .select(`
+        id,
+        type,
+        description,
+        amount,
+        currency,
+        status,
+        bank,
+        account_name,
+        account_number,
+        created_at
+      `)
       .eq(
         'user_id',
         userId
@@ -790,7 +811,7 @@ async function getTransactions(
           ascending: false
         }
       )
-      .limit(limit);
+      .limit(safeLimit);
 
   if (error) {
     throw error;
@@ -836,13 +857,80 @@ async function getTransactions(
 
 }
 
+async function getRecentSpins(
+  userId,
+  limit = 20
+) {
+
+  const safeLimit = Math.min(
+    Math.max(Number(limit) || 20, 1),
+    50
+  );
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('transactions')
+      .select(`
+        id,
+        type,
+        description,
+        amount,
+        currency,
+        status,
+        created_at
+      `)
+      .eq(
+        'user_id',
+        userId
+      )
+      .ilike(
+        'type',
+        '%Spin%'
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      )
+      .limit(safeLimit);
+
+  if (error) {
+    throw error;
+  }
+
+  return (
+    data || []
+  ).map(
+    t => ({
+      id: t.id,
+      type: t.type,
+      description: t.description,
+      amount: number(t.amount),
+      currency: t.currency,
+      status: t.status,
+      createdAt: t.created_at
+    })
+  );
+
+}
+
 // ======================================================
 // DEPOSITS
 // ======================================================
 
 async function getUserDeposits(
-  userId
+  userId,
+  limit = 25
 ) {
+
+  const safeLimit = Math.min(
+    Math.max(Number(limit) || 25, 1),
+    50
+  );
 
   const {
     data,
@@ -850,7 +938,14 @@ async function getUserDeposits(
   } =
     await supabase
       .from('deposits')
-      .select('*')
+      .select(`
+        reference,
+        amount,
+        status,
+        screenshot,
+        reason,
+        created_at
+      `)
       .eq(
         'user_id',
         userId
@@ -860,7 +955,8 @@ async function getUserDeposits(
         {
           ascending: false
         }
-      );
+      )
+      .limit(safeLimit);
 
   if (error) {
     throw error;
@@ -1384,10 +1480,9 @@ async function authenticateRequest(
         user.id
     };
 
-    req.user =
-      await loadUserData(
-        user
-      );
+    // Keep authentication lightweight. Transaction and deposit
+    // history is fetched only by endpoints that need it.
+    req.user = user;
 
     return next();
 
@@ -1442,10 +1537,8 @@ async function requireLogin(
     try {
 
       req.user =
-        await loadUserData(
-          await getUserById(
-            req.session.userId
-          )
+        await getUserById(
+          req.session.userId
         );
 
     } catch (err) {
@@ -3852,7 +3945,7 @@ app.post('/api/auth/localtest-signup', async (req, res) => {
       await updateUser(user);
     }
 
-    const finalUser = await loadUserData(await getUserById(user.id));
+    const finalUser = await getUserById(user.id);
 
     // Set authentication session cookie
     setSessionCookie(res, createSessionToken(finalUser));
@@ -4015,7 +4108,7 @@ app.post(
           user = await getUserById(createdUser.id);
         }
 
-        user = await loadUserData(user);
+        // User is already loaded; no transaction history is needed for authentication.
         const sessionToken = createSessionToken(user);
         setSessionCookie(res, sessionToken);
 
@@ -4344,10 +4437,8 @@ app.post(
         }
 
         user =
-          await loadUserData(
-            await getUserById(
-              savedUser.id
-            )
+          await getUserById(
+            savedUser.id
           );
 
         const sessionToken =
@@ -4540,10 +4631,8 @@ app.post(
         }
 
         user =
-          await loadUserData(
-            await getUserById(
-              user.id
-            )
+          await getUserById(
+            user.id
           );
 
       }
@@ -4780,10 +4869,8 @@ app.post(
       );
 
       const finalUser =
-        await loadUserData(
-          await getUserById(
-            user.id
-          )
+        await getUserById(
+          user.id
         );
 
       setSessionCookie(
@@ -5101,7 +5188,14 @@ app.get(
 
         transactions:
           await getTransactions(
-            req.user.id
+            req.user.id,
+            Math.min(
+              Math.max(
+                Number(req.query.limit) || 25,
+                1
+              ),
+              50
+            )
           )
 
       });
@@ -5310,14 +5404,9 @@ app.get(
     try {
 
       const spins =
-        (
-          await getTransactions(
-            req.user.id
-          )
-        ).filter(
-          t =>
-            t.type &&
-            t.type.includes('Spin')
+        await getRecentSpins(
+          req.user.id,
+          20
         );
 
       return res.json({
@@ -5630,14 +5719,9 @@ app.post(
       );
 
       const recentSpins =
-        (
-          await getTransactions(
-            user.id
-          )
-        ).filter(
-          t =>
-            t.type &&
-            t.type.includes('Spin')
+        await getRecentSpins(
+          user.id,
+          20
         );
 
       return res.json({
@@ -5919,7 +6003,14 @@ app.get(
 
         deposits:
           await getUserDeposits(
-            req.user.id
+            req.user.id,
+            Math.min(
+              Math.max(
+                Number(req.query.limit) || 25,
+                1
+              ),
+              50
+            )
           )
 
       });
@@ -6693,11 +6784,17 @@ app.post(
       }
 
       user =
-        await loadUserData(
-          await getUserById(
-            user.id
-          )
+        await getUserById(
+          user.id
         );
+
+      const [
+        transactions,
+        deposits
+      ] = await Promise.all([
+        getTransactions(user.id, 25),
+        getUserDeposits(user.id, 25)
+      ]);
 
       const daily =
         normalizeDailyReward(
@@ -6752,11 +6849,9 @@ app.post(
             ) >=
             MIN_WITHDRAWAL_LIMIT,
 
-          transactions:
-            user.transactions,
+          transactions,
 
-          deposits:
-            user.deposits
+          deposits
 
         },
 
@@ -8268,7 +8363,7 @@ setInterval(
                 )
         );
     },
-    10000
+    60000
 );
 
 
@@ -10995,6 +11090,7 @@ app.listen(
   }
 
 );
+
 
 
 
