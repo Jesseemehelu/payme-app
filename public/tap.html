@@ -1317,7 +1317,7 @@ button {
 
     <!-- HOME SCREEN -->
     <section id="homeScreen" class="screen active home">
-        <button id="homeBackBtn" class="top-back-btn" onclick="window.location.href='earn.html'">‹</button>
+        <button id="homeBackBtn" class="top-back-btn" type="button">‹</button>
         <div class="home-inner">
             <div class="logo-container">
                 <div class="logo-badge">⚡</div>
@@ -1893,10 +1893,10 @@ setInterval(updateChallengeCountdown, 1000);
 
 const homeBackBtn = $("homeBackBtn");
 if (homeBackBtn) {
-    homeBackBtn.addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "earn.html"; });
+    homeBackBtn.addEventListener("click", e => { e.preventDefault(); window.location.href = "earn.html"; });
 }
 
-$("homePlayBtn").addEventListener("pointerdown", async e => {
+$("homePlayBtn").addEventListener("click", async e => {
     e.preventDefault();
     state.mode = "paid";
     audio.init();
@@ -1911,7 +1911,7 @@ $("homePlayBtn").addEventListener("pointerdown", async e => {
         restore();
     }
 });
-$("homeFreePlayBtn").addEventListener("pointerdown", async e => {
+$("homeFreePlayBtn").addEventListener("click", async e => {
     e.preventDefault();
     if (state.running) return;
 
@@ -1943,14 +1943,14 @@ $("homeFreePlayBtn").addEventListener("pointerdown", async e => {
     }
 });
 
-$("howToPlayBtn").addEventListener("pointerdown", e => { e.preventDefault(); openModal("howToModal"); });
-$("depositQuickBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "dashboard.html"; });
-$("depositBtn").addEventListener("pointerdown", e => { e.preventDefault(); window.location.href = "deposit.html"; });
-document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("pointerdown", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
-document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("pointerdown", e => { if(e.target === overlay) closeModal(overlay.id); }));
-$("confirmBack").addEventListener("pointerdown", e => { e.preventDefault(); showScreen("home"); });
+$("howToPlayBtn").addEventListener("click", e => { e.preventDefault(); openModal("howToModal"); });
+$("depositQuickBtn").addEventListener("click", e => { e.preventDefault(); window.location.href = "deposit.html"; });
+$("depositBtn").addEventListener("click", e => { e.preventDefault(); window.location.href = "deposit.html"; });
+document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
+document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("click", e => { if(e.target === overlay) closeModal(overlay.id); }));
+$("confirmBack").addEventListener("click", e => { e.preventDefault(); showScreen("home"); });
 
-$("confirmPlayBtn").addEventListener("pointerdown", async e => {
+$("confirmPlayBtn").addEventListener("click", async e => {
     e.preventDefault();
     if (state.running) return;
     const btn = $("confirmPlayBtn");
@@ -2068,7 +2068,7 @@ function spawnTarget() {
     if (now < nextSpawn) return;
 
     const d = difficulty();
-    nextSpawn = now + d.spawnGap;
+    nextSpawn = now + Math.round(d.spawnGap * 1.05);
 
     const roll = Math.random();
     let type = "normal";
@@ -2096,9 +2096,9 @@ function spawnTarget() {
 
     const targetData = {
         id: target.dataset.id, el: target, type, size, x, y,
-        createdAt: now, lifetime: d.lifetime,
-        vx: d.moving ? (Math.random() - 0.5) * (d.stage >= 5 ? 1.2 : 0.6) : 0,
-        vy: d.moving ? (Math.random() - 0.5) * (d.stage >= 5 ? 1.2 : 0.6) : 0,
+        createdAt: now, lifetime: Math.round(d.lifetime * 1.05),
+        vx: d.moving ? (Math.random() - 0.5) * (d.stage >= 5 ? 1.2 : 0.6) * 0.95 : 0,
+        vy: d.moving ? (Math.random() - 0.5) * (d.stage >= 5 ? 1.2 : 0.6) * 0.95 : 0,
         clicked: false
     };
 
@@ -2171,7 +2171,15 @@ function handleTargetPointer(e) {
     scoreEl.textContent = state.score.toLocaleString();
     comboEl.textContent = `x${getComboMultiplier()}`;
 
-    recordEvent({ type: "hit", targetType: type, baseValue: base, combo: state.combo, at: now });
+    recordEvent({
+        type: "hit",
+        targetType: type,
+        targetSize: data.size,
+        reactionMs: Math.max(1, Math.round(now - data.createdAt)),
+        baseValue: base,
+        combo: state.combo,
+        at: now
+    });
     removeTarget(data, true);
 }
 
@@ -2479,7 +2487,7 @@ function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
 }
 
-$("freePlayAgainBtn").addEventListener("pointerdown", async e => {
+$("freePlayAgainBtn").addEventListener("click", async e => {
     e.preventDefault();
     closeModal("freeResultModal");
 
@@ -2492,7 +2500,7 @@ $("freePlayAgainBtn").addEventListener("pointerdown", async e => {
     beginGame();
 });
 
-$("freeResultCloseBtn").addEventListener("pointerdown", e => {
+$("freeResultCloseBtn").addEventListener("click", e => {
     e.preventDefault();
     closeModal("freeResultModal");
     state.mode = "paid";
@@ -2500,7 +2508,7 @@ $("freeResultCloseBtn").addEventListener("pointerdown", e => {
     showScreen("home");
 });
 
-$("playAgainBtn").addEventListener("pointerdown", async e => {
+$("playAgainBtn").addEventListener("click", async e => {
     e.preventDefault();
     const btn = $("playAgainBtn");
     const restore = setButtonLoading(btn, "CHECKING BALANCE...");
@@ -2514,7 +2522,7 @@ $("playAgainBtn").addEventListener("pointerdown", async e => {
     }
 });
 
-$("homeBtn").addEventListener("pointerdown", e => {
+$("homeBtn").addEventListener("click", e => {
     e.preventDefault();
     const btn = $("homeBtn");
     const restore = setButtonLoading(btn, "MAIN MENU...");
@@ -2542,7 +2550,7 @@ async function fetchAndRenderHomeLeaderboard(btn = null) {
     }
 }
 
-$("leaderboardBtn").addEventListener("pointerdown", async e => {
+$("leaderboardBtn").addEventListener("click", async e => {
     e.preventDefault();
     const btn = $("leaderboardBtn");
     try {
@@ -2554,7 +2562,7 @@ $("leaderboardBtn").addEventListener("pointerdown", async e => {
     } catch (_) {}
 });
 
-$("viewLeaderboardBtn").addEventListener("pointerdown", async e => {
+$("viewLeaderboardBtn").addEventListener("click", async e => {
     e.preventDefault();
     openModal("homeLeaderboardModal");
     const rows = $("homeLeaderboardRows");
@@ -2564,7 +2572,7 @@ $("viewLeaderboardBtn").addEventListener("pointerdown", async e => {
     } catch (_) {}
 });
 
-$("homeLeaderboardRefresh").addEventListener("pointerdown", async e => {
+$("homeLeaderboardRefresh").addEventListener("click", async e => {
     e.preventDefault();
     try {
         await fetchAndRenderHomeLeaderboard($("homeLeaderboardRefresh"));
@@ -2572,11 +2580,11 @@ $("homeLeaderboardRefresh").addEventListener("pointerdown", async e => {
     } catch (_) {}
 });
 
-$("homeLeaderboardClose").addEventListener("pointerdown", e => {
+$("homeLeaderboardClose").addEventListener("click", e => {
     e.preventDefault();
     closeModal("homeLeaderboardModal");
 });
-$("homeLeaderboardCloseBottom").addEventListener("pointerdown", e => {
+$("homeLeaderboardCloseBottom").addEventListener("click", e => {
     e.preventDefault();
     closeModal("homeLeaderboardModal");
 });
@@ -2601,5 +2609,6 @@ document.addEventListener("touchmove", e => { if (state.running) e.preventDefaul
 </script>
 </body>
 </html>
+
 
 

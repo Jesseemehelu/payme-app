@@ -3795,6 +3795,7 @@ function txIsTapRush(tx){
 function txTitle(tx){
   const raw = String(tx.type || tx.description || tx.reason || "Transaction");
   const lower = raw.toLowerCase();
+  const fullText = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""}`.toLowerCase();
 
   if(
     /telegram/.test(lower) &&
@@ -3817,7 +3818,22 @@ function txTitle(tx){
     return "Telegram Advertising";
   }
 
+  if(
+    /weekly_referral_reward|weekly referral challenge/.test(lower)
+  ){
+    if(/1st\s*place/.test(lower)) return "Weekly Referral — 1st Place";
+    if(/2nd\s*place/.test(lower)) return "Weekly Referral — 2nd Place";
+    if(/3rd\s*place/.test(lower)) return "Weekly Referral — 3rd Place";
+    return "Weekly Referral Prize";
+  }
+
   if(txIsTapRush(tx)){
+    if(/contest|challenge|1st\s*place|2nd\s*place|3rd\s*place/.test(fullText)){
+      if(/1st\s*place/.test(fullText)) return "Tap Rush — 1st Place Prize";
+      if(/2nd\s*place/.test(fullText)) return "Tap Rush — 2nd Place Prize";
+      if(/3rd\s*place/.test(fullText)) return "Tap Rush — 3rd Place Prize";
+      return "Tap Rush Contest Prize";
+    }
     if(/entry|fee|ticket|join|start/.test(lower)) return "Tap Rush Entry Fee";
     if(/winning|win|prize|payout|reward/.test(lower)) return "Tap Rush Winnings";
     return "Tap Rush";
@@ -3998,6 +4014,7 @@ loadLeaderboard,
 
 </body>
 </html>
+
 
 
 

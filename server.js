@@ -7271,7 +7271,7 @@ const WEEKLY_PRIZES = [
       1,
 
     amount:
-      500,
+      1000,
 
     description:
       'Weekly Referral Challenge — 1st Place'
@@ -7284,7 +7284,7 @@ const WEEKLY_PRIZES = [
       2,
 
     amount:
-      200,
+      500,
 
     description:
       'Weekly Referral Challenge — 2nd Place'
@@ -7297,7 +7297,7 @@ const WEEKLY_PRIZES = [
       3,
 
     amount:
-      50,
+      200,
 
     description:
       'Weekly Referral Challenge — 3rd Place'
@@ -7600,10 +7600,9 @@ async function getWeeklyLeaderboard(
 // FINALIZE WEEKLY COMPETITION
 // ======================================================
 
-async function finalizeWeeklyCompetition() {
-
-  const competition =
-    getCurrentCompetition();
+async function finalizeWeeklyCompetition(
+  competition = getCurrentCompetition()
+) {
 
   if (
     Date.now() <
@@ -8253,6 +8252,26 @@ async function handleTelegramCallback(
 
 }
 
+// ============================================================
+// TAP RUSH — AUTOMATIC PRIZE FINALIZATION CHECK
+// ============================================================
+// The challenge endpoint also performs this check, so prize
+// processing still occurs when traffic reaches the app after
+// the exact 2-day end time.
+setInterval(
+    () => {
+        finalizeExpiredTapRushChallenges().catch(
+            err =>
+                console.error(
+                    'Tap Rush prize finalization error:',
+                    err
+                )
+        );
+    },
+    10000
+);
+
+
 // ======================================================
 // TELEGRAM POLLING
 // ======================================================
@@ -8414,15 +8433,43 @@ app.get(
 setInterval(
 
   () => {
+    /*
+     * Finalize the competition that has just ended.
+     * getCurrentCompetition() rolls over to the new week when
+     * the countdown reaches zero, so the previous competition
+     * must be finalized explicitly.
+     */
+    const currentCompetition =
+      getCurrentCompetition();
 
-    finalizeWeeklyCompetition()
-      .catch(
-        err =>
-          console.error(
-            'Weekly competition error:',
-            err
-          )
+    const previousStart =
+      new Date(
+        new Date(currentCompetition.startTime).getTime() -
+        7 * 24 * 60 * 60 * 1000
       );
+
+    const previousCompetition = {
+      competitionId:
+        `weekly_${previousStart.toISOString().slice(0, 10)}`,
+      startTime:
+        previousStart.toISOString(),
+      endTime:
+        new Date(
+          currentCompetition.startTime
+        ).toISOString(),
+      status:
+        'completed'
+    };
+
+    finalizeWeeklyCompetition(
+      previousCompetition
+    ).catch(
+      err =>
+        console.error(
+          'Weekly competition error:',
+          err
+        )
+    );
 
   },
 
@@ -8447,6 +8494,143 @@ const TAP_RUSH_DURATION_MS = 20000;
 const TAP_RUSH_GRACE_MS = 2500;
 const TAP_RUSH_MAX_EVENTS = 500;
 
+// ============================================================
+// TAP RUSH — FINALIZE EXPIRED 2-DAY CHALLENGES
+//
+// When a 2-day challenge ends, the server ranks the verified
+// scores using:
+//   1. highest actual score first
+//   2. if scores are equal, the earlier submitted score wins
+//
+// The top three are credited to their withdrawable balance and
+// each prize is written to the normal transactions table so it
+// appears in the Dashboard transaction modal.
+// ============================================================
+const TAP_RUSH_PRIZES = [
+    {
+        position: 1,
+        amount: 1000,
+        description: 'Tap Rush 2-Day Contest — 1st Place Prize'
+    },
+    {
+        position: 2,
+        amount: 500,
+        description: 'Tap Rush 2-Day Contest — 2nd Place Prize'
+    },
+    {
+        position: 3,
+        amount: 200,
+        description: 'Tap Rush 2-Day Contest — 3rd Place Prize'
+    }
+];
+
+async function finalizeExpiredTapRushChallenges() {
+    const nowIso = new Date().toISOString();
+
+    const {
+        data: expiredChallenges,
+        error: challengeError
+    } = await supabase
+        .from('game_challenges')
+        .select('*')
+        .eq('game_type', 'tap_rush')
+        .eq('status', 'active')
+        .lte('end_time', nowIso)
+        .order('end_time', { ascending: true })
+        .limit(10);
+
+    if (challengeError) throw challengeError;
+
+    for (const challenge of expiredChallenges || []) {
+        try {
+            const {
+                data: scores,
+                error: scoreError
+            } = await supabase
+                .from('tap_rush_scores')
+                .select('user_id,score,displayed_score,created_at')
+                .eq('challenge_id', challenge.id)
+                .order('score', { ascending: false })
+                .order('created_at', { ascending: true })
+                .limit(100);
+
+            if (scoreError) throw scoreError;
+
+            const winners = scores || [];
+
+            const winnerUserIds = winners
+                .slice(0, 3)
+                .map(row => row.user_id);
+
+            const profiles = await getTapRushUserProfiles(winnerUserIds);
+
+            for (let i = 0; i < 3; i++) {
+                const prize = TAP_RUSH_PRIZES[i];
+                const winner = winners[i];
+
+                if (!winner) continue;
+
+                const uniqueId =
+                    `tx_tap_rush_prize_${challenge.id}_${winner.user_id}_${i + 1}`;
+
+                // Idempotency: if the prize transaction already exists,
+                // the wallet credit has already been processed.
+                const {
+                    data: alreadyPaid,
+                    error: paidCheckError
+                } = await supabase
+                    .from('transactions')
+                    .select('id')
+                    .eq('id', uniqueId)
+                    .maybeSingle();
+
+                if (paidCheckError) throw paidCheckError;
+                if (alreadyPaid) continue;
+
+                const user = await getUserById(winner.user_id);
+                if (!user) continue;
+
+                user.withdrawableBalance =
+                    getWithdrawableBalance(user) + prize.amount;
+
+                await updateUser(user);
+
+                const profile = profiles.get(String(winner.user_id)) || {};
+                const winnerName =
+                    profile.username ||
+                    profile.full_name ||
+                    'Player';
+
+                await addTransaction(user.id, {
+                    id: uniqueId,
+                    type: 'tap_rush_contest_prize',
+                    description:
+                        `${prize.description} (${winnerName}, Challenge #${challenge.challenge_number})`,
+                    amount: prize.amount,
+                    currency: 'NGN',
+                    status: 'completed',
+                    bank: 'PAYME Wallet'
+                });
+            }
+
+            // Only mark the challenge completed after the prize-processing
+            // pass has succeeded. This keeps the operation retryable if
+            // Supabase has a temporary error.
+            await supabase
+                .from('game_challenges')
+                .update({ status: 'completed' })
+                .eq('id', challenge.id)
+                .eq('status', 'active');
+
+        } catch (error) {
+            console.error(
+                `Tap Rush challenge ${challenge.id} finalization error:`,
+                error
+            );
+        }
+    }
+}
+
 
 // ============================================================
 // TAP RUSH — ACTIVE CHALLENGE
@@ -8458,6 +8642,10 @@ app.get(
     async (req, res) => {
 
         try {
+
+            // Finalize any 2-day Tap Rush contest whose countdown has
+            // reached zero before loading/creating the next contest.
+            await finalizeExpiredTapRushChallenges();
 
             const now =
                 new Date().toISOString();
@@ -9763,104 +9951,21 @@ app.post(
 
 
             // ------------------------------------------------
-            // UNIQUE DISPLAY SCORE
+            // DISPLAY SCORE
             //
-            // Base score remains legitimate.
-            //
-            // If an exact collision occurs, the server
-            // deterministically adds a tiny performance
-            // derived component.
+            // The leaderboard and UI must show the exact verified
+            // calculated score. Never inflate or modify it to
+            // manufacture unique-looking scores.
             // ------------------------------------------------
-
-            let displayedScore =
-                score;
-
-
-            const {
-                data: collision
-            } = await supabase
-                .from(
-                    'tap_rush_scores'
-                )
-                .select(
-                    'id,displayed_score,tie_break_value'
-                )
-                .eq(
-                    'challenge_id',
-                    session.challenge_id
-                )
-                .eq(
-                    'displayed_score',
-                    displayedScore
-                )
-                .limit(1)
-                .maybeSingle();
-
-
-            let tieBreakValue =
-                Number(
-                    completionTimeMs
-                );
-
-
-            if (
-                collision
-            ) {
-
-                const cryptoHash =
-                    crypto
-                        .createHash(
-                            'sha256'
-                        )
-                        .update(
-                            `${user.id}:${sessionId}:${score}:${completionTimeMs}:${events.length}`
-                        )
-                        .digest('hex');
-
-
-                const suffix =
-                    parseInt(
-                        cryptoHash.slice(
-                            0,
-                            8
-                        ),
-                        16
-                    ) %
-                    997;
-
-
-                displayedScore =
-                    score *
-                    1000 +
-                    suffix;
-
-
-                tieBreakValue =
-                    Number(
-                        (
-                            completionTimeMs +
-                            (
-                                suffix /
-                                1000
-                            )
-                        ).toFixed(8)
-                    );
-
-            } else {
-
-                displayedScore =
-                    score *
-                    1000 +
-                    (
-                        completionTimeMs %
-                        997
-                    );
-
-            }
-
+            const displayedScore = score;
 
             // ------------------------------------------------
             // INSERT SCORE
+            // ------------------------------------------------
+            // Do not store Date.now() in a numeric(20,8) tie-break column:
+            // PostgreSQL numeric(20,8) allows only 12 integer digits, while
+            // Unix milliseconds already use 13 digits. The table's normal
+            // created_at timestamp is used as the tie-breaker instead.
             // ------------------------------------------------
 
             const {
@@ -9943,10 +10048,7 @@ app.post(
                         events.length,
 
                     displayed_score:
-                        displayedScore,
-
-                    tie_break_value:
-                        tieBreakValue
+                        displayedScore
 
                 })
                 .select(
@@ -10150,7 +10252,8 @@ const {
     .select(`
         displayed_score,
         score,
-        user_id
+        user_id,
+        created_at
     `)
     .eq(
         'challenge_id',
@@ -10160,6 +10263,12 @@ const {
         'displayed_score',
         {
             ascending: false
+        }
+    )
+    .order(
+        'created_at',
+        {
+            ascending: true
         }
     )
     .limit(100);
@@ -10238,8 +10347,11 @@ const ranked =
 
                 score:
                     Number(
-                        row.displayed_score
+                        row.score
                     ),
+
+                createdAt:
+                    row.created_at,
 
                 username,
 
@@ -10449,16 +10561,23 @@ app.get(
                 .select(`
                     displayed_score,
                     score,
-                    user_id
+                    user_id,
+                    created_at
                 `)
                 .eq(
                     'challenge_id',
                     challenge.id
                 )
                 .order(
-                    'displayed_score',
+                    'score',
                     {
                         ascending: false
+                    }
+                )
+                .order(
+                    'created_at',
+                    {
+                        ascending: true
                     }
                 )
                 .limit(100);
@@ -10876,6 +10995,7 @@ app.listen(
   }
 
 );
+
 
 
 
