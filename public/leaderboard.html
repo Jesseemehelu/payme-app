@@ -3209,42 +3209,30 @@ window.addEventListener(
 
 
 /*
-   Keep live rankings updated.
+   No timer-based polling — that was the main source of egress even
+   when nobody was looking at the page. Instead, the leaderboard only
+   refreshes once on load (above), and once whenever the user comes
+   back to this tab/app after having left it.
 */
 
-let leaderboardRefreshTimer = null;
+const LEADERBOARD_REFRESH_COOLDOWN_MS = 3000;
+let lastLeaderboardRefresh = Date.now();
 
-function startLeaderboardRefresh() {
-    if (leaderboardRefreshTimer !== null) {
-        clearInterval(leaderboardRefreshTimer);
-    }
-
-    leaderboardRefreshTimer = setInterval(
-        loadLeaderboardData,
-        60000
-    );
+function refreshLeaderboardOnReturn(){
+    const now = Date.now();
+    if(now - lastLeaderboardRefresh < LEADERBOARD_REFRESH_COOLDOWN_MS) return;
+    lastLeaderboardRefresh = now;
+    loadLeaderboardData();
 }
 
-function stopLeaderboardRefresh() {
-    if (leaderboardRefreshTimer !== null) {
-        clearInterval(leaderboardRefreshTimer);
-        leaderboardRefreshTimer = null;
+document.addEventListener("visibilitychange", () => {
+    if(!document.hidden){
+        refreshLeaderboardOnReturn();
     }
-}
+});
 
-document.addEventListener(
-    'visibilitychange',
-    () => {
-        if (document.hidden) {
-            stopLeaderboardRefresh();
-        } else {
-            loadLeaderboardData();
-            startLeaderboardRefresh();
-        }
-    }
-);
-
-startLeaderboardRefresh();
+window.addEventListener("focus", refreshLeaderboardOnReturn);
+window.addEventListener("pageshow", refreshLeaderboardOnReturn);
 
 </script>
 

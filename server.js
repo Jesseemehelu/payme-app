@@ -932,11 +932,6 @@ async function getUserDeposits(
     50
   );
 
-  // Deposit history never needs the payment screenshot.
-  // Screenshots can be large (the upload UI allows up to 5 MB),
-  // so do not transfer them as part of normal history/dashboard
-  // responses. Fetch a specific screenshot only when an admin
-  // explicitly needs it via getDeposit(reference).
   const {
     data,
     error
@@ -947,6 +942,7 @@ async function getUserDeposits(
         reference,
         amount,
         status,
+        screenshot,
         reason,
         created_at
       `)
@@ -979,6 +975,9 @@ async function getUserDeposits(
 
       status:
         d.status,
+
+      screenshot:
+        d.screenshot,
 
       reason:
         d.reason,
@@ -6763,8 +6762,10 @@ app.post(
         user
       );
 
-      // ensureWelcomeBonus mutates the in-memory user when needed,
-      // so there is no reason to re-download the complete user row.
+      // ensureWelcomeBonus() mutates and persists `user` in place when it
+      // grants the bonus, so re-reading the row here was a duplicate
+      // Supabase query on every single dashboard poll. The in-memory
+      // object already reflects the persisted state.
       const isNewUser =
         !beforeBonus &&
         user.hasReceivedWelcomeBonus &&
@@ -6780,6 +6781,17 @@ app.post(
         );
 
       }
+
+      // Same reasoning: `user` already carries the up-to-date fields
+      // (mutated + persisted above when relevant), so a second re-fetch
+      // here was redundant on every poll.
+      const [
+        transactions,
+        deposits
+      ] = await Promise.all([
+        getTransactions(user.id, 25),
+        getUserDeposits(user.id, 25)
+      ]);
 
       const daily =
         normalizeDailyReward(
@@ -6797,6 +6809,9 @@ app.post(
         lastClaimTimestamp >=
         CLAIM_COOLDOWN;
 
+      let dailyRewardCycleReset =
+        false;
+
       if (
         canClaim &&
         daily.currentDay === 1 &&
@@ -6806,11 +6821,23 @@ app.post(
         daily.claimedDays =
           [];
 
+        dailyRewardCycleReset =
+          true;
+
       }
 
-      await updateUser(
-        user
-      );
+      // Only write to Supabase here when something actually changed
+      // (the once-per-cycle claimedDays reset). Every other field on
+      // `user` was already persisted by its own updateUser() call above
+      // (or hasn't changed at all), so writing unconditionally on every
+      // 5-30s poll from every active user was pure wasted egress.
+      if (dailyRewardCycleReset) {
+
+        await updateUser(
+          user
+        );
+
+      }
 
       return res.json({
 
@@ -6833,6 +6860,10 @@ app.post(
               user.withdrawableBalance
             ) >=
             MIN_WITHDRAWAL_LIMIT,
+
+          transactions,
+
+          deposits
 
         },
 
@@ -7249,84 +7280,20 @@ app.post(
 );
 
 // ======================================================
-// LIGHTWEIGHT BALANCE
-// ======================================================
-// Used by pages that only need current balances. This avoids
-// downloading transaction/deposit history just to display a balance.
-
-app.get(
-  '/api/user/balance',
-  requireLogin,
-  async (req, res) => {
-
-    try {
-
-      const user =
-        req.user;
-
-      return res.json({
-
-        success:
-          true,
-
-        user: {
-
-          fullName:
-            user.fullName,
-
-          username:
-            user.username,
-
-          balance:
-            number(user.balance),
-
-          depositBalance:
-            number(user.depositBalance),
-
-          withdrawableBalance:
-            number(user.withdrawableBalance),
-
-          referralEarnings:
-            number(user.referralEarnings),
-
-          totalReferrals:
-            number(user.totalReferrals),
-
-          successfulReferrals:
-            number(user.successfulReferrals),
-
-          referralCode:
-            user.referralCode
-
-        }
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Balance error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        message:
-          'Failed to load balance.'
-
-      });
-
-    }
-
-  }
-);
-
-// ======================================================
 // LEADERBOARD
 // ======================================================
+// The leaderboard is identical for every visitor, but it was being
+// re-queried from Supabase on every single request from every user
+// (every 5 seconds, per open tab). With thousands of active users that
+// is thousands of duplicate reads per minute for data that only needs
+// to be a few seconds fresh. A tiny in-memory cache means Supabase is
+// only actually hit once per cache window, no matter how many users
+// are polling.
+let leaderboardCache = {
+  data: null,
+  expiresAt: 0
+};
+const LEADERBOARD_CACHE_TTL_MS = 20000;
 
 app.get(
   '/api/leaderboard',
@@ -7334,38 +7301,48 @@ app.get(
 
     try {
 
-      const {
-        data,
-        error
-      } =
-        await supabase
-          .from('users')
-          .select(
-            'username,total_referrals,referral_earnings'
-          )
-          .gt(
-            'total_referrals',
-            0
-          )
-          .order(
-            'referral_earnings',
-            {
-              ascending:
-                false
-            }
-          )
-          .limit(10);
+      const now =
+        Date.now();
 
-      if (error) {
-        throw error;
-      }
+      let leaderboard;
 
-      return res.json({
+      if (
+        leaderboardCache.data &&
+        leaderboardCache.expiresAt > now
+      ) {
 
-        success:
-          true,
+        leaderboard =
+          leaderboardCache.data;
 
-        leaderboard:
+      } else {
+
+        const {
+          data,
+          error
+        } =
+          await supabase
+            .from('users')
+            .select(
+              'username,total_referrals,referral_earnings'
+            )
+            .gt(
+              'total_referrals',
+              0
+            )
+            .order(
+              'referral_earnings',
+              {
+                ascending:
+                  false
+              }
+            )
+            .limit(10);
+
+        if (error) {
+          throw error;
+        }
+
+        leaderboard =
           (
             data || []
           ).map(
@@ -7385,7 +7362,23 @@ app.get(
                 )
 
             })
-          )
+          );
+
+        leaderboardCache = {
+          data: leaderboard,
+          expiresAt:
+            now +
+            LEADERBOARD_CACHE_TTL_MS
+        };
+
+      }
+
+      return res.json({
+
+        success:
+          true,
+
+        leaderboard
 
       });
 
