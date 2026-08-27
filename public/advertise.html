@@ -1851,7 +1851,7 @@ header {
 .campaigns-modal-title{display:flex;align-items:center;gap:10px}.campaigns-modal-title-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:#172642;font-size:1.05rem}.campaigns-modal-title h3{font-size:.9rem;font-weight:800}.campaigns-modal-title p{margin-top:2px;color:var(--muted);font-size:.56rem}
 .campaigns-modal-close{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:11px;color:#cbd5e1;background:#17233d;font-size:1rem;cursor:pointer}
 .campaigns-modal-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 17px}.campaigns-modal-tools span{color:#71829a;font-size:.56rem;font-weight:700}
-.refresh-campaigns{min-height:34px;padding:0 11px;border-radius:10px;color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08);font-size:.56rem;font-weight:800;cursor:pointer}
+.refresh-campaigns{min-height:34px;padding:0 11px;border-radius:10px;color:#cbd5e1;background:#17233d;border:1px solid rgba(255,255,255,.08);font-size:.56rem;font-weight:800;cursor:pointer}.campaigns-topup-bar{padding:0 17px 12px}.campaigns-topup-launcher{width:100%;min-height:43px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(16,185,129,.22);border-radius:12px;color:#a7f3d0;background:linear-gradient(135deg,#073d32,#0b5a48);font-size:.6rem;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.18);transition:transform .18s ease,filter .18s ease}.campaigns-topup-launcher:hover{transform:translateY(-1px);filter:brightness(1.08)}.campaigns-topup-launcher:active{transform:scale(.985)}.campaigns-topup-launcher[disabled]{opacity:.45;cursor:not-allowed;transform:none;filter:none}
 .campaign-list{min-height:120px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:0 17px 17px;overscroll-behavior:contain}.campaign-empty{padding:22px 12px;text-align:center;color:#71829a;font-size:.62rem;line-height:1.5;border:1px dashed rgba(255,255,255,.08);border-radius:14px}
 .campaign-card{padding:13px;border-radius:16px;background:#0b162a;border:1px solid rgba(255,255,255,.07);animation:campaignRowIn .25s ease both}@keyframes campaignRowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 .campaign-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.campaign-community{min-width:0}.campaign-community-name{color:white;font-size:.72rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.campaign-community-type{margin-top:3px;color:#71829a;font-size:.54rem;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
@@ -1863,7 +1863,7 @@ header {
 ========================================================= */
 
 .app-modal {
-  position:fixed; inset:0; z-index:9999; display:none;
+  position:fixed; inset:0; z-index:11000; display:none;
   align-items:center; justify-content:center; padding:20px;
   background:rgba(2,6,23,.78); backdrop-filter:blur(9px);
 }
@@ -3058,13 +3058,16 @@ header {
       <span>Manage your advertising campaigns</span>
       <button class="refresh-campaigns" id="refreshCampaignsBtn" type="button">Refresh</button>
     </div>
+    <div class="campaigns-topup-bar">
+      <button class="campaigns-topup-launcher" id="campaignsTopupBtn" type="button">↗&nbsp; Top up a campaign</button>
+    </div>
     <div class="campaign-list" id="campaignList">
       <div class="campaign-empty">Open the campaigns panel to load your campaigns.</div>
     </div>
   </div>
 </div>
 
-<!-- TOP UP COMPLETED CAMPAIGN MODAL -->
+<!-- TOP UP CAMPAIGN MODAL -->
 <div class="campaigns-modal" id="topupModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="topupModalTitle">
   <div class="campaigns-modal-card topup-modal-card">
     <div class="campaigns-modal-head">
@@ -3216,7 +3219,7 @@ function renderCampaigns(campaigns){
       </div>
       <div class="campaign-progress"><span style="width:${progress}%"></span></div>
       <div class="campaign-actions"><button class="campaign-open-btn" type="button" onclick="openCampaign('${escapeHtml(ad.telegram_link||"")}')">Open community</button>
-      ${status==="completed"?`<button class="campaign-topup-btn" type="button" onclick="openTopupCampaign('${escapeHtml(ad.id)}',${target},${completed},'${escapeHtml(ad.telegram_username||"")}')">Top up campaign</button>`:""}
+      ${(status==="active"||status==="completed")?`<button class="campaign-topup-btn" type="button" onclick="openTopupCampaign('${escapeHtml(ad.id)}',${target},${completed},'${escapeHtml(ad.telegram_username||"")}')">Top up campaign</button>`:""}
       ${canCancel?`<button class="campaign-cancel-btn" type="button" onclick="confirmCancelCampaign('${escapeHtml(ad.id)}')">Cancel campaign</button>`:""}</div>
     </div>`;
   }).join("");
@@ -3253,7 +3256,7 @@ campaignsModal.addEventListener("click",event=>{if(event.target===campaignsModal
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&campaignsModal.classList.contains("show"))closeCampaignsModal();});
 
 /* =========================================================
-   TOP UP COMPLETED CAMPAIGN
+   TOP UP CAMPAIGN
 ========================================================= */
 const topupModal = document.getElementById("topupModal");
 const closeTopupBtn = document.getElementById("closeTopupBtn");
@@ -3262,6 +3265,7 @@ const confirmTopupBtn = document.getElementById("confirmTopupBtn");
 const topupMembersInput = document.getElementById("topupMembersInput");
 const topupTotal = document.getElementById("topupTotal");
 const topupCommunity = document.getElementById("topupCommunity");
+const campaignsTopupBtn = document.getElementById("campaignsTopupBtn");
 let topupCampaignId = "";
 
 function closeTopupModal(){
@@ -3269,14 +3273,12 @@ function closeTopupModal(){
   topupModal.setAttribute("aria-hidden","true");
   topupCampaignId = "";
 }
-
 function updateTopupEstimate(){
   const members = Number(topupMembersInput.value);
   topupTotal.textContent = Number.isInteger(members) && members >= 20
     ? formatNaira(members * 50)
     : "₦0";
 }
-
 function openTopupCampaign(adId,target,completed,username){
   topupCampaignId = String(adId || "");
   topupCommunity.textContent = username ? "@" + String(username).replace(/^@/,"") : "Telegram community";
@@ -3288,9 +3290,32 @@ function openTopupCampaign(adId,target,completed,username){
   setTimeout(() => topupMembersInput.focus(), 120);
 }
 
+function openTopupFromCampaigns(){
+  const cards = Array.from(document.querySelectorAll("#campaignList .campaign-card"));
+  const eligible = cards.find(card => {
+    const status = card.querySelector(".campaign-status");
+    const value = status ? status.textContent.trim().toLowerCase() : "";
+    return value === "active" || value === "completed";
+  });
+
+  if(!eligible){
+    showMessageModal("No campaign available","You can top up an active or completed campaign. Cancelled campaigns cannot be topped up.","error");
+    return;
+  }
+
+  const topupButton = eligible.querySelector(".campaign-topup-btn");
+  if(topupButton){
+    topupButton.click();
+    return;
+  }
+
+  showMessageModal("No campaign available","Please choose an active or completed campaign to top up.","error");
+}
+
 topupMembersInput.addEventListener("input",updateTopupEstimate);
 closeTopupBtn.addEventListener("click",closeTopupModal);
 cancelTopupBtn.addEventListener("click",closeTopupModal);
+campaignsTopupBtn.addEventListener("click",openTopupFromCampaigns);
 topupModal.addEventListener("click",event=>{if(event.target===topupModal)closeTopupModal();});
 
 confirmTopupBtn.addEventListener("click",async()=>{
@@ -3302,36 +3327,34 @@ confirmTopupBtn.addEventListener("click",async()=>{
   }
 
   const adId = topupCampaignId;
-  closeTopupModal();
-  showConfirmModal(
-    "Confirm campaign top up?",
-    `You are about to add ${members.toLocaleString("en-NG")} new members for ${formatNaira(members * 50)}. This will start a new active campaign for the same Telegram community.`,
-    async function(){
-      showLoadingModal("Topping up campaign","Please verify the community and process your campaign payment.");
-      try{
-        const response = await fetch("/api/telegram-ads/top-up",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          credentials:"include",
-          body:JSON.stringify({adId,members})
-        });
-        const data = await response.json();
-        closeAppModal();
-        if(response.ok && data.success){
-          await loadMyCampaigns();
-          showMessageModal("Campaign topped up",`Your new ${members.toLocaleString("en-NG")} member campaign is now active. ${formatNaira(data.totalCost || members * 50)} was charged.` ,"success");
-        }else{
-          showMessageModal("Could not top up campaign",data.message || "The campaign could not be topped up.","error");
-        }
-      }catch(error){
-        console.error("top up campaign:",error);
-        closeAppModal();
-        showMessageModal("Connection problem","We could not top up the campaign right now. Please try again.","error");
-      }
-    }
-  );
-});
+  if(!adId){
+    showMessageModal("Campaign not selected","Please choose an active or completed campaign to top up.","error");
+    return;
+  }
 
+  closeTopupModal();
+  showLoadingModal("Topping up campaign","Please verify the community and process your campaign payment.");
+  try{
+    const response = await fetch("/api/telegram-ads/top-up",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"include",
+      body:JSON.stringify({adId,members})
+    });
+    const data = await response.json();
+    closeAppModal();
+    if(response.ok && data.success){
+      await loadMyCampaigns();
+      showMessageModal("Campaign topped up",`${members.toLocaleString("en-NG")} added to campaign. ${formatNaira(data.totalCost || members * 50)} was charged.` ,"success");
+    }else{
+      showMessageModal("Could not top up campaign",data.message || "The campaign could not be topped up.","error");
+    }
+  }catch(error){
+    console.error("top up campaign:",error);
+    closeAppModal();
+    showMessageModal("Connection problem","We could not top up the campaign right now. Please try again.","error");
+  }
+});
 
 /* =========================================================
    PAYME BOT COPY
@@ -4014,6 +4037,7 @@ document
 
 </body>
 </html>
+
 
 
 

@@ -2459,7 +2459,7 @@ app.get('/api/telegram-ads/my-campaigns',requireLogin,async(req,res)=>{
 
 
 // ======================================================
-// TOP UP COMPLETED ADVERTISER CAMPAIGN
+// TOP UP ADVERTISER CAMPAIGN
 // ======================================================
 // A top-up uses the same verified Telegram community and creates
 // a fresh active campaign for the requested additional members.
@@ -2483,8 +2483,8 @@ app.post('/api/telegram-ads/top-up',requireLogin,async(req,res)=>{
 
     const target=Number(ad.target_members||0);
     const completed=Number(ad.completed_members||0);
-    if(ad.status!=='completed' && completed<target){
-      return res.status(400).json({success:false,message:'Only completed campaigns can be topped up.'});
+    if(ad.status==='cancelled'){
+      return res.status(400).json({success:false,message:'Cancelled campaigns cannot be topped up.'});
     }
 
     const verification=await verifyTelegramAdvertisingCommunity(
@@ -10692,6 +10692,7 @@ app.listen(
   }
 
 );
+
 
 
 
