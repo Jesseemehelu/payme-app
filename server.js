@@ -942,7 +942,6 @@ async function getUserDeposits(
         reference,
         amount,
         status,
-        screenshot,
         reason,
         created_at
       `)
@@ -975,9 +974,6 @@ async function getUserDeposits(
 
       status:
         d.status,
-
-      screenshot:
-        d.screenshot,
 
       reason:
         d.reason,
@@ -2541,7 +2537,7 @@ app.get('/api/telegram-ads/my-campaigns',requireLogin,async(req,res)=>{
     const {data,error}=await supabase.from('telegram_ads').select(`
       id, advertiser_id, telegram_type, telegram_link, telegram_username,
       target_members, completed_members, price_per_join, total_cost, status, created_at
-    `).eq('advertiser_id',String(req.user.id)).order('created_at',{ascending:false});
+    `).eq('advertiser_id',String(req.user.id)).order('created_at',{ascending:false}).limit(50);
     if(error) throw error;
     return res.json({success:true,campaigns:data||[]});
   }catch(error){
@@ -6785,13 +6781,15 @@ app.post(
       // Same reasoning: `user` already carries the up-to-date fields
       // (mutated + persisted above when relevant), so a second re-fetch
       // here was redundant on every poll.
-      const [
-        transactions,
-        deposits
-      ] = await Promise.all([
-        getTransactions(user.id, 25),
-        getUserDeposits(user.id, 25)
-      ]);
+      // dashboard.html's own response handler never reads `.transactions`
+      // or `.deposits` from THIS endpoint's payload — it only reads
+      // `.success`, `.user`, and `.dailyReward`. Transaction history is
+      // rendered by a separate on-demand modal that calls the dedicated
+      // /api/user/transactions endpoint when the user actually opens it,
+      // and deposit history likewise has its own /api/deposits endpoint.
+      // Fetching both full lists here on every single dashboard load (or
+      // every tab-return) was pure wasted Supabase egress for data that
+      // was silently discarded on arrival.
 
       const daily =
         normalizeDailyReward(
@@ -6859,11 +6857,7 @@ app.post(
             number(
               user.withdrawableBalance
             ) >=
-            MIN_WITHDRAWAL_LIMIT,
-
-          transactions,
-
-          deposits
+            MIN_WITHDRAWAL_LIMIT
 
         },
 
