@@ -1,0 +1,3225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>PAYME — Leaderboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+>
+
+<style>
+
+/* =========================================================
+   PAYME 3D LEADERBOARD
+========================================================= */
+
+:root {
+
+    --bg: #050816;
+    --bg-2: #081022;
+
+    --surface: rgba(15, 23, 42, .76);
+    --surface-2: rgba(17, 28, 52, .82);
+
+    --blue: #2563eb;
+    --blue-light: #38bdf8;
+    --cyan: #06b6d4;
+    --indigo: #6366f1;
+    --purple: #8b5cf6;
+
+    --gold: #facc15;
+    --gold-dark: #ca8a04;
+
+    --silver: #cbd5e1;
+    --bronze: #fb923c;
+
+    --green: #22c55e;
+    --red: #ef4444;
+
+    --white: #f8fafc;
+    --muted: #94a3b8;
+    --muted-2: #64748b;
+
+    --border: rgba(255,255,255,.08);
+
+    --radius: 24px;
+
+}
+
+
+* {
+
+    box-sizing: border-box;
+
+    margin: 0;
+
+    padding: 0;
+
+    -webkit-tap-highlight-color: transparent;
+
+}
+
+
+html {
+
+    scroll-behavior: smooth;
+
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    font-family:
+        'Plus Jakarta Sans',
+        sans-serif;
+
+    color: var(--white);
+
+    background:
+
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(37,99,235,.23),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at -10% 40%,
+            rgba(56,189,248,.10),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 110% 70%,
+            rgba(139,92,246,.13),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            180deg,
+            #050816 0%,
+            #070b18 50%,
+            #040713 100%
+        );
+
+    padding:
+        14px
+        14px
+        45px;
+
+    max-width: 560px;
+
+    margin: auto;
+
+    overflow-x: hidden;
+
+}
+
+
+/* =========================================================
+   AMBIENT BACKGROUND
+========================================================= */
+
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    width: 270px;
+
+    height: 270px;
+
+    top: 100px;
+
+    left: -150px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(37,99,235,.10);
+
+    filter: blur(65px);
+
+    pointer-events: none;
+
+    animation:
+        ambientFloat 8s ease-in-out infinite;
+
+}
+
+
+body::after {
+
+    content: "";
+
+    position: fixed;
+
+    width: 260px;
+
+    height: 260px;
+
+    right: -150px;
+
+    bottom: 70px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(139,92,246,.09);
+
+    filter: blur(65px);
+
+    pointer-events: none;
+
+    animation:
+        ambientFloat 10s ease-in-out infinite reverse;
+
+}
+
+
+@keyframes ambientFloat {
+
+    0%,100% {
+
+        transform:
+            translate3d(0,0,0);
+
+    }
+
+    50% {
+
+        transform:
+            translate3d(20px,-25px,0);
+
+    }
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.top-bar {
+
+    position: relative;
+
+    z-index: 10;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding:
+        6px
+        2px
+        18px;
+
+}
+
+
+.back-btn {
+
+    width: 43px;
+
+    height: 43px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 15px;
+
+    text-decoration: none;
+
+    color: white;
+
+    background:
+        rgba(255,255,255,.06);
+
+    border:
+        1px solid rgba(255,255,255,.09);
+
+    box-shadow:
+
+        0 10px 25px rgba(0,0,0,.25),
+
+        inset 0 1px
+        rgba(255,255,255,.08);
+
+    transition:
+        .2s ease;
+
+}
+
+
+.back-btn:active {
+
+    transform:
+        scale(.93);
+
+}
+
+
+.page-title {
+
+    flex: 1;
+
+    text-align: center;
+
+    font-size:
+        1.05rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -.04em;
+
+}
+
+
+.live-indicator {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding:
+        7px
+        10px;
+
+    border-radius:
+        30px;
+
+    background:
+        rgba(34,197,94,.08);
+
+    border:
+        1px solid
+        rgba(34,197,94,.18);
+
+    color:
+        #4ade80;
+
+    font-size:
+        .61rem;
+
+    font-weight:
+        900;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .05em;
+
+}
+
+
+.pulse-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 12px
+        rgba(34,197,94,.8);
+
+    animation:
+        livePulse 1.6s infinite;
+
+}
+
+
+@keyframes livePulse {
+
+    0%,100% {
+
+        transform:
+            scale(1);
+
+        opacity: 1;
+
+    }
+
+    50% {
+
+        transform:
+            scale(.65);
+
+        opacity: .55;
+
+    }
+
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.challenge-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+        25px
+        20px
+        20px;
+
+    margin-bottom:
+        18px;
+
+    border-radius:
+        30px;
+
+    background:
+
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(56,189,248,.20),
+            transparent 28%
+        ),
+
+        radial-gradient(
+            circle at 10% 90%,
+            rgba(99,102,241,.20),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            145deg,
+            #0d1830,
+            #0a1022 48%,
+            #11112b
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    box-shadow:
+
+        0 25px 60px
+        rgba(0,0,0,.48),
+
+        0 0 40px
+        rgba(37,99,235,.10),
+
+        inset 0 1px
+        rgba(255,255,255,.10);
+
+}
+
+
+.challenge-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 210px;
+
+    height: 210px;
+
+    right: -90px;
+
+    top: -100px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(56,189,248,.15);
+
+    box-shadow:
+
+        0 0 0 25px
+        rgba(56,189,248,.025),
+
+        0 0 0 55px
+        rgba(56,189,248,.018);
+
+    pointer-events: none;
+
+}
+
+
+.challenge-card::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 120px;
+
+    height: 120px;
+
+    left: -65px;
+
+    bottom: -70px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(99,102,241,.15);
+
+    filter: blur(30px);
+
+    pointer-events: none;
+
+}
+
+
+.hero-top {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+}
+
+
+.card-tag {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+        6px
+        11px;
+
+    border-radius:
+        30px;
+
+    background:
+        rgba(56,189,248,.08);
+
+    border:
+        1px solid
+        rgba(56,189,248,.18);
+
+    color:
+        #67e8f9;
+
+    font-size:
+        .61rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .06em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.challenge-icon {
+
+    width: 43px;
+
+    height: 43px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius:
+        14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(56,189,248,.18),
+            rgba(99,102,241,.15)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    font-size:
+        1.25rem;
+
+    box-shadow:
+
+        0 10px 25px
+        rgba(0,0,0,.25),
+
+        inset 0 1px
+        rgba(255,255,255,.12);
+
+    animation:
+        iconFloat 3s ease-in-out infinite;
+
+}
+
+
+@keyframes iconFloat {
+
+    0%,100% {
+
+        transform:
+            translateY(0)
+            rotate(0deg);
+
+    }
+
+    50% {
+
+        transform:
+            translateY(-4px)
+            rotate(2deg);
+
+    }
+
+}
+
+
+.challenge-card h2 {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top:
+        15px;
+
+    font-size:
+        1.55rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -.055em;
+
+}
+
+
+.challenge-card p {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top:
+        5px;
+
+    color:
+        #94a3b8;
+
+    font-size:
+        .75rem;
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+.timer-container {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top:
+        18px;
+
+    margin-bottom:
+        17px;
+
+    padding:
+        13px
+        15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-radius:
+        17px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid
+        rgba(255,255,255,.075);
+
+    box-shadow:
+        inset 0 1px
+        rgba(255,255,255,.05);
+
+}
+
+
+.timer-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+.timer-icon {
+
+    width: 29px;
+
+    height: 29px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(56,189,248,.10);
+
+    font-size:
+        .85rem;
+
+}
+
+
+.timer-label {
+
+    color:
+        #94a3b8;
+
+    font-size:
+        .61rem;
+
+    font-weight:
+        800;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .05em;
+
+}
+
+
+.timer-val {
+
+    color:
+        #ffffff;
+
+    font-family:
+        monospace;
+
+    font-size:
+        .93rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .02em;
+
+}
+
+
+/* =========================================================
+   PRIZE PODIUM
+========================================================= */
+
+.prizes-grid {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1.12fr
+        1fr;
+
+    align-items: end;
+
+    gap: 8px;
+
+}
+
+
+.prize-item {
+
+    position: relative;
+
+    min-height:
+        78px;
+
+    padding:
+        12px
+        7px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    border-radius:
+        17px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid
+        rgba(255,255,255,.075);
+
+    box-shadow:
+
+        inset 0 1px
+        rgba(255,255,255,.05),
+
+        0 8px 20px
+        rgba(0,0,0,.15);
+
+    transform:
+        translateZ(0);
+
+    transition:
+        .25s ease;
+
+}
+
+
+.prize-item:hover {
+
+    transform:
+        translateY(-4px);
+
+}
+
+
+.prize-item.rank-1 {
+
+    min-height:
+        94px;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(250,204,21,.20),
+            transparent 65%
+        ),
+
+        rgba(250,204,21,.07);
+
+    border-color:
+        rgba(250,204,21,.25);
+
+    box-shadow:
+
+        0 15px 30px
+        rgba(0,0,0,.2),
+
+        0 0 25px
+        rgba(250,204,21,.08),
+
+        inset 0 1px
+        rgba(255,255,255,.09);
+
+}
+
+
+.prize-rank {
+
+    color:
+        #cbd5e1;
+
+    font-size:
+        .59rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.prize-amount {
+
+    margin-top:
+        4px;
+
+    color:
+        #38bdf8;
+
+    font-size:
+        .98rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.rank-1 .prize-amount {
+
+    color:
+        #facc15;
+
+    font-size:
+        1.1rem;
+
+}
+
+
+/* =========================================================
+   CURRENT USER RANK
+========================================================= */
+
+.user-rank-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding:
+        18px
+        19px;
+
+    margin-bottom:
+        18px;
+
+    border-radius:
+        23px;
+
+    background:
+
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(56,189,248,.22),
+            transparent 32%
+        ),
+
+        linear-gradient(
+            135deg,
+            #1d4ed8,
+            #3730a3
+        );
+
+    border:
+        1px solid
+        rgba(147,197,253,.20);
+
+    box-shadow:
+
+        0 20px 40px
+        rgba(29,78,216,.28),
+
+        inset 0 1px
+        rgba(255,255,255,.16);
+
+}
+
+
+.user-rank-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 160px;
+
+    height: 160px;
+
+    right: -65px;
+
+    top: -75px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    box-shadow:
+        0 0 0 20px
+        rgba(255,255,255,.025),
+
+        0 0 0 45px
+        rgba(255,255,255,.018);
+
+}
+
+
+.rank-label {
+
+    position: relative;
+
+    z-index: 2;
+
+    color:
+        #bfdbfe;
+
+    font-size:
+        .59rem;
+
+    font-weight:
+        800;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .06em;
+
+}
+
+
+.rank-val {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top:
+        2px;
+
+    font-size:
+        1.42rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -.05em;
+
+}
+
+
+.rank-meta {
+
+    position: relative;
+
+    z-index: 2;
+
+    text-align:
+        right;
+
+}
+
+
+.eligible-text {
+
+    font-size:
+        .75rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.action-subtext {
+
+    margin-top:
+        3px;
+
+    color:
+        #fde047;
+
+    font-size:
+        .59rem;
+
+    font-weight:
+        800;
+
+}
+
+
+/* =========================================================
+   SECTION CARD
+========================================================= */
+
+.section-card {
+
+    position: relative;
+
+    padding:
+        19px
+        15px;
+
+    margin-bottom:
+        18px;
+
+    border-radius:
+        27px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(17,28,52,.80),
+            rgba(8,13,27,.80)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.075);
+
+    box-shadow:
+
+        0 20px 45px
+        rgba(0,0,0,.28),
+
+        inset 0 1px
+        rgba(255,255,255,.045);
+
+    backdrop-filter:
+        blur(16px);
+
+    -webkit-backdrop-filter:
+        blur(16px);
+
+}
+
+
+.card-head {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom:
+        15px;
+
+}
+
+
+.card-title {
+
+    color:
+        #f8fafc;
+
+    font-size:
+        .96rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -.025em;
+
+}
+
+
+.card-desc {
+
+    margin-top:
+        3px;
+
+    color:
+        #64748b;
+
+    font-size:
+        .64rem;
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================================
+   PODIUM TOP 3
+========================================================= */
+
+.top-three-stage {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1.12fr
+        1fr;
+
+    align-items:
+        end;
+
+    gap: 7px;
+
+    margin-bottom:
+        15px;
+
+}
+
+
+.podium-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    min-height:
+        112px;
+
+    padding:
+        14px
+        6px
+        11px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    text-align: center;
+
+    border-radius:
+        19px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+
+    box-shadow:
+
+        0 12px 25px
+        rgba(0,0,0,.25),
+
+        inset 0 1px
+        rgba(255,255,255,.06);
+
+    animation:
+        podiumIn .5s ease both;
+
+}
+
+
+.podium-card:nth-child(1) {
+
+    animation-delay:
+        .1s;
+
+}
+
+
+.podium-card:nth-child(2) {
+
+    min-height:
+        137px;
+
+    animation-delay:
+        .0s;
+
+}
+
+
+.podium-card:nth-child(3) {
+
+    animation-delay:
+        .2s;
+
+}
+
+
+@keyframes podiumIn {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(20px)
+            scale(.94);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+    }
+
+}
+
+
+.podium-card.first {
+
+    background:
+
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(250,204,21,.18),
+            transparent 62%
+        ),
+
+        rgba(250,204,21,.045);
+
+    border-color:
+        rgba(250,204,21,.22);
+
+    box-shadow:
+
+        0 15px 35px
+        rgba(0,0,0,.28),
+
+        0 0 25px
+        rgba(250,204,21,.08);
+
+}
+
+
+.podium-card.second {
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(203,213,225,.13),
+            transparent 65%
+        ),
+
+        rgba(255,255,255,.035);
+
+}
+
+
+.podium-card.third {
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(251,146,60,.14),
+            transparent 65%
+        ),
+
+        rgba(251,146,60,.035);
+
+}
+
+
+.podium-medal {
+
+    position: absolute;
+
+    top: 10px;
+
+    font-size:
+        1.55rem;
+
+    filter:
+        drop-shadow(
+            0 6px 6px
+            rgba(0,0,0,.35)
+        );
+
+}
+
+
+.podium-card.first .podium-medal {
+
+    font-size:
+        1.85rem;
+
+    animation:
+        crownFloat 2.4s ease-in-out infinite;
+
+}
+
+
+@keyframes crownFloat {
+
+    0%,100% {
+
+        transform:
+            translateY(0)
+            rotate(-2deg);
+
+    }
+
+    50% {
+
+        transform:
+            translateY(-4px)
+            rotate(2deg);
+
+    }
+
+}
+
+
+.podium-name {
+
+    width:
+        100%;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+    color:
+        #e2e8f0;
+
+    font-size:
+        .63rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.podium-referrals {
+
+    margin-top:
+        2px;
+
+    color:
+        #64748b;
+
+    font-size:
+        .53rem;
+
+    font-weight:
+        700;
+
+}
+
+
+.podium-refs {
+
+    margin-top:
+        6px;
+
+    color:
+        #38bdf8;
+
+    font-size:
+        .67rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.first .podium-refs {
+
+    color:
+        #facc15;
+
+}
+
+
+/* =========================================================
+   USER ROW
+========================================================= */
+
+.list-wrapper {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+
+}
+
+
+.user-row {
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        8px;
+
+    padding:
+        11px;
+
+    border-radius:
+        17px;
+
+    background:
+        rgba(3,7,18,.48);
+
+    border:
+        1px solid
+        rgba(255,255,255,.055);
+
+    transition:
+        .2s ease;
+
+}
+
+
+.user-row:active {
+
+    transform:
+        scale(.985);
+
+}
+
+
+.user-row.is-me {
+
+    background:
+
+        linear-gradient(
+            135deg,
+            rgba(37,99,235,.18),
+            rgba(56,189,248,.06)
+        );
+
+    border-color:
+        rgba(56,189,248,.30);
+
+    box-shadow:
+
+        0 0 25px
+        rgba(37,99,235,.10),
+
+        inset 0 1px
+        rgba(255,255,255,.06);
+
+}
+
+
+.user-row.is-me::after {
+
+    content:
+        "YOU";
+
+    position:
+        absolute;
+
+    right:
+        -18px;
+
+    top:
+        8px;
+
+    transform:
+        rotate(45deg);
+
+    width:
+        70px;
+
+    padding:
+        2px;
+
+    text-align:
+        center;
+
+    background:
+        #2563eb;
+
+    color:
+        white;
+
+    font-size:
+        .42rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.user-row-left {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+}
+
+
+.rank-badge-box {
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #1e293b,
+            #0f172a
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    color:
+        #94a3b8;
+
+    font-size:
+        .68rem;
+
+    font-weight:
+        900;
+
+    box-shadow:
+
+        0 6px 15px
+        rgba(0,0,0,.25),
+
+        inset 0 1px
+        rgba(255,255,255,.07);
+
+}
+
+
+.rank-1 .rank-badge-box {
+
+    background:
+        linear-gradient(
+            145deg,
+            #facc15,
+            #ca8a04
+        );
+
+    border-color:
+        rgba(255,255,255,.3);
+
+    color:
+        #422006;
+
+    font-size:
+        1rem;
+
+    box-shadow:
+
+        0 7px 18px
+        rgba(250,204,21,.20),
+
+        inset 0 1px
+        rgba(255,255,255,.45);
+
+}
+
+
+.rank-2 .rank-badge-box {
+
+    background:
+        linear-gradient(
+            145deg,
+            #e2e8f0,
+            #64748b
+        );
+
+    color:
+        #0f172a;
+
+    font-size:
+        1rem;
+
+}
+
+
+.rank-3 .rank-badge-box {
+
+    background:
+        linear-gradient(
+            145deg,
+            #fdba74,
+            #c2410c
+        );
+
+    color:
+        #431407;
+
+    font-size:
+        1rem;
+
+}
+
+
+.user-details {
+
+    min-width:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.user-details .uname {
+
+    max-width:
+        180px;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+    color:
+        #e2e8f0;
+
+    font-size:
+        .73rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.user-details .count {
+
+    margin-top:
+        2px;
+
+    color:
+        #64748b;
+
+    font-size:
+        .57rem;
+
+    font-weight:
+        700;
+
+}
+
+
+.reward-val {
+
+    flex-shrink:
+        0;
+
+    color:
+        #38bdf8;
+
+    font-size:
+        .67rem;
+
+    font-weight:
+        900;
+
+}
+
+
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.empty-state {
+
+    padding:
+        25px
+        10px;
+
+    text-align:
+        center;
+
+    color:
+        #64748b;
+
+    font-size:
+        .72rem;
+
+    font-weight:
+        600;
+
+}
+
+
+.loading-orb {
+
+    width:
+        35px;
+
+    height:
+        35px;
+
+    margin:
+        0 auto 10px;
+
+    border-radius:
+        50%;
+
+    border:
+        3px solid
+        rgba(56,189,248,.12);
+
+    border-top-color:
+        #38bdf8;
+
+    animation:
+        spinLoader .8s linear infinite;
+
+}
+
+
+@keyframes spinLoader {
+
+    to {
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+/* =========================================================
+   PREVIOUS CHAMPIONS
+========================================================= */
+
+.champion-empty {
+
+    padding:
+        20px;
+
+    text-align:
+        center;
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(3,7,18,.35);
+
+    border:
+        1px solid
+        rgba(255,255,255,.04);
+
+}
+
+
+.champion-icon {
+
+    font-size:
+        1.8rem;
+
+    margin-bottom:
+        6px;
+
+    filter:
+        drop-shadow(
+            0 5px 8px
+            rgba(0,0,0,.4)
+        );
+
+}
+
+
+.champion-empty-title {
+
+    color:
+        #cbd5e1;
+
+    font-size:
+        .72rem;
+
+    font-weight:
+        900;
+
+}
+
+
+.champion-empty-text {
+
+    margin-top:
+        3px;
+
+    color:
+        #475569;
+
+    font-size:
+        .59rem;
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 370px) {
+
+    body {
+
+        padding-left:
+            10px;
+
+        padding-right:
+            10px;
+
+    }
+
+
+    .challenge-card {
+
+        padding:
+            22px
+            15px
+            17px;
+
+    }
+
+
+    .challenge-card h2 {
+
+        font-size:
+            1.35rem;
+
+    }
+
+
+    .user-rank-card {
+
+        padding:
+            16px;
+
+    }
+
+
+    .user-details .uname {
+
+        max-width:
+            145px;
+
+    }
+
+
+    .page-title {
+
+        font-size:
+            .96rem;
+
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation-duration:
+            .01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        scroll-behavior:
+            auto !important;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =======================================================
+     HEADER
+======================================================= -->
+
+<div class="top-bar">
+
+
+    <a
+        href="/dashboard.html"
+        class="back-btn"
+        title="Back to Dashboard"
+    >
+
+        <svg
+            width="19"
+            height="19"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+
+            <line
+                x1="19"
+                y1="12"
+                x2="5"
+                y2="12"
+            ></line>
+
+            <polyline
+                points="12 19 5 12 12 5"
+            ></polyline>
+
+        </svg>
+
+    </a>
+
+
+    <h1 class="page-title">
+        Referral Leaderboard
+    </h1>
+
+
+    <div class="live-indicator">
+
+        <div class="pulse-dot"></div>
+
+        <span>Live</span>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =======================================================
+     HERO / WEEKLY CHALLENGE
+======================================================= -->
+
+<div class="challenge-card">
+
+
+    <div class="hero-top">
+
+
+        <div class="card-tag">
+
+            ⚡ Weekly Sprint
+
+        </div>
+
+
+        <div class="challenge-icon">
+
+            🏆
+
+        </div>
+
+
+    </div>
+
+
+    <h2>
+        Referral Challenge
+    </h2>
+
+
+    <p>
+        Invite friends. Climb higher. Win weekly rewards!
+    </p>
+
+
+    <!-- TIMER -->
+
+    <div class="timer-container">
+
+
+        <div class="timer-left">
+
+            <div class="timer-icon">
+                ⏱️
+            </div>
+
+            <span class="timer-label">
+                Challenge Ends In
+            </span>
+
+        </div>
+
+
+        <span
+            class="timer-val"
+            id="countdownTimer"
+        >
+            Loading...
+        </span>
+
+
+    </div>
+
+
+    <!-- PRIZES -->
+
+    <div class="prizes-grid">
+
+
+        <div class="prize-item">
+
+            <div class="prize-rank">
+                🥈 2nd Place
+            </div>
+
+            <div class="prize-amount">
+                ₦500</div>
+
+        </div>
+
+
+        <div class="prize-item rank-1">
+
+            <div class="prize-rank">
+                🥇 1st Place
+            </div>
+
+            <div class="prize-amount">
+                ₦1,000</div>
+
+        </div>
+
+
+        <div class="prize-item">
+
+            <div class="prize-rank">
+                🥉 3rd Place
+            </div>
+
+            <div class="prize-amount">
+                ₦200</div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =======================================================
+     CURRENT USER
+======================================================= -->
+
+<div class="user-rank-card">
+
+
+    <div>
+
+        <div class="rank-label">
+            Your Current Position
+        </div>
+
+        <div
+            class="rank-val"
+            id="userCurrentRank"
+        >
+            Unranked
+        </div>
+
+    </div>
+
+
+    <div class="rank-meta">
+
+        <div
+            class="eligible-text"
+            id="userEligibleCount"
+        >
+            0 Referrals
+        </div>
+
+        <div
+            class="action-subtext"
+            id="userActionPrompt"
+        >
+            Invite 1 user to rank!
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =======================================================
+     TOP REFERRERS
+======================================================= -->
+
+<div class="section-card">
+
+
+    <div class="card-head">
+
+        <div>
+
+            <h3 class="card-title">
+                Top 10 Referrers
+            </h3>
+
+            <p class="card-desc">
+                Rankings update automatically as referrals join.
+            </p>
+
+        </div>
+
+
+        <div
+            style="
+                font-size:.65rem;
+                color:#38bdf8;
+                font-weight:900;
+            "
+        >
+            LIVE
+        </div>
+
+    </div>
+
+
+
+    <div
+        class="top-three-stage"
+        id="topThreeStage"
+        style="display:none;"
+    >
+
+        <!-- Generated by JavaScript -->
+
+    </div>
+
+
+
+    <div
+        class="list-wrapper"
+        id="topReferrersList"
+    >
+
+        <div class="empty-state">
+
+            <div class="loading-orb"></div>
+
+            Loading rankings...
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =======================================================
+     PREVIOUS CHAMPIONS
+======================================================= -->
+
+<div class="section-card">
+
+
+    <div class="card-head">
+
+        <div>
+
+            <h3 class="card-title">
+                Previous Champions
+            </h3>
+
+            <p class="card-desc">
+                Winners from completed weekly challenges.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="champion-empty">
+
+        <div class="champion-icon">
+            🏆
+        </div>
+
+        <div class="champion-empty-title">
+            No Past Winners Yet
+        </div>
+
+        <div class="champion-empty-text">
+            Be the first champion of the weekly challenge.
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   LEADERBOARD DATA
+========================================================= */
+
+async function loadLeaderboardData() {
+
+    try {
+
+
+        const [
+            lbRes,
+            userRes
+        ] = await Promise.all([
+
+            fetch(
+                '/api/weekly-competition'
+            ),
+
+            fetch(
+                '/api/user/dashboard',
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    }
+                }
+            )
+
+        ]);
+
+
+        const lbData =
+            await lbRes.json();
+
+
+        const userData =
+            userRes.ok
+                ? await userRes.json()
+                : null;
+
+
+        const currentUser =
+            userData &&
+            userData.success
+                ? userData.user
+                : null;
+
+
+        const listContainer =
+            document.getElementById(
+                'topReferrersList'
+            );
+
+
+        const podiumContainer =
+            document.getElementById(
+                'topThreeStage'
+            );
+
+
+        /*
+           No leaderboard data
+        */
+
+        if (
+            !lbData.success ||
+            !lbData.leaderboard ||
+            lbData.leaderboard.length === 0
+        ) {
+
+
+            listContainer.innerHTML = `
+
+                <div class="empty-state">
+
+                    <div style="
+                        font-size:1.8rem;
+                        margin-bottom:8px;
+                    ">
+                        🏆
+                    </div>
+
+                    No referrals recorded yet this week.
+
+                    <br>
+
+                    Be the first to climb the leaderboard!
+
+                </div>
+
+            `;
+
+
+            podiumContainer.style.display =
+                'none';
+
+
+            if (currentUser) {
+
+                document
+                    .getElementById(
+                        'userEligibleCount'
+                    )
+                    .innerText =
+                        `${currentUser.totalReferrals || 0} Referrals`;
+
+            }
+
+
+            return;
+
+        }
+
+
+
+        const items =
+            lbData.leaderboard;
+
+
+
+        /*
+           Current user position
+        */
+
+        let currentUserRank =
+            lbData.user
+                ? lbData.user.position
+                : -1;
+
+
+        let currentUserReferrals =
+            lbData.user
+                ? lbData.user.eligibleReferrals
+                : 0;
+
+
+
+        /* =================================================
+           TOP 3 PODIUM
+        ================================================= */
+
+        const topThree =
+            items.slice(
+                0,
+                3
+            );
+
+
+        if (
+            topThree.length > 0
+        ) {
+
+
+            podiumContainer.style.display =
+                'grid';
+
+
+            /*
+               Reorder:
+
+               2nd | 1st | 3rd
+            */
+
+            const podiumOrder = [];
+
+
+            if (topThree[1]) {
+
+                podiumOrder.push(
+                    topThree[1]
+                );
+
+            } else {
+
+                podiumOrder.push(null);
+
+            }
+
+
+            if (topThree[0]) {
+
+                podiumOrder.push(
+                    topThree[0]
+                );
+
+            } else {
+
+                podiumOrder.push(null);
+
+            }
+
+
+            if (topThree[2]) {
+
+                podiumOrder.push(
+                    topThree[2]
+                );
+
+            } else {
+
+                podiumOrder.push(null);
+
+            }
+
+
+
+            podiumContainer.innerHTML =
+                podiumOrder.map(
+                    (user, position) => {
+
+
+                        if (!user) {
+
+                            return `
+                                <div></div>
+                            `;
+
+                        }
+
+
+                        const actualRank =
+                            position === 1
+                                ? 1
+                                : position === 0
+                                    ? 2
+                                    : 3;
+
+
+                        const name =
+                            user.username
+                                ? '@' +
+                                  user.username
+                                : (
+                                    user.fullName ||
+                                    '@User'
+                                );
+
+
+                        const refs =
+                            Number(
+                                user.eligibleReferrals ??
+                                user.totalReferrals ??
+                                0
+                            );
+
+
+                        const medal =
+                            actualRank === 1
+                                ? '🥇'
+                                : actualRank === 2
+                                    ? '🥈'
+                                    : '🥉';
+
+
+                        const extraClass =
+                            actualRank === 1
+                                ? 'first'
+                                : actualRank === 2
+                                    ? 'second'
+                                    : 'third';
+
+
+                        return `
+
+                            <div
+                                class="
+                                    podium-card
+                                    ${extraClass}
+                                "
+                            >
+
+                                <div
+                                    class="podium-medal"
+                                >
+                                    ${medal}
+                                </div>
+
+
+                                <div
+                                    class="podium-name"
+                                >
+                                    ${escapeHtml(name)}
+                                </div>
+
+
+                                <div
+                                    class="podium-referrals"
+                                >
+                                    ${refs}
+                                    Referral${refs === 1 ? '' : 's'}
+                                </div>
+
+
+                                <div
+                                    class="podium-refs"
+                                >
+                                    ${refs} Refs
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+                ).join('');
+
+        }
+
+
+
+        /*
+           Full ranking list
+        */
+
+        listContainer.innerHTML =
+            items.map(
+                (user, index) => {
+
+
+                    const rank =
+                        index + 1;
+
+
+                    const name =
+                        user.username
+                            ? '@' +
+                              user.username
+                            : (
+                                user.fullName ||
+                                '@User'
+                            );
+
+
+                    const refCount =
+                        Number(
+                            user.eligibleReferrals ??
+                            user.totalReferrals ??
+                            0
+                        );
+
+
+                    /*
+                       Match logged-in user
+                    */
+
+                    const isMe =
+                        currentUser &&
+                        (
+
+                            (
+                                user.userId &&
+                                user.userId ===
+                                currentUser.id
+                            )
+
+                            ||
+
+                            (
+                                user.id &&
+                                user.id ===
+                                currentUser.id
+                            )
+
+                            ||
+
+                            (
+                                user.username &&
+                                user.username ===
+                                currentUser.username
+                            )
+
+                        );
+
+
+                    if (
+                        isMe &&
+                        currentUserRank <= 0
+                    ) {
+
+                        currentUserRank =
+                            rank;
+
+                        currentUserReferrals =
+                            refCount;
+
+                    }
+
+
+                    const rankBadges = [
+                        '🥇',
+                        '🥈',
+                        '🥉'
+                    ];
+
+
+                    const rankClass =
+                        rank <= 3
+                            ? `top-three rank-${rank}`
+                            : '';
+
+
+                    const displayRank =
+                        rankBadges[index] ||
+                        `#${rank}`;
+
+
+                    return `
+
+                        <div
+                            class="
+                                user-row
+                                ${rankClass}
+                                ${isMe ? 'is-me' : ''}
+                            "
+                        >
+
+
+                            <div
+                                class="user-row-left"
+                            >
+
+
+                                <div
+                                    class="rank-badge-box"
+                                >
+                                    ${displayRank}
+                                </div>
+
+
+                                <div
+                                    class="user-details"
+                                >
+
+                                    <span
+                                        class="uname"
+                                    >
+                                        ${escapeHtml(name)}
+                                        ${isMe ? ' (You)' : ''}
+                                    </span>
+
+
+                                    <span
+                                        class="count"
+                                    >
+                                        ${refCount}
+                                        Referral${refCount === 1 ? '' : 's'}
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span
+                                class="reward-val"
+                            >
+                                ${refCount} Refs
+                            </span>
+
+
+                        </div>
+
+                    `;
+
+                }
+            ).join('');
+
+
+
+        /*
+           Update current user banner
+        */
+
+        const rankValEl =
+            document.getElementById(
+                'userCurrentRank'
+            );
+
+
+        const countEl =
+            document.getElementById(
+                'userEligibleCount'
+            );
+
+
+        const promptEl =
+            document.getElementById(
+                'userActionPrompt'
+            );
+
+
+        countEl.innerText =
+            `${currentUserReferrals} Referral${
+                currentUserReferrals === 1
+                    ? ''
+                    : 's'
+            }`;
+
+
+
+        if (
+            currentUserRank > 0
+        ) {
+
+            rankValEl.innerText =
+                `#${currentUserRank}`;
+
+
+            promptEl.innerText =
+                'Keep inviting to hold your spot!';
+
+
+        } else if (
+            currentUserReferrals > 0
+        ) {
+
+            rankValEl.innerText =
+                'Unranked';
+
+
+            promptEl.innerText =
+                'Top 10 spots are higher up!';
+
+
+        } else {
+
+            rankValEl.innerText =
+                'Unranked';
+
+
+            promptEl.innerText =
+                'Invite 1 user to rank!';
+
+        }
+
+
+    } catch (err) {
+
+
+        console.error(
+            'Error loading leaderboard:',
+            err
+        );
+
+
+        document
+            .getElementById(
+                'topReferrersList'
+            )
+            .innerHTML = `
+
+                <div class="empty-state">
+
+                    ⚠️
+
+                    <br><br>
+
+                    Unable to load live standings right now.
+
+                    <br>
+
+                    Please try again shortly.
+
+                </div>
+
+            `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    return String(
+        value ?? ''
+    )
+
+    .replace(
+        /&/g,
+        '&amp;'
+    )
+
+    .replace(
+        /</g,
+        '&lt;'
+    )
+
+    .replace(
+        />/g,
+        '&gt;'
+    )
+
+    .replace(
+        /"/g,
+        '&quot;'
+    )
+
+    .replace(
+        /'/g,
+        '&#039;'
+    );
+
+}
+
+
+
+/* =========================================================
+   COUNTDOWN TIMER
+========================================================= */
+
+let countdownInterval =
+    null;
+
+
+async function syncAndStartTimer() {
+
+    try {
+
+
+        const res =
+            await fetch(
+                '/api/weekly-competition'
+            );
+
+
+        const data =
+            await res.json();
+
+
+        if (
+            !data.success ||
+            !data.competition ||
+            !data.competition.endTime
+        ) {
+
+            document
+                .getElementById(
+                    'countdownTimer'
+                )
+                .innerText =
+                    'Ended';
+
+            return;
+
+        }
+
+
+        const targetTime =
+            new Date(
+                data.competition.endTime
+            ).getTime();
+
+
+        if (
+            countdownInterval
+        ) {
+
+            clearInterval(
+                countdownInterval
+            );
+
+        }
+
+
+        function updateTimer() {
+
+
+            const now =
+                Date.now();
+
+
+            const remainingMs =
+                targetTime -
+                now;
+
+
+            if (
+                remainingMs <= 0
+            ) {
+
+                clearInterval(
+                    countdownInterval
+                );
+
+
+                document
+                    .getElementById(
+                        'countdownTimer'
+                    )
+                    .innerText =
+                        'Ended';
+
+
+                return;
+
+            }
+
+
+            const totalSeconds =
+                Math.floor(
+                    remainingMs /
+                    1000
+                );
+
+
+            const d =
+                Math.floor(
+                    totalSeconds /
+                    86400
+                );
+
+
+            const h =
+                Math.floor(
+                    (
+                        totalSeconds %
+                        86400
+                    ) /
+                    3600
+                );
+
+
+            const m =
+                Math.floor(
+                    (
+                        totalSeconds %
+                        3600
+                    ) /
+                    60
+                );
+
+
+            const s =
+                totalSeconds %
+                60;
+
+
+            const formattedS =
+                s < 10
+                    ? '0' + s
+                    : s;
+
+
+            document
+                .getElementById(
+                    'countdownTimer'
+                )
+                .innerText =
+                    `${d}d ${h}h ${m}m ${formattedS}s`;
+
+        }
+
+
+        updateTimer();
+
+
+        countdownInterval =
+            setInterval(
+                updateTimer,
+                1000
+            );
+
+
+    } catch (err) {
+
+        console.error(
+            'Error fetching competition timer:',
+            err
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+window.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        loadLeaderboardData();
+
+        syncAndStartTimer();
+
+    }
+);
+
+
+/*
+   Keep live rankings updated.
+*/
+
+setInterval(
+    loadLeaderboardData,
+    5000
+);
+
+</script>
+
+
+</body>
+</html>
+
