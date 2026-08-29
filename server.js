@@ -1566,6 +1566,21 @@ async function requireLogin(
 
 
 // ======================================================
+// 
+// Lightweight auth guard for Tap Rush endpoints.
+// Uses the signed session cookie only; it deliberately avoids
+// loading the full users row when the endpoint only needs user_id.
+function requireTapRushSession(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized session.'
+    });
+  }
+  req.tapRushUserId = String(req.session.userId);
+  next();
+}
+
 // TELEGRAM ADVERTISING SYSTEM
 // ======================================================
 
@@ -8394,12 +8409,11 @@ async function handleTelegramCallback(
 // ============================================================
 // TAP RUSH — AUTOMATIC PRIZE FINALIZATION CHECK
 // ============================================================
-// The challenge endpoint also performs this check, so prize
-// processing still occurs when traffic reaches the app after
-// the exact 2-day end time.
+// Keep weekly prize settlement running while the server is active.
+ // The first page visit also performs a lightweight finalization check.
 setInterval(
     () => {
-        finalizeExpiredTapRushChallenges().catch(
+        finalizeTapRushWeeklyChallenges().catch(
             err =>
                 console.error(
                     'Tap Rush prize finalization error:',
@@ -8625,1015 +8639,180 @@ pollTelegramUpdates();
 
 
 // ============================================================
-// TAP RUSH
+// TAP RUSH — WEEKLY SKILL MATCH
 // ============================================================
 
-const TAP_RUSH_ENTRY_FEE = 100;
+const TAP_RUSH_STAKES = new Set([200, 500, 1000]);
 const TAP_RUSH_DURATION_MS = 20000;
-const TAP_RUSH_GRACE_MS = 2500;
-const TAP_RUSH_MAX_EVENTS = 500;
+const TAP_RUSH_MAX_EVENTS = 250;
+const TAP_RUSH_WEEK_PRIZES = [1000, 500];
 
-// ============================================================
-// TAP RUSH — FINALIZE EXPIRED 2-DAY CHALLENGES
-//
-// When a 2-day challenge ends, the server ranks the verified
-// scores using:
-//   1. highest actual score first
-//   2. if scores are equal, the earlier submitted score wins
-//
-// The top three are credited to their withdrawable balance and
-// each prize is written to the normal transactions table so it
-// appears in the Dashboard transaction modal.
-// ============================================================
-const TAP_RUSH_PRIZES = [
-    {
-        position: 1,
-        amount: 1000,
-        description: 'Tap Rush 2-Day Contest — 1st Place Prize'
-    },
-    {
-        position: 2,
-        amount: 500,
-        description: 'Tap Rush 2-Day Contest — 2nd Place Prize'
-    },
-    {
-        position: 3,
-        amount: 200,
-        description: 'Tap Rush 2-Day Contest — 3rd Place Prize'
-    }
-];
+let tapRushWeekCache = null;
+let tapRushLastFinalizationCheck = 0;
 
-async function finalizeExpiredTapRushChallenges() {
-    const nowIso = new Date().toISOString();
-
-    const {
-        data: expiredChallenges,
-        error: challengeError
-    } = await supabase
-        .from('game_challenges')
-        .select('*')
-        .eq('game_type', 'tap_rush')
-        .eq('status', 'active')
-        .lte('end_time', nowIso)
-        .order('end_time', { ascending: true })
-        .limit(10);
-
-    if (challengeError) throw challengeError;
-
-    for (const challenge of expiredChallenges || []) {
-        try {
-            const {
-                data: scores,
-                error: scoreError
-            } = await supabase
-                .from('tap_rush_scores')
-                .select('user_id,score,displayed_score,created_at')
-                .eq('challenge_id', challenge.id)
-                .order('score', { ascending: false })
-                .order('created_at', { ascending: true })
-                .limit(100);
-
-            if (scoreError) throw scoreError;
-
-            const winners = scores || [];
-
-            const winnerUserIds = winners
-                .slice(0, 3)
-                .map(row => row.user_id);
-
-            const profiles = await getTapRushUserProfiles(winnerUserIds);
-
-            for (let i = 0; i < 3; i++) {
-                const prize = TAP_RUSH_PRIZES[i];
-                const winner = winners[i];
-
-                if (!winner) continue;
-
-                const uniqueId =
-                    `tx_tap_rush_prize_${challenge.id}_${winner.user_id}_${i + 1}`;
-
-                // Idempotency: if the prize transaction already exists,
-                // the wallet credit has already been processed.
-                const {
-                    data: alreadyPaid,
-                    error: paidCheckError
-                } = await supabase
-                    .from('transactions')
-                    .select('id')
-                    .eq('id', uniqueId)
-                    .maybeSingle();
-
-                if (paidCheckError) throw paidCheckError;
-                if (alreadyPaid) continue;
-
-                const user = await getUserById(winner.user_id);
-                if (!user) continue;
-
-                user.withdrawableBalance =
-                    getWithdrawableBalance(user) + prize.amount;
-
-                await updateUser(user);
-
-                const profile = profiles.get(String(winner.user_id)) || {};
-                const winnerName =
-                    profile.username ||
-                    profile.full_name ||
-                    'Player';
-
-                await addTransaction(user.id, {
-                    id: uniqueId,
-                    type: 'tap_rush_contest_prize',
-                    description:
-                        `${prize.description} (${winnerName}, Challenge #${challenge.challenge_number})`,
-                    amount: prize.amount,
-                    currency: 'NGN',
-                    status: 'completed',
-                    bank: 'PAYME Wallet'
-                });
-            }
-
-            // Only mark the challenge completed after the prize-processing
-            // pass has succeeded. This keeps the operation retryable if
-            // Supabase has a temporary error.
-            await supabase
-                .from('game_challenges')
-                .update({ status: 'completed' })
-                .eq('id', challenge.id)
-                .eq('status', 'active');
-
-        } catch (error) {
-            console.error(
-                `Tap Rush challenge ${challenge.id} finalization error:`,
-                error
-            );
-        }
-    }
+function getTapRushWeekBounds(date = new Date()) {
+    const d = new Date(date);
+    const day = d.getUTCDay();
+    const daysFromMonday = (day + 6) % 7;
+    const start = new Date(Date.UTC(
+        d.getUTCFullYear(),
+        d.getUTCMonth(),
+        d.getUTCDate() - daysFromMonday,
+        0, 0, 0, 0
+    ));
+    const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return { start, end };
 }
 
-
-// ============================================================
-// TAP RUSH — ACTIVE CHALLENGE
-// ============================================================
-
-app.get(
-    '/api/games/tap-rush/challenge',
-    requireLogin,
-    async (req, res) => {
-
-        try {
-
-            // Finalize any 2-day Tap Rush contest whose countdown has
-            // reached zero before loading/creating the next contest.
-            await finalizeExpiredTapRushChallenges();
-
-            const now =
-                new Date().toISOString();
-
-            let {
-                data: challenge,
-                error
-            } = await supabase
-                .from('game_challenges')
-                .select('*')
-                .eq(
-                    'game_type',
-                    'tap_rush'
-                )
-                .eq(
-                    'status',
-                    'active'
-                )
-                .lte(
-                    'start_time',
-                    now
-                )
-                .gt(
-                    'end_time',
-                    now
-                )
-                .order(
-                    'start_time',
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(1)
-                .maybeSingle();
-
-            if (error) {
-                throw error;
-            }
-
-
-            // ------------------------------------------------
-            // CREATE NEXT CHALLENGE IF NEEDED
-            // ------------------------------------------------
-
-            if (!challenge) {
-
-                const {
-                    data: latest,
-                    error: latestError
-                } = await supabase
-                    .from(
-                        'game_challenges'
-                    )
-                    .select(
-                        'challenge_number,end_time'
-                    )
-                    .eq(
-                        'game_type',
-                        'tap_rush'
-                    )
-                    .order(
-                        'challenge_number',
-                        {
-                            ascending: false
-                        }
-                    )
-                    .limit(1)
-                    .maybeSingle();
-
-                if (latestError) {
-                    throw latestError;
-                }
-
-
-                let start =
-                    new Date();
-
-                if (
-                    latest &&
-                    latest.end_time
-                ) {
-
-                    const latestEnd =
-                        new Date(
-                            latest.end_time
-                        );
-
-                    if (
-                        latestEnd >
-                        start
-                    ) {
-                        start =
-                            latestEnd;
-                    }
-
-                }
-
-                const end =
-                    new Date(
-                        start.getTime() +
-                        48 * 60 * 60 * 1000
-                    );
-
-                const challengeNumber =
-                    Number(
-                        latest?.challenge_number ||
-                        0
-                    ) + 1;
-
-
-                const {
-                    data: created,
-                    error: createError
-                } = await supabase
-                    .from(
-                        'game_challenges'
-                    )
-                    .insert({
-                        game_type:
-                            'tap_rush',
-
-                        challenge_number:
-                            challengeNumber,
-
-                        start_time:
-                            start.toISOString(),
-
-                        end_time:
-                            end.toISOString(),
-
-                        status:
-                            'active',
-
-                        prize_1:
-                            1000,
-
-                        prize_2:
-                            500,
-
-                        prize_3:
-                            200
-                    })
-                    .select('*')
-                    .single();
-
-                if (createError) {
-                    throw createError;
-                }
-
-                challenge =
-                    created;
-
-            }
-
-
-            return res.json({
-
-                success:
-                    true,
-
-                challenge: {
-
-                    id:
-                        challenge.id,
-
-                    number:
-                        challenge.challenge_number,
-
-                    startTime:
-                        challenge.start_time,
-
-                    endTime:
-                        challenge.end_time,
-
-                    status:
-                        challenge.status,
-
-                    prizes: {
-
-                        first:
-                            Number(
-                                challenge.prize_1
-                            ),
-
-                        second:
-                            Number(
-                                challenge.prize_2
-                            ),
-
-                        third:
-                            Number(
-                                challenge.prize_3
-                            )
-
-                    }
-
-                }
-
-            });
-
-        } catch (err) {
-
-            console.error(
-                'Tap Rush challenge error:',
-                err
-            );
-
-            return res.status(500).json({
-
-                success:
-                    false,
-
-                message:
-                    'Unable to load Tap Rush challenge.'
-
-            });
-
-        }
-
-    }
-);
-
-
-// ============================================================
-// TAP RUSH — START GAME
-// ============================================================
-
-app.post(
-    '/api/games/tap-rush/start',
-    requireLogin,
-    async (req, res) => {
-
-        try {
-
-            const user =
-                req.user;
-
-            const challengeId =
-                String(
-                    req.body?.challengeId ||
-                    ''
-                ).trim();
-
-
-            if (!challengeId) {
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Challenge is required.'
-
-                });
-
-            }
-
-
-            // ------------------------------------------------
-            // CALL ATOMIC SUPABASE FUNCTION
-            // ------------------------------------------------
-
-            const {
-                data,
-                error
-            } = await supabase.rpc(
-                'start_tap_rush_game',
-                {
-                    p_user_id:
-                        user.id,
-
-                    p_challenge_id:
-                        challengeId,
-
-                    p_entry_fee:
-                        TAP_RUSH_ENTRY_FEE
-                }
-            );
-
-
-            if (error) {
-
-                console.error(
-                    'Tap Rush start RPC error:',
-                    error
-                );
-
-                const message =
-                    String(
-                        error.message ||
-                        ''
-                    );
-
-
-                if (
-                    message.includes(
-                        'INSUFFICIENT_BALANCE'
-                    )
-                ) {
-
-                    return res.status(400).json({
-
-                        success:
-                            false,
-
-                        message:
-                            'Insufficient balance. You need ₦100 to play.'
-
-                    });
-
-                }
-
-
-                if (
-                    message.includes(
-                        'ACTIVE_GAME_EXISTS'
-                    )
-                ) {
-
-                    return res.status(400).json({
-
-                        success:
-                            false,
-
-                        message:
-                            'You already have an active Tap Rush game.'
-
-                    });
-
-                }
-
-
-                if (
-                    message.includes(
-                        'CHALLENGE_EXPIRED'
-                    )
-                ) {
-
-                    return res.status(400).json({
-
-                        success:
-                            false,
-
-                        message:
-                            'This challenge has ended.'
-
-                    });
-
-                }
-
-
-                throw error;
-
-            }
-
-
-            if (!data) {
-
-                throw new Error(
-                    'Tap Rush session was not created.'
-                );
-
-            }
-
-
-            return res.json({
-
-                success:
-                    true,
-
-                session: {
-
-                    id:
-                        data.sessionId,
-
-                    seed:
-                        data.seed,
-
-                    serverStartTime:
-                        data.serverStartTime,
-
-                    expiresAt:
-                        data.expiresAt,
-
-                    challengeId:
-                        challengeId
-
-                },
-
-                entryFee:
-                    TAP_RUSH_ENTRY_FEE,
-
-                balance:
-                    Number(
-                        data.balance || 0
-                    )
-
-            });
-
-        } catch (err) {
-
-            console.error(
-                'Tap Rush start error:',
-                err
-            );
-
-            return res.status(500).json({
-
-                success:
-                    false,
-
-                message:
-                    'Unable to start Tap Rush.'
-
-            });
-
-        }
-
-    }
-);
-
-
-// ============================================================
-// TAP RUSH — SCORE CALCULATION
-// ============================================================
-
-function calculateTapRushScore(
-    events,
-    completionTimeMs
-) {
-
-    let baseScore = 0;
-    let comboScore = 0;
-    let bonusScore = 0;
-    let goldenScore = 0;
-    let streakScore = 0;
-    let accuracyScore = 0;
-    let speedScore = 0;
-    let difficultyScore = 0;
-
-    let hits = 0;
-    let misses = 0;
-
-    let highestCombo = 0;
-
-    let currentCombo =
-        0;
-
-    let goldenTargets = 0;
-    let megaTargets = 0;
-    let bonusTargets = 0;
-    let fakeTargetsHit = 0;
-
-    let reactionTotal = 0;
-    let reactionCount = 0;
-
-    const safeEvents =
-        Array.isArray(events)
-            ? events
-            : [];
-
-
-    for (
-        const event of safeEvents
-    ) {
-
-        if (
-            !event ||
-            typeof event !== 'object'
-        ) {
-            continue;
-        }
-
-
-        const type =
-            String(
-                event.type || ''
-            );
-
-
-        if (
-            type === 'hit'
-        ) {
-
-            hits++;
-
-            currentCombo++;
-
-            highestCombo =
-                Math.max(
-                    highestCombo,
-                    currentCombo
-                );
-
-
-            const size =
-                Number(
-                    event.targetSize
-                );
-
-
-            let base = 10;
-
-
-            if (
-                event.targetType ===
-                'golden'
-            ) {
-
-                base =
-                    100;
-
-                goldenTargets++;
-
-                goldenScore +=
-                    100;
-
-            } else if (
-                event.targetType ===
-                'mega'
-            ) {
-
-                base =
-                    250;
-
-                megaTargets++;
-
-                bonusScore +=
-                    250;
-
-            } else if (
-                event.targetType ===
-                'bonus'
-            ) {
-
-                base =
-                    30;
-
-                bonusTargets++;
-
-                bonusScore +=
-                    30;
-
-            } else if (
-                size <= 28
-            ) {
-
-                base =
-                    40;
-
-            } else if (
-                size <= 38
-            ) {
-
-                base =
-                    25;
-
-            } else if (
-                size <= 55
-            ) {
-
-                base =
-                    15;
-
-            }
-
-
-            baseScore +=
-                base;
-
-
-            let multiplier =
-                1;
-
-
-            if (
-                currentCombo >= 30
-            ) {
-
-                multiplier =
-                    5;
-
-            } else if (
-                currentCombo >= 20
-            ) {
-
-                multiplier =
-                    4;
-
-            } else if (
-                currentCombo >= 10
-            ) {
-
-                multiplier =
-                    3;
-
-            } else if (
-                currentCombo >= 5
-            ) {
-
-                multiplier =
-                    2;
-
-            }
-
-
-            comboScore +=
-                Math.round(
-                    base *
-                    (
-                        multiplier - 1
-                    )
-                );
-
-
-            const reaction =
-                Number(
-                    event.reactionMs
-                );
-
-
-            if (
-                Number.isFinite(
-                    reaction
-                ) &&
-                reaction >= 1 &&
-                reaction <= 2000
-            ) {
-
-                reactionTotal +=
-                    reaction;
-
-                reactionCount++;
-
-            }
-
-
-            if (
-                currentCombo === 10 ||
-                currentCombo === 20 ||
-                currentCombo === 30
-            ) {
-
-                streakScore +=
-                    currentCombo *
-                    3;
-
-            }
-
-        } else {
-
-            misses++;
-
-            currentCombo =
-                0;
-
-        }
-
-    }
-
-
-    const totalAttempts =
-        hits +
-        misses;
-
-
-    const accuracy =
-        totalAttempts > 0
-            ? (
-                hits /
-                totalAttempts
-            ) * 100
-            : 0;
-
-
-    accuracyScore =
-        Math.round(
-            accuracy *
-            1.5
-        );
-
-
-    const averageReaction =
-        reactionCount > 0
-            ? reactionTotal /
-              reactionCount
-            : 999;
-
+async function getOrCreateTapRushWeek() {
+    const { start, end } = getTapRushWeekBounds();
 
     if (
-        averageReaction < 250
+        tapRushWeekCache &&
+        tapRushWeekCache.start === start.toISOString() &&
+        tapRushWeekCache.end === end.toISOString()
     ) {
-
-        speedScore =
-            150;
-
-    } else if (
-        averageReaction < 350
-    ) {
-
-        speedScore =
-            110;
-
-    } else if (
-        averageReaction < 500
-    ) {
-
-        speedScore =
-            75;
-
-    } else if (
-        averageReaction < 700
-    ) {
-
-        speedScore =
-            40;
-
+        return tapRushWeekCache;
     }
 
+    const { data: existing, error: existingError } = await supabase
+        .from('game_challenges')
+        .select('id,challenge_number,start_time,end_time,status,prize_1,prize_2')
+        .eq('game_type', 'tap_rush')
+        .eq('start_time', start.toISOString())
+        .maybeSingle();
 
-    const difficulty =
-        safeEvents.reduce(
-            (
-                total,
-                event
-            ) => {
+    if (existingError) throw existingError;
 
-                const size =
-                    Number(
-                        event?.targetSize
-                    );
+    if (existing) {
+        tapRushWeekCache = {
+            id: existing.id,
+            number: existing.challenge_number,
+            start: existing.start_time,
+            end: existing.end_time,
+            prize1: Number(existing.prize_1 || 1000),
+            prize2: Number(existing.prize_2 || 500)
+        };
+        return tapRushWeekCache;
+    }
 
-                if (
-                    !Number.isFinite(size)
-                ) {
-                    return total;
-                }
+    const { data: latest, error: latestError } = await supabase
+        .from('game_challenges')
+        .select('challenge_number')
+        .eq('game_type', 'tap_rush')
+        .order('challenge_number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-                if (
-                    size <= 28
-                ) {
-                    return total + 5;
-                }
+    if (latestError) throw latestError;
 
-                if (
-                    size <= 38
-                ) {
-                    return total + 3;
-                }
+    const challengeNumber = Number(latest?.challenge_number || 0) + 1;
 
-                if (
-                    size <= 55
-                ) {
-                    return total + 1;
-                }
+    const { data: created, error: createError } = await supabase
+        .from('game_challenges')
+        .insert({
+            game_type: 'tap_rush',
+            challenge_number: challengeNumber,
+            start_time: start.toISOString(),
+            end_time: end.toISOString(),
+            status: 'active',
+            prize_1: TAP_RUSH_WEEK_PRIZES[0],
+            prize_2: TAP_RUSH_WEEK_PRIZES[1],
+            prize_3: 0
+        })
+        .select('id,challenge_number,start_time,end_time,status,prize_1,prize_2')
+        .single();
 
-                return total;
+    if (createError) {
+        // Another server instance may have created the same week.
+        const { data: raced } = await supabase
+            .from('game_challenges')
+            .select('id,challenge_number,start_time,end_time,status,prize_1,prize_2')
+            .eq('game_type', 'tap_rush')
+            .eq('start_time', start.toISOString())
+            .maybeSingle();
 
-            },
-            0
-        );
+        if (!raced) throw createError;
 
+        tapRushWeekCache = {
+            id: raced.id,
+            number: raced.challenge_number,
+            start: raced.start_time,
+            end: raced.end_time,
+            prize1: Number(raced.prize_1 || 1000),
+            prize2: Number(raced.prize_2 || 500)
+        };
+        return tapRushWeekCache;
+    }
 
-    difficultyScore =
-        difficulty;
-
-
-    const timeBonus =
-        completionTimeMs <=
-        TAP_RUSH_DURATION_MS + 1000
-            ? 50
-            : 0;
-
-
-    const finalScore =
-        Math.max(
-            0,
-            Math.round(
-                baseScore +
-                comboScore +
-                bonusScore +
-                goldenScore +
-                streakScore +
-                accuracyScore +
-                speedScore +
-                difficultyScore +
-                timeBonus
-            )
-        );
-
-
-    return {
-
-        score:
-            finalScore,
-
-        baseScore,
-
-        comboScore,
-
-        bonusScore,
-
-        goldenScore,
-
-        streakScore,
-
-        accuracyScore,
-
-        speedScore,
-
-        difficultyScore,
-
-        hits,
-
-        misses,
-
-        accuracy,
-
-        highestCombo,
-
-        goldenTargets,
-
-        megaTargets,
-
-        bonusTargets,
-
-        fakeTargetsHit,
-
-        averageReaction
-
+    tapRushWeekCache = {
+        id: created.id,
+        number: created.challenge_number,
+        start: created.start_time,
+        end: created.end_time,
+        prize1: Number(created.prize_1 || 1000),
+        prize2: Number(created.prize_2 || 500)
     };
 
+    return tapRushWeekCache;
 }
 
+async function finalizeTapRushWeeklyChallenges() {
+    const now = Date.now();
 
+    if (
+        tapRushWeekCache &&
+        now < new Date(tapRushWeekCache.end).getTime()
+    ) {
+        return;
+    }
 
-// ============================================================
-// TAP RUSH — USER PROFILE HELPER
-// ============================================================
-// We intentionally do NOT use a Supabase foreign-key join
-// between tap_rush_scores and users.
-//
-// This works with the existing users table even when there is
-// no FK relationship exposed in Supabase's schema cache.
-// ============================================================
+    // Do not hit Supabase every minute when there is no active cached week.
+    // A fresh check is enough every five minutes, plus the normal week-end
+    // check while a cached week is active.
+    if (now - tapRushLastFinalizationCheck < 5 * 60 * 1000) {
+        return;
+    }
+
+    tapRushLastFinalizationCheck = now;
+
+    try {
+        await supabase.rpc('finalize_tap_rush_week');
+        tapRushWeekCache = null;
+    } catch (error) {
+        console.error('Tap Rush weekly finalization error:', error);
+    }
+}
+
+async function getTapRushScoreRows(challengeId) {
+    const { data, error } = await supabase
+        .from('tap_rush_scores')
+        .select('score,user_id,created_at')
+        .eq('challenge_id', challengeId)
+        .order('score', { ascending: false })
+        .order('created_at', { ascending: true })
+        .limit(30);
+
+    if (error) throw error;
+
+    // A player can play multiple matches; only their best score counts.
+    const best = new Map();
+    for (const row of data || []) {
+        const key = String(row.user_id);
+        if (!best.has(key)) {
+            best.set(key, row);
+        }
+    }
+
+    return Array.from(best.values())
+        .sort((a, b) => {
+            const scoreDiff = Number(b.score || 0) - Number(a.score || 0);
+            if (scoreDiff !== 0) return scoreDiff;
+            return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        });
+}
 
 async function getTapRushUserProfiles(userIds) {
-
     const ids = [
         ...new Set(
             (Array.isArray(userIds) ? userIds : [])
@@ -9642,1273 +8821,638 @@ async function getTapRushUserProfiles(userIds) {
         )
     ];
 
-    if (!ids.length) {
-        return new Map();
-    }
+    if (!ids.length) return new Map();
 
-    const {
-        data,
-        error
-    } = await supabase
+    const { data, error } = await supabase
         .from('users')
-        .select(`
-            id,
-            username,
-            full_name
-        `)
+        .select('id,username,full_name')
         .in('id', ids);
 
-    if (error) {
-        throw error;
-    }
+    if (error) throw error;
 
     const profiles = new Map();
-
     for (const user of data || []) {
-
-        profiles.set(
-            String(user.id),
-            {
-                username:
-                    user.username ||
-                    null,
-
-                full_name:
-                    user.full_name ||
-                    null
-            }
-        );
+        profiles.set(String(user.id), {
+            username: user.username || null,
+            full_name: user.full_name || null
+        });
     }
-
     return profiles;
 }
 
+function calculateTapRushScore(events, completionTimeMs) {
+    let baseScore = 0;
+    let comboScore = 0;
+    let bonusScore = 0;
+    let goldenScore = 0;
+    let streakScore = 0;
+    let accuracyScore = 0;
+    let speedScore = 0;
+    let difficultyScore = 0;
+    let hits = 0;
+    let misses = 0;
+    let highestCombo = 0;
+    let currentCombo = 0;
+    let goldenTargets = 0;
+    let megaTargets = 0;
+    let bonusTargets = 0;
+    let fakeTargetsHit = 0;
+    let reactionTotal = 0;
+    let reactionCount = 0;
 
+    const safeEvents = Array.isArray(events) ? events : [];
 
-// ============================================================
-// TAP RUSH — FINISH GAME
-// ============================================================
+    for (const event of safeEvents) {
+        if (!event || typeof event !== 'object') continue;
 
-app.post(
-    '/api/games/tap-rush/finish',
-    requireLogin,
-    async (req, res) => {
+        const type = String(event.type || '');
 
-        try {
+        if (type === 'hit') {
+            hits++;
+            currentCombo++;
+            highestCombo = Math.max(highestCombo, currentCombo);
 
-            const user =
-                req.user;
+            const size = Number(event.targetSize);
+            let base = 10;
 
-
-            const sessionId =
-                String(
-                    req.body?.sessionId ||
-                    ''
-                ).trim();
-
-
-            if (!sessionId) {
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Game session is required.'
-
-                });
-
+            if (event.targetType === 'golden') {
+                base = 100;
+                goldenTargets++;
+                goldenScore += 100;
+            } else if (event.targetType === 'mega') {
+                base = 250;
+                megaTargets++;
+                bonusScore += 250;
+            } else if (event.targetType === 'bonus') {
+                base = 30;
+                bonusTargets++;
+                bonusScore += 30;
+            } else if (size <= 28) {
+                base = 40;
+            } else if (size <= 38) {
+                base = 25;
+            } else if (size <= 55) {
+                base = 15;
             }
 
+            baseScore += base;
 
-            const {
-                data: session,
-                error: sessionError
-            } = await supabase
-                .from(
-                    'tap_rush_sessions'
-                )
-                .select(
-                    '*'
-                )
-                .eq(
-                    'id',
-                    sessionId
-                )
-                .eq(
-                    'user_id',
-                    user.id
-                )
-                .maybeSingle();
+            let multiplier = 1;
+            if (currentCombo >= 30) multiplier = 5;
+            else if (currentCombo >= 20) multiplier = 4;
+            else if (currentCombo >= 10) multiplier = 3;
+            else if (currentCombo >= 5) multiplier = 2;
 
+            comboScore += Math.round(base * (multiplier - 1));
 
-            if (sessionError) {
-                throw sessionError;
+            const reaction = Number(event.reactionMs);
+            if (Number.isFinite(reaction) && reaction >= 1 && reaction <= 2000) {
+                reactionTotal += reaction;
+                reactionCount++;
             }
 
-
-            if (!session) {
-
-                return res.status(404).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Game session not found.'
-
-                });
-
+            if (currentCombo === 10 || currentCombo === 20 || currentCombo === 30) {
+                streakScore += currentCombo * 3;
             }
-
-
-            if (
-                session.status !==
-                'active'
-            ) {
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'This game has already been completed.'
-
-                });
-
-            }
-
-
-            const now =
-                Date.now();
-
-
-            const serverStart =
-                new Date(
-                    session.server_start_time
-                ).getTime();
-
-
-            const serverElapsed =
-                now -
-                serverStart;
-
-
-            if (
-                serverElapsed <
-                18000
-            ) {
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Game completed too quickly.'
-
-                });
-
-            }
-
-
-            if (
-                serverElapsed >
-                28000
-            ) {
-
-                await supabase
-                    .from(
-                        'tap_rush_sessions'
-                    )
-                    .update({
-                        status:
-                            'expired',
-
-                        finished_at:
-                            new Date()
-                                .toISOString()
-                    })
-                    .eq(
-                        'id',
-                        sessionId
-                    );
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Game session expired.'
-
-                });
-
-            }
-
-
-            const events =
-                Array.isArray(
-                    req.body?.events
-                )
-                    ? req.body.events
-                    : [];
-
-
-            if (
-                events.length >
-                TAP_RUSH_MAX_EVENTS
-            ) {
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Too many gameplay events.'
-
-                });
-
-            }
-
-
-            const completionTimeMs =
-                Number(
-                    req.body?.completionTimeMs
-                );
-
-
-            if (
-                !Number.isFinite(
-                    completionTimeMs
-                ) ||
-                completionTimeMs <
-                    18000 ||
-                completionTimeMs >
-                    22000
-            ) {
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Invalid game duration.'
-
-                });
-
-            }
-
-
-            // ------------------------------------------------
-            // EVENT VALIDATION
-            // ------------------------------------------------
-
-            let previousEventTime =
-                -1;
-
-            let impossible =
-                false;
-
-            let suspiciousReason =
-                null;
-
-
-            for (
-                const event of events
-            ) {
-
-                if (
-                    !event ||
-                    typeof event !== 'object'
-                ) {
-
-                    impossible =
-                        true;
-
-                    suspiciousReason =
-                        'Invalid event';
-
-                    break;
-
-                }
-
-
-                const at =
-                    Number(
-                        event.at
-                    );
-
-
-                if (
-                    !Number.isFinite(
-                        at
-                    )
-                ) {
-
-                    impossible =
-                        true;
-
-                    suspiciousReason =
-                        'Invalid event timestamp';
-
-                    break;
-
-                }
-
-
-                if (
-                    at <
-                    previousEventTime
-                ) {
-
-                    impossible =
-                        true;
-
-                    suspiciousReason =
-                        'Events out of order';
-
-                    break;
-
-                }
-
-
-                previousEventTime =
-                    at;
-
-            }
-
-
-            if (
-                impossible
-            ) {
-
-                await supabase
-                    .from(
-                        'tap_rush_sessions'
-                    )
-                    .update({
-
-                        status:
-                            'rejected',
-
-                        suspicious:
-                            true,
-
-                        suspicious_reason:
-                            suspiciousReason,
-
-                        finished_at:
-                            new Date()
-                                .toISOString()
-
-                    })
-                    .eq(
-                        'id',
-                        sessionId
-                    );
-
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Suspicious gameplay detected.'
-
-                });
-
-            }
-
-
-            const calculated =
-                calculateTapRushScore(
-                    events,
-                    completionTimeMs
-                );
-
-
-            // ------------------------------------------------
-            // THE CLIENT SCORE IS NEVER USED
-            // ------------------------------------------------
-
-            const score =
-                calculated.score;
-
-
-            // ------------------------------------------------
-            // SCORE UPPER LIMIT
-            // ------------------------------------------------
-
-            if (
-                score >
-                50000
-            ) {
-
-                await supabase
-                    .from(
-                        'tap_rush_sessions'
-                    )
-                    .update({
-
-                        status:
-                            'rejected',
-
-                        suspicious:
-                            true,
-
-                        suspicious_reason:
-                            'Score exceeded theoretical limit',
-
-                        finished_at:
-                            new Date()
-                                .toISOString()
-
-                    })
-                    .eq(
-                        'id',
-                        sessionId
-                    );
-
-
-                return res.status(400).json({
-
-                    success:
-                        false,
-
-                    message:
-                        'Impossible score detected.'
-
-                });
-
-            }
-
-
-            // ------------------------------------------------
-            // DISPLAY SCORE
-            //
-            // The leaderboard and UI must show the exact verified
-            // calculated score. Never inflate or modify it to
-            // manufacture unique-looking scores.
-            // ------------------------------------------------
-            const displayedScore = score;
-
-            // ------------------------------------------------
-            // INSERT SCORE
-            // ------------------------------------------------
-            // Do not store Date.now() in a numeric(20,8) tie-break column:
-            // PostgreSQL numeric(20,8) allows only 12 integer digits, while
-            // Unix milliseconds already use 13 digits. The table's normal
-            // created_at timestamp is used as the tie-breaker instead.
-            // ------------------------------------------------
-
-            const {
-                data: savedScore,
-                error: scoreError
-            } = await supabase
-                .from(
-                    'tap_rush_scores'
-                )
-                .insert({
-
-                    challenge_id:
-                        session.challenge_id,
-
-                    user_id:
-                        user.id,
-
-                    game_session_id:
-                        sessionId,
-
-                    score,
-
-                    base_score:
-                        calculated.baseScore,
-
-                    combo_score:
-                        calculated.comboScore,
-
-                    bonus_score:
-                        calculated.bonusScore,
-
-                    golden_score:
-                        calculated.goldenScore,
-
-                    streak_score:
-                        calculated.streakScore,
-
-                    accuracy_score:
-                        calculated.accuracyScore,
-
-                    speed_score:
-                        calculated.speedScore,
-
-                    difficulty_score:
-                        calculated.difficultyScore,
-
-                    hits:
-                        calculated.hits,
-
-                    misses:
-                        calculated.misses,
-
-                    accuracy:
-                        calculated.accuracy,
-
-                    highest_combo:
-                        calculated.highestCombo,
-
-                    golden_targets:
-                        calculated.goldenTargets,
-
-                    mega_targets:
-                        calculated.megaTargets,
-
-                    bonus_targets:
-                        calculated.bonusTargets,
-
-                    fake_targets_hit:
-                        calculated.fakeTargetsHit,
-
-                    reaction_score:
-                        Math.round(
-                            calculated.averageReaction
-                        ),
-
-                    completion_time_ms:
-                        completionTimeMs,
-
-                    total_events:
-                        events.length,
-
-                    displayed_score:
-                        displayedScore
-
-                })
-                .select(
-                    '*'
-                )
-                .single();
-
-
-            if (scoreError) {
-
-                throw scoreError;
-
-            }
-
-
-            // ------------------------------------------------
-            // MARK SESSION FINISHED
-            // ------------------------------------------------
-
-            await supabase
-                .from(
-                    'tap_rush_sessions'
-                )
-                .update({
-
-                    status:
-                        'finished',
-
-                    server_end_time:
-                        new Date()
-                            .toISOString(),
-
-                    client_finished_at:
-                        Date.now(),
-
-                    gameplay_hash:
-                        crypto
-                            .createHash(
-                                'sha256'
-                            )
-                            .update(
-                                JSON.stringify(
-                                    events
-                                )
-                            )
-                            .digest('hex'),
-
-                    finished_at:
-                        new Date()
-                            .toISOString()
-
-                })
-                .eq(
-                    'id',
-                    sessionId
-                );
-
-
-            // ------------------------------------------------
-            // PLAYER STATS
-            // ------------------------------------------------
-
-            const {
-                data: existingStats
-            } = await supabase
-                .from(
-                    'player_game_stats'
-                )
-                .select(
-                    '*'
-                )
-                .eq(
-                    'user_id',
-                    user.id
-                )
-                .eq(
-                    'game_type',
-                    'tap_rush'
-                )
-                .maybeSingle();
-
-
-            if (
-                existingStats
-            ) {
-
-                await supabase
-                    .from(
-                        'player_game_stats'
-                    )
-                    .update({
-
-                        games_played:
-                            Number(
-                                existingStats.games_played
-                            ) + 1,
-
-                        best_score:
-                            Math.max(
-                                Number(
-                                    existingStats.best_score
-                                ),
-                                displayedScore
-                            ),
-
-                        total_hits:
-                            Number(
-                                existingStats.total_hits
-                            ) +
-                            calculated.hits,
-
-                        total_misses:
-                            Number(
-                                existingStats.total_misses
-                            ) +
-                            calculated.misses,
-
-                        golden_targets:
-                            Number(
-                                existingStats.golden_targets
-                            ) +
-                            calculated.goldenTargets,
-
-                        highest_combo:
-                            Math.max(
-                                Number(
-                                    existingStats.highest_combo
-                                ),
-                                calculated.highestCombo
-                            ),
-
-                        updated_at:
-                            new Date()
-                                .toISOString()
-
-                    })
-                    .eq(
-                        'id',
-                        existingStats.id
-                    );
-
-            } else {
-
-                await supabase
-                    .from(
-                        'player_game_stats'
-                    )
-                    .insert({
-
-                        user_id:
-                            user.id,
-
-                        game_type:
-                            'tap_rush',
-
-                        games_played:
-                            1,
-
-                        best_score:
-                            displayedScore,
-
-                        total_hits:
-                            calculated.hits,
-
-                        total_misses:
-                            calculated.misses,
-
-                        golden_targets:
-                            calculated.goldenTargets,
-
-                        highest_combo:
-                            calculated.highestCombo
-
-                    });
-
-            }
-
-
-            // ------------------------------------------------
-            // LEADERBOARD
-            // ------------------------------------------------
-
-
-// ------------------------------------------------
-// LEADERBOARD
-// ------------------------------------------------
-// Do NOT use:
-// users:user_id(...)
-//
-// There is no FK relationship exposed between
-// tap_rush_scores.user_id and users.id.
-//
-// Fetch scores first, then fetch users separately.
-// ------------------------------------------------
-
-const {
-    data: leaderboard,
-    error: leaderboardError
-} = await supabase
-    .from('tap_rush_scores')
-    .select(`
-        displayed_score,
+        } else if (type === 'fake' || type === 'miss') {
+            misses++;
+            if (type === 'fake') fakeTargetsHit++;
+            currentCombo = 0;
+        }
+    }
+
+    const totalAttempts = hits + misses;
+    const accuracy = totalAttempts > 0 ? (hits / totalAttempts) * 100 : 0;
+    accuracyScore = Math.round(accuracy * 1.5);
+
+    const averageReaction = reactionCount > 0
+        ? reactionTotal / reactionCount
+        : 999;
+
+    if (averageReaction < 250) speedScore = 150;
+    else if (averageReaction < 350) speedScore = 110;
+    else if (averageReaction < 500) speedScore = 75;
+    else if (averageReaction < 700) speedScore = 40;
+
+    difficultyScore = safeEvents.reduce((total, event) => {
+        const size = Number(event?.targetSize);
+        if (!Number.isFinite(size)) return total;
+        if (size <= 28) return total + 5;
+        if (size <= 38) return total + 3;
+        if (size <= 55) return total + 1;
+        return total;
+    }, 0);
+
+    const timeBonus =
+        completionTimeMs <= TAP_RUSH_DURATION_MS + 1000 ? 50 : 0;
+
+    const score = Math.max(0, Math.round(
+        baseScore +
+        comboScore +
+        bonusScore +
+        goldenScore +
+        streakScore +
+        accuracyScore +
+        speedScore +
+        difficultyScore +
+        timeBonus
+    ));
+
+    return {
         score,
-        user_id,
-        created_at
-    `)
-    .eq(
-        'challenge_id',
-        session.challenge_id
-    )
-    .order(
-        'displayed_score',
-        {
-            ascending: false
-        }
-    )
-    .order(
-        'created_at',
-        {
-            ascending: true
-        }
-    )
-    .limit(100);
-
-if (leaderboardError) {
-    throw leaderboardError;
+        baseScore,
+        comboScore,
+        bonusScore,
+        goldenScore,
+        streakScore,
+        accuracyScore,
+        speedScore,
+        difficultyScore,
+        hits,
+        misses,
+        accuracy,
+        highestCombo,
+        goldenTargets,
+        megaTargets,
+        bonusTargets,
+        fakeTargetsHit,
+        averageReaction
+    };
 }
 
+function getTapRushReward(stake, score) {
+    const s = Number(stake);
+    const points = Number(score);
 
-// ------------------------------------------------
-// FETCH USER PROFILES SEPARATELY
-// ------------------------------------------------
+    if (points >= 5000) {
+        return {
+            type: '2x',
+            amount: s * 2,
+            freeSpins: 0,
+            description: `Tap Rush reward — 2× ₦${s.toLocaleString()} stake payout`
+        };
+    }
 
-const leaderboardUserIds =
-    (
-        leaderboard ||
-        []
-    ).map(
-        row => row.user_id
-    );
+    if (points >= 3000) {
+        return {
+            type: '0.5x',
+            amount: s * 0.5,
+            freeSpins: 0,
+            description: `Tap Rush reward — 0.5× ₦${s.toLocaleString()} stake payout`
+        };
+    }
 
-let userProfiles =
-    new Map();
+    if (points >= 1000) {
+        const spins = s === 1000 ? 7 : s === 500 ? 3 : 1;
+        return {
+            type: 'free_spin',
+            amount: 0,
+            freeSpins: spins,
+            description: `Tap Rush reward — ${spins} free spin${spins === 1 ? '' : 's'}`
+        };
+    }
 
-try {
+    return {
+        type: 'none',
+        amount: 0,
+        freeSpins: 0,
+        description: 'Tap Rush — no reward tier reached'
+    };
+}
 
-    userProfiles =
-        await getTapRushUserProfiles(
-            leaderboardUserIds
+// ------------------------------------------------------------
+// Weekly challenge info — retained as a lightweight compatibility
+// endpoint. tap.html does not poll it; it uses /leaderboard instead.
+// ------------------------------------------------------------
+app.get('/api/games/tap-rush/challenge', requireTapRushSession, async (req, res) => {
+    try {
+        await finalizeTapRushWeeklyChallenges();
+        const week = await getOrCreateTapRushWeek();
+
+        return res.json({
+            success: true,
+            challenge: {
+                id: week.id,
+                number: week.number,
+                startTime: week.start,
+                endTime: week.end,
+                status: 'active',
+                prizes: { first: week.prize1, second: week.prize2, third: 0 }
+            }
+        });
+    } catch (err) {
+        console.error('Tap Rush challenge error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to load Tap Rush weekly challenge.'
+        });
+    }
+});
+
+// Lightweight balance endpoint. Unlike /api/user/dashboard it does not
+// load transactions, deposits, or the complete users row.
+app.get('/api/games/tap-rush/balance', requireTapRushSession, async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('balance,deposit_balance,withdrawable_balance')
+            .eq('id', req.tapRushUserId)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) {
+            return res.status(401).json({
+                success: false,
+                message: 'User session not found.'
+            });
+        }
+
+        const balance =
+            Math.max(0, Number(data.deposit_balance || 0)) +
+            Math.max(0, Number(data.withdrawable_balance || 0));
+
+        return res.json({ success: true, balance });
+    } catch (err) {
+        console.error('Tap Rush balance error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to load Tap Rush balance.'
+        });
+    }
+});
+
+// ------------------------------------------------------------
+// START GAME
+// ------------------------------------------------------------
+app.post('/api/games/tap-rush/start', requireTapRushSession, async (req, res) => {
+    try {
+        const stake = Number(req.body?.stake);
+
+        if (!TAP_RUSH_STAKES.has(stake)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Choose a valid Tap Rush stake: ₦200, ₦500 or ₦1,000.'
+            });
+        }
+
+        await finalizeTapRushWeeklyChallenges();
+        const week = await getOrCreateTapRushWeek();
+
+        const { data, error } = await supabase.rpc('start_tap_rush_game', {
+            p_user_id: req.tapRushUserId,
+            p_challenge_id: week.id,
+            p_entry_fee: stake
+        });
+
+        if (error) {
+            const message = String(error.message || '');
+            if (message.includes('INSUFFICIENT_BALANCE')) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient balance. You need ${moneyForServer(stake)} to play.`
+                });
+            }
+            if (message.includes('ACTIVE_GAME_EXISTS')) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'You already have an active Tap Rush game.'
+                });
+            }
+            if (message.includes('CHALLENGE_EXPIRED')) {
+                tapRushWeekCache = null;
+                return res.status(400).json({
+                    success: false,
+                    message: 'This weekly game has ended. Please try again.'
+                });
+            }
+            throw error;
+        }
+
+        if (!data) throw new Error('Tap Rush session was not created.');
+
+        return res.json({
+            success: true,
+            session: {
+                id: data.sessionId,
+                seed: data.seed,
+                serverStartTime: data.serverStartTime,
+                expiresAt: data.expiresAt,
+                challengeId: week.id
+            },
+            stake,
+            balance: Number(data.balance || 0)
+        });
+    } catch (err) {
+        console.error('Tap Rush start error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to start Tap Rush.'
+        });
+    }
+});
+
+function moneyForServer(n) {
+    return `₦${Number(n || 0).toLocaleString('en-NG')}`;
+}
+
+// ------------------------------------------------------------
+// FINISH GAME
+// ------------------------------------------------------------
+app.post('/api/games/tap-rush/finish', requireTapRushSession, async (req, res) => {
+    try {
+        const sessionId = String(req.body?.sessionId || '').trim();
+        if (!sessionId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Game session is required.'
+            });
+        }
+
+        const { data: session, error: sessionError } = await supabase
+            .from('tap_rush_sessions')
+            .select('id,user_id,challenge_id,entry_fee,server_start_time,status')
+            .eq('id', sessionId)
+            .eq('user_id', req.tapRushUserId)
+            .maybeSingle();
+
+        if (sessionError) throw sessionError;
+        if (!session) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tap Rush session not found.'
+            });
+        }
+
+        if (session.status !== 'active') {
+            return res.status(400).json({
+                success: false,
+                message: 'This game has already been completed.'
+            });
+        }
+
+        const now = Date.now();
+        const serverStart = new Date(session.server_start_time).getTime();
+        const serverElapsed = now - serverStart;
+
+        if (serverElapsed < 18000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Game completed too quickly.'
+            });
+        }
+
+        if (serverElapsed > 28000) {
+            await supabase
+                .from('tap_rush_sessions')
+                .update({
+                    status: 'expired',
+                    finished_at: new Date().toISOString()
+                })
+                .eq('id', sessionId)
+                .eq('status', 'active');
+
+            return res.status(400).json({
+                success: false,
+                message: 'Game session expired.'
+            });
+        }
+
+        const events = Array.isArray(req.body?.events) ? req.body.events : [];
+        if (events.length > TAP_RUSH_MAX_EVENTS) {
+            return res.status(400).json({
+                success: false,
+                message: 'Too many gameplay events.'
+            });
+        }
+
+        const completionTimeMs = Number(req.body?.completionTimeMs);
+        if (
+            !Number.isFinite(completionTimeMs) ||
+            completionTimeMs < 18000 ||
+            completionTimeMs > 22000
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid game duration.'
+            });
+        }
+
+        let previousEventTime = -1;
+
+        for (const event of events) {
+            if (!event || typeof event !== 'object') {
+                await supabase
+                    .from('tap_rush_sessions')
+                    .update({
+                        status: 'rejected',
+                        suspicious: true,
+                        suspicious_reason: 'Invalid event',
+                        finished_at: new Date().toISOString()
+                    })
+                    .eq('id', sessionId)
+                    .eq('status', 'active');
+
+                return res.status(400).json({
+                    success: false,
+                    message: 'Suspicious gameplay detected.'
+                });
+            }
+
+            const at = Number(event.at);
+
+            if (!Number.isFinite(at) || at < previousEventTime) {
+                await supabase
+                    .from('tap_rush_sessions')
+                    .update({
+                        status: 'rejected',
+                        suspicious: true,
+                        suspicious_reason: !Number.isFinite(at)
+                            ? 'Invalid event timestamp'
+                            : 'Events out of order',
+                        finished_at: new Date().toISOString()
+                    })
+                    .eq('id', sessionId)
+                    .eq('status', 'active');
+
+                return res.status(400).json({
+                    success: false,
+                    message: 'Suspicious gameplay detected.'
+                });
+            }
+
+            previousEventTime = at;
+        }
+
+        const calculated = calculateTapRushScore(events, completionTimeMs);
+
+        if (calculated.score > 50000) {
+            await supabase
+                .from('tap_rush_sessions')
+                .update({
+                    status: 'rejected',
+                    suspicious: true,
+                    suspicious_reason: 'Score exceeded theoretical limit',
+                    finished_at: new Date().toISOString()
+                })
+                .eq('id', sessionId)
+                .eq('status', 'active');
+
+            return res.status(400).json({
+                success: false,
+                message: 'Impossible score detected.'
+            });
+        }
+
+        const score = calculated.score;
+
+        // Save the verified score without selecting the inserted row back.
+        // This avoids an unnecessary Supabase response payload.
+        const { error: scoreError } = await supabase
+            .from('tap_rush_scores')
+            .insert({
+                challenge_id: session.challenge_id,
+                user_id: req.tapRushUserId,
+                game_session_id: sessionId,
+                score,
+                base_score: calculated.baseScore,
+                combo_score: calculated.comboScore,
+                bonus_score: calculated.bonusScore,
+                golden_score: calculated.goldenScore,
+                streak_score: calculated.streakScore,
+                accuracy_score: calculated.accuracyScore,
+                speed_score: calculated.speedScore,
+                difficulty_score: calculated.difficultyScore,
+                hits: calculated.hits,
+                misses: calculated.misses,
+                accuracy: calculated.accuracy,
+                highest_combo: calculated.highestCombo,
+                golden_targets: calculated.goldenTargets,
+                mega_targets: calculated.megaTargets,
+                bonus_targets: calculated.bonusTargets,
+                fake_targets_hit: calculated.fakeTargetsHit,
+                reaction_score: Math.round(calculated.averageReaction),
+                completion_time_ms: completionTimeMs,
+                total_events: events.length,
+                displayed_score: score
+            });
+
+        if (scoreError) throw scoreError;
+
+        // Keep player stats current without downloading the existing row.
+        try {
+            await supabase.rpc('record_tap_rush_stats', {
+                p_user_id: req.tapRushUserId,
+                p_score: score,
+                p_hits: calculated.hits,
+                p_misses: calculated.misses,
+                p_golden_targets: calculated.goldenTargets,
+                p_highest_combo: calculated.highestCombo
+            });
+        } catch (statsError) {
+            console.error('Tap Rush stats update error:', statsError);
+        }
+
+        const stake = Number(session.entry_fee);
+        const reward = getTapRushReward(stake, score);
+        const rewardTxId = `tx_tap_rush_reward_${sessionId}`;
+
+        const { data: rewardData, error: rewardError } = await supabase.rpc(
+            'settle_tap_rush_reward',
+            {
+                p_user_id: req.tapRushUserId,
+                p_transaction_id: rewardTxId,
+                p_reward_amount: reward.amount,
+                p_free_spins: reward.freeSpins,
+                p_description: reward.description
+            }
         );
 
-} catch (profileError) {
+        if (rewardError) throw rewardError;
 
-    // The score has already been saved.
-    // Do NOT turn a successful game into
-    // "Unable to submit" just because a
-    // display-name lookup failed.
+        const { error: finishError } = await supabase
+            .from('tap_rush_sessions')
+            .update({
+                status: 'finished',
+                server_end_time: new Date().toISOString(),
+                client_finished_at: Date.now(),
+                gameplay_hash: crypto
+                    .createHash('sha256')
+                    .update(JSON.stringify(events))
+                    .digest('hex'),
+                finished_at: new Date().toISOString()
+            })
+            .eq('id', sessionId)
+            .eq('status', 'active');
 
-    console.error(
-        'Tap Rush profile lookup error:',
-        profileError
-    );
-}
+        if (finishError) throw finishError;
 
+        return res.json({
+            success: true,
+            balance: Number(rewardData?.balance ?? 0),
+            result: {
+                score,
+                hits: calculated.hits,
+                misses: calculated.misses,
+                accuracy: calculated.accuracy,
+                highestCombo: calculated.highestCombo,
+                goldenTargets: calculated.goldenTargets,
+                rewardType: reward.type,
+                rewardAmount: reward.amount,
+                freeSpinsAwarded: reward.freeSpins
+            }
+        });
+    } catch (err) {
+        console.error('Tap Rush finish error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to submit Tap Rush result.'
+        });
+    }
+});
 
-// ------------------------------------------------
-// BUILD RANKED LEADERBOARD
-// ------------------------------------------------
+// ------------------------------------------------------------
+// WEEKLY LEADERBOARD — TOP 2 ONLY
+// ------------------------------------------------------------
+app.get('/api/games/tap-rush/leaderboard', requireTapRushSession, async (req, res) => {
+    try {
+        await finalizeTapRushWeeklyChallenges();
+        const week = await getOrCreateTapRushWeek();
+        const rows = await getTapRushScoreRows(week.id);
+        const top = rows.slice(0, 2);
+        const profiles = await getTapRushUserProfiles(top.map(r => r.user_id));
 
-const ranked =
-    (
-        leaderboard ||
-        []
-    ).map(
-        (
-            row,
-            index
-        ) => {
-
-            const profile =
-                userProfiles.get(
-                    String(
-                        row.user_id
-                    )
-                ) || {};
-
-            const username =
-                profile.username ||
-                profile.full_name ||
-                'Player';
-
+        const leaderboard = top.map((row, index) => {
+            const profile = profiles.get(String(row.user_id)) || {};
             return {
-
-                rank:
-                    index + 1,
-
-                score:
-                    Number(
-                        row.score
-                    ),
-
-                createdAt:
-                    row.created_at,
-
-                username,
-
-                userId:
-                    row.user_id,
-
-                isYou:
-                    String(
-                        row.user_id
-                    ) ===
-                    String(
-                        user.id
-                    )
+                rank: index + 1,
+                score: Number(row.score || 0),
+                username: profile.username || profile.full_name || 'Player',
+                userId: row.user_id,
+                isYou: String(row.user_id) === String(req.tapRushUserId)
             };
-        }
-    );
+        });
 
-
-            const userRank =
-                ranked.find(
-                    row =>
-                        row.isYou
-                );
-
-
-            const pointsToNext =
-                userRank &&
-                userRank.rank > 1
-                    ? Math.max(
-                        0,
-                        Number(
-                            ranked[
-                                userRank.rank - 2
-                            ]?.score || 0
-                        ) -
-                        Number(
-                            userRank.score
-                        )
-                    )
-                    : null;
-
-
-            return res.json({
-
-                success:
-                    true,
-
-                result: {
-
-                    score:
-                        displayedScore,
-
-                    baseScore:
-                        calculated.baseScore,
-
-                    hits:
-                        calculated.hits,
-
-                    misses:
-                        calculated.misses,
-
-                    accuracy:
-                        calculated.accuracy,
-
-                    highestCombo:
-                        calculated.highestCombo,
-
-                    goldenTargets:
-                        calculated.goldenTargets,
-
-                    megaTargets:
-                        calculated.megaTargets,
-
-                    rank:
-                        userRank?.rank ||
-                        null,
-
-                    pointsToNext,
-
-                    personalBest:
-                        existingStats
-                            ? displayedScore >
-                              Number(
-                                  existingStats.best_score
-                              )
-                            : true,
-
-                    leaderboard:
-                        ranked.slice(
-                            0,
-                            10
-                        )
-
-                }
-
-            });
-
-        } catch (err) {
-
-            console.error(
-                'Tap Rush finish error:',
-                err
-            );
-
-            return res.status(500).json({
-
-                success:
-                    false,
-
-                message:
-                    'Unable to submit Tap Rush result.'
-
-            });
-
-        }
-
+        return res.json({
+            success: true,
+            weekStart: week.start,
+            weekEnd: week.end,
+            prizes: {
+                first: week.prize1,
+                second: week.prize2
+            },
+            leaderboard
+        });
+    } catch (err) {
+        console.error('Tap Rush leaderboard error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Unable to load Tap Rush leaderboard.'
+        });
     }
-);
+});
 
 
-// ============================================================
-// TAP RUSH — LEADERBOARD
-// ============================================================
 
-// ============================================================
-// TAP RUSH — LEADERBOARD
-// ============================================================
-
-app.get(
-    '/api/games/tap-rush/leaderboard',
-    requireLogin,
-    async (req, res) => {
-
-        try {
-
-            // ------------------------------------------------
-            // FIND ACTIVE CHALLENGE
-            // ------------------------------------------------
-
-            const {
-                data: challenge,
-                error: challengeError
-            } = await supabase
-                .from('game_challenges')
-                .select('*')
-                .eq(
-                    'game_type',
-                    'tap_rush'
-                )
-                .eq(
-                    'status',
-                    'active'
-                )
-                .lte(
-                    'start_time',
-                    new Date().toISOString()
-                )
-                .gt(
-                    'end_time',
-                    new Date().toISOString()
-                )
-                .order(
-                    'start_time',
-                    {
-                        ascending: false
-                    }
-                )
-                .limit(1)
-                .maybeSingle();
-
-
-            if (challengeError) {
-                throw challengeError;
-            }
-
-
-            // ------------------------------------------------
-            // NO ACTIVE CHALLENGE
-            // ------------------------------------------------
-
-            if (!challenge) {
-
-                return res.json({
-
-                    success:
-                        true,
-
-                    leaderboard:
-                        [],
-
-                    yourRank:
-                        null
-
-                });
-            }
-
-
-            // ------------------------------------------------
-            // GET SCORES
-            // ------------------------------------------------
-
-            const {
-                data: scores,
-                error: scoreError
-            } = await supabase
-                .from('tap_rush_scores')
-                .select(`
-                    displayed_score,
-                    score,
-                    user_id,
-                    created_at
-                `)
-                .eq(
-                    'challenge_id',
-                    challenge.id
-                )
-                .order(
-                    'score',
-                    {
-                        ascending: false
-                    }
-                )
-                .order(
-                    'created_at',
-                    {
-                        ascending: true
-                    }
-                )
-                .limit(100);
-
-
-            if (scoreError) {
-                throw scoreError;
-            }
-
-
-            // ------------------------------------------------
-            // GET USER IDs
-            // ------------------------------------------------
-
-            const userIds =
-                (
-                    scores ||
-                    []
-                ).map(
-                    row =>
-                        row.user_id
-                );
-
-
-            // ------------------------------------------------
-            // GET USER PROFILES
-            // ------------------------------------------------
-
-            let profiles =
-                new Map();
-
-            try {
-
-                profiles =
-                    await getTapRushUserProfiles(
-                        userIds
-                    );
-
-            } catch (profileError) {
-
-                console.error(
-                    'Tap Rush leaderboard profile error:',
-                    profileError
-                );
-
-                // Keep the leaderboard working even
-                // if a profile lookup temporarily fails.
-            }
-
-
-            // ------------------------------------------------
-            // BUILD LEADERBOARD
-            // ------------------------------------------------
-
-            const ranked =
-                (
-                    scores ||
-                    []
-                ).map(
-                    (
-                        row,
-                        index
-                    ) => {
-
-                        const profile =
-                            profiles.get(
-                                String(
-                                    row.user_id
-                                )
-                            ) || {};
-
-                        return {
-
-                            rank:
-                                index + 1,
-
-                            score:
-                                Number(
-                                    row.displayed_score
-                                ),
-
-                            username:
-                                profile.username ||
-                                profile.full_name ||
-                                'Player',
-
-                            userId:
-                                row.user_id,
-
-                            isYou:
-                                String(
-                                    row.user_id
-                                ) ===
-                                String(
-                                    req.user.id
-                                )
-                        };
-                    }
-                );
-
-
-            // ------------------------------------------------
-            // FIND CURRENT USER
-            // ------------------------------------------------
-
-            const yourRank =
-                ranked.find(
-                    row =>
-                        row.isYou
-                );
-
-
-            // ------------------------------------------------
-            // RETURN TOP 10 + USER POSITION
-            // ------------------------------------------------
-
-            return res.json({
-
-                success:
-                    true,
-
-                challenge: {
-
-                    id:
-                        challenge.id,
-
-                    number:
-                        challenge.challenge_number,
-
-                    startTime:
-                        challenge.start_time,
-
-                    endTime:
-                        challenge.end_time,
-
-                    prizes: {
-
-                        first:
-                            Number(
-                                challenge.prize_1
-                            ),
-
-                        second:
-                            Number(
-                                challenge.prize_2
-                            ),
-
-                        third:
-                            Number(
-                                challenge.prize_3
-                            )
-                    }
-                },
-
-                leaderboard:
-                    ranked.slice(
-                        0,
-                        10
-                    ),
-
-                yourPosition:
-                    yourRank?.rank ||
-                    null,
-
-                yourScore:
-                    yourRank?.score ||
-                    0
-
-            });
-
-        } catch (err) {
-
-            console.error(
-                'Tap Rush leaderboard error:',
-                err
-            );
-
-            return res.status(500).json({
-
-                success:
-                    false,
-
-                message:
-                    'Unable to load leaderboard.'
-            });
-        }
-    }
-);
-
-
-
-// ============================================================
 // TAP RUSH — MY STATS
 // ============================================================
 
@@ -11134,6 +9678,7 @@ app.listen(
   }
 
 );
+
 
 
 
