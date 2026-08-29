@@ -95,16 +95,7 @@ display:flex;
 align-items:center;
 gap:8px;
 }
-.logout-btn{
-border:1px solid #fecaca;
-background:rgba(254,242,242,.9);
-color:#ef4444;
-padding:8px 13px;
-border-radius: 18px;
-font-size:.72rem;
-font-weight:800;
-cursor:pointer;
-}
+
 .support-btn{
 width:40px;
 height:40px;
@@ -779,29 +770,6 @@ margin:0 auto 16px;
 .alert-text strong{ color:#ef4444; }
 .alert-btn{ width:100%; border:0; background:#0f172a; color:#fff; padding:13px; border-radius:
 14px; font-size:.82rem; font-weight:800; cursor:pointer; }
-
-/* LOGOUT OVERLAY */
-#logoutOverlay{
-position:fixed;
-inset:0;
-background:rgba(11,16,32,.88);
-z-index:9999;
-display:none;
-align-items:center;
-justify-content:center;
-color:#fff;
-}
-.logout-box{ text-align:center; }
-.spinner{
-width:35px;
-height:35px;
-border:3px solid rgba(255,255,255,.2);
-border-top-color:white;
-border-radius:50%;
-animation:spin .8s linear infinite;
-margin:0 auto 12px;
-}
-@keyframes spin{ to{ transform:rotate(360deg); } }
 
 /* DASHBOARD DATA LOADING SKELETONS */
 .loading-skeleton{
@@ -1899,7 +1867,6 @@ transition-duration: 0.01ms !important;
 <li><a href="/leaderboard.html">Leaderboard</a></li>
 </ul>
 <div class="header-actions">
-<button class="logout-btn" onclick="handleLogout()">Logout</button>
 <a href="https://wa.me/+2348034399095" target="_blank" class="support-btn"
 title="WhatsApp Support">
 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2324,20 +2291,6 @@ You need a higher earnings balance to proceed.
 onclick="closeAlertModal()">
 Got It
 </button>
-
-</div>
-</div>
-
-<!-- LOGOUT OVERLAY -->
-<div id="logoutOverlay">
-
-<div class="logout-box">
-
-<div class="spinner"></div>
-
-<div style="font-size:.85rem; font-weight:800;">
-Logging out...
-</div>
 
 </div>
 </div>
@@ -4011,47 +3964,6 @@ alert(
 
 }
 
-/* LOGOUT */
-async function handleLogout(){
-
-const overlay =
-document.getElementById(
-"logoutOverlay"
-);
-
-if(overlay)
-overlay.style.display =
-"flex";
-
-try{
-
-await fetch(
-"/api/auth/logout",
-{
-method:"POST",
-credentials:"include"
-}
-);
-
-setTimeout(()=>{
-window.location.href =
-"/";
-},700);
-
-}catch(error){
-
-console.error(
-"Logout error:",
-error
-);
-
-window.location.href =
-"/";
-
-}
-
-}
-
 /* TRANSACTIONS */
 function getTapRushLocalTransactions(){
   try{
@@ -4382,6 +4294,7 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
 
 
 

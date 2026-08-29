@@ -2465,6 +2465,60 @@ html, body {
     }
 }
 
+
+
+/* USER REQUEST: selection lock, 3D popup, and back-button press animation */
+.top-back-btn {
+    width: 50px !important; height: 50px !important;
+    min-width: 50px; min-height: 50px;
+    border-radius: 17px !important; font-size: 30px !important; font-weight: 800;
+    background: linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.035)) !important;
+    border: 1px solid rgba(255,255,255,.16) !important;
+    box-shadow: 0 12px 25px rgba(0,0,0,.38), inset 0 2px rgba(255,255,255,.16), inset 0 -5px 12px rgba(0,0,0,.22) !important;
+    transform: perspective(500px) translateZ(0);
+    transition: transform .13s cubic-bezier(.2,.8,.2,1), box-shadow .13s ease, background .13s ease;
+    touch-action: manipulation;
+}
+.top-back-btn:active {
+    transform: perspective(500px) translateZ(-2px) scale(.88) rotateZ(-4deg) !important;
+    box-shadow: 0 5px 10px rgba(0,0,0,.34), inset 0 3px 7px rgba(0,0,0,.24) !important;
+    background: linear-gradient(145deg, rgba(0,242,254,.20), rgba(155,48,255,.18)) !important;
+}
+#homePlayBtn.no-selection {
+    color: #c3cad5 !important;
+    background: linear-gradient(145deg, #626b78, #3d4551) !important;
+    border: 1px solid rgba(255,255,255,.13) !important;
+    box-shadow: 0 10px 22px rgba(0,0,0,.32), inset 0 2px rgba(255,255,255,.12), inset 0 -7px 15px rgba(0,0,0,.22) !important;
+    filter: saturate(.45);
+}
+#homePlayBtn.no-selection:active { transform: perspective(500px) scale(.96) !important; }
+#homePlayBtn:not(.no-selection) { color: #fff !important; filter: none; }
+#noStakeModal { z-index: 8000 !important; }
+#noStakeModal .no-stake-modal {
+    width: min(92vw, 390px); text-align: center; padding: 26px 22px 22px;
+    transform-style: preserve-3d;
+    box-shadow: 0 35px 110px rgba(0,0,0,.72), 0 0 45px rgba(0,242,254,.10), inset 0 1px rgba(255,255,255,.14);
+    animation: noStakePopIn .42s cubic-bezier(.16,.9,.25,1.15) both;
+}
+#noStakeModal .no-stake-icon {
+    margin: 0 auto 14px;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.16), transparent 32%), linear-gradient(145deg, rgba(0,242,254,.18), rgba(155,48,255,.18));
+    border-color: rgba(0,242,254,.25);
+    box-shadow: 0 12px 28px rgba(0,0,0,.35), 0 0 30px rgba(0,242,254,.14), inset 0 2px rgba(255,255,255,.18);
+}
+#noStakeModal .btn-primary { min-height: 52px; }
+@keyframes noStakePopIn {
+    0% { opacity: 0; transform: translateY(35px) scale(.76) rotateX(18deg); filter: blur(3px); }
+    65% { opacity: 1; transform: translateY(-3px) scale(1.025) rotateX(-1deg); filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+}
+.balance-mini.balance-loading .value {
+    width: 105px; min-height: 21px; border-radius: 8px; color: transparent !important;
+    background: linear-gradient(90deg, rgba(255,255,255,.10) 20%, rgba(255,255,255,.28) 40%, rgba(255,255,255,.10) 60%);
+    background-size: 220% 100%; animation: balanceShimmer 1.15s linear infinite;
+}
+@keyframes balanceShimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+
 </style>
 </head>
 
@@ -2532,13 +2586,13 @@ html, body {
                     </button>
                     <div id="stakeOptions" class="stake-options" role="listbox">
                         <button type="button" class="stake-chip" data-stake="200" role="option">
-                            <span class="stake-option-icon">⚡</span><span><strong>₦200</strong><small>LOW ENTRY · 1 FREE SPIN</small></span><span class="stake-option-check">✓</span>
+                            <span class="stake-option-icon">⚡</span><span><strong>₦200</strong><small>LOW ENTRY · 400</small></span><span class="stake-option-check">✓</span>
                         </button>
                         <button type="button" class="stake-chip" data-stake="500" role="option">
-                            <span class="stake-option-icon">🔥</span><span><strong>₦500</strong><small>POPULAR · 3 FREE SPINS</small></span><span class="stake-option-check">✓</span>
+                            <span class="stake-option-icon">🔥</span><span><strong>₦500</strong><small>POPULAR · 1,000</small></span><span class="stake-option-check">✓</span>
                         </button>
                         <button type="button" class="stake-chip" data-stake="1000" role="option">
-                            <span class="stake-option-icon">👑</span><span><strong>₦1,000</strong><small>HIGH STAKE · 7 FREE SPINS</small></span><span class="stake-option-check">✓</span>
+                            <span class="stake-option-icon">👑</span><span><strong>₦1,000</strong><small>HIGH STAKE · 2,000</small></span><span class="stake-option-check">✓</span>
                         </button>
                     </div>
                 </div>
@@ -2554,12 +2608,25 @@ html, body {
                 <button id="homeFreePlayBtn" class="btn-free-play" type="button">
                     🎮 PLAY FOR FREE
                 </button>
-                <button id="homePlayBtn" class="btn-primary" type="button">
-                    ⚡ ENTER ARENA — ₦200
+                <button id="homePlayBtn" class="btn-primary no-selection" type="button" aria-label="Enter Arena">
+                    ⚡ ENTER ARENA
                 </button>
             </div>
         </div>
     </section>
+
+    <!-- NO STAKE SELECTED POPUP -->
+    <div id="noStakeModal" class="modal-overlay" aria-hidden="true">
+        <div class="modern-modal no-stake-modal" role="dialog" aria-modal="true" aria-labelledby="noStakeTitle">
+            <div class="modal-icon no-stake-icon">🎯</div>
+            <h2 id="noStakeTitle">Choose an Entry Option</h2>
+            <p>Please select an entry option first. Once you choose your stake, the Enter Arena button will unlock and show the selected amount.</p>
+            <div class="modal-actions">
+                <button id="chooseStakeFromModal" class="btn-primary" type="button">🎯 CHOOSE OPTION</button>
+                <button class="modal-secondary" type="button" data-close-modal="noStakeModal">CANCEL</button>
+            </div>
+        </div>
+    </div>
 
     <!-- GAME SCREEN -->
     <section id="gameScreen" class="screen">
@@ -2945,6 +3012,9 @@ async function api(url, options = {}) {
 }
 
 async function loadUserBalance() {
+    const balanceBox = document.querySelector(".balance-mini");
+    if (balanceBox) balanceBox.classList.add("balance-loading");
+
     try {
         const tgUser = tg?.initDataUnsafe?.user;
         const data = await api("/api/user/dashboard", {
@@ -2969,6 +3039,8 @@ async function loadUserBalance() {
     } catch (err) {
         console.error("Balance load failed:", err);
         return null;
+    } finally {
+        if (balanceBox) balanceBox.classList.remove("balance-loading");
     }
 }
 
@@ -3030,8 +3102,11 @@ function selectStake(stake) {
     const playBtn = $("homePlayBtn");
     if (playBtn) {
         playBtn.disabled = false;
+        playBtn.classList.remove("no-selection");
         playBtn.textContent = `⚡ ENTER ARENA — ₦${numericStake.toLocaleString()}`;
     }
+    const stakeTriggerEl = $("stakeTrigger");
+    if (stakeTriggerEl) stakeTriggerEl.classList.add("has-selection");
 
     $("depositWarning").textContent = `You need at least ₦${numericStake.toLocaleString()} to enter the arena.`;
 
@@ -3086,12 +3161,8 @@ $("homePlayBtn").addEventListener("click", async e => {
     e.preventDefault();
     if (state.running) return;
     if (state.stake === null) {
-        toast("Please select a stake first.");
-        if (stakeTrigger) {
-            stakeSelector.classList.add("open");
-            stakeTrigger.setAttribute("aria-expanded", "true");
-        }
-        vibrate(15);
+        openModal("noStakeModal");
+        vibrate(18);
         return;
     }
     state.mode = "paid";
@@ -3144,6 +3215,17 @@ $("depositQuickBtn").addEventListener("click", e => { e.preventDefault(); window
 $("depositBtn").addEventListener("click", e => { e.preventDefault(); window.location.href = "deposit.html"; });
 document.querySelectorAll("[data-close-modal]").forEach(btn => btn.addEventListener("click", e => { e.preventDefault(); closeModal(btn.dataset.closeModal); }));
 document.querySelectorAll(".modal-overlay").forEach(overlay => overlay.addEventListener("click", e => { if(e.target === overlay) closeModal(overlay.id); }));
+
+$("chooseStakeFromModal")?.addEventListener("click", e => {
+    e.preventDefault();
+    closeModal("noStakeModal");
+    if (stakeSelector && stakeTrigger) {
+        stakeSelector.classList.add("open");
+        stakeTrigger.setAttribute("aria-expanded", "true");
+    }
+    setTimeout(() => stakeTrigger?.focus(), 80);
+    vibrate(12);
+});
 
 async function startPaidMatch() {
     try {
@@ -3807,9 +3889,15 @@ document.addEventListener("touchmove", e => { if (state.running) e.preventDefaul
     }
 })();
 
+    // Refresh the current user's balance whenever Tap Rush becomes visible again.
+    window.addEventListener("pageshow", () => {
+        if (document.visibilityState === "visible") loadUserBalance();
+    });
+
 })();
 </script>
 </body>
 </html>
+
 
 
