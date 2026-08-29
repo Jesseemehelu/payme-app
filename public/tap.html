@@ -2096,6 +2096,375 @@ html, body {
     }
 }
 
+
+/* ============================================================
+   TAP RUSH FINAL UI + EXACT SCORE SYNC
+   ============================================================ */
+
+/* Every informational popup is truly fixed to the viewport center.
+   This overrides the earlier generic z-index/position rule. */
+.modal-overlay,
+#resultModal,
+#freeResultModal,
+#insufficientModal,
+#howToModal,
+#leaderboardModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 7000 !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+    perspective: 1200px;
+}
+
+.modal-overlay.show,
+#resultModal.show,
+#freeResultModal.show,
+#insufficientModal.show,
+#howToModal.show,
+#leaderboardModal.show {
+    display: flex !important;
+}
+
+.modal-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(0,242,254,.10), transparent 32%),
+        radial-gradient(circle at 50% 70%, rgba(155,48,255,.10), transparent 38%);
+    pointer-events: none;
+}
+
+.modal-overlay > .modern-modal {
+    position: relative;
+    z-index: 2;
+    margin: 0 auto !important;
+    transform-origin: center center;
+    transform-style: preserve-3d;
+}
+
+/* How-to popup */
+#howToModal > .modern-modal {
+    width: min(92vw, 410px) !important;
+    max-height: min(86dvh, 650px) !important;
+    overflow-y: auto !important;
+    padding: 24px 20px 20px !important;
+    border-radius: 30px !important;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(0,242,254,.14), transparent 36%),
+        linear-gradient(155deg, #17243b 0%, #090e1b 72%) !important;
+    border: 1px solid rgba(0,242,254,.22) !important;
+    box-shadow:
+        0 38px 110px rgba(0,0,0,.78),
+        0 0 55px rgba(0,242,254,.10),
+        inset 0 1px rgba(255,255,255,.16) !important;
+    animation: centeredInfoIn .48s cubic-bezier(.16,.88,.24,1.16) both !important;
+}
+
+#howToModal .modal-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 14px !important;
+    border-radius: 22px;
+    font-size: 31px;
+    background: linear-gradient(145deg, rgba(0,242,254,.18), rgba(155,48,255,.14));
+    border: 1px solid rgba(0,242,254,.25);
+    box-shadow:
+        0 16px 32px rgba(0,0,0,.32),
+        0 0 32px rgba(0,242,254,.13),
+        inset 0 2px rgba(255,255,255,.18);
+    animation: infoIconIn .55s cubic-bezier(.2,1.35,.3,1) .06s both;
+}
+
+#howToModal h2 {
+    font-size: 23px !important;
+    margin-bottom: 8px !important;
+}
+
+#howToModal > .modern-modal > p {
+    color: #aebdd0 !important;
+    font-size: 11px !important;
+}
+
+#howToModal .how-list {
+    gap: 8px !important;
+    margin-top: 16px !important;
+}
+
+#howToModal .how-list li {
+    padding: 10px 10px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: inset 0 1px rgba(255,255,255,.05);
+    animation: listItemIn .4s ease both;
+}
+
+#howToModal .how-list li:nth-child(1) { animation-delay: .08s; }
+#howToModal .how-list li:nth-child(2) { animation-delay: .12s; }
+#howToModal .how-list li:nth-child(3) { animation-delay: .16s; }
+#howToModal .how-list li:nth-child(4) { animation-delay: .20s; }
+#howToModal .how-list li:nth-child(5) { animation-delay: .24s; }
+#howToModal .how-list li:nth-child(6) { animation-delay: .28s; }
+#howToModal .how-list li:nth-child(7) { animation-delay: .32s; }
+
+#howToModal .how-list b {
+    box-shadow: 0 5px 14px rgba(0,242,254,.10), inset 0 1px rgba(255,255,255,.12);
+}
+
+#howToModal .modal-actions {
+    margin-top: 15px !important;
+}
+
+/* Leaderboard popup */
+#leaderboardModal > .leaderboard-popup {
+    width: min(92vw, 410px) !important;
+    max-height: min(84dvh, 620px) !important;
+    overflow-y: auto !important;
+    padding: 22px 18px 18px !important;
+    border-radius: 30px !important;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255,201,60,.17), transparent 35%),
+        radial-gradient(circle at 100% 100%, rgba(155,48,255,.11), transparent 38%),
+        linear-gradient(155deg, #1a2740 0%, #080d18 72%) !important;
+    border: 1px solid rgba(255,201,60,.24) !important;
+    box-shadow:
+        0 38px 115px rgba(0,0,0,.82),
+        0 0 55px rgba(255,201,60,.09),
+        inset 0 1px rgba(255,255,255,.15) !important;
+    animation: centeredLeaderboardIn .52s cubic-bezier(.16,.88,.24,1.16) both !important;
+}
+
+#leaderboardModal .leaderboard-icon {
+    width: 66px;
+    height: 66px;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+    box-shadow:
+        0 16px 34px rgba(0,0,0,.32),
+        0 0 32px rgba(255,201,60,.13),
+        inset 0 2px rgba(255,255,255,.18);
+    animation: infoIconIn .55s cubic-bezier(.2,1.35,.3,1) .06s both;
+}
+
+#leaderboardModal .leaderboard-close {
+    transition: transform .16s ease, background .16s ease;
+}
+#leaderboardModal .leaderboard-close:active {
+    transform: scale(.9) rotate(-8deg);
+}
+
+.leaderboard-countdown-card {
+    margin: 13px 0 14px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background:
+        linear-gradient(145deg, rgba(255,201,60,.12), rgba(255,255,255,.025));
+    border: 1px solid rgba(255,201,60,.18);
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.08),
+        0 12px 26px rgba(0,0,0,.22);
+}
+
+.leaderboard-countdown-card span {
+    color: #aebdd0;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1.3px;
+}
+
+.leaderboard-countdown-card strong {
+    color: #ffd35a;
+    font-size: 17px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .5px;
+    text-shadow: 0 0 15px rgba(255,201,60,.32);
+}
+
+#leaderboardModal .weekly-row {
+    transform: translateZ(0);
+    box-shadow:
+        0 12px 24px rgba(0,0,0,.20),
+        inset 0 1px rgba(255,255,255,.05);
+    animation: leaderboardRowIn .38s ease both;
+}
+#leaderboardModal .weekly-row:nth-child(2) { animation-delay: .08s; }
+
+#leaderboardModal .leaderboard-week-end {
+    box-shadow: inset 0 1px rgba(255,255,255,.05);
+}
+
+/* Make the score-generation overlay feel like a premium result verification step. */
+#scoreGeneratingOverlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 8000 !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+#scoreGeneratingOverlay .score-generating-card {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    border-radius: 30px !important;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(0,242,254,.12), transparent 38%),
+        linear-gradient(155deg, #18253e, #070c17) !important;
+    border: 1px solid rgba(0,242,254,.24) !important;
+    box-shadow:
+        0 40px 120px rgba(0,0,0,.80),
+        0 0 55px rgba(0,242,254,.10),
+        inset 0 1px rgba(255,255,255,.16) !important;
+    animation: centeredInfoIn .46s cubic-bezier(.16,.88,.24,1.16) both !important;
+}
+#scoreGeneratingOverlay .score-generating-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: conic-gradient(from 0deg, transparent, rgba(0,242,254,.10), transparent 25%);
+    animation: verificationSweep 2.2s linear infinite;
+    pointer-events: none;
+}
+#scoreGeneratingOverlay .score-generating-icon,
+#scoreGeneratingOverlay h2,
+#scoreGeneratingOverlay p {
+    position: relative;
+    z-index: 1;
+}
+
+/* Result popups remain dead-center and gain a stronger 3D entrance. */
+#resultModal .modern-modal,
+#freeResultModal .modern-modal,
+#insufficientModal .modern-modal {
+    width: min(92vw, 400px) !important;
+    max-height: min(86dvh, 680px) !important;
+    overflow-y: auto !important;
+    margin: 0 auto !important;
+    border-radius: 30px !important;
+    box-shadow:
+        0 40px 120px rgba(0,0,0,.80),
+        0 0 55px rgba(0,242,254,.08),
+        inset 0 1px rgba(255,255,255,.15) !important;
+}
+
+#resultModal .modern-modal {
+    animation: centeredResultIn .52s cubic-bezier(.16,.88,.24,1.16) both !important;
+}
+#freeResultModal .modern-modal,
+#insufficientModal .modern-modal {
+    animation: centeredInfoIn .46s cubic-bezier(.16,.88,.24,1.16) both !important;
+}
+
+@keyframes centeredInfoIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 38px, 0) scale(.76) rotateX(13deg) rotateY(-5deg);
+        filter: blur(3px);
+    }
+    65% {
+        opacity: 1;
+        transform: translate3d(0, -3px, 0) scale(1.025) rotateX(0) rotateY(1deg);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) rotateX(0) rotateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes centeredLeaderboardIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 45px, 0) scale(.72) rotateX(18deg) rotateY(7deg);
+    }
+    62% {
+        opacity: 1;
+        transform: translate3d(0, -4px, 0) scale(1.035) rotateX(0) rotateY(-1deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) rotateX(0) rotateY(0);
+    }
+}
+
+@keyframes centeredResultIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 42px, 0) scale(.68) rotateX(16deg) rotateY(-8deg);
+    }
+    62% {
+        opacity: 1;
+        transform: translate3d(0, -4px, 0) scale(1.035) rotateX(0) rotateY(1deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1) rotateX(0) rotateY(0);
+    }
+}
+
+@keyframes infoIconIn {
+    0% { opacity: 0; transform: translateZ(40px) scale(.55) rotate(-12deg); }
+    70% { opacity: 1; transform: translateZ(40px) scale(1.08) rotate(4deg); }
+    100% { opacity: 1; transform: translateZ(40px) scale(1) rotate(0); }
+}
+
+@keyframes listItemIn {
+    from { opacity: 0; transform: translateX(-10px) translateZ(-10px); }
+    to { opacity: 1; transform: translateX(0) translateZ(0); }
+}
+
+@keyframes leaderboardRowIn {
+    from { opacity: 0; transform: translateY(10px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes verificationSweep {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 380px) {
+    #howToModal > .modern-modal,
+    #leaderboardModal > .leaderboard-popup {
+        width: 94vw !important;
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    #howToModal .how-list li {
+        font-size: 10.5px;
+    }
+
+    .leaderboard-countdown-card strong {
+        font-size: 15px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modal-overlay > .modern-modal,
+    #scoreGeneratingOverlay .score-generating-card,
+    #howToModal .how-list li,
+    #leaderboardModal .weekly-row,
+    #howToModal .modal-icon,
+    #leaderboardModal .leaderboard-icon {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
 </style>
 </head>
 
@@ -2231,7 +2600,11 @@ html, body {
     </div>
     <div class="leaderboard-kicker">WEEKLY CHALLENGE</div>
     <h2 id="leaderboardTitle">TOP 2 PLAYERS</h2>
-    <p>Only the two highest scores are shown. The list refreshes the next time you open this popup.</p>
+    <p>Compete all week. The leaderboard resets every Monday at 12:00 AM (WAT).</p>
+    <div class="leaderboard-countdown-card">
+      <span>WEEK RESETS IN</span>
+      <strong id="leaderboardCountdown">--:--:--</strong>
+    </div>
     <div id="leaderboardRows" class="leaderboard-popup-rows">
       <div class="weekly-empty">Tap to load the latest rankings…</div>
     </div>
@@ -2599,8 +2972,22 @@ async function loadUserBalance() {
     }
 }
 
-function openModal(id){ const el=$(id); if(el) el.classList.add("show"); }
-function closeModal(id){ const el=$(id); if(el) el.classList.remove("show"); }
+function openModal(id){
+    const el = $(id);
+    if (!el) return;
+    el.classList.add("show");
+    if (id === "leaderboardModal" && weeklyEndsAt) {
+        startLeaderboardCountdown();
+    }
+}
+function closeModal(id){
+    const el = $(id);
+    if (!el) return;
+    el.classList.remove("show");
+    if (id === "leaderboardModal") {
+        stopLeaderboardCountdown();
+    }
+}
 function showInsufficientBalance(){
     $("insufficientText").innerHTML = `You need <strong>₦${state.stake}</strong> to start a Tap Rush match at this stake. Deposit funds to keep playing.`;
     openModal("insufficientModal");
@@ -2893,6 +3280,9 @@ function spawnTarget() {
 
     const targetData = {
         id: target.dataset.id, el: target, type, size, x, y,
+        // Store the difficulty stage when the target is created.
+        // A target can remain visible after the game advances to another stage.
+        difficultyStage: d.stage,
         createdAt: now, lifetime: Math.max(280, Math.round(d.lifetime * 0.95)),
         vx: d.moving ? (Math.random() - 0.5) * (d.stage >= 5 ? 1.2 : 0.6) * 1.05 : 0,
         vy: d.moving ? (Math.random() - 0.5) * (d.stage >= 5 ? 1.2 : 0.6) * 1.05 : 0,
@@ -2929,7 +3319,12 @@ function handleTargetPointer(e) {
         createBurst(data.x, data.y, "#ff0055");
         audio.playMiss();
         vibrate(50);
-        recordEvent({ type: "fake", targetType: "fake", at: now });
+        recordEvent({
+            type: "fake",
+            targetType: "fake",
+            difficultyStage: data.difficultyStage,
+            at: Math.max(0, Math.round(now - state.gameStartClient))
+        });
         removeTarget(data, true);
         return;
     }
@@ -2961,12 +3356,16 @@ function handleTargetPointer(e) {
     createBurst(data.x, data.y, color);
     vibrate(15);
 
-    const mult = getComboMultiplier() * getDifficultyMultiplier();
+    const comboMultiplier = getComboMultiplier();
+    // Use the target's spawn stage so client scoring and server validation match.
+    const difficultyStage = data.difficultyStage;
+    const difficultyMultiplier = 1 + (difficultyStage - 1) * 0.15;
+    const mult = comboMultiplier * difficultyMultiplier;
     const earned = Math.round(base * mult);
     state.score += earned;
 
     scoreEl.textContent = state.score.toLocaleString();
-    comboEl.textContent = `x${getComboMultiplier()}`;
+    comboEl.textContent = `x${comboMultiplier}`;
 
     recordEvent({
         type: "hit",
@@ -2975,7 +3374,10 @@ function handleTargetPointer(e) {
         reactionMs: Math.max(1, Math.round(now - data.createdAt)),
         baseValue: base,
         combo: state.combo,
-        at: now
+        comboMultiplier,
+        difficultyStage,
+        scoreDelta: earned,
+        at: Math.max(0, Math.round(now - state.gameStartClient))
     });
     removeTarget(data, true);
 }
@@ -3015,7 +3417,10 @@ stage.addEventListener("pointerdown", e => {
     addFeedback("❌ MISS", x, y, "bad");
     audio.playMiss();
     vibrate(30);
-    recordEvent({ type: "miss", at: performance.now() });
+    recordEvent({
+        type: "miss",
+        at: Math.max(0, Math.round(performance.now() - state.gameStartClient))
+    });
 }, { passive: false });
 
 function updateMovingTargets() {
@@ -3056,7 +3461,7 @@ function addFeedback(text, x, y, type = "") {
 function recordEvent(ev) {
     state.totalEvents++;
     state.events.push({ ...ev, index: state.totalEvents });
-    if (state.events.length > 400) state.events.shift();
+    if (state.events.length > 1000) state.events.shift();
 }
 
 async function endGame() {
@@ -3232,13 +3637,67 @@ $("resultCloseBtn").addEventListener("click", e => {
 
 /* ============================================================
    WEEKLY TOP-2 LEADERBOARD
-   The leaderboard is NOT polled and does NOT refresh in the
-   background. It is fetched only when the popup is opened.
-   Closing the popup does nothing. Opening it again fetches fresh
-   data from the server.
+   Rankings are fetched when the popup opens. A live countdown
+   runs inside the popup until the server-provided weekly reset.
    ============================================================ */
 let weeklyEndsAt = null;
+let leaderboardServerOffsetMs = 0;
 let leaderboardLoading = false;
+let leaderboardTimerInterval = null;
+
+function formatLeaderboardCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (days > 0) {
+        return `${days}d ${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
+    }
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function stopLeaderboardCountdown() {
+    if (leaderboardTimerInterval) {
+        clearInterval(leaderboardTimerInterval);
+        leaderboardTimerInterval = null;
+    }
+}
+
+function updateLeaderboardCountdown() {
+    const countdownEl = $("leaderboardCountdown");
+    if (!countdownEl) return;
+
+    if (!weeklyEndsAt) {
+        countdownEl.textContent = "--:--:--";
+        return;
+    }
+
+    const serverNow = Date.now() + leaderboardServerOffsetMs;
+    const remaining = new Date(weeklyEndsAt).getTime() - serverNow;
+
+    if (remaining <= 0) {
+        countdownEl.textContent = "RESETTING…";
+        stopLeaderboardCountdown();
+
+        // Fetch the new week's leaderboard immediately after the old
+        // competition expires so the popup never shows stale rankings.
+        if ($("leaderboardModal")?.classList.contains("show")) {
+            fetchWeeklyLeaderboard();
+        }
+        return;
+    }
+
+    countdownEl.textContent = formatLeaderboardCountdown(remaining);
+}
+
+function startLeaderboardCountdown() {
+    stopLeaderboardCountdown();
+    updateLeaderboardCountdown();
+    leaderboardTimerInterval = setInterval(updateLeaderboardCountdown, 1000);
+}
 
 function renderWeeklyLeaderboard(rows) {
     const container = $("leaderboardRows");
@@ -3246,33 +3705,35 @@ function renderWeeklyLeaderboard(rows) {
 
     if (!Array.isArray(rows) || !rows.length) {
         container.innerHTML = `<div class="weekly-empty">No scores yet this week — be the first!</div>`;
-        return;
-    }
-
-    container.innerHTML = rows.slice(0, 2).map(row => {
-        const rankClass = row.rank === 1 ? "gold" : "silver";
-        const medal = row.rank === 1 ? "🥇" : "🥈";
-        return `
-            <div class="weekly-row ${rankClass}">
-                <div class="medal">${medal}</div>
-                <div>
-                    <div class="who">${escapeHtml(row.username || "Player")}</div>
-                    <div class="score">${Number(row.score || 0).toLocaleString()} pts</div>
+    } else {
+        container.innerHTML = rows.slice(0, 2).map(row => {
+            const rankClass = row.rank === 1 ? "gold" : "silver";
+            const medal = row.rank === 1 ? "🥇" : "🥈";
+            return `
+                <div class="weekly-row ${rankClass}">
+                    <div class="medal">${medal}</div>
+                    <div>
+                        <div class="who">${escapeHtml(row.username || "Player")}</div>
+                        <div class="score">${Number(row.score || 0).toLocaleString()} pts</div>
+                    </div>
+                    <div class="prize">₦${Number(row.prize || 0).toLocaleString()}</div>
                 </div>
-                <div class="prize">₦${Number(row.prize || 0).toLocaleString()}</div>
-            </div>
-        `;
-    }).join("");
+            `;
+        }).join("");
+    }
 
     const endText = $("leaderboardEndsText");
     if (endText) {
         if (weeklyEndsAt) {
             const endDate = new Date(weeklyEndsAt);
-            endText.textContent = `Challenge ends ${endDate.toLocaleDateString(undefined, {day:"numeric", month:"short"})} at ${endDate.toLocaleTimeString(undefined, {hour:"2-digit", minute:"2-digit"})}`;
+            endText.textContent =
+                `Resets ${endDate.toLocaleDateString(undefined, {weekday:"short", day:"numeric", month:"short"})} at ${endDate.toLocaleTimeString(undefined, {hour:"2-digit", minute:"2-digit"})}`;
         } else {
-            endText.textContent = "Challenge ends at the weekly reset";
+            endText.textContent = "Weekly leaderboard";
         }
     }
+
+    startLeaderboardCountdown();
 }
 
 async function fetchWeeklyLeaderboard() {
@@ -3291,12 +3752,24 @@ async function fetchWeeklyLeaderboard() {
     try {
         const data = await api(API.leaderboard);
         weeklyEndsAt = data.weekEndsAt || null;
+
+        // Use the server clock for the countdown so a device with an
+        // inaccurate clock does not display the wrong weekly reset time.
+        if (data.serverNow) {
+            const serverNowMs = new Date(data.serverNow).getTime();
+            if (Number.isFinite(serverNowMs)) {
+                leaderboardServerOffsetMs = serverNowMs - Date.now();
+            }
+        }
+
         renderWeeklyLeaderboard(data.leaderboard || []);
     } catch (err) {
         console.error("Leaderboard load failed:", err);
         if (container) {
             container.innerHTML = `<div class="weekly-empty">Unable to load leaderboard. Please close and open it again.</div>`;
         }
+        const countdownEl = $("leaderboardCountdown");
+        if (countdownEl) countdownEl.textContent = "UNAVAILABLE";
     } finally {
         leaderboardLoading = false;
     }
@@ -3308,8 +3781,8 @@ $("viewLeaderboardBtn").addEventListener("click", async e => {
     await fetchWeeklyLeaderboard();
 });
 
-/* No visibilitychange, focus, pageshow or polling refresh is used.
-   Every new popup open performs exactly one fresh leaderboard request. */
+/* No background leaderboard polling is used.
+   The countdown runs only while the popup is open. */
 
 function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
@@ -3338,4 +3811,5 @@ document.addEventListener("touchmove", e => { if (state.running) e.preventDefaul
 </script>
 </body>
 </html>
+
 

@@ -8669,7 +8669,7 @@ pollTelegramUpdates();
 
 const TAP_RUSH_DURATION_MS = 20000;
 const TAP_RUSH_GRACE_MS = 2500;
-const TAP_RUSH_MAX_EVENTS = 500;
+const TAP_RUSH_MAX_EVENTS = 1000;
 const TAP_RUSH_STAKES = [200, 500, 1000];
 
 const TAP_RUSH_REWARD_TABLE = {
@@ -8829,33 +8829,44 @@ app.post(
 // ============================================================
 // TAP RUSH — SCORE CALCULATION
 // ============================================================
-// Unchanged from before: the server replays the raw tap-event log
-// itself and computes its own score — the client-reported score is
-// never trusted. Making high scores harder to reach is done by
-// tuning the client's spawn/target difficulty (fewer, smaller,
-// faster targets), which this formula naturally reflects since it
-// only scores whatever real events actually happened.
+// The server replays the raw tap-event log using the exact same scoring
+// rules as the live Tap11 client. The client-reported total is never used.
+// This keeps the displayed in-game score, final popup, reward and leaderboard
+// score synchronized while retaining server-side validation.
 // ============================================================
 
 function calculateTapRushScore(
     events,
     completionTimeMs
 ) {
+    /*
+     * IMPORTANT:
+     * The live score shown in Tap11 is the score players actually earn
+     * during the 20-second match. The server MUST reproduce that exact
+     * scoring formula so the final popup, reward and leaderboard all use
+     * the same number.
+     *
+     * Client scoring:
+     *   normal target: <=32 = 40, <=48 = 25, otherwise 15
+     *   golden: 100
+     *   mega: 250
+     *   bonus: uses the normal target-size value
+     *   combo multiplier: 1x at <5 hits, 2x at 5+, 3x at 12+, 4x at 25+
+     *   difficulty multiplier: 1 + (stage - 1) * 0.15
+     *   normal miss: -5 points, minimum 0
+     *   fake target: counts as a miss but does NOT subtract 5
+     */
 
+    let score = 0;
     let baseScore = 0;
     let comboScore = 0;
-    let bonusScore = 0;
     let goldenScore = 0;
-    let streakScore = 0;
-    let accuracyScore = 0;
-    let speedScore = 0;
-    let difficultyScore = 0;
+    let bonusScore = 0;
 
     let hits = 0;
     let misses = 0;
-
     let highestCombo = 0;
-    let currentCombo = 0;
+    let currentCombo = 1;
 
     let goldenTargets = 0;
     let megaTargets = 0;
@@ -8867,52 +8878,92 @@ function calculateTapRushScore(
 
     const safeEvents = Array.isArray(events) ? events : [];
 
-    for (const event of safeEvents) {
+    function getClientBaseValue(targetType, size) {
+        if (targetType === 'golden') return 100;
+        if (targetType === 'mega') return 250;
 
-        if (!event || typeof event !== 'object') {
-            continue;
-        }
+        if (size <= 32) return 40;
+        if (size <= 48) return 25;
+        return 15;
+    }
+
+    function getClientComboMultiplier(totalSuccessfulHits) {
+        if (totalSuccessfulHits >= 25) return 4;
+        if (totalSuccessfulHits >= 12) return 3;
+        if (totalSuccessfulHits >= 5) return 2;
+        return 1;
+    }
+
+    function getClientDifficultyMultiplier(stage) {
+        return 1 + (stage - 1) * 0.15;
+    }
+
+    for (const event of safeEvents) {
+        if (!event || typeof event !== 'object') continue;
 
         const type = String(event.type || '');
 
         if (type === 'hit') {
-
             hits++;
-            currentCombo++;
+            currentCombo = Math.min(10, currentCombo + 1);
             highestCombo = Math.max(highestCombo, currentCombo);
 
+            const targetType = String(event.targetType || 'normal');
             const size = Number(event.targetSize);
-            let base = 10;
+            const difficultyStage = Number(event.difficultyStage);
 
-            if (event.targetType === 'golden') {
-                base = 100;
+            if (!Number.isFinite(size) || size < 24 || size > 81) {
+                return { invalid: true, reason: 'Invalid target data.' };
+            }
+
+            if (!Number.isInteger(difficultyStage) || difficultyStage < 1 || difficultyStage > 5) {
+                return { invalid: true, reason: 'Invalid difficulty data.' };
+            }
+
+            /*
+             * The client generates these size ranges after its 0.95
+             * difficulty-size scaling. This prevents a submitted event
+             * from claiming an impossible difficulty stage.
+             */
+            const stageRanges = {
+                1: [62, 81],
+                2: [48, 67],
+                3: [38, 52],
+                4: [30, 46],
+                5: [24, 38]
+            };
+
+            const [minSize, maxSize] = stageRanges[difficultyStage];
+            if (size < minSize || size > maxSize) {
+                console.warn(
+                    'Tap Rush target validation mismatch:',
+                    { size, difficultyStage, minSize, maxSize }
+                );
+                return { invalid: true, reason: 'Target difficulty mismatch.' };
+            }
+
+            let base = getClientBaseValue(targetType, size);
+
+            if (targetType === 'golden') {
                 goldenTargets++;
-                goldenScore += 100;
-            } else if (event.targetType === 'mega') {
-                base = 250;
+                goldenScore += base;
+            } else if (targetType === 'mega') {
                 megaTargets++;
-                bonusScore += 250;
-            } else if (event.targetType === 'bonus') {
-                base = 30;
+                bonusScore += base;
+            } else if (targetType === 'bonus') {
                 bonusTargets++;
-                bonusScore += 30;
-            } else if (size <= 28) {
-                base = 40;
-            } else if (size <= 38) {
-                base = 25;
-            } else if (size <= 55) {
-                base = 15;
+                // The live client treats bonus targets as normal size-based
+                // targets, so no extra bonus points are added here.
             }
 
             baseScore += base;
 
-            let multiplier = 1;
-            if (currentCombo >= 30) multiplier = 5;
-            else if (currentCombo >= 20) multiplier = 4;
-            else if (currentCombo >= 10) multiplier = 3;
-            else if (currentCombo >= 5) multiplier = 2;
+            const comboMultiplier = getClientComboMultiplier(hits);
+            const difficultyMultiplier = getClientDifficultyMultiplier(difficultyStage);
+            const earned = Math.round(base * comboMultiplier * difficultyMultiplier);
 
-            comboScore += Math.round(base * (multiplier - 1));
+            score += earned;
+            comboScore += earned - base;
 
             const reaction = Number(event.reactionMs);
             if (Number.isFinite(reaction) && reaction >= 1 && reaction <= 2000) {
@@ -8920,55 +8971,55 @@ function calculateTapRushScore(
                 reactionCount++;
             }
 
-            if (currentCombo === 10 || currentCombo === 20 || currentCombo === 30) {
-                streakScore += currentCombo * 3;
-            }
+        } else if (type === 'fake') {
+            fakeTargetsHit++;
+            misses++;
+            currentCombo = 1;
+
+        } else if (type === 'miss') {
+            misses++;
+            currentCombo = 1;
+            score = Math.max(0, score - 5);
 
         } else {
-            misses++;
-            currentCombo = 0;
+            return { invalid: true, reason: 'Unknown gameplay event.' };
         }
-
     }
 
     const totalAttempts = hits + misses;
     const accuracy = totalAttempts > 0 ? (hits / totalAttempts) * 100 : 0;
-    accuracyScore = Math.round(accuracy * 1.5);
-
     const averageReaction = reactionCount > 0 ? reactionTotal / reactionCount : 999;
 
-    if (averageReaction < 250) speedScore = 150;
-    else if (averageReaction < 350) speedScore = 110;
-    else if (averageReaction < 500) speedScore = 75;
-    else if (averageReaction < 700) speedScore = 40;
-
-    const difficulty = safeEvents.reduce((total, event) => {
-        const size = Number(event?.targetSize);
-        if (!Number.isFinite(size)) return total;
-        if (size <= 28) return total + 5;
-        if (size <= 38) return total + 3;
-        if (size <= 55) return total + 1;
-        return total;
-    }, 0);
-
-    difficultyScore = difficulty;
-
-    const timeBonus = completionTimeMs <= TAP_RUSH_DURATION_MS + 1000 ? 50 : 0;
-
-    const finalScore = Math.max(0, Math.round(
-        baseScore + comboScore + bonusScore + goldenScore +
-        streakScore + accuracyScore + speedScore + difficultyScore + timeBonus
-    ));
+    /*
+     * These values are retained for the existing Supabase columns and
+     * result payload. They are informational only; the actual score is
+     * the exact live-game score calculated above.
+     */
+    const accuracyScore = 0;
+    const speedScore = 0;
+    const difficultyScore = 0;
+    const streakScore = 0;
 
     return {
-        score: finalScore,
-        baseScore, comboScore, bonusScore, goldenScore, streakScore,
-        accuracyScore, speedScore, difficultyScore,
-        hits, misses, accuracy, highestCombo,
-        goldenTargets, megaTargets, bonusTargets, fakeTargetsHit,
+        score: Math.max(0, Math.round(score)),
+        baseScore,
+        comboScore,
+        bonusScore,
+        goldenScore,
+        streakScore,
+        accuracyScore,
+        speedScore,
+        difficultyScore,
+        hits,
+        misses,
+        accuracy,
+        highestCombo,
+        goldenTargets,
+        megaTargets,
+        bonusTargets,
+        fakeTargetsHit,
         averageReaction
     };
-
 }
 
 // ============================================================
@@ -9105,7 +9156,12 @@ app.post(
 
                 const at = Number(event.at);
 
-                if (!Number.isFinite(at) || at < previousEventTime) {
+                if (
+                    !Number.isFinite(at) ||
+                    at < previousEventTime ||
+                    at < 0 ||
+                    at > completionTimeMs + 250
+                ) {
                     return res.status(400).json({
                         success: false,
                         message: 'Suspicious gameplay detected.'
@@ -9117,6 +9173,14 @@ app.post(
             }
 
             const calculated = calculateTapRushScore(events, completionTimeMs);
+
+            if (calculated.invalid) {
+                return res.status(400).json({
+                    success: false,
+                    message: calculated.reason || 'Invalid gameplay data.'
+                });
+            }
+
             const score = calculated.score;
 
             if (score > 50000) {
@@ -9239,7 +9303,12 @@ app.post(
 // Supabase read total, instead of one per person.
 // ============================================================
 
-let tapRushLeaderboardCache = { data: null, expiresAt: 0, weekEndsAt: null };
+let tapRushLeaderboardCache = {
+    data: null,
+    expiresAt: 0,
+    weekEndsAt: null,
+    competitionId: null
+};
 const TAP_RUSH_LEADERBOARD_CACHE_TTL_MS = 20000;
 
 async function loadTapRushWeeklyLeaderboard() {
@@ -9288,6 +9357,11 @@ async function loadTapRushWeeklyLeaderboard() {
     return { leaderboard, weekEndsAt: competition.endTime };
 }
 
+function payloadWeekIsStillActive(weekEndsAt, now = Date.now()) {
+    const end = new Date(weekEndsAt || 0).getTime();
+    return Number.isFinite(end) && end > now;
+}
+
 app.get(
     '/api/games/tap-rush/leaderboard',
     requireLogin,
@@ -9296,15 +9370,22 @@ app.get(
         try {
 
             const now = Date.now();
+            const currentCompetition = getCurrentCompetition();
             let payload;
 
-            if (tapRushLeaderboardCache.data && tapRushLeaderboardCache.expiresAt > now) {
+            if (
+                tapRushLeaderboardCache.data &&
+                tapRushLeaderboardCache.expiresAt > now &&
+                tapRushLeaderboardCache.competitionId === currentCompetition.competitionId &&
+                payloadWeekIsStillActive(tapRushLeaderboardCache.weekEndsAt, now)
+            ) {
                 payload = tapRushLeaderboardCache;
             } else {
                 const fresh = await loadTapRushWeeklyLeaderboard();
                 payload = {
                     data: fresh.leaderboard,
                     weekEndsAt: fresh.weekEndsAt,
+                    competitionId: currentCompetition.competitionId,
                     expiresAt: now + TAP_RUSH_LEADERBOARD_CACHE_TTL_MS
                 };
                 tapRushLeaderboardCache = payload;
@@ -9313,7 +9394,8 @@ app.get(
             return res.json({
                 success: true,
                 leaderboard: payload.data,
-                weekEndsAt: payload.weekEndsAt
+                weekEndsAt: payload.weekEndsAt,
+                serverNow: new Date().toISOString()
             });
 
         } catch (err) {
@@ -9458,6 +9540,7 @@ app.listen(
   }
 
 );
+
 
 
 
