@@ -260,10 +260,77 @@ color:#94a3b8;
 font-size:.67rem;
 margin-top:7px;
 }
+.balance-amount-row{
+position:relative;
+z-index:3;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+flex-wrap:wrap;
+}
+.spin-chip{
+flex:0 0 auto;
+display:inline-flex;
+align-items:center;
+gap:7px;
+padding:6px 10px 6px 6px;
+border-radius:14px;
+background: linear-gradient(145deg, rgba(245,158,11,.22), rgba(236,72,153,.13));
+border:1px solid rgba(245,158,11,.32);
+backdrop-filter:blur(10px);
+box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 16px rgba(0,0,0,.16);
+text-decoration:none;
+cursor:pointer;
+transition: transform .18s ease, box-shadow .18s ease;
+}
+.spin-chip:active{ transform:scale(.94); }
+.spin-chip::after{
+content:"›";
+color:#fde68a;
+font-size:.95rem;
+font-weight:900;
+line-height:1;
+margin-left:1px;
+}
+.spin-chip-icon{
+flex:0 0 27px;
+width:27px;
+height:27px;
+border-radius:9px;
+display:grid;
+place-items:center;
+background:linear-gradient(135deg,#f59e0b,#ec4899);
+font-size:.82rem;
+box-shadow:0 6px 12px rgba(245,158,11,.34);
+}
+.spin-chip-text{
+display:flex;
+flex-direction:column;
+line-height:1.2;
+min-width:0;
+}
+.spin-chip-value{
+color:#fff;
+font-size:.8rem;
+font-weight:800;
+letter-spacing:-.02em;
+white-space:nowrap;
+}
+.spin-chip-value .balance-loading{ width:26px; min-width:26px; height:.8em; }
+.spin-chip-label{
+color:#fde68a;
+font-size:.48rem;
+font-weight:800;
+text-transform:uppercase;
+letter-spacing:.06em;
+margin-top:1px;
+white-space:nowrap;
+}
 .balance-breakdown{
 position:relative;
 z-index:3;
-margin-top:25px;
+margin-top:12px;
 display:grid;
 grid-template-columns: 1fr 1fr;
 gap:10px;
@@ -1928,7 +1995,7 @@ transition-duration: 0.01ms !important;
 .monetag-orb{position:relative;width:92px;height:92px;margin:18px auto 13px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-size:2.25rem;box-shadow:0 18px 40px rgba(124,58,237,.28);animation:monetagOrbPulse 1.8s ease-in-out infinite}
 .monetag-title{position:relative;font-size:1.18rem;font-weight:900;color:#0f172a;letter-spacing:-.04em}
 .monetag-subtitle{position:relative;margin-top:6px;color:#64748b;font-size:.70rem;line-height:1.5}
-.monetag-prize-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:18px 0 14px}
+.monetag-prize-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:18px 0 14px}
 .monetag-prize{padding:12px 5px 10px;border-radius:14px;background:#fff;border:1px solid #e2e8f0;color:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .15s ease}
 .monetag-prize-icon{font-size:1.15rem;line-height:1}
 .monetag-prize strong{font-size:.63rem;font-weight:900;color:#334155;letter-spacing:-.01em;white-space:nowrap}
@@ -1942,6 +2009,17 @@ transition-duration: 0.01ms !important;
 .monetag-result-icon{font-size:2rem}
 .monetag-result-label{margin-top:4px;font-size:1.25rem;font-weight:900;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
 .monetag-result-copy{margin-top:4px;color:#64748b;font-size:.62rem;font-weight:700}
+.monetag-spin-fill-wrap{display:none;margin-top:11px;padding:11px 13px;border-radius:16px;background:linear-gradient(145deg,#f5f3ff,#fdf4ff);border:1px solid #e9d5ff}
+.monetag-spin-fill-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.monetag-spin-fill-header span:first-child{color:#7c3aed;font-size:.56rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.monetag-spin-fill-header span:last-child{color:#0f172a;font-size:.72rem;font-weight:900}
+.monetag-spin-fill-laps{display:flex;gap:5px;justify-content:center;margin-bottom:7px}
+.monetag-spin-fill-dot{width:8px;height:8px;border-radius:50%;background:#e2d9fb;border:1px solid #ddd6fe;transition:.3s ease}
+.monetag-spin-fill-dot.filled{background:linear-gradient(135deg,#7c3aed,#ec4899);border-color:transparent;box-shadow:0 0 8px rgba(124,58,237,.45)}
+.monetag-spin-fill-dot.partial{background:linear-gradient(135deg,rgba(124,58,237,.5),rgba(236,72,153,.5));border-color:transparent}
+.monetag-spin-fill-track{position:relative;height:13px;border-radius:999px;background:#ede9fe;border:1px solid #ddd6fe;overflow:hidden}
+.monetag-spin-fill-track::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(124,58,237,.25);z-index:1}
+.monetag-spin-fill-bar{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:999px;background:linear-gradient(90deg,#7c3aed,#ec4899);box-shadow:0 0 10px rgba(124,58,237,.35)}
 .monetag-done-button{display:none;width:100%;margin-top:11px;min-height:45px;border:0;border-radius:14px;background:#0f172a;color:#fff;font-family:inherit;font-size:.74rem;font-weight:900;cursor:pointer}
 .monetag-done-button.show{display:block}
 @keyframes monetagFadeIn{from{opacity:0}to{opacity:1}}
@@ -2202,8 +2280,19 @@ class="user-name loading-skeleton name-loading" aria-label="Loading user name"><
 
 <div class="verified">Verified</div>
 </div>
+<div class="balance-amount-row">
 <div class="total-balance"><span class="balance-currency" id="balanceCurrency">₦</span><span id="balanceText" class="loading-skeleton balance-loading" aria-label="Loading balance"></span></div>
+
+<a id="freeSpinsUseBtn" href="/game.html" class="spin-chip" aria-label="Use free spins">
+<span class="spin-chip-icon" aria-hidden="true">🎰</span>
+<span class="spin-chip-text">
+<span class="spin-chip-value"><span id="freeSpinsText" class="loading-skeleton balance-loading" aria-label="Loading free spins">0.0</span></span>
+<span class="spin-chip-label">Free Spins</span>
+</span>
+</a>
+</div>
 <div class="balance-caption">Available earnings for withdrawal</div>
+
 <div class="balance-breakdown">
 <div class="balance-box">
 <div class="balance-box-header">
@@ -2530,6 +2619,7 @@ Awesome ✨
 
     <div class="monetag-prize-grid" id="monetagPrizeGrid">
       <div class="monetag-prize"><span class="monetag-prize-icon">🔄</span><strong>Try Again</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.2 Free Spin</strong></div>
       <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦5</strong></div>
       <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦10</strong></div>
       <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>1 Free Spin</strong></div>
@@ -2558,6 +2648,11 @@ Awesome ✨
       <div class="monetag-result-icon" id="monetagResultIcon">🎁</div>
       <div class="monetag-result-label" id="monetagResultLabel">Reward</div>
       <div class="monetag-result-copy" id="monetagResultCopy">Your reward has been added.</div>
+      <div class="monetag-spin-fill-wrap" id="monetagSpinFillWrap">
+        <div class="monetag-spin-fill-header"><span>Free Spin Meter</span><span id="monetagSpinFillLabel">0</span></div>
+        <div class="monetag-spin-fill-laps" id="monetagSpinFillLaps"></div>
+        <div class="monetag-spin-fill-track"><div class="monetag-spin-fill-bar" id="monetagSpinFillBar"></div></div>
+      </div>
     </div>
 
     <button id="monetagDoneBtn" class="monetag-done-button" onclick="claimMonetagRewardAndClose()">Claim Reward</button>
@@ -2847,6 +2942,7 @@ const MONETAG_REEL_ITEMS = [
     {icon:"🔄",label:"TRY AGAIN"},
     {icon:"₦5",label:"₦5"},
     {icon:"₦10",label:"₦10"},
+    {icon:"🎟️",label:"0.2 FREE SPIN"},
     {icon:"🎟️",label:"1 FREE SPIN"},
     {icon:"🎟️🎟️",label:"2 FREE SPINS"},
     {icon:"₦50",label:"₦50"},
@@ -2932,6 +3028,7 @@ function monetagResetModal(){
     if(done) done.classList.remove("show");
     if(orb) orb.textContent = "▶";
     if(reel){ reel.classList.remove("show","landed"); reel.style.display = "none"; }
+    animateMonetagSpinFill(0);
     buildMonetagReel();
 }
 
@@ -3001,11 +3098,13 @@ async function waitForMonetagPostback(timeoutMs=15000, intervalMs=1200){
 
 function getMonetagRewardIndex(result){
     const label = String(result?.label || "").toLowerCase();
-    if(label.includes("500")) return 7;
-    if(label.includes("100")) return 6;
-    if(label.includes("50")) return 5;
-    if(Number(result.spins || 0) >= 2) return 4;
-    if(Number(result.spins || 0) === 1) return 3;
+    const spins = Number(result.spins || 0);
+    if(label.includes("500")) return 8;
+    if(label.includes("100")) return 7;
+    if(label.includes("50")) return 6;
+    if(spins >= 2) return 5;
+    if(spins === 1) return 4;
+    if(spins > 0 && spins < 1) return 3;
     if(Number(result.cash || 0) === 10) return 2;
     if(Number(result.cash || 0) === 5) return 1;
     return 0;
@@ -3026,11 +3125,11 @@ function runMonetagRewardReel(result){
         const windowEl = wrap.querySelector(".monetag-reel-window");
         const centerOffset = (windowEl?.clientWidth || 300) / 2;
 
-        // The track repeats MONETAG_REEL_ITEMS (8 items) in cycles, so the
+        // The track repeats MONETAG_REEL_ITEMS (9 items) in cycles, so the
         // reel only lands on the correct reward if the stopping index is a
-        // multiple of 8 away from resultIndex. 32 is the highest such
+        // multiple of 9 away from resultIndex. 27 is the highest such
         // multiple that still leaves every stop within the 40-item track.
-        const targetIndex = 32 + resultIndex;
+        const targetIndex = 27 + resultIndex;
         const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2);
 
         wrap.style.display = "block";
@@ -3055,6 +3154,69 @@ function runMonetagRewardReel(result){
     });
 }
 
+/* Animated "free spin" meter: fills fully once per whole spin (e.g. 2 spins = 2 full fills),
+   and for a fractional spin (e.g. 0.2) it only fills that fraction of the way (won't reach the middle). */
+function animateMonetagSpinFill(spins){
+    const wrap = document.getElementById("monetagSpinFillWrap");
+    const bar = document.getElementById("monetagSpinFillBar");
+    const label = document.getElementById("monetagSpinFillLabel");
+    const lapsWrap = document.getElementById("monetagSpinFillLaps");
+    if(!wrap || !bar || !label || !lapsWrap) return;
+
+    spins = Number(spins || 0);
+    if(spins <= 0){
+        wrap.style.display = "none";
+        bar.style.transition = "none";
+        bar.style.width = "0%";
+        lapsWrap.innerHTML = "";
+        return;
+    }
+
+    const whole = Math.floor(spins + 1e-9);
+    const remainder = Math.max(0, +(spins - whole).toFixed(2));
+    const totalLaps = whole + (remainder > 0 ? 1 : 0);
+
+    label.textContent = `${spins} Free Spin${spins === 1 ? "" : "s"}`;
+    lapsWrap.innerHTML = "";
+    const dots = [];
+    for(let i = 0; i < totalLaps; i++){
+        const d = document.createElement("div");
+        d.className = "monetag-spin-fill-dot";
+        lapsWrap.appendChild(d);
+        dots.push(d);
+    }
+
+    wrap.style.display = "block";
+    bar.style.transition = "none";
+    bar.style.width = "0%";
+    void bar.offsetWidth;
+
+    let i = 0;
+    function step(){
+        if(i < whole){
+            bar.style.transition = "width .6s cubic-bezier(.22,.9,.3,1)";
+            bar.style.width = "100%";
+            setTimeout(() => {
+                dots[i].classList.add("filled");
+                i++;
+                if(i < whole || remainder > 0){
+                    bar.style.transition = "none";
+                    bar.style.width = "0%";
+                    void bar.offsetWidth;
+                    setTimeout(step, 140);
+                }
+            }, 600);
+        } else if(remainder > 0){
+            bar.style.transition = "width .6s cubic-bezier(.22,.9,.3,1)";
+            bar.style.width = (remainder * 100) + "%";
+            setTimeout(() => {
+                dots[dots.length - 1].classList.add(remainder >= .5 ? "filled" : "partial");
+            }, 600);
+        }
+    }
+    step();
+}
+
 function showMonetagResult(result){
     const title = document.getElementById("monetagModalTitle");
     const subtitle = document.getElementById("monetagModalSubtitle");
@@ -3075,7 +3237,7 @@ function showMonetagResult(result){
     if(status) status.textContent = "";
     if(orb) orb.textContent = "🎉";
 
-    if(icon) icon.textContent = result.spins >= 2 ? "🎟️🎟️" : result.spins === 1 ? "🎟️" : result.cash > 0 ? "💰" : "🔄";
+    if(icon) icon.textContent = result.spins >= 2 ? "🎟️🎟️" : result.spins > 0 ? "🎟️" : result.cash > 0 ? "💰" : "🔄";
     if(label) label.textContent = result.label || "Try Again";
     if(copy){
         if(result.cash > 0) copy.textContent = `₦${Number(result.cash).toLocaleString()} has been added to your earnings balance.`;
@@ -3084,6 +3246,7 @@ function showMonetagResult(result){
     }
     if(resultBox) resultBox.classList.add("show");
     if(done) done.classList.add("show");
+    animateMonetagSpinFill(result.spins);
     // The server has already credited the reward at this point, so the
     // 30-second cooldown begins as soon as the reward is revealed.
     startMonetagCooldown();
@@ -3094,9 +3257,11 @@ function refreshVisibleBalances(user){
     const balanceEl = document.getElementById("balanceText");
     const earningsEl = document.getElementById("earningsBalanceText");
     const depositEl = document.getElementById("depositBalanceText");
+    const freeSpinsEl = document.getElementById("freeSpinsText");
     if(balanceEl && user.balance != null) balanceEl.textContent = Number(user.balance).toLocaleString();
     if(earningsEl && user.withdrawableBalance != null) earningsEl.textContent = Number(user.withdrawableBalance).toLocaleString();
     if(depositEl && user.depositBalance != null) depositEl.textContent = Number(user.depositBalance).toLocaleString();
+    if(freeSpinsEl && user.freeSpins != null) freeSpinsEl.textContent = Number(user.freeSpins).toFixed(1);
 }
 
 function claimMonetagRewardAndClose(){
@@ -3585,6 +3750,7 @@ function restoreCachedDashboard(){
         const balanceEl = document.getElementById("balanceText");
         const earningsEl = document.getElementById("earningsBalanceText");
         const depositEl = document.getElementById("depositBalanceText");
+        const freeSpinsEl = document.getElementById("freeSpinsText");
 
         if(nameEl && data.name != null)
             nameEl.innerText = data.name;
@@ -3598,6 +3764,9 @@ function restoreCachedDashboard(){
         if(depositEl && data.deposit != null)
             depositEl.innerText = data.deposit;
 
+        if(freeSpinsEl && data.freeSpins != null)
+            freeSpinsEl.innerText = data.freeSpins;
+
         return true;
     }catch(error){
         console.warn("Unable to restore dashboard cache:", error);
@@ -3605,7 +3774,7 @@ function restoreCachedDashboard(){
     }
 }
 
-function cacheDashboardData(name, balance, earnings, deposit){
+function cacheDashboardData(name, balance, earnings, deposit, freeSpins){
     try{
         localStorage.setItem(
             "paymeDashboardCache",
@@ -3613,7 +3782,8 @@ function cacheDashboardData(name, balance, earnings, deposit){
                 name:name,
                 balance:balance,
                 earnings:earnings,
-                deposit:deposit
+                deposit:deposit,
+                freeSpins:freeSpins
             })
         );
     }catch(error){
@@ -3627,7 +3797,8 @@ function setDashboardLoading(isLoading){
     const balanceEls = [
         document.getElementById("balanceText"),
         document.getElementById("earningsBalanceText"),
-        document.getElementById("depositBalanceText")
+        document.getElementById("depositBalanceText"),
+        document.getElementById("freeSpinsText")
     ];
 
     const currencyEls = [
@@ -3772,6 +3943,16 @@ document.getElementById(
 ).innerText =
 depositBalance.toFixed(2);
 
+const freeSpinsBalance =
+Number(
+user.freeSpins ?? 0
+);
+
+document.getElementById(
+"freeSpinsText"
+).innerText =
+freeSpinsBalance.toFixed(1);
+
 document.getElementById(
 "referralCodeText"
 ).innerText =
@@ -3783,7 +3964,8 @@ cacheDashboardData(
     resolvedName,
     availableBalance.toFixed(2),
     withdrawableBalance.toFixed(2),
-    depositBalance.toFixed(2)
+    depositBalance.toFixed(2),
+    freeSpinsBalance.toFixed(1)
 );
 
 /* DATA IS READY: reveal the real name and balances only when
@@ -5190,6 +5372,7 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
 
 
 

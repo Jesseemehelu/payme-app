@@ -155,9 +155,13 @@ const MONETAG_REWARD_COOLDOWN = 30 * 1000;
 // Reward table. 10,000 secure-random slots are used server-side.
 // Higher rewards are intentionally rare.
 const MONETAG_REWARD_SLOTS = [
-  // 100,000 cryptographically-random slots. Cash prizes and free spins
-  // are deliberately very rare; Try Again is the normal outcome.
-  { max: 85000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  // 100,000 cryptographically-random slots. Cash prizes and the larger
+  // free-spin bundles are deliberately very rare. The 0.2 Free Spin
+  // reward is intentionally very common (the single highest-odds
+  // outcome) — it is carved out of what used to be "Try Again" share;
+  // every other reward below keeps its original odds/width unchanged.
+  { max: 35000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  { max: 85000, key: 'spin_0_2',  label: '0.2 Free Spin',  cash: 0,   spins: 0.2 },
   { max: 93000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
   { max: 98000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
   { max: 99500, key: 'spin_1',    label: '1 Free Spin',     cash: 0,   spins: 1 },
@@ -9995,6 +9999,7 @@ app.listen(
   }
 
 );
+
 
 
 
