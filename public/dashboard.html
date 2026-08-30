@@ -520,6 +520,11 @@ text-decoration: none;
     linear-gradient(145deg,#ffffff 0%,#f8fbff 100%);
 }
 .referral-hero{position:relative;z-index:2;display:flex;align-items:center;gap:12px;margin:2px 0 14px;padding:13px;border-radius:18px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #dbeafe;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+.referral-earn-highlight{position:relative;z-index:2;display:flex;align-items:center;gap:12px;margin:2px 0 12px;padding:15px 16px;border-radius:18px;background:linear-gradient(135deg,#0f172a,#1e3a8a 60%,#4c1d95);box-shadow:0 16px 34px rgba(37,99,235,.28)}
+.referral-earn-amount{font-size:2.15rem;font-weight:900;letter-spacing:-.04em;line-height:1;background:linear-gradient(90deg,#93c5fd,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.referral-earn-copy{min-width:0}
+.referral-earn-label{font-size:.66rem;font-weight:900;color:#e0e7ff;text-transform:uppercase;letter-spacing:.05em}
+.referral-earn-sub{margin-top:2px;font-size:.6rem;color:#a5b4fc;line-height:1.4}
 .referral-hero-icon{width:46px;height:46px;display:grid;place-items:center;flex:0 0 46px;border-radius:15px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:1.35rem;box-shadow:0 10px 22px rgba(37,99,235,.22)}
 .referral-hero-title{font-size:.78rem;font-weight:900;color:#0f172a}.referral-hero-text{font-size:.62rem;line-height:1.45;color:#64748b;margin-top:2px}
 .referral-steps{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
@@ -1923,9 +1928,12 @@ transition-duration: 0.01ms !important;
 .monetag-orb{position:relative;width:92px;height:92px;margin:18px auto 13px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-size:2.25rem;box-shadow:0 18px 40px rgba(124,58,237,.28);animation:monetagOrbPulse 1.8s ease-in-out infinite}
 .monetag-title{position:relative;font-size:1.18rem;font-weight:900;color:#0f172a;letter-spacing:-.04em}
 .monetag-subtitle{position:relative;margin-top:6px;color:#64748b;font-size:.70rem;line-height:1.5}
-.monetag-prize-grid{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 14px}
-.monetag-prize{padding:10px 7px;border-radius:14px;background:#fff;border:1px solid #e2e8f0;color:#475569;font-size:.61rem;font-weight:900}
-.monetag-prize strong{display:block;color:#0f172a;font-size:.78rem;margin-bottom:2px}
+.monetag-prize-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:18px 0 14px}
+.monetag-prize{padding:12px 5px 10px;border-radius:14px;background:#fff;border:1px solid #e2e8f0;color:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .15s ease}
+.monetag-prize-icon{font-size:1.15rem;line-height:1}
+.monetag-prize strong{font-size:.63rem;font-weight:900;color:#334155;letter-spacing:-.01em;white-space:nowrap}
+.monetag-prize.top-prize{position:relative;background:linear-gradient(155deg,#fffbeb,#fff7ed);border-color:#fde68a;box-shadow:0 8px 18px rgba(245,158,11,.16)}
+.monetag-prize.top-prize:after{content:"TOP";position:absolute;top:-7px;right:-4px;padding:3px 6px;border-radius:8px;background:#f59e0b;color:#fff;font-size:.42rem;font-weight:900;letter-spacing:.06em;box-shadow:0 4px 10px rgba(245,158,11,.35)}
 .monetag-reveal-button{position:relative;width:100%;min-height:48px;border:0;border-radius:15px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-family:inherit;font-size:.76rem;font-weight:900;cursor:pointer;box-shadow:0 12px 25px rgba(124,58,237,.25)}
 .monetag-reveal-button:disabled{opacity:.65;cursor:not-allowed}
 .monetag-status{min-height:18px;margin-top:9px;color:#64748b;font-size:.58rem;font-weight:800}
@@ -2277,6 +2285,14 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
 <span class="reward-tag">+ ₦15</span>
 </div>
 
+<div class="referral-earn-highlight">
+<div class="referral-earn-amount">₦15</div>
+<div class="referral-earn-copy">
+<div class="referral-earn-label">Per Successful Referral</div>
+<div class="referral-earn-sub">Paid straight to your balance every time a friend signs up.</div>
+</div>
+</div>
+
 <div class="referral-hero">
 <div class="referral-hero-icon">🎁</div>
 <div>
@@ -2513,14 +2529,14 @@ Awesome ✨
     <div class="monetag-subtitle" id="monetagModalSubtitle">Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event. The reel is only the suspense reveal.</div>
 
     <div class="monetag-prize-grid" id="monetagPrizeGrid">
-      <div class="monetag-prize"><strong>🔄 TRY AGAIN</strong>Most common</div>
-      <div class="monetag-prize"><strong>₦5</strong>Rare</div>
-      <div class="monetag-prize"><strong>₦10</strong>Very rare</div>
-      <div class="monetag-prize"><strong>🎟️ 1 FREE SPIN</strong>Rare</div>
-      <div class="monetag-prize"><strong>🎟️🎟️ 2 FREE SPINS</strong>Very rare</div>
-      <div class="monetag-prize"><strong>₦50</strong>Extremely rare</div>
-      <div class="monetag-prize"><strong>₦100</strong>Almost impossible</div>
-      <div class="monetag-prize"><strong>₦500</strong>Ultra rare</div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🔄</span><strong>Try Again</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦5</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦10</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>1 Free Spin</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>2 Free Spins</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦50</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦100</strong></div>
+      <div class="monetag-prize top-prize"><span class="monetag-prize-icon">💎</span><strong>₦500</strong></div>
     </div>
 
     <div class="monetag-reel-wrap" id="monetagReelWrap">
@@ -2828,14 +2844,14 @@ const MONETAG_CLIENT_COOLDOWN_MS = 30 * 1000;
 const MONETAG_COOLDOWN_KEY = "paymeMonetagCooldownUntil";
 
 const MONETAG_REEL_ITEMS = [
-    {icon:"🔄",label:"TRY AGAIN",sub:"No reward this time"},
-    {icon:"₦5",label:"₦5",sub:"Rare"},
-    {icon:"₦10",label:"₦10",sub:"Very rare"},
-    {icon:"🎟️",label:"1 FREE SPIN",sub:"Rare"},
-    {icon:"🎟️🎟️",label:"2 FREE SPINS",sub:"Very rare"},
-    {icon:"₦50",label:"₦50",sub:"Extremely rare"},
-    {icon:"₦100",label:"₦100",sub:"Almost impossible"},
-    {icon:"₦500",label:"₦500",sub:"Ultra rare"}
+    {icon:"🔄",label:"TRY AGAIN"},
+    {icon:"₦5",label:"₦5"},
+    {icon:"₦10",label:"₦10"},
+    {icon:"🎟️",label:"1 FREE SPIN"},
+    {icon:"🎟️🎟️",label:"2 FREE SPINS"},
+    {icon:"₦50",label:"₦50"},
+    {icon:"₦100",label:"₦100"},
+    {icon:"₦500",label:"₦500"}
 ];
 
 function monetagSetStatus(text, isError=false){
@@ -2878,7 +2894,7 @@ function startMonetagCooldown(){
 }
 
 function monetagPrizeHtml(item){
-    return `<div class="monetag-reel-item"><div>${item.icon}</div><div>${item.label}</div><small>${item.sub}</small></div>`;
+    return `<div class="monetag-reel-item"><div>${item.icon}</div><div>${item.label}</div></div>`;
 }
 
 function buildMonetagReel(){
@@ -2887,7 +2903,7 @@ function buildMonetagReel(){
 
     // A longer reel makes the reveal feel like a real prize wheel.
     const sequence = [];
-    for(let i=0;i<36;i++){
+    for(let i=0;i<40;i++){
         sequence.push(MONETAG_REEL_ITEMS[i % MONETAG_REEL_ITEMS.length]);
     }
 
@@ -3009,10 +3025,13 @@ function runMonetagRewardReel(result){
         const step = itemWidth + gap;
         const windowEl = wrap.querySelector(".monetag-reel-window");
         const centerOffset = (windowEl?.clientWidth || 300) / 2;
-        const targetIndex = 28 + resultIndex;
+
+        // The track repeats MONETAG_REEL_ITEMS (8 items) in cycles, so the
+        // reel only lands on the correct reward if the stopping index is a
+        // multiple of 8 away from resultIndex. 32 is the highest such
+        // multiple that still leaves every stop within the 40-item track.
+        const targetIndex = 32 + resultIndex;
         const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2);
-        const nearBigIndex = Math.max(1, targetIndex - 1);
-        const nearBigOffset = -(nearBigIndex * step) + centerOffset - (itemWidth / 2);
 
         wrap.style.display = "block";
         wrap.classList.add("show");
@@ -3023,24 +3042,16 @@ function runMonetagRewardReel(result){
         track.style.transform = "translate3d(0,0,0)";
         void track.offsetWidth;
 
-        // Phase 1: very fast movement.
-        track.style.transition = "transform 1.05s cubic-bezier(.05,.75,.12,1)";
-        track.style.transform = `translate3d(${nearBigOffset}px,0,0)`;
-
-        setTimeout(()=>{
-            if(caption) caption.textContent = "SO CLOSE…";
-            // Phase 2: crawl past the tempting large prize and settle on the
-            // server-selected reward. This is visual only; the server result
-            // remains authoritative.
-            track.style.transition = "transform 2.45s cubic-bezier(.12,.82,.08,1)";
-            track.style.transform = `translate3d(${targetOffset}px,0,0)`;
-        },1080);
+        // One continuous, smoothly-decelerating spin straight to the
+        // server-selected reward — no fake slow-down/speed-up detour.
+        track.style.transition = "transform 2.6s cubic-bezier(.12,.72,.1,1)";
+        track.style.transform = `translate3d(${targetOffset}px,0,0)`;
 
         setTimeout(()=>{
             wrap.classList.add("landed");
             if(caption) caption.textContent = "REWARD LOCKED IN ✓";
             resolve();
-        },3650);
+        },2700);
     });
 }
 
