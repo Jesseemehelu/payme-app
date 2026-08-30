@@ -136,86 +136,52 @@ const MIN_DEPOSIT_AMOUNT = 200;
 const SPIN_COST = 50;
 
 // ======================================================
-// ADSGRAM WATCH-AND-WIN CONFIGURATION
+// MONETAG REWARDED INTERSTITIAL
 // ======================================================
-// These are server-side weights. The browser never decides
-// the prize. Total weight = 10,000.
-//
-// Approximate odds:
-// Try Again       92.00%
-// 1 Free Spin      6.00%
-// ₦10              1.80%
-// 3 Free Spins     0.18%
-// ₦100             0.02%
-// ======================================================
+// Monetag zone supplied for PAYME.
+const MONETAG_ZONE_ID = '11688228';
 
-const ADSGRAM_BLOCK_ID = '45250';
-const ADSGRAM_REWARD_COOLDOWN_MS = 60 * 1000;
+// The postback endpoint is intentionally public because Monetag's
+// servers must be able to call it. Reward decisions are made here,
+// not in dashboard.html.
+const MONETAG_POSTBACK_PATH = '/api/monetag/postback';
 
-const ADSGRAM_REWARDS = [
-  {
-    id: 'try_again',
-    type: 'none',
-    amount: 0,
-    freeSpins: 0,
-    label: 'Try Again Later',
-    weight: 9200
-  },
-  {
-    id: 'free_spin',
-    type: 'freespins',
-    amount: 0,
-    freeSpins: 1,
-    label: '1 Free Spin',
-    weight: 600
-  },
-  {
-    id: 'cash_10',
-    type: 'cash',
-    amount: 10,
-    freeSpins: 0,
-    label: '₦10',
-    weight: 180
-  },
-  {
-    id: 'free_spins_3',
-    type: 'freespins',
-    amount: 0,
-    freeSpins: 3,
-    label: '3 Free Spins',
-    weight: 18
-  },
-  {
-    id: 'cash_100',
-    type: 'cash',
-    amount: 100,
-    freeSpins: 0,
-    label: '₦100',
-    weight: 2
-  }
+// A short watch-session window lets us associate a browser ad request
+// with the logged-in PAYME user while still allowing Monetag to call
+// the postback asynchronously.
+const MONETAG_SESSION_TTL = 10 * 60 * 1000;
+const MONETAG_REWARD_COOLDOWN = 60 * 1000;
+
+// Reward table. 10,000 secure-random slots are used server-side.
+// Higher rewards are intentionally rare.
+const MONETAG_REWARD_SLOTS = [
+  { max: 8800, key: 'try_again',  label: 'Try Again',     cash: 0,  spins: 0 },
+  { max: 9700, key: 'cash_5',     label: '₦5',             cash: 5,  spins: 0 },
+  { max: 9950, key: 'cash_10',    label: '₦10',            cash: 10, spins: 0 },
+  { max: 9990, key: 'spin_1',     label: '1 Free Spin',    cash: 0,  spins: 1 },
+  { max: 10000,key: 'spin_2',     label: '2 Free Spins',   cash: 0,  spins: 2 }
 ];
 
-const adsgramRewardLocks = new Set();
+// userId -> pending watch session
+const monetagPendingSessions = new Map();
+const monetagCompletedSessions = new Map();
 
-function selectAdsgramReward() {
-  const totalWeight = ADSGRAM_REWARDS.reduce(
-    (sum, reward) => sum + reward.weight,
-    0
-  );
-
-  const roll = crypto.randomInt(0, totalWeight);
-  let cursor = 0;
-
-  for (const reward of ADSGRAM_REWARDS) {
-    cursor += reward.weight;
-    if (roll < cursor) {
-      return reward;
+function cleanupMonetagSessions() {
+  const now = Date.now();
+  for (const [sessionId, session] of monetagPendingSessions.entries()) {
+    if (!session || now > number(session.expiresAt)) {
+      monetagPendingSessions.delete(sessionId);
     }
   }
 
-  return ADSGRAM_REWARDS[0];
+  for (const [sessionId, session] of monetagCompletedSessions.entries()) {
+    if (!session || now > number(session.expiresAt)) {
+      monetagCompletedSessions.delete(sessionId);
+    }
+  }
 }
 
+setInterval(cleanupMonetagSessions, 60 * 1000).unref();
 
 
 // ======================================================
@@ -1645,6 +1611,359 @@ async function requireLogin(
 }
 
 
+
+
+// ======================================================
+// MONETAG REWARDED INTERSTITIAL API
+// ======================================================
+
+// Called by dashboard.html immediately before opening the Monetag ad.
+// It does NOT award anything. It only records that this authenticated
+// user intentionally requested a rewarded ad.
+app.post('/api/monetag/start', requireLogin, async (req, res) => {
+  try {
+    const user = req.user;
+
+    const recent = await getRecentMonetagReward(user.id);
+    if (recent) {
+      const nextAllowedAt = new Date(recent.created_at).getTime() + MONETAG_REWARD_COOLDOWN;
+      return res.status(429).json({
+        success: false,
+        message: 'Please wait before watching another rewarded ad.',
+        nextAllowedAt
+      });
+    }
+
+    const sessionId = `monetag_${Date.now().toString(36)}_${crypto.randomBytes(12).toString('hex')}`;
+    const now = Date.now();
+
+    monetagPendingSessions.set(sessionId, {
+      userId: user.id,
+      telegramId: String(user.telegramId || ''),
+      createdAt: now,
+      expiresAt: now + MONETAG_SESSION_TTL
+    });
+
+    return res.json({
+      success: true,
+      sessionId,
+      zoneId: MONETAG_ZONE_ID,
+      createdAt: now,
+      expiresAt: now + MONETAG_SESSION_TTL
+    });
+  } catch (err) {
+    console.error('Monetag start error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to start the rewarded ad.'
+    });
+  }
+});
+
+// Browser polling endpoint. It never decides the reward; it only reads the
+// reward that the server-side postback has already recorded.
+app.get('/api/monetag/status', requireLogin, async (req, res) => {
+  try {
+    const sessionId = String(req.query?.sessionId || '').trim();
+    const startedAt = Number(req.query?.startedAt || 0);
+    if (!sessionId) {
+      return res.status(400).json({ success: false, message: 'Ad session is required.' });
+    }
+
+    const completed = monetagCompletedSessions.get(sessionId);
+    if (completed && String(completed.userId) === String(req.user.id)) {
+      return res.json({
+        success: true,
+        confirmed: true,
+        reward: completed.reward,
+        completedAt: completed.completedAt
+      });
+    }
+
+    const pending = monetagPendingSessions.get(sessionId);
+    if (pending && String(pending.userId) === String(req.user.id)) {
+      return res.json({ success: true, confirmed: false });
+    }
+
+    // If Render restarted after the postback was written to Supabase,
+    // recover the reward from the most recent Monetag transaction.
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('id, amount, description, created_at')
+      .eq('user_id', req.user.id)
+      .eq('type', 'monetag_reward')
+      .gte('created_at', new Date(startedAt > 0 ? startedAt : Date.now()).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    if (Array.isArray(data) && data.length) {
+      const tx = data[0];
+      const description = String(tx.description || 'Monetag Reward');
+      const label = description.replace(/^Monetag Reward\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
+      let spins = 0;
+      if (/2\s*Free Spins/i.test(label)) spins = 2;
+      else if (/1\s*Free Spin/i.test(label)) spins = 1;
+
+      return res.json({
+        success: true,
+        confirmed: true,
+        reward: {
+          key: 'server_confirmed',
+          label,
+          cash: number(tx.amount),
+          spins
+        },
+        completedAt: tx.created_at
+      });
+    }
+
+    return res.json({ success: true, confirmed: false });
+  } catch (err) {
+    console.error('Monetag status error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to check ad reward status.' });
+  }
+});
+
+// Monetag server-side postback.
+// Supports both GET and POST because the postback screen does not require
+// us to assume one transport method. Monetag values may arrive in the body
+// or query string depending on the configured callback.
+app.all('/api/monetag/postback', async (req, res) => {
+  try {
+    const telegramId = normalizeMonetagTelegramId(
+      monetagValue(req, ['telegram_id', 'telegramId', 'telegram_id_int', 'user_id'])
+    );
+
+    const zoneId = monetagValue(req, ['zone_id', 'zoneId']);
+    const eventType = monetagValue(req, ['event_type', 'eventType']).toLowerCase();
+    const rewardEventType = monetagValue(req, [
+      'reward_event_type',
+      'rewardEventType',
+      'rewarded',
+      'reward'
+    ]).toLowerCase();
+    const ymid = monetagValue(req, ['ymid', 'YMID']);
+    const requestVar = monetagValue(req, ['request_var', 'requestVar']);
+    const subZoneId = monetagValue(req, ['sub_zone_id', 'subZoneId']);
+    const estimatedPrice = monetagValue(req, ['estimated_price', 'estimatedPrice']);
+
+    // Always acknowledge malformed/non-reward events without crediting a user.
+    if (zoneId && String(zoneId) !== MONETAG_ZONE_ID) {
+      console.warn('Rejected Monetag postback: unexpected zone ID', zoneId);
+      return res.status(400).send('invalid zone');
+    }
+
+    // Monetag currently documents `valued` / `non_valued`; the older
+    // publisher UI may show `yes` / `no`. Support both forms.
+    if (!['valued', 'yes', 'true', '1'].includes(rewardEventType)) {
+      return res.status(200).send('ignored');
+    }
+
+    // YMID is the unique identifier we generate for every ad call. It is the
+    // primary idempotency key and also lets us map the callback to the pending
+    // PAYME watch session even when Telegram ID is not present.
+    if (!ymid && !requestVar) {
+      console.warn('Rejected Monetag postback: missing YMID/request_var');
+      return res.status(400).send('missing ymid');
+    }
+
+    const eventId = String(ymid || requestVar).trim();
+
+    let user = null;
+    if (telegramId) {
+      user = await getUserByTelegramId(telegramId);
+    }
+
+    const pending = findMonetagPendingSession({
+      userId: user ? user.id : null,
+      sessionId: requestVar,
+      ymid,
+      requestVar
+    });
+
+    if (!user && pending) {
+      user = await getUserById(pending.session.userId);
+    }
+
+    if (!user) {
+      console.warn('Monetag postback: user not found', telegramId || eventId);
+      return res.status(404).send('user not found');
+    }
+
+    // The app-created session is single-use. If Monetag does not echo our
+    // session identifier, findMonetagPendingSession() can still associate
+    // the callback with this user's pending watch session using Telegram ID.
+    if (pending) {
+      monetagPendingSessions.delete(pending.id);
+    }
+
+    // The database transaction ID is the idempotency key. A duplicate YMID
+    // can therefore never produce another reward.
+    const transactionId = `tx_monetag_${crypto
+      .createHash('sha256')
+      .update(eventId)
+      .digest('hex')
+      .slice(0, 48)}`;
+
+    const { data: existing, error: existingError } = await supabase
+      .from('transactions')
+      .select('id, amount, description, created_at, status')
+      .eq('id', transactionId)
+      .maybeSingle();
+
+    if (existingError) throw existingError;
+
+    if (existing) {
+      return res.status(200).send('already processed');
+    }
+
+    // Server-side reward selection. The browser never decides which reward
+    // is won.
+    const reward = chooseMonetagReward();
+    const rewardResult = buildMonetagRewardResult(reward);
+
+    // Insert the unique transaction first. The primary/unique transaction ID
+    // acts as our idempotency lock for duplicate postbacks.
+    await addTransaction(user.id, {
+      id: transactionId,
+      type: 'monetag_reward',
+      description: `Monetag Reward — ${rewardResult.label}`,
+      amount: rewardResult.cash,
+      currency: 'NGN',
+      status: 'completed',
+      bank: `Monetag ${MONETAG_ZONE_ID}`
+    });
+
+    if (rewardResult.cash > 0) {
+      user.withdrawableBalance =
+        getWithdrawableBalance(user) + rewardResult.cash;
+    }
+
+    if (rewardResult.spins > 0) {
+      user.freeSpins = number(user.freeSpins) + rewardResult.spins;
+    }
+
+    syncUserBalance(user);
+    await updateUser(user);
+
+    if (pending) {
+      monetagCompletedSessions.set(pending.id, {
+        userId: user.id,
+        reward: rewardResult,
+        completedAt: Date.now(),
+        expiresAt: Date.now() + 5 * 60 * 1000
+      });
+    }
+
+    console.log('Monetag reward credited:', {
+      userId: user.id,
+      telegramId,
+      zoneId: zoneId || MONETAG_ZONE_ID,
+      eventType,
+      rewardEventType,
+      ymid: ymid || null,
+      requestVar: requestVar || null,
+      subZoneId: subZoneId || null,
+      estimatedPrice: estimatedPrice || null,
+      reward: rewardResult
+    });
+
+    return res.status(200).send('ok');
+  } catch (err) {
+    console.error('Monetag postback error:', err);
+    return res.status(500).send('server error');
+  }
+});
+
+// ======================================================
+// MONETAG REWARDED INTERSTITIAL HELPERS
+// ======================================================
+
+function monetagValue(req, names) {
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const query = req.query && typeof req.query === 'object' ? req.query : {};
+  const headers = req.headers || {};
+
+  for (const name of names) {
+    if (body[name] !== undefined && body[name] !== null && String(body[name]).trim() !== '') {
+      return String(body[name]).trim();
+    }
+    if (query[name] !== undefined && query[name] !== null && String(query[name]).trim() !== '') {
+      return String(query[name]).trim();
+    }
+  }
+
+  return '';
+}
+
+function normalizeMonetagTelegramId(value) {
+  const clean = String(value || '').trim();
+  if (!clean) return '';
+  if (!/^-?\d{3,30}$/.test(clean)) return '';
+  return clean;
+}
+
+function chooseMonetagReward() {
+  const roll = crypto.randomInt(0, 10000) + 1;
+  for (const reward of MONETAG_REWARD_SLOTS) {
+    if (roll <= reward.max) {
+      return reward;
+    }
+  }
+  return MONETAG_REWARD_SLOTS[0];
+}
+
+function findMonetagPendingSession({ userId, sessionId, ymid, requestVar }) {
+  cleanupMonetagSessions();
+
+  const candidates = [sessionId, requestVar, ymid]
+    .map(v => String(v || '').trim())
+    .filter(Boolean);
+
+  for (const id of candidates) {
+    const session = monetagPendingSessions.get(id);
+    if (session && (!userId || String(session.userId) === String(userId))) {
+      return { id, session };
+    }
+  }
+
+  if (userId) {
+    for (const [id, session] of monetagPendingSessions.entries()) {
+      if (String(session.userId) === String(userId)) {
+        return { id, session };
+      }
+    }
+  }
+
+  return null;
+}
+
+async function getRecentMonetagReward(userId) {
+  const since = new Date(Date.now() - MONETAG_REWARD_COOLDOWN).toISOString();
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('id, created_at, status, description')
+    .eq('user_id', userId)
+    .eq('type', 'monetag_reward')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (error) throw error;
+  return Array.isArray(data) && data.length ? data[0] : null;
+}
+
+function buildMonetagRewardResult(reward) {
+  return {
+    key: reward.key,
+    label: reward.label,
+    cash: number(reward.cash),
+    spins: number(reward.spins)
+  };
+}
 
 
 // ======================================================
@@ -9574,160 +9893,6 @@ async function finalizeTapRushWeek(competition) {
 }
 
 
-
-
-// ======================================================
-// ADSGRAM WATCH-AND-WIN REWARD
-// ======================================================
-// The AdsGram Reward block is client-side rewarded. AdsGram's
-// Reward show() promise resolves for a rewarded ad after it is
-// watched to the end. The server then chooses the prize so the
-// browser cannot choose a cash amount or free-spin count.
-//
-// IMPORTANT: Because no AdsGram Reward URL was configured, this
-// endpoint is protected by login + server-side cooldown and an
-// audit transaction. For a stronger server-to-server verification
-// layer later, add the optional AdsGram Reward URL and we can add
-// that confirmation path without changing the UI.
-// ======================================================
-
-app.post(
-  '/api/adsgram/reward',
-  requireLogin,
-  async (req, res) => {
-
-    const user = req.user;
-    const lockKey = String(user.id);
-
-    if (adsgramRewardLocks.has(lockKey)) {
-      return res.status(429).json({
-        success: false,
-        message: 'Your previous ad reward is still being processed.'
-      });
-    }
-
-    adsgramRewardLocks.add(lockKey);
-
-    try {
-
-      // --------------------------------------------------
-      // SERVER-SIDE COOLDOWN
-      // --------------------------------------------------
-      // Every completed ad gets an audit transaction, even if
-      // the prize is "Try Again". That gives us a reliable
-      // server-side timestamp without adding another users column.
-      // --------------------------------------------------
-
-      const { data: recentReward, error: recentRewardError } =
-        await supabase
-          .from('transactions')
-          .select('id,created_at')
-          .eq('user_id', user.id)
-          .eq('type', 'adsgram_reward')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-      if (recentRewardError) {
-        throw recentRewardError;
-      }
-
-      if (recentReward?.created_at) {
-        const lastRewardAt =
-          new Date(recentReward.created_at).getTime();
-
-        if (Number.isFinite(lastRewardAt)) {
-          const elapsed = Date.now() - lastRewardAt;
-
-          if (elapsed < ADSGRAM_REWARD_COOLDOWN_MS) {
-            const remainingSeconds = Math.ceil(
-              (ADSGRAM_REWARD_COOLDOWN_MS - elapsed) / 1000
-            );
-
-            return res.status(429).json({
-              success: false,
-              code: 'AD_COOLDOWN',
-              message:
-                `Please wait ${remainingSeconds} seconds before watching another rewarded ad.`
-            });
-          }
-        }
-      }
-
-      // --------------------------------------------------
-      // CHOOSE THE PRIZE ON THE SERVER
-      // --------------------------------------------------
-
-      const reward = selectAdsgramReward();
-
-      // --------------------------------------------------
-      // APPLY REWARD
-      // --------------------------------------------------
-
-      if (reward.type === 'cash' && reward.amount > 0) {
-        user.withdrawableBalance =
-          getWithdrawableBalance(user) + reward.amount;
-      }
-
-      if (reward.type === 'freespins' && reward.freeSpins > 0) {
-        user.freeSpins =
-          number(user.freeSpins) + reward.freeSpins;
-      }
-
-      syncUserBalance(user);
-      await updateUser(user);
-
-      // --------------------------------------------------
-      // AUDIT TRANSACTION
-      // --------------------------------------------------
-
-      const transaction = await addTransaction(user.id, {
-        id: generateTransactionId('tx_adsgram_reward'),
-        type: 'adsgram_reward',
-        description:
-          `AdsGram Watch & Win — ${reward.label}`,
-        amount: reward.amount,
-        currency: 'NGN',
-        status: 'completed',
-        bank: 'PAYME Wallet'
-      });
-
-      return res.json({
-        success: true,
-        prize: {
-          id: reward.id,
-          type: reward.type,
-          amount: reward.amount,
-          freeSpins: reward.freeSpins,
-          label: reward.label
-        },
-        user: {
-          balance: user.balance,
-          depositBalance: user.depositBalance,
-          withdrawableBalance: user.withdrawableBalance,
-          freeSpins: user.freeSpins
-        },
-        transactionId: transaction.id
-      });
-
-    } catch (error) {
-
-      console.error(
-        'AdsGram reward processing error:',
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message: 'Unable to process your ad reward right now.'
-      });
-
-    } finally {
-      adsgramRewardLocks.delete(lockKey);
-    }
-
-  }
-);
 
 // ======================================================
 // START SERVER
