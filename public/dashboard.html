@@ -2977,6 +2977,11 @@ function updateMonetagCooldownUI(){
         monetagCooldownTimer = setTimeout(updateMonetagCooldownUI, 250);
     }else{
         localStorage.removeItem(MONETAG_COOLDOWN_KEY);
+        if(monetagCooldownTimer){ clearTimeout(monetagCooldownTimer); monetagCooldownTimer = null; }
+        // Explicitly clear the disabled state (and its grey styling, which
+        // is driven off :disabled in CSS) rather than relying only on the
+        // fact that remaining hit 0 — this is what actually restores the
+        // icon's color once the 30s cooldown is over.
         button.disabled = false;
         button.title = "Watch ad and get a reward";
         if(hint) hint.textContent = "Click here";
@@ -3122,6 +3127,7 @@ function runMonetagRewardReel(result){
         const itemWidth = 112;
         const gap = 10;
         const step = itemWidth + gap;
+        const trackPadding = 20; // matches .monetag-reel-track's "padding:0 20px"
         const windowEl = wrap.querySelector(".monetag-reel-window");
         const centerOffset = (windowEl?.clientWidth || 300) / 2;
 
@@ -3130,7 +3136,10 @@ function runMonetagRewardReel(result){
         // multiple of 9 away from resultIndex. 27 is the highest such
         // multiple that still leaves every stop within the 40-item track.
         const targetIndex = 27 + resultIndex;
-        const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2);
+        // Items are offset by the track's own left padding, so that has to
+        // be subtracted too or the reel stops ~20px short and the pointer
+        // lands on the wrong item relative to the actual server reward.
+        const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2) - trackPadding;
 
         wrap.style.display = "block";
         wrap.classList.add("show");
@@ -4080,9 +4089,24 @@ function isReturningFromFreeSpin(){
 }
 
 function findTutorialTarget(selector){
-    const el = document.getElementById(selector);
-    if(el) return el;
-    return document.querySelector(selector);
+    const byId = document.getElementById(selector);
+    if(byId) return byId;
+
+    /* Some nav links (Earn, Refer, Ranking) exist twice in the DOM —
+       once in the hidden .desktop-nav list and once in the visible
+       .mobile-nav bar. querySelector() alone always returns the first
+       match in document order, which is the hidden desktop-nav copy,
+       so its zero-size rect broke the spotlight/card positioning for
+       those three steps. Walk every match and use the first one that
+       is actually visible on screen. */
+    const candidates = document.querySelectorAll(selector);
+    for(const candidate of candidates){
+        const rect = candidate.getBoundingClientRect();
+        if(rect.width > 0 && rect.height > 0 && candidate.offsetParent !== null){
+            return candidate;
+        }
+    }
+    return candidates[0] || null;
 }
 
 function positionDashboardTutorial(){
@@ -5114,6 +5138,24 @@ function txIsTapRush(tx){
   return /(tap[\s_-]*rush|taprush)/.test(text);
 }
 
+/* Watching a rewarded ad (the "ads spin") can pay out cash, free spins,
+   or nothing ("Try Again"). Only a cash payout should ever show up as a
+   transaction — a "nothing" result isn't a transaction at all, and free
+   spins are tracked as spins, not money, so neither should appear in the
+   transactions modal. */
+function txIsNonCashAdSpinReward(tx){
+  const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""}`.toLowerCase();
+  const looksLikeAdSpin = /(monetag|rewarded[\s_-]*ad|watch[\s_-]*ad|ads?[\s_-]*spin|sponsored[\s_-]*ad)/.test(text);
+  const looksLikeTryAgain = /try[\s_-]*again/.test(text);
+  const looksLikeFreeSpin = /free[\s_-]*spins?/.test(text);
+  const amount = Number(tx.amount ?? tx.value ?? tx.total ?? tx.cash ?? 0);
+
+  if(looksLikeTryAgain && amount === 0) return true;
+  if(looksLikeAdSpin && amount === 0) return true;
+  if(looksLikeAdSpin && looksLikeFreeSpin && amount === 0) return true;
+  return false;
+}
+
 function txTitle(tx){
   const raw = String(tx.type || tx.description || tx.reason || "Transaction");
   const lower = raw.toLowerCase();
@@ -5175,16 +5217,19 @@ function txDate(tx){
 function renderTransactionRows(serverRows){
   const localRows = getTapRushLocalTransactions();
 
-  const normalizedServer = (Array.isArray(serverRows) ? serverRows : []).map((tx,i)=>({
-    ...tx,
-    __source:"server",
-    __time:txTimestamp(tx),
-    __amount:Number(tx.amount || tx.value || tx.total || 0)
-  }));
+  const normalizedServer = (Array.isArray(serverRows) ? serverRows : [])
+    .filter(tx=>!txIsNonCashAdSpinReward(tx))
+    .map((tx,i)=>({
+      ...tx,
+      __source:"server",
+      __time:txTimestamp(tx),
+      __amount:Number(tx.amount || tx.value || tx.total || 0)
+    }));
 
   const merged = [...normalizedServer];
 
   localRows.forEach(local=>{
+    if(txIsNonCashAdSpinReward(local)) return;
     const amount = Number(local.amount || 0);
     const time = txTimestamp(local);
     const duplicate = normalizedServer.some(server=>{
@@ -5349,6 +5394,14 @@ const DASHBOARD_REFRESH_COOLDOWN_MS = 3000;
 let lastDashboardRefresh = Date.now();
 
 function refreshDashboardOnReturn(){
+    // This re-sync is local only (reads the cooldown timestamp already in
+    // localStorage) — no network call, so it never adds egress. It exists
+    // because the app runs inside the Telegram WebView, which can pause
+    // timers while backgrounded; without this, the 30s ad-icon cooldown
+    // could still be counted down in the background but the button would
+    // stay visually grey until something else happened to re-render it.
+    updateMonetagCooldownUI();
+
     const now = Date.now();
     if(now - lastDashboardRefresh < DASHBOARD_REFRESH_COOLDOWN_MS) return;
     lastDashboardRefresh = now;
