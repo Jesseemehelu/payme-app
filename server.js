@@ -167,17 +167,30 @@ const MONETAG_REWARD_SLOTS = [
 ];
 
 // Reward table for the game page's "Watch Ad" free-spin fraction reward.
-// 100,000 secure-random slots. 0.02 and 0.05 are deliberately the two
-// overwhelmingly common outcomes; every tier above that gets rarer very
-// fast, and a full 1 Free Spin is an extremely rare outcome.
+// 100,000 secure-random slots. 0.05 is deliberately the overwhelmingly
+// common outcome; every tier above that gets rarer very fast, and the top
+// tiers (1 and especially 2 Free Spins) are made extremely hard to hit.
 const GAME_FREESPIN_AD_REWARD_SLOTS = [
-  { max: 62000, key: 'fs_002', label: '0.02 Free Spin', cash: 0, spins: 0.02 },
-  { max: 92000, key: 'fs_005', label: '0.05 Free Spin', cash: 0, spins: 0.05 },
-  { max: 98000, key: 'fs_01',  label: '0.1 Free Spin',  cash: 0, spins: 0.1 },
-  { max: 99500, key: 'fs_015', label: '0.15 Free Spin', cash: 0, spins: 0.15 },
-  { max: 99900, key: 'fs_02',  label: '0.2 Free Spin',  cash: 0, spins: 0.2 },
-  { max: 99990, key: 'fs_05',  label: '0.5 Free Spin',  cash: 0, spins: 0.5 },
-  { max: 100000,key: 'fs_1',   label: '1 Free Spin',    cash: 0, spins: 1 }
+  { max: 65000, key: 'fs_005', label: '0.05 Free Spin', cash: 0, spins: 0.05 },
+  { max: 90000, key: 'fs_01',  label: '0.1 Free Spin',  cash: 0, spins: 0.1 },
+  { max: 97000, key: 'fs_02',  label: '0.2 Free Spin',  cash: 0, spins: 0.2 },
+  { max: 99500, key: 'fs_05',  label: '0.5 Free Spin',  cash: 0, spins: 0.5 },
+  { max: 99900, key: 'fs_1',   label: '1 Free Spin',    cash: 0, spins: 1 },
+  { max: 100000,key: 'fs_2',   label: '2 Free Spins',   cash: 0, spins: 2 }
+];
+
+// Reward table for the Earn page's "Watch Ads & Earn" button. Same cash
+// tiers/labels as the dashboard reel, but skewed far more aggressively
+// toward "Try Again" — the higher cash tiers are made deliberately,
+// extremely rare so meaningfully high payouts are a near-never event.
+const EARN_WATCH_AD_REWARD_SLOTS = [
+  { max: 95000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  { max: 99000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
+  { max: 99700, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
+  { max: 99920, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
+  { max: 99980, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
+  { max: 99997, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
+  { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
 ];
 
 // userId -> pending watch session
@@ -1656,8 +1669,11 @@ app.post('/api/monetag/start', requireLogin, async (req, res) => {
       });
     }
 
-    const context = String(req.body?.context || 'dashboard').trim() === 'game_free_spin'
+    const rawContext = String(req.body?.context || 'dashboard').trim();
+    const context = rawContext === 'game_free_spin'
       ? 'game_free_spin'
+      : rawContext === 'earn_watch_ad'
+      ? 'earn_watch_ad'
       : 'dashboard';
 
     const sessionId = `monetag_${Date.now().toString(36)}_${crypto.randomBytes(12).toString('hex')}`;
@@ -1728,7 +1744,7 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
     if (Array.isArray(data) && data.length) {
       const tx = data[0];
       const description = String(tx.description || 'Monetag Reward');
-      const label = description.replace(/^(Monetag Reward|Watch Ad Free Spin)\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
+      const label = description.replace(/^(Monetag Reward|Watch Ad Free Spin|Earn Watch Ad Reward)\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
       let spins = 0;
       const spinMatch = label.match(/([\d.]+)\s*Free Spins?/i);
       if (spinMatch) spins = Number(spinMatch[1]) || 0;
@@ -1849,8 +1865,11 @@ app.all('/api/monetag/postback', async (req, res) => {
     // Server-side reward selection. The browser never decides which reward
     // is won. The context (dashboard cash reel vs. game free-spin reel)
     // comes from the pending session created when the ad was requested.
-    const adContext = pending && pending.session && pending.session.context === 'game_free_spin'
+    const pendingContext = pending && pending.session && pending.session.context;
+    const adContext = pendingContext === 'game_free_spin'
       ? 'game_free_spin'
+      : pendingContext === 'earn_watch_ad'
+      ? 'earn_watch_ad'
       : 'dashboard';
     const reward = chooseMonetagReward(adContext);
     const rewardResult = buildMonetagRewardResult(reward);
@@ -1862,6 +1881,8 @@ app.all('/api/monetag/postback', async (req, res) => {
       type: 'monetag_reward',
       description: adContext === 'game_free_spin'
         ? `Watch Ad Free Spin — ${rewardResult.label}`
+        : adContext === 'earn_watch_ad'
+        ? `Earn Watch Ad Reward — ${rewardResult.label}`
         : `Monetag Reward — ${rewardResult.label}`,
       amount: rewardResult.cash,
       currency: 'NGN',
@@ -1939,7 +1960,11 @@ function normalizeMonetagTelegramId(value) {
 }
 
 function chooseMonetagReward(context) {
-  const table = context === 'game_free_spin' ? GAME_FREESPIN_AD_REWARD_SLOTS : MONETAG_REWARD_SLOTS;
+  const table = context === 'game_free_spin'
+    ? GAME_FREESPIN_AD_REWARD_SLOTS
+    : context === 'earn_watch_ad'
+    ? EARN_WATCH_AD_REWARD_SLOTS
+    : MONETAG_REWARD_SLOTS;
   const roll = crypto.randomInt(0, 100000) + 1;
   for (const reward of table) {
     if (roll <= reward.max) {

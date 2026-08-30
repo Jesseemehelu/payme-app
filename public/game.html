@@ -163,6 +163,42 @@ header {
   align-items: center;
 }
 
+.free-spin-balance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 12px;
+
+  border-radius: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(168,85,247,.20),
+      rgba(236,72,153,.10)
+    );
+
+  border: 1px solid rgba(236,72,153,.28);
+
+  box-shadow:
+    0 0 20px rgba(168,85,247,.10),
+    inset 0 1px rgba(255,255,255,.08);
+}
+
+.free-spin-balance-icon {
+  font-size: .82rem;
+  line-height: 1;
+}
+
+.free-spin-balance-value {
+  color: #f0abfc;
+  font-size: .80rem;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+
 .balance-badge {
   min-width: 108px;
 
@@ -638,15 +674,16 @@ canvas.spinning {
 
 .ad-spin-btn {
   width: 100%;
-  min-height: 54px;
+  min-height: 46px;
   position: relative;
   overflow: hidden;
 
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-bottom: 3px solid rgba(76,29,149,.75);
+  border-radius: 16px;
 
   color: #fff;
-  font-size: .88rem;
+  font-size: .80rem;
   font-weight: 900;
   letter-spacing: -.01em;
   cursor: pointer;
@@ -654,28 +691,37 @@ canvas.spinning {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
 
   background:
     linear-gradient(
-      135deg,
-      #7c3aed,
-      #a855f7 45%,
-      #ec4899
+      160deg,
+      #9152f5 0%,
+      #7c3aed 42%,
+      #a855f7 70%,
+      #ec4899 100%
     );
 
   box-shadow:
     0 0 0 0 rgba(236,72,153,.55),
-    0 14px 28px rgba(124,58,237,.30),
-    inset 0 1px rgba(255,255,255,.25);
+    0 8px 0 rgba(76,29,149,.55),
+    0 12px 22px rgba(124,58,237,.35),
+    inset 0 1px rgba(255,255,255,.35),
+    inset 0 -6px 10px rgba(76,29,149,.25);
 
   animation: adSpinGlow 1.8s ease-in-out infinite;
 
-  transition: transform .16s ease, filter .16s ease;
+  transition: transform .12s ease, box-shadow .12s ease, filter .16s ease;
 }
 
 .ad-spin-btn:active {
-  transform: translateY(2px) scale(.985);
+  transform: translateY(4px) scale(.98);
+  box-shadow:
+    0 0 0 0 rgba(236,72,153,.45),
+    0 2px 0 rgba(76,29,149,.55),
+    0 4px 10px rgba(124,58,237,.30),
+    inset 0 1px rgba(255,255,255,.3),
+    inset 0 -4px 8px rgba(76,29,149,.25);
 }
 
 .ad-spin-btn:disabled {
@@ -688,20 +734,24 @@ canvas.spinning {
   0%, 100% {
     box-shadow:
       0 0 0 0 rgba(236,72,153,.45),
-      0 14px 28px rgba(124,58,237,.30),
-      inset 0 1px rgba(255,255,255,.25);
+      0 8px 0 rgba(76,29,149,.55),
+      0 12px 22px rgba(124,58,237,.35),
+      inset 0 1px rgba(255,255,255,.35),
+      inset 0 -6px 10px rgba(76,29,149,.25);
   }
   50% {
     box-shadow:
-      0 0 0 9px rgba(236,72,153,0),
-      0 14px 34px rgba(236,72,153,.42),
-      inset 0 1px rgba(255,255,255,.3);
+      0 0 0 7px rgba(236,72,153,0),
+      0 8px 0 rgba(76,29,149,.55),
+      0 12px 28px rgba(236,72,153,.45),
+      inset 0 1px rgba(255,255,255,.4),
+      inset 0 -6px 10px rgba(76,29,149,.25);
   }
 }
 
 .ad-spin-play-icon {
-  width: 19px;
-  height: 19px;
+  width: 16px;
+  height: 16px;
   flex: 0 0 auto;
 }
 
@@ -731,6 +781,73 @@ canvas.spinning {
   color: #94a3b8;
   font-size: .74rem;
   line-height: 1.55;
+}
+
+.ad-spin-rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ad-spin-reward-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 9px 4px;
+  border-radius: 13px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.ad-spin-reward-chip-amt {
+  font-size: .92rem;
+  font-weight: 900;
+  color: #f1f5f9;
+}
+
+.ad-spin-reward-chip-amt::after {
+  content: " spins";
+  font-size: .58rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.ad-spin-reward-chip-tag {
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.ad-spin-reward-chip.rare {
+  background: rgba(56,189,248,.10);
+  border-color: rgba(56,189,248,.30);
+}
+
+.ad-spin-reward-chip.rare .ad-spin-reward-chip-tag {
+  color: #7dd3fc;
+}
+
+.ad-spin-reward-chip.epic {
+  background: rgba(168,85,247,.12);
+  border-color: rgba(168,85,247,.35);
+}
+
+.ad-spin-reward-chip.epic .ad-spin-reward-chip-tag {
+  color: #c4b5fd;
+}
+
+.ad-spin-reward-chip.legendary {
+  background: linear-gradient(135deg, rgba(251,191,36,.16), rgba(236,72,153,.14));
+  border-color: rgba(251,191,36,.4);
+}
+
+.ad-spin-reward-chip.legendary .ad-spin-reward-chip-tag {
+  color: #fbbf24;
 }
 
 .ad-spin-view-btn {
@@ -1803,6 +1920,10 @@ canvas.spinning {
   .spin-btn {
     min-height: 57px;
   }
+
+  .ad-spin-btn {
+    min-height: 44px;
+  }
 }
 
 /* =========================
@@ -1830,6 +1951,11 @@ canvas.spinning {
   <a href="/dashboard.html" class="back-btn">
     ‹ Dashboard
   </a>
+
+  <div class="free-spin-balance" id="freeSpinBalance">
+    <span class="free-spin-balance-icon">🎟️</span>
+    <span class="free-spin-balance-value" id="freeSpinBalanceValue">0.00</span>
+  </div>
 
   <div class="header-right">
     <div class="balance-badge" id="headerBalance">
@@ -1933,7 +2059,7 @@ canvas.spinning {
 
   <div class="ad-spin-promo">
     <div class="ad-spin-hint">
-      Get free spins
+      Free spins are waiting
       <span class="ad-spin-hint-arrow">↓</span>
     </div>
 
@@ -1954,7 +2080,7 @@ canvas.spinning {
         <path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/>
       </svg>
 
-      <span>Watch Ad &amp; Spin</span>
+      <span>🎁 Watch Ad, Claim Free Spins</span>
 
     </button>
   </div>
@@ -2306,12 +2432,46 @@ canvas.spinning {
     <div class="ad-spin-icon" id="adSpinIcon">🎬</div>
 
     <div class="ad-spin-title" id="adSpinTitle">
-      Get Up to 1 Free Spin per Ad
+      Watch &amp; Unlock Free Spins!
     </div>
 
     <div class="ad-spin-subtitle" id="adSpinSubtitle">
-      Watch a short sponsored ad. Your reward is picked securely by the
-      server right after the ad finishes.
+      One quick ad stands between you and a free spin on the wheel.
+      Watch now and see what you land on!
+    </div>
+
+    <div class="ad-spin-rewards-grid" id="adSpinRewardsGrid">
+
+      <div class="ad-spin-reward-chip">
+        <span class="ad-spin-reward-chip-amt">0.05</span>
+        <span class="ad-spin-reward-chip-tag">Common</span>
+      </div>
+
+      <div class="ad-spin-reward-chip">
+        <span class="ad-spin-reward-chip-amt">0.1</span>
+        <span class="ad-spin-reward-chip-tag">Common</span>
+      </div>
+
+      <div class="ad-spin-reward-chip">
+        <span class="ad-spin-reward-chip-amt">0.2</span>
+        <span class="ad-spin-reward-chip-tag">Uncommon</span>
+      </div>
+
+      <div class="ad-spin-reward-chip rare">
+        <span class="ad-spin-reward-chip-amt">0.5</span>
+        <span class="ad-spin-reward-chip-tag">Rare</span>
+      </div>
+
+      <div class="ad-spin-reward-chip epic">
+        <span class="ad-spin-reward-chip-amt">1</span>
+        <span class="ad-spin-reward-chip-tag">Super Rare</span>
+      </div>
+
+      <div class="ad-spin-reward-chip legendary">
+        <span class="ad-spin-reward-chip-amt">2</span>
+        <span class="ad-spin-reward-chip-tag">Jackpot</span>
+      </div>
+
     </div>
 
     <div class="ad-spin-reel-wrap" id="adSpinReelWrap">
@@ -2910,6 +3070,27 @@ function drawWheel(angle = 0) {
    BUTTON STATE
 ========================================= */
 
+function updateFreeSpinBalanceDisplay() {
+
+  const el =
+    document.getElementById('freeSpinBalanceValue');
+
+  if (!el) return;
+
+  el.innerText =
+    Number(
+      userFreeSpins || 0
+    ).toLocaleString(
+      undefined,
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
+
+}
+
+
 function updateSpinButtonState() {
 
   const btn =
@@ -2920,6 +3101,9 @@ function updateSpinButtonState() {
 
   const freePill =
     document.getElementById('freeSpinPill');
+
+
+  updateFreeSpinBalanceDisplay();
 
 
   if (userFreeSpins >= 1) {
@@ -3415,23 +3599,21 @@ const AD_SPIN_COOLDOWN_MS = 30 * 1000;
 // Mirrors the server's GAME_FREESPIN_AD_REWARD_SLOTS order exactly, so the
 // reel always has the correct item to land on.
 const AD_SPIN_REEL_ITEMS = [
-  { icon: '🎟️', label: '0.02' },
   { icon: '🎟️', label: '0.05' },
   { icon: '🎟️', label: '0.1' },
-  { icon: '🎟️', label: '0.15' },
   { icon: '🎟️', label: '0.2' },
-  { icon: '🎟️', label: '0.5' },
-  { icon: '🏆', label: '1 SPIN' }
+  { icon: '🎖️', label: '0.5' },
+  { icon: '🏆', label: '1 SPIN' },
+  { icon: '💎', label: '2 SPINS' }
 ];
 
 function adSpinRewardIndex(spins) {
   const s = Number(spins || 0);
-  if (s >= 1) return 6;
-  if (s >= 0.5) return 5;
-  if (s >= 0.2) return 4;
-  if (s >= 0.15) return 3;
-  if (s >= 0.1) return 2;
-  if (s >= 0.05) return 1;
+  if (s >= 2) return 5;
+  if (s >= 1) return 4;
+  if (s >= 0.5) return 3;
+  if (s >= 0.2) return 2;
+  if (s >= 0.1) return 1;
   return 0;
 }
 
@@ -3485,15 +3667,17 @@ function resetAdSpinModal() {
   const result = document.getElementById('adSpinResult');
   const done = document.getElementById('adSpinDoneBtn');
   const reel = document.getElementById('adSpinReelWrap');
+  const rewardsGrid = document.getElementById('adSpinRewardsGrid');
 
-  if (title) title.textContent = 'Get Up to 1 Free Spin per Ad';
-  if (subtitle) subtitle.textContent = 'Watch a short sponsored ad. Your reward is picked securely by the server right after the ad finishes.';
+  if (title) title.textContent = 'Watch & Unlock Free Spins!';
+  if (subtitle) subtitle.textContent = 'One quick ad stands between you and a free spin on the wheel. Watch now and see what you land on!';
   if (icon) icon.textContent = '🎬';
   if (viewBtn) { viewBtn.style.display = 'block'; viewBtn.textContent = '▶ View Ad'; }
   if (status) status.textContent = '';
   if (result) result.classList.remove('show');
   if (done) done.classList.remove('show');
   if (reel) { reel.classList.remove('show', 'landed'); reel.style.display = 'none'; }
+  if (rewardsGrid) rewardsGrid.style.display = 'grid';
 
   buildAdSpinReel();
   updateAdSpinCooldownUI();
@@ -3574,9 +3758,10 @@ function runAdSpinReel(spins) {
     const windowEl = wrap.querySelector('.ad-spin-reel-window');
     const centerOffset = (windowEl?.clientWidth || 280) / 2;
 
-    // AD_SPIN_REEL_ITEMS repeats every 7 items — land on a multiple of 7
+    // AD_SPIN_REEL_ITEMS repeats every N items — land on a multiple of N
     // away from resultIndex so the pointer always matches the real reward.
-    const targetIndex = 21 + resultIndex;
+    const cycleLen = AD_SPIN_REEL_ITEMS.length;
+    const targetIndex = (cycleLen * 3) + resultIndex;
     const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2) - trackPadding;
 
     wrap.style.display = 'block';
@@ -3610,19 +3795,21 @@ function showAdSpinResult(spins) {
   const resultLabel = document.getElementById('adSpinResultLabel');
   const resultCopy = document.getElementById('adSpinResultCopy');
   const done = document.getElementById('adSpinDoneBtn');
+  const rewardsGrid = document.getElementById('adSpinRewardsGrid');
 
-  if (title) title.textContent = '🎉 Reward revealed!';
-  if (subtitle) subtitle.textContent = 'Your reward has been confirmed and added to your account.';
+  if (title) title.textContent = '🎉 You won!';
+  if (subtitle) subtitle.textContent = 'Nice! Come back soon for another shot at even bigger free spins.';
   if (icon) icon.textContent = '🎉';
   if (viewBtn) viewBtn.style.display = 'none';
   if (status) status.textContent = '';
+  if (rewardsGrid) rewardsGrid.style.display = 'none';
 
   if (resultIcon) resultIcon.textContent = spins > 0 ? '🎟️' : '🔄';
   if (resultLabel) resultLabel.textContent = spins > 0 ? `${spins} Free Spin` : 'Try Again';
   if (resultCopy) {
     resultCopy.textContent = spins > 0
-      ? `${spins} free spin has been added to your account.`
-      : 'No free spin was awarded this time.';
+      ? `${spins} free spin has been added to your account. Keep watching to grow your streak!`
+      : 'Almost! Watch another ad for another shot at free spins.';
   }
 
   if (resultBox) resultBox.classList.add('show');
@@ -3649,7 +3836,7 @@ async function watchAdForFreeSpin() {
     }
 
     if (btn) btn.textContent = 'Opening ad…';
-    if (status) status.textContent = 'Please complete the ad. The server will decide your reward.';
+    if (status) status.textContent = 'Stick with it — your free spin reward unlocks right after!';
 
     await window.show_11688228({
       type: 'end',
