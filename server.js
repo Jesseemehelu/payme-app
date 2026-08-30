@@ -152,23 +152,32 @@ const MONETAG_POSTBACK_PATH = '/api/monetag/postback';
 const MONETAG_SESSION_TTL = 10 * 60 * 1000;
 const MONETAG_REWARD_COOLDOWN = 30 * 1000;
 
-// Reward table. 10,000 secure-random slots are used server-side.
-// Higher rewards are intentionally rare.
+// Reward table. 100,000 secure-random slots are used server-side.
+// No free-spin rewards come from this reel anymore — cash only.
+// Higher cash tiers are intentionally made extremely rare so the vast
+// majority of plays land on "Try Again" or the smallest cash amount.
 const MONETAG_REWARD_SLOTS = [
-  // 100,000 cryptographically-random slots. Cash prizes and the larger
-  // free-spin bundles are deliberately very rare. The 0.2 Free Spin
-  // reward is intentionally very common (the single highest-odds
-  // outcome) — it is carved out of what used to be "Try Again" share;
-  // every other reward below keeps its original odds/width unchanged.
-  { max: 35000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
-  { max: 85000, key: 'spin_0_2',  label: '0.2 Free Spin',  cash: 0,   spins: 0.2 },
-  { max: 93000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
-  { max: 98000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
-  { max: 99500, key: 'spin_1',    label: '1 Free Spin',     cash: 0,   spins: 1 },
-  { max: 99950, key: 'spin_2',    label: '2 Free Spins',    cash: 0,   spins: 2 },
-  { max: 99990, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
-  { max: 99999, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
+  { max: 78000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  { max: 96000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
+  { max: 99000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
+  { max: 99700, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
+  { max: 99930, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
+  { max: 99985, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
   { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
+];
+
+// Reward table for the game page's "Watch Ad" free-spin fraction reward.
+// 100,000 secure-random slots. 0.02 and 0.05 are deliberately the two
+// overwhelmingly common outcomes; every tier above that gets rarer very
+// fast, and a full 1 Free Spin is an extremely rare outcome.
+const GAME_FREESPIN_AD_REWARD_SLOTS = [
+  { max: 62000, key: 'fs_002', label: '0.02 Free Spin', cash: 0, spins: 0.02 },
+  { max: 92000, key: 'fs_005', label: '0.05 Free Spin', cash: 0, spins: 0.05 },
+  { max: 98000, key: 'fs_01',  label: '0.1 Free Spin',  cash: 0, spins: 0.1 },
+  { max: 99500, key: 'fs_015', label: '0.15 Free Spin', cash: 0, spins: 0.15 },
+  { max: 99900, key: 'fs_02',  label: '0.2 Free Spin',  cash: 0, spins: 0.2 },
+  { max: 99990, key: 'fs_05',  label: '0.5 Free Spin',  cash: 0, spins: 0.5 },
+  { max: 100000,key: 'fs_1',   label: '1 Free Spin',    cash: 0, spins: 1 }
 ];
 
 // userId -> pending watch session
@@ -1647,12 +1656,17 @@ app.post('/api/monetag/start', requireLogin, async (req, res) => {
       });
     }
 
+    const context = String(req.body?.context || 'dashboard').trim() === 'game_free_spin'
+      ? 'game_free_spin'
+      : 'dashboard';
+
     const sessionId = `monetag_${Date.now().toString(36)}_${crypto.randomBytes(12).toString('hex')}`;
     const now = Date.now();
 
     monetagPendingSessions.set(sessionId, {
       userId: user.id,
       telegramId: String(user.telegramId || ''),
+      context,
       createdAt: now,
       expiresAt: now + MONETAG_SESSION_TTL
     });
@@ -1714,10 +1728,10 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
     if (Array.isArray(data) && data.length) {
       const tx = data[0];
       const description = String(tx.description || 'Monetag Reward');
-      const label = description.replace(/^Monetag Reward\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
+      const label = description.replace(/^(Monetag Reward|Watch Ad Free Spin)\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
       let spins = 0;
-      if (/2\s*Free Spins/i.test(label)) spins = 2;
-      else if (/1\s*Free Spin/i.test(label)) spins = 1;
+      const spinMatch = label.match(/([\d.]+)\s*Free Spins?/i);
+      if (spinMatch) spins = Number(spinMatch[1]) || 0;
 
       return res.json({
         success: true,
@@ -1833,8 +1847,12 @@ app.all('/api/monetag/postback', async (req, res) => {
     }
 
     // Server-side reward selection. The browser never decides which reward
-    // is won.
-    const reward = chooseMonetagReward();
+    // is won. The context (dashboard cash reel vs. game free-spin reel)
+    // comes from the pending session created when the ad was requested.
+    const adContext = pending && pending.session && pending.session.context === 'game_free_spin'
+      ? 'game_free_spin'
+      : 'dashboard';
+    const reward = chooseMonetagReward(adContext);
     const rewardResult = buildMonetagRewardResult(reward);
 
     // Insert the unique transaction first. The primary/unique transaction ID
@@ -1842,7 +1860,9 @@ app.all('/api/monetag/postback', async (req, res) => {
     await addTransaction(user.id, {
       id: transactionId,
       type: 'monetag_reward',
-      description: `Monetag Reward — ${rewardResult.label}`,
+      description: adContext === 'game_free_spin'
+        ? `Watch Ad Free Spin — ${rewardResult.label}`
+        : `Monetag Reward — ${rewardResult.label}`,
       amount: rewardResult.cash,
       currency: 'NGN',
       status: 'completed',
@@ -1918,14 +1938,15 @@ function normalizeMonetagTelegramId(value) {
   return clean;
 }
 
-function chooseMonetagReward() {
+function chooseMonetagReward(context) {
+  const table = context === 'game_free_spin' ? GAME_FREESPIN_AD_REWARD_SLOTS : MONETAG_REWARD_SLOTS;
   const roll = crypto.randomInt(0, 100000) + 1;
-  for (const reward of MONETAG_REWARD_SLOTS) {
+  for (const reward of table) {
     if (roll <= reward.max) {
       return reward;
     }
   }
-  return MONETAG_REWARD_SLOTS[0];
+  return table[0];
 }
 
 function findMonetagPendingSession({ userId, sessionId, ymid, requestVar }) {
@@ -5924,7 +5945,7 @@ app.post(
       if (
         number(
           user.freeSpins
-        ) > 0
+        ) >= 1
       ) {
 
         user.freeSpins -= 1;
@@ -7654,7 +7675,9 @@ app.post(
         user
       );
 
-      if (justCompletedFreeSpin) {
+      if (
+        Number(recentFreeSpinCompletions.get(String(user.id)) || 0) > Date.now()
+      ) {
         recentFreeSpinCompletions.delete(String(user.id));
       }
 
@@ -9999,6 +10022,7 @@ app.listen(
   }
 
 );
+
 
 
 
