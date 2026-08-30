@@ -135,6 +135,88 @@ const MIN_DEPOSIT_AMOUNT = 200;
 
 const SPIN_COST = 50;
 
+// ======================================================
+// ADSGRAM WATCH-AND-WIN CONFIGURATION
+// ======================================================
+// These are server-side weights. The browser never decides
+// the prize. Total weight = 10,000.
+//
+// Approximate odds:
+// Try Again       92.00%
+// 1 Free Spin      6.00%
+// ₦10              1.80%
+// 3 Free Spins     0.18%
+// ₦100             0.02%
+// ======================================================
+
+const ADSGRAM_BLOCK_ID = '45250';
+const ADSGRAM_REWARD_COOLDOWN_MS = 60 * 1000;
+
+const ADSGRAM_REWARDS = [
+  {
+    id: 'try_again',
+    type: 'none',
+    amount: 0,
+    freeSpins: 0,
+    label: 'Try Again Later',
+    weight: 9200
+  },
+  {
+    id: 'free_spin',
+    type: 'freespins',
+    amount: 0,
+    freeSpins: 1,
+    label: '1 Free Spin',
+    weight: 600
+  },
+  {
+    id: 'cash_10',
+    type: 'cash',
+    amount: 10,
+    freeSpins: 0,
+    label: '₦10',
+    weight: 180
+  },
+  {
+    id: 'free_spins_3',
+    type: 'freespins',
+    amount: 0,
+    freeSpins: 3,
+    label: '3 Free Spins',
+    weight: 18
+  },
+  {
+    id: 'cash_100',
+    type: 'cash',
+    amount: 100,
+    freeSpins: 0,
+    label: '₦100',
+    weight: 2
+  }
+];
+
+const adsgramRewardLocks = new Set();
+
+function selectAdsgramReward() {
+  const totalWeight = ADSGRAM_REWARDS.reduce(
+    (sum, reward) => sum + reward.weight,
+    0
+  );
+
+  const roll = crypto.randomInt(0, totalWeight);
+  let cursor = 0;
+
+  for (const reward of ADSGRAM_REWARDS) {
+    cursor += reward.weight;
+    if (roll < cursor) {
+      return reward;
+    }
+  }
+
+  return ADSGRAM_REWARDS[0];
+}
+
+
 
 // ======================================================
 // LUCKY 3 CONFIGURATION
@@ -9493,6 +9575,160 @@ async function finalizeTapRushWeek(competition) {
 
 
 
+
+// ======================================================
+// ADSGRAM WATCH-AND-WIN REWARD
+// ======================================================
+// The AdsGram Reward block is client-side rewarded. AdsGram's
+// Reward show() promise resolves for a rewarded ad after it is
+// watched to the end. The server then chooses the prize so the
+// browser cannot choose a cash amount or free-spin count.
+//
+// IMPORTANT: Because no AdsGram Reward URL was configured, this
+// endpoint is protected by login + server-side cooldown and an
+// audit transaction. For a stronger server-to-server verification
+// layer later, add the optional AdsGram Reward URL and we can add
+// that confirmation path without changing the UI.
+// ======================================================
+
+app.post(
+  '/api/adsgram/reward',
+  requireLogin,
+  async (req, res) => {
+
+    const user = req.user;
+    const lockKey = String(user.id);
+
+    if (adsgramRewardLocks.has(lockKey)) {
+      return res.status(429).json({
+        success: false,
+        message: 'Your previous ad reward is still being processed.'
+      });
+    }
+
+    adsgramRewardLocks.add(lockKey);
+
+    try {
+
+      // --------------------------------------------------
+      // SERVER-SIDE COOLDOWN
+      // --------------------------------------------------
+      // Every completed ad gets an audit transaction, even if
+      // the prize is "Try Again". That gives us a reliable
+      // server-side timestamp without adding another users column.
+      // --------------------------------------------------
+
+      const { data: recentReward, error: recentRewardError } =
+        await supabase
+          .from('transactions')
+          .select('id,created_at')
+          .eq('user_id', user.id)
+          .eq('type', 'adsgram_reward')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+      if (recentRewardError) {
+        throw recentRewardError;
+      }
+
+      if (recentReward?.created_at) {
+        const lastRewardAt =
+          new Date(recentReward.created_at).getTime();
+
+        if (Number.isFinite(lastRewardAt)) {
+          const elapsed = Date.now() - lastRewardAt;
+
+          if (elapsed < ADSGRAM_REWARD_COOLDOWN_MS) {
+            const remainingSeconds = Math.ceil(
+              (ADSGRAM_REWARD_COOLDOWN_MS - elapsed) / 1000
+            );
+
+            return res.status(429).json({
+              success: false,
+              code: 'AD_COOLDOWN',
+              message:
+                `Please wait ${remainingSeconds} seconds before watching another rewarded ad.`
+            });
+          }
+        }
+      }
+
+      // --------------------------------------------------
+      // CHOOSE THE PRIZE ON THE SERVER
+      // --------------------------------------------------
+
+      const reward = selectAdsgramReward();
+
+      // --------------------------------------------------
+      // APPLY REWARD
+      // --------------------------------------------------
+
+      if (reward.type === 'cash' && reward.amount > 0) {
+        user.withdrawableBalance =
+          getWithdrawableBalance(user) + reward.amount;
+      }
+
+      if (reward.type === 'freespins' && reward.freeSpins > 0) {
+        user.freeSpins =
+          number(user.freeSpins) + reward.freeSpins;
+      }
+
+      syncUserBalance(user);
+      await updateUser(user);
+
+      // --------------------------------------------------
+      // AUDIT TRANSACTION
+      // --------------------------------------------------
+
+      const transaction = await addTransaction(user.id, {
+        id: generateTransactionId('tx_adsgram_reward'),
+        type: 'adsgram_reward',
+        description:
+          `AdsGram Watch & Win — ${reward.label}`,
+        amount: reward.amount,
+        currency: 'NGN',
+        status: 'completed',
+        bank: 'PAYME Wallet'
+      });
+
+      return res.json({
+        success: true,
+        prize: {
+          id: reward.id,
+          type: reward.type,
+          amount: reward.amount,
+          freeSpins: reward.freeSpins,
+          label: reward.label
+        },
+        user: {
+          balance: user.balance,
+          depositBalance: user.depositBalance,
+          withdrawableBalance: user.withdrawableBalance,
+          freeSpins: user.freeSpins
+        },
+        transactionId: transaction.id
+      });
+
+    } catch (error) {
+
+      console.error(
+        'AdsGram reward processing error:',
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: 'Unable to process your ad reward right now.'
+      });
+
+    } finally {
+      adsgramRewardLocks.delete(lockKey);
+    }
+
+  }
+);
+
 // ======================================================
 // START SERVER
 // ======================================================
@@ -9540,6 +9776,7 @@ app.listen(
   }
 
 );
+
 
 
 

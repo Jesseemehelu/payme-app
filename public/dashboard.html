@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
 user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <title>PAYME Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1852,6 +1853,261 @@ transition-duration: 0.01ms !important;
     }
 }
 
+
+
+/* =========================================================
+   ADSGRAM WATCH & WIN
+========================================================= */
+.watch-ad-top-btn{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    min-height:40px;
+    padding:0 13px;
+    border:0;
+    border-radius:14px;
+    color:#fff;
+    background:
+        radial-gradient(circle at 20% 10%,rgba(255,255,255,.35),transparent 35%),
+        linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4);
+    font-size:.67rem;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(37,99,235,.24),inset 0 1px 0 rgba(255,255,255,.35);
+    overflow:hidden;
+    transition:transform .18s ease,box-shadow .18s ease;
+}
+.watch-ad-top-btn::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.35) 50%,transparent 75%);
+    transform:translateX(-120%);
+    animation:watchAdShine 3.2s infinite;
+}
+.watch-ad-top-btn:active{transform:scale(.94)}
+.watch-ad-top-btn:hover{box-shadow:0 12px 28px rgba(37,99,235,.32),inset 0 1px 0 rgba(255,255,255,.4)}
+.watch-ad-icon{
+    position:relative;
+    z-index:2;
+    width:18px;
+    height:18px;
+    display:grid;
+    place-items:center;
+    border-radius:50%;
+    background:rgba(255,255,255,.18);
+    font-size:.55rem;
+}
+.watch-ad-top-btn span:last-child{position:relative;z-index:2}
+@keyframes watchAdShine{
+    0%{transform:translateX(-120%)}
+    35%,100%{transform:translateX(120%)}
+}
+
+.watch-ad-overlay{
+    position:fixed;
+    inset:0;
+    z-index:20000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background:radial-gradient(circle at 50% 20%,rgba(37,99,235,.22),transparent 35%),rgba(3,7,18,.86);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+}
+.watch-ad-overlay.show{display:flex;animation:adOverlayIn .25s ease both}
+.watch-ad-card{
+    position:relative;
+    width:100%;
+    max-width:390px;
+    padding:25px 18px 20px;
+    border-radius:30px;
+    background:radial-gradient(circle at 50% 0%,rgba(99,102,241,.12),transparent 38%),linear-gradient(160deg,#fff,#f8fbff 60%,#f5f3ff);
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 40px 100px rgba(0,0,0,.42),0 0 60px rgba(37,99,235,.15);
+    overflow:hidden;
+    animation:watchCardIn .55s cubic-bezier(.16,1,.3,1) both;
+}
+.watch-ad-close{
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:12px;
+    background:#f1f5f9;
+    color:#64748b;
+    font-size:1.3rem;
+    cursor:pointer;
+    z-index:5;
+}
+.watch-ad-header{text-align:center}
+.watch-ad-orb{
+    width:64px;
+    height:64px;
+    margin:0 auto 11px;
+    display:grid;
+    place-items:center;
+    border-radius:21px;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    font-size:1.8rem;
+    box-shadow:0 15px 30px rgba(37,99,235,.25);
+    animation:adOrbFloat 2.5s ease-in-out infinite;
+}
+.watch-ad-title{
+    font-size:1.35rem;
+    font-weight:900;
+    letter-spacing:-.04em;
+    background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+.watch-ad-subtitle{margin-top:6px;color:#64748b;font-size:.69rem;line-height:1.5}
+.reward-machine{position:relative;margin-top:22px;padding:15px 0 17px}
+.reward-window{
+    position:relative;
+    height:83px;
+    overflow:hidden;
+    border-radius:21px;
+    border:2px solid #dbeafe;
+    background:linear-gradient(135deg,#f8fafc,#eef2ff);
+    box-shadow:inset 0 5px 20px rgba(15,23,42,.05),0 12px 25px rgba(15,23,42,.06);
+}
+.reward-window::before,.reward-window::after{
+    content:"";
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:55px;
+    z-index:3;
+    pointer-events:none;
+}
+.reward-window::before{left:0;background:linear-gradient(90deg,#f3f6fb,transparent)}
+.reward-window::after{right:0;background:linear-gradient(270deg,#f3f6fb,transparent)}
+.reward-track{
+    position:absolute;
+    top:0;
+    left:0;
+    height:100%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 10px;
+    will-change:transform;
+}
+.reward-item{
+    flex:0 0 100px;
+    height:59px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    background:#fff;
+    border:1px solid #e2e8f0;
+    box-shadow:0 6px 15px rgba(15,23,42,.07);
+    font-weight:900;
+    font-size:.67rem;
+    color:#334155;
+    transform:scale(.92);
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+}
+.reward-item strong{font-size:.82rem;white-space:nowrap}
+.reward-item.highlight{
+    transform:scale(1.1);
+    box-shadow:0 12px 30px rgba(37,99,235,.22),0 0 0 3px rgba(37,99,235,.12);
+    border-color:#93c5fd;
+}
+.reward-pointer{
+    position:absolute;
+    left:50%;
+    top:-1px;
+    width:0;
+    height:0;
+    transform:translateX(-50%);
+    z-index:10;
+}
+.pointer-tip{
+    width:0;
+    height:0;
+    border-left:10px solid transparent;
+    border-right:10px solid transparent;
+    border-top:17px solid #ef4444;
+    filter:drop-shadow(0 4px 6px rgba(239,68,68,.3));
+}
+.watch-ad-status{min-height:21px;margin-top:6px;text-align:center;color:#64748b;font-size:.67rem;font-weight:700}
+.watch-ad-main-btn{
+    width:100%;
+    min-height:52px;
+    margin-top:12px;
+    border:0;
+    border-radius:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:#fff;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    font-size:.78rem;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 13px 28px rgba(37,99,235,.25),inset 0 1px 0 rgba(255,255,255,.25);
+    transition:transform .18s ease,opacity .18s ease;
+}
+.watch-ad-main-btn:active{transform:scale(.97)}
+.watch-ad-main-btn:disabled{opacity:.55;cursor:not-allowed}
+.watch-main-icon{width:21px;height:21px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.18);font-size:.55rem}
+.watch-ad-note{margin-top:10px;text-align:center;color:#94a3b8;font-size:.55rem}
+.ad-result-overlay{
+    position:fixed;
+    inset:0;
+    z-index:21000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(3,7,18,.84);
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+}
+.ad-result-overlay.show{display:flex;animation:adOverlayIn .25s ease both}
+.ad-result-card{
+    position:relative;
+    width:100%;
+    max-width:340px;
+    padding:30px 22px 22px;
+    text-align:center;
+    border-radius:30px;
+    background:linear-gradient(145deg,#fff,#f8fbff);
+    box-shadow:0 40px 100px rgba(0,0,0,.45);
+    overflow:hidden;
+    animation:rewardResultPop .55s cubic-bezier(.16,1.3,.3,1) both;
+}
+.ad-result-particles{position:absolute;top:12px;left:0;right:0;color:#7c3aed;font-size:.9rem;letter-spacing:.4em;animation:rewardSparkle 1.5s ease-in-out infinite}
+.ad-result-orb{width:86px;height:86px;margin:0 auto 14px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;font-size:2.2rem;box-shadow:0 17px 38px rgba(16,185,129,.3);animation:rewardOrb .7s cubic-bezier(.16,1.3,.3,1) both}
+.ad-result-amount{font-size:2.05rem;font-weight:900;letter-spacing:-.06em;background:linear-gradient(90deg,#059669,#2563eb);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ad-result-title{margin-top:3px;font-size:1.1rem;font-weight:900}
+.ad-result-text{margin:8px 0 19px;color:#64748b;font-size:.72rem;line-height:1.5}
+.ad-result-close{width:100%;border:0;border-radius:15px;padding:13px;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed);font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 12px 25px rgba(37,99,235,.24)}
+@keyframes adOverlayIn{from{opacity:0}to{opacity:1}}
+@keyframes watchCardIn{from{opacity:0;transform:translateY(25px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes adOrbFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(3deg)}}
+@keyframes rewardResultPop{from{opacity:0;transform:translateY(30px) scale(.75)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes rewardOrb{from{opacity:0;transform:scale(.2) rotate(-25deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes rewardSparkle{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-5px)}}
+@media(max-width:390px){
+    .watch-ad-top-btn{padding:0 10px;gap:5px;font-size:.60rem}
+    .watch-ad-icon{width:16px;height:16px}
+}
+@media(prefers-reduced-motion:reduce){
+    .watch-ad-top-btn::before,.watch-ad-orb,.ad-result-particles,.ad-result-orb{animation:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -1867,6 +2123,16 @@ transition-duration: 0.01ms !important;
 <li><a href="/leaderboard.html">Leaderboard</a></li>
 </ul>
 <div class="header-actions">
+<button
+    id="watchAdTopBtn"
+    class="watch-ad-top-btn"
+    type="button"
+    onclick="openWatchAd()"
+    aria-label="Watch an ad and earn a reward"
+>
+    <span class="watch-ad-icon">▶</span>
+    <span>Watch Ad</span>
+</button>
 <a href="https://wa.me/+2348034399095" target="_blank" class="support-btn"
 title="WhatsApp Support">
 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2414,6 +2680,56 @@ Your free spin will be verified before you enter the game.
 </div>
 </div>
 
+
+<!-- =========================================================
+     ADSGRAM WATCH & WIN MODAL
+========================================================= -->
+<div
+    id="watchAdModal"
+    class="watch-ad-overlay"
+    onclick="if(event.target === this) closeWatchAd()"
+>
+    <div class="watch-ad-card">
+        <button class="watch-ad-close" type="button" onclick="closeWatchAd()" aria-label="Close">×</button>
+
+        <div class="watch-ad-header">
+            <div class="watch-ad-orb">🎁</div>
+            <div class="watch-ad-title">Watch &amp; Win</div>
+            <div class="watch-ad-subtitle">Watch one rewarded ad and reveal your prize.</div>
+        </div>
+
+        <div class="reward-machine">
+            <div class="reward-pointer" aria-hidden="true">
+                <div class="pointer-tip"></div>
+            </div>
+            <div class="reward-window">
+                <div id="rewardTrack" class="reward-track"></div>
+            </div>
+        </div>
+
+        <div id="watchAdStatus" class="watch-ad-status">Tap below to watch your ad.</div>
+
+        <button id="watchAdButton" class="watch-ad-main-btn" type="button" onclick="watchRewardAd()">
+            <span class="watch-main-icon">▶</span>
+            <span id="watchAdButtonText">Watch Ad</span>
+        </button>
+
+        <div class="watch-ad-note">One completed rewarded ad gives one chance.</div>
+    </div>
+</div>
+
+<!-- ADSGRAM REWARD RESULT -->
+<div id="adRewardResult" class="ad-result-overlay">
+    <div class="ad-result-card">
+        <div class="ad-result-particles">✦ ✧ ✦ ✧ ✦</div>
+        <div id="adResultOrb" class="ad-result-orb">🎁</div>
+        <div id="adResultAmount" class="ad-result-amount">₦10</div>
+        <div id="adResultTitle" class="ad-result-title">You Won!</div>
+        <div id="adResultText" class="ad-result-text">Your reward has been added.</div>
+        <button class="ad-result-close" type="button" onclick="closeAdRewardResult()">Awesome!</button>
+    </div>
+</div>
+
 <!-- FLOATING GIFT -->
 <div class="gift-floating-widget"
 id="giftWidget"
@@ -2425,6 +2741,275 @@ onclick="restoreGiftModal()">
 
 <script>
 let currentEarnings = 0;
+
+/* =========================================================
+   ADSGRAM WATCH & WIN
+   Block ID supplied from the AdsGram publisher dashboard.
+========================================================= */
+const ADSGRAM_BLOCK_ID = '45250';
+let adsgramController = null;
+let adsgramRewardInProgress = false;
+
+const ADSGRAM_REWARD_ITEMS = [
+    { id:'try_again', label:'Try Again' },
+    { id:'free_spin', label:'🎰 1 Free Spin' },
+    { id:'cash_10', label:'₦10' },
+    { id:'free_spins_3', label:'🎰 3 Free Spins' },
+    { id:'cash_100', label:'₦100' }
+];
+
+function initAdsgram(){
+    try{
+        if(!window.Adsgram || typeof window.Adsgram.init !== 'function'){
+            console.warn('AdsGram SDK is not available yet.');
+            return;
+        }
+
+        adsgramController = window.Adsgram.init({
+            blockId: ADSGRAM_BLOCK_ID
+        });
+
+    }catch(error){
+        console.error('AdsGram initialization error:', error);
+        adsgramController = null;
+    }
+}
+
+function renderRewardTrack(){
+    const track = document.getElementById('rewardTrack');
+    if(!track) return;
+
+    track.innerHTML = '';
+
+    // Repeating visual strip. The server-selected result determines
+    // where the animation stops; these repeated labels are only UI.
+    const repeated = [];
+    for(let round = 0; round < 14; round++){
+        ADSGRAM_REWARD_ITEMS.forEach(item => repeated.push(item));
+    }
+
+    repeated.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'reward-item';
+        el.dataset.reward = item.id;
+        el.innerHTML = `<strong>${item.label}</strong>`;
+        track.appendChild(el);
+    });
+}
+
+function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function openWatchAd(){
+    const modal = document.getElementById('watchAdModal');
+    if(!modal) return;
+
+    renderRewardTrack();
+
+    const status = document.getElementById('watchAdStatus');
+    const button = document.getElementById('watchAdButton');
+    const buttonText = document.getElementById('watchAdButtonText');
+
+    if(status) status.innerText = 'Tap below to watch your ad.';
+    if(button) button.disabled = false;
+    if(buttonText) buttonText.innerText = 'Watch Ad';
+
+    modal.classList.add('show');
+}
+
+function closeWatchAd(){
+    if(adsgramRewardInProgress) return;
+
+    const modal = document.getElementById('watchAdModal');
+    if(modal) modal.classList.remove('show');
+}
+
+async function watchRewardAd(){
+    if(adsgramRewardInProgress) return;
+
+    if(!adsgramController){
+        initAdsgram();
+    }
+
+    if(!adsgramController){
+        const status = document.getElementById('watchAdStatus');
+        if(status) status.innerText = 'Advertisement is not available right now.';
+        return;
+    }
+
+    const button = document.getElementById('watchAdButton');
+    const buttonText = document.getElementById('watchAdButtonText');
+    const status = document.getElementById('watchAdStatus');
+
+    adsgramRewardInProgress = true;
+    if(button) button.disabled = true;
+    if(buttonText) buttonText.innerText = 'Loading Ad...';
+    if(status) status.innerText = 'Please watch the advertisement completely.';
+
+    try{
+        const result = await adsgramController.show();
+
+        // AdsGram documents that Reward show() resolves when the
+        // rewarded banner is watched to the end. Do not reward on
+        // an error or an incomplete result.
+        if(!result || result.error || result.done === false){
+            throw new Error('The advertisement was not completed.');
+        }
+
+        if(status) status.innerText = 'Ad completed. Revealing your reward...';
+
+        await processAdsgramReward();
+
+    }catch(error){
+        console.error('AdsGram show/reward error:', error);
+
+        if(status){
+            status.innerText =
+                error?.message ||
+                'The ad could not be completed. Please try again later.';
+        }
+
+        if(button) button.disabled = false;
+        if(buttonText) buttonText.innerText = 'Watch Ad';
+        adsgramRewardInProgress = false;
+    }
+}
+
+async function processAdsgramReward(){
+    const status = document.getElementById('watchAdStatus');
+
+    try{
+        const response = await fetch('/api/adsgram/reward', {
+            method:'POST',
+            credentials:'include',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                adsgramBlockId: ADSGRAM_BLOCK_ID
+            })
+        });
+
+        let data = null;
+        try{
+            data = await response.json();
+        }catch(_){
+            data = null;
+        }
+
+        if(!response.ok || !data?.success){
+            throw new Error(
+                data?.message ||
+                'Your reward could not be processed.'
+            );
+        }
+
+        await animateAdsgramReward(data.prize.id);
+
+        // Refresh the dashboard balances after the server has credited
+        // the reward. This is a single request, not polling.
+        await fetchDashboardData(false);
+
+        closeWatchAd();
+        showAdsgramRewardResult(data.prize);
+
+    }catch(error){
+        console.error('AdsGram server reward error:', error);
+
+        if(status){
+            status.innerText =
+                error?.message ||
+                'Unable to process the reward right now.';
+        }
+
+        const button = document.getElementById('watchAdButton');
+        const buttonText = document.getElementById('watchAdButtonText');
+        if(button) button.disabled = false;
+        if(buttonText) buttonText.innerText = 'Watch Ad';
+
+        adsgramRewardInProgress = false;
+        throw error;
+    }
+}
+
+async function animateAdsgramReward(winningId){
+    const track = document.getElementById('rewardTrack');
+    const windowEl = document.querySelector('.reward-window');
+    if(!track || !windowEl) return;
+
+    const items = Array.from(track.querySelectorAll('.reward-item'));
+    const matches = items.filter(item => item.dataset.reward === winningId);
+    if(!matches.length) return;
+
+    // Use a late target so the strip visibly travels left -> right.
+    // Pick a deterministic occurrence of the server-selected prize.
+    const targetIndex = Math.min(57, matches.length - 1);
+    const target = matches[targetIndex];
+
+    const center = windowEl.clientWidth / 2;
+    const targetCenter = target.offsetLeft + (target.offsetWidth / 2);
+    const finalX = center - targetCenter;
+
+    // Start well to the left, then travel rightward under the fixed
+    // pointer. This gives the requested left-to-right prize movement.
+    const startX = finalX - (2400 + Math.floor(Math.random() * 700));
+
+    track.style.transition = 'none';
+    track.style.transform = `translateX(${startX}px)`;
+
+    await sleep(80);
+
+    // Fast start + long deceleration creates the slot-machine feel.
+    track.style.transition = 'transform 4.8s cubic-bezier(.08,.72,.16,1)';
+    track.style.transform = `translateX(${finalX}px)`;
+
+    await sleep(4850);
+
+    target.classList.add('highlight');
+    await sleep(550);
+}
+
+function showAdsgramRewardResult(prize){
+    const overlay = document.getElementById('adRewardResult');
+    const amount = document.getElementById('adResultAmount');
+    const title = document.getElementById('adResultTitle');
+    const text = document.getElementById('adResultText');
+    const orb = document.getElementById('adResultOrb');
+
+    if(!overlay) return;
+
+    if(prize.type === 'cash'){
+        amount.innerText = `₦${Number(prize.amount || 0).toLocaleString()}`;
+        title.innerText = 'You Won! 🎉';
+        text.innerText = 'Your cash reward has been added to your earnings balance.';
+        orb.innerText = '💰';
+    }else if(prize.type === 'freespins'){
+        const count = Number(prize.freeSpins || 0);
+        amount.innerText = `+${count}`;
+        title.innerText = count === 1 ? 'Free Spin! 🎰' : 'Free Spins! 🎰';
+        text.innerText = `${count} free spin${count === 1 ? '' : 's'} added to your account.`;
+        orb.innerText = '🎰';
+    }else{
+        amount.innerText = '😅';
+        title.innerText = 'Try Again Later';
+        text.innerText = 'No prize this time. Your next rewarded ad will give you another chance.';
+        orb.innerText = '🔄';
+    }
+
+    overlay.classList.add('show');
+}
+
+function closeAdRewardResult(){
+    const overlay = document.getElementById('adRewardResult');
+    if(overlay) overlay.classList.remove('show');
+
+    adsgramRewardInProgress = false;
+
+    const button = document.getElementById('watchAdButton');
+    const buttonText = document.getElementById('watchAdButtonText');
+    if(button) button.disabled = false;
+    if(buttonText) buttonText.innerText = 'Watch Ad';
+}
+
 
 let dailyState = {
 currentDay: 1,
@@ -4226,6 +4811,8 @@ closeStreakCongratsModal();
 window.addEventListener(
 "DOMContentLoaded",
 ()=>{
+    initAdsgram();
+
     const luckyWidget = document.getElementById("luckyFloatingWidget");
     if(luckyWidget){
         luckyWidget.addEventListener("keydown", e=>{
@@ -4294,6 +4881,7 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
 
 
 
