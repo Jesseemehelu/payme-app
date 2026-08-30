@@ -1857,206 +1857,278 @@ transition-duration: 0.01ms !important;
 
 <style>
 /* =========================================================
-   MONETAG WATCH-AD + 3D REWARD REVEAL
+   MONETAG WATCH-AD REWARD UI
    ========================================================= */
-.monetag-watch-launch{
+.monetag-watch-card{
   position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:68px;
-  margin:-2px 0 2px;
-  padding:2px 8px;
-}
-.monetag-watch-button{
-  position:relative;
-  isolation:isolate;
-  width:min(100%,360px);
-  min-height:58px;
-  border:0;
-  border-radius:20px;
-  cursor:pointer;
-  color:#fff;
-  font-family:inherit;
-  font-size:.78rem;
-  font-weight:900;
-  letter-spacing:-.02em;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  background:linear-gradient(135deg,#2563eb 0%,#7c3aed 48%,#ec4899 100%);
-  box-shadow:0 18px 34px rgba(79,70,229,.28),inset 0 1px 0 rgba(255,255,255,.32);
-  transform:translateZ(0);
-  transition:transform .18s ease,filter .18s ease,opacity .18s ease;
   overflow:hidden;
-  animation:monetagButtonFloat 2.4s ease-in-out infinite;
+  padding:16px;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(124,58,237,.18),transparent 35%),
+    radial-gradient(circle at 0% 100%,rgba(6,182,212,.12),transparent 34%),
+    linear-gradient(145deg,#0b1020,#18244a 58%,#25134f);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 20px 45px rgba(15,23,42,.18), inset 0 1px 0 rgba(255,255,255,.08);
+  color:#fff;
 }
-.monetag-watch-button::before{
+.monetag-watch-card:before{
   content:"";
   position:absolute;
-  inset:-80% -20%;
-  background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.36) 49%,transparent 60%);
-  transform:translateX(-80%);
-  animation:monetagButtonShine 2.8s ease-in-out infinite;
-  z-index:-1;
-}
-.monetag-watch-button::after{
-  content:"";
-  position:absolute;
-  width:90px;height:90px;
-  right:-35px;top:-40px;
+  width:160px;
+  height:160px;
+  right:-85px;
+  top:-85px;
   border-radius:50%;
-  border:1px solid rgba(255,255,255,.2);
-  box-shadow:0 0 0 16px rgba(255,255,255,.035),0 0 0 32px rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 0 0 25px rgba(255,255,255,.025),0 0 0 50px rgba(255,255,255,.018);
 }
-.monetag-watch-button:active{transform:scale(.965)}
-.monetag-watch-button:disabled{cursor:not-allowed;animation:none;filter:grayscale(1);opacity:.7;box-shadow:none}
-.monetag-watch-button-icon{font-size:.82rem;display:inline-grid;place-items:center;width:27px;height:27px;border-radius:9px;background:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
-.monetag-watch-button-label{position:relative;z-index:2}
-.monetag-watch-timer{font-size:.68rem;opacity:.9;min-width:36px;text-align:left}
-.monetag-click-pointer{
-  position:absolute;
-  left:calc(50% + 128px);
-  top:-5px;
-  z-index:4;
-  display:flex;
-  align-items:center;
-  gap:5px;
-  pointer-events:none;
-  transform:rotate(6deg);
-  animation:monetagPointerBounce 1.25s ease-in-out infinite;
+.monetag-watch-inner{position:relative;z-index:2;display:flex;align-items:center;gap:12px}
+.monetag-watch-icon{
+  width:48px;height:48px;flex:0 0 48px;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:1.35rem;
+  box-shadow:0 12px 25px rgba(124,58,237,.30),inset 0 1px 0 rgba(255,255,255,.25);
+  animation:monetagIconFloat 2.8s ease-in-out infinite;
 }
-.monetag-click-pointer span{
-  font-size:.52rem;
-  font-weight:1000;
-  letter-spacing:.12em;
-  color:#7c3aed;
-  background:#fff;
-  border:1px solid #ddd6fe;
-  border-radius:999px;
-  padding:5px 7px;
-  box-shadow:0 8px 18px rgba(124,58,237,.16);
+.monetag-watch-copy{min-width:0;flex:1}
+.monetag-watch-title{font-size:.88rem;font-weight:900;letter-spacing:-.02em}
+.monetag-watch-sub{margin-top:3px;color:#cbd5e1;font-size:.62rem;line-height:1.45}
+.monetag-watch-button{
+  width:100%;margin-top:12px;min-height:47px;border:0;border-radius:15px;cursor:pointer;
+  color:#fff;font-family:inherit;font-size:.76rem;font-weight:900;
+  background:linear-gradient(135deg,#8b5cf6,#ec4899);
+  box-shadow:0 12px 25px rgba(124,58,237,.30),inset 0 1px 0 rgba(255,255,255,.20);
+  transition:transform .18s ease,filter .18s ease,opacity .18s ease;
 }
-.monetag-click-pointer i{
-  width:25px;height:25px;
-  display:block;
-  border-right:3px solid #7c3aed;
-  border-bottom:3px solid #7c3aed;
-  transform:rotate(45deg) translateY(-3px);
-  border-radius:0 0 4px 0;
-}
+.monetag-watch-button:active{transform:scale(.97)}
+.monetag-watch-button:disabled{opacity:.65;cursor:not-allowed}
+.monetag-watch-note{margin-top:8px;text-align:center;color:#94a3b8;font-size:.54rem;font-weight:700}
+@keyframes monetagIconFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
 
-/* 3D reward modal */
+/* Reward reveal modal */
 .monetag-overlay{
   position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;padding:18px;
-  background:rgba(2,6,23,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  background:rgba(2,6,23,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
 }
-.monetag-overlay.show{display:flex;animation:monetagFadeIn .25s ease both}
+.monetag-overlay.show{display:flex;animation:monetagFadeIn .28s ease both}
 .monetag-card{
-  position:relative;width:100%;max-width:390px;overflow:hidden;border-radius:32px;padding:22px 16px 18px;
-  text-align:center;background:linear-gradient(160deg,#ffffff 0%,#f8fbff 52%,#f5f3ff 100%);
-  border:1px solid rgba(255,255,255,.96);
-  box-shadow:0 45px 110px rgba(0,0,0,.48),0 0 80px rgba(124,58,237,.18);
-  animation:monetagCardIn .5s cubic-bezier(.16,1,.3,1) both;
-  transform:translateZ(0);
+  position:relative;width:100%;max-width:380px;overflow:hidden;border-radius:30px;padding:24px 20px 20px;
+  text-align:center;background:linear-gradient(160deg,#fff 0%,#f8fbff 58%,#f5f3ff 100%);
+  border:1px solid rgba(255,255,255,.9);box-shadow:0 40px 100px rgba(0,0,0,.42),0 0 60px rgba(124,58,237,.16);
+  animation:monetagCardIn .48s cubic-bezier(.16,1,.3,1) both;
 }
-.monetag-card::before{
-  content:"";position:absolute;width:270px;height:270px;left:50%;top:-205px;transform:translateX(-50%);border-radius:50%;
-  background:radial-gradient(circle,rgba(124,58,237,.2),transparent 67%);pointer-events:none;
-}
-.monetag-close{position:absolute;right:12px;top:12px;width:34px;height:34px;border:0;border-radius:50%;background:#eef2f7;color:#64748b;font-size:1.1rem;cursor:pointer;z-index:5}
-.monetag-badge{position:relative;display:inline-flex;padding:7px 11px;border-radius:999px;background:#f3e8ff;color:#7c3aed;border:1px solid #e9d5ff;font-size:.55rem;font-weight:900;letter-spacing:.08em}
-.monetag-title{position:relative;margin-top:12px;font-size:1.1rem;font-weight:1000;color:#0f172a;letter-spacing:-.04em}
-.monetag-subtitle{position:relative;margin-top:5px;color:#64748b;font-size:.64rem;line-height:1.45}
-
-/* Horizontal prize reel */
-.monetag-reel-shell{
-  position:relative;
-  margin:18px -2px 13px;
-  padding:13px 0;
-  border-radius:22px;
-  background:linear-gradient(145deg,#0a1020,#17244b 58%,#291653);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 18px 38px rgba(15,23,42,.22);
-  overflow:hidden;
-}
-.monetag-reel-shell::before,.monetag-reel-shell::after{content:"";position:absolute;top:0;bottom:0;width:55px;z-index:3;pointer-events:none}
-.monetag-reel-shell::before{left:0;background:linear-gradient(90deg,#0a1020,transparent)}
-.monetag-reel-shell::after{right:0;background:linear-gradient(270deg,#291653,transparent)}
-.monetag-reel-track{
-  display:flex;align-items:center;gap:9px;width:max-content;transform:translate3d(0,0,0);will-change:transform;
-}
-.monetag-reel-item{
-  flex:0 0 112px;height:70px;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.055));
-  border:1px solid rgba(255,255,255,.13);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
-  font-size:.61rem;font-weight:900;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-}
-.monetag-reel-item .reel-icon{font-size:1.3rem;line-height:1;margin-bottom:5px}
-.monetag-reel-item .reel-label{white-space:nowrap}
-.monetag-reel-center{
-  position:absolute;left:50%;top:7px;bottom:7px;width:116px;transform:translateX(-50%);z-index:4;
-  border:2px solid rgba(255,255,255,.82);border-radius:18px;box-shadow:0 0 0 5px rgba(124,58,237,.16),0 0 35px rgba(236,72,153,.3),inset 0 0 22px rgba(255,255,255,.07);pointer-events:none;
-}
-.monetag-reel-center::after{content:"";position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid #fff}
-.monetag-reel-status{min-height:18px;color:#64748b;font-size:.6rem;font-weight:800}
-
-.monetag-result{display:none;position:relative;margin:12px 0 3px;padding:18px 12px;border-radius:21px;background:linear-gradient(135deg,#eff6ff,#faf5ff);border:1px solid #ddd6fe;box-shadow:inset 0 1px 0 #fff}
-.monetag-result.show{display:block;animation:monetagResultIn .55s cubic-bezier(.16,1,.3,1) both}
-.monetag-result-icon{font-size:2.15rem;filter:drop-shadow(0 8px 12px rgba(124,58,237,.18))}
-.monetag-result-label{margin-top:4px;font-size:1.35rem;font-weight:1000;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
-.monetag-result-copy{margin-top:4px;color:#64748b;font-size:.62rem;font-weight:800}
-.monetag-done-button{display:none;width:100%;margin-top:11px;min-height:47px;border:0;border-radius:15px;background:#0f172a;color:#fff;font-family:inherit;font-size:.74rem;font-weight:900;cursor:pointer;box-shadow:0 12px 24px rgba(15,23,42,.18)}
-.monetag-done-button.show{display:block;animation:monetagButtonIn .35s ease both}
-.monetag-reveal-button{width:100%;min-height:48px;border:0;border-radius:15px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-family:inherit;font-size:.74rem;font-weight:900;cursor:pointer;box-shadow:0 13px 28px rgba(124,58,237,.26)}
+.monetag-card:before{content:"";position:absolute;width:230px;height:230px;left:50%;top:-175px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.18),transparent 68%);pointer-events:none}
+.monetag-close{position:absolute;right:13px;top:13px;width:34px;height:34px;border:0;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:1.15rem;cursor:pointer;z-index:3}
+.monetag-badge{position:relative;display:inline-flex;padding:7px 11px;border-radius:999px;background:#f3e8ff;color:#7c3aed;border:1px solid #e9d5ff;font-size:.58rem;font-weight:900;letter-spacing:.05em}
+.monetag-orb{position:relative;width:92px;height:92px;margin:18px auto 13px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-size:2.25rem;box-shadow:0 18px 40px rgba(124,58,237,.28);animation:monetagOrbPulse 1.8s ease-in-out infinite}
+.monetag-title{position:relative;font-size:1.18rem;font-weight:900;color:#0f172a;letter-spacing:-.04em}
+.monetag-subtitle{position:relative;margin-top:6px;color:#64748b;font-size:.70rem;line-height:1.5}
+.monetag-prize-grid{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 14px}
+.monetag-prize{padding:10px 7px;border-radius:14px;background:#fff;border:1px solid #e2e8f0;color:#475569;font-size:.61rem;font-weight:900}
+.monetag-prize strong{display:block;color:#0f172a;font-size:.78rem;margin-bottom:2px}
+.monetag-reveal-button{position:relative;width:100%;min-height:48px;border:0;border-radius:15px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-family:inherit;font-size:.76rem;font-weight:900;cursor:pointer;box-shadow:0 12px 25px rgba(124,58,237,.25)}
 .monetag-reveal-button:disabled{opacity:.65;cursor:not-allowed}
-.monetag-status{min-height:18px;margin-top:8px;color:#64748b;font-size:.59rem;font-weight:800}
+.monetag-status{min-height:18px;margin-top:9px;color:#64748b;font-size:.58rem;font-weight:800}
+.monetag-result{display:none;position:relative;margin:13px 0 3px;padding:17px 12px;border-radius:19px;background:linear-gradient(135deg,#eff6ff,#faf5ff);border:1px solid #ddd6fe}
+.monetag-result.show{display:block;animation:monetagResultIn .45s cubic-bezier(.16,1,.3,1) both}
+.monetag-result-icon{font-size:2rem}
+.monetag-result-label{margin-top:4px;font-size:1.25rem;font-weight:900;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+.monetag-result-copy{margin-top:4px;color:#64748b;font-size:.62rem;font-weight:700}
+.monetag-done-button{display:none;width:100%;margin-top:11px;min-height:45px;border:0;border-radius:14px;background:#0f172a;color:#fff;font-family:inherit;font-size:.74rem;font-weight:900;cursor:pointer}
+.monetag-done-button.show{display:block}
+@keyframes monetagFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes monetagCardIn{from{opacity:0;transform:translateY(25px) scale(.90)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes monetagOrbPulse{0%,100%{transform:scale(1);box-shadow:0 18px 40px rgba(124,58,237,.28)}50%{transform:scale(1.045);box-shadow:0 22px 52px rgba(236,72,153,.34)}}
+@keyframes monetagResultIn{from{opacity:0;transform:scale(.82) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+</style>
 
-/* FIRST-TIME WALKTHROUGH */
-.payme-tutorial-overlay{
-  position:fixed;inset:0;z-index:14000;display:none;pointer-events:auto;
-  background:transparent;
+
+<style>
+/* =========================================================
+   COMPACT MONETAG HEADER BUTTON
+   ========================================================= */
+.monetag-header-wrap{
+  position:relative;
+  width:52px;
+  height:66px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  z-index:20;
 }
-.payme-tutorial-overlay.show{display:block;animation:tutorialFade .22s ease both}
-.payme-tutorial-spotlight{
-  position:fixed;left:0;top:0;width:10px;height:10px;border-radius:16px;z-index:14002;
-  border:2px solid rgba(255,255,255,.96);background:rgba(255,255,255,.035);
-  box-shadow:0 0 0 9999px rgba(2,6,23,.72),0 0 0 5px rgba(124,58,237,.28),0 0 35px rgba(124,58,237,.5);
-  transition:left .38s cubic-bezier(.16,1,.3,1),top .38s cubic-bezier(.16,1,.3,1),width .38s cubic-bezier(.16,1,.3,1),height .38s cubic-bezier(.16,1,.3,1),border-radius .25s ease;
+.monetag-header-button{
+  position:relative;
+  width:46px;
+  height:46px;
+  border:0;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  color:#fff;
+  background:linear-gradient(145deg,#8b5cf6 0%,#7c3aed 48%,#ec4899 100%);
+  box-shadow:0 11px 22px rgba(124,58,237,.30),inset 0 2px 0 rgba(255,255,255,.30),inset 0 -4px 8px rgba(37,16,82,.20);
+  transform:translateZ(0);
+  animation:monetagHeaderFloat 2.1s ease-in-out infinite,monetagHeaderGlow 2.4s ease-in-out infinite;
+  overflow:visible;
+}
+.monetag-header-button:before{
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-radius:11px;
+  border:1px solid rgba(255,255,255,.25);
   pointer-events:none;
 }
-.payme-tutorial-card{
-  position:fixed;z-index:14003;width:min(calc(100vw - 30px),370px);left:50%;
-  padding:18px 17px 15px;border-radius:24px;background:linear-gradient(160deg,#fff,#f8fbff);border:1px solid rgba(255,255,255,.95);
-  box-shadow:0 30px 80px rgba(0,0,0,.38),0 0 45px rgba(124,58,237,.16);
-  transition:top .38s cubic-bezier(.16,1,.3,1);transform:translateX(-50%);
+.monetag-header-button:after{
+  content:"";
+  position:absolute;
+  width:10px;height:10px;
+  top:3px;right:5px;
+  border-radius:50%;
+  background:#fff;
+  opacity:.75;
+  filter:blur(.2px);
 }
-.payme-tutorial-kicker{font-size:.53rem;font-weight:1000;letter-spacing:.12em;color:#7c3aed;text-transform:uppercase}
-.payme-tutorial-title{margin-top:5px;font-size:1rem;font-weight:1000;color:#0f172a;letter-spacing:-.03em}
-.payme-tutorial-text{margin-top:6px;font-size:.66rem;line-height:1.55;color:#64748b}
-.payme-tutorial-progress{display:flex;gap:5px;margin:13px 0 12px}
-.payme-tutorial-progress i{height:4px;flex:1;border-radius:99px;background:#e2e8f0;transition:.25s}
-.payme-tutorial-progress i.active{background:linear-gradient(90deg,#2563eb,#7c3aed)}
-.payme-tutorial-actions{display:flex;align-items:center;justify-content:space-between;gap:9px}
-.payme-tutorial-skip{border:0;background:transparent;color:#94a3b8;font-family:inherit;font-size:.64rem;font-weight:900;cursor:pointer;padding:9px 5px}
-.payme-tutorial-next{border:0;min-width:106px;min-height:42px;border-radius:13px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-family:inherit;font-size:.68rem;font-weight:900;cursor:pointer;box-shadow:0 10px 22px rgba(37,99,235,.22)}
-@keyframes monetagButtonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes monetagButtonShine{0%,20%{transform:translateX(-90%)}58%,100%{transform:translateX(90%)}}
-@keyframes monetagPointerBounce{0%,100%{transform:rotate(6deg) translate(0,0)}50%{transform:rotate(6deg) translate(-5px,4px)}}
-@keyframes monetagFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes monetagCardIn{from{opacity:0;transform:translateY(28px) scale(.88) rotateX(8deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
-@keyframes monetagResultIn{from{opacity:0;transform:scale(.78) translateY(15px)}to{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes monetagButtonIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes tutorialFade{from{opacity:0}to{opacity:1}}
+.monetag-header-gift{
+  font-size:1.35rem;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.22));
+  transform:translateY(-1px);
+}
+.monetag-header-play{
+  position:absolute;
+  right:3px;
+  bottom:3px;
+  width:17px;height:17px;
+  border-radius:7px;
+  display:grid;place-items:center;
+  background:#fff;
+  color:#7c3aed;
+  font-size:.55rem;
+  box-shadow:0 4px 9px rgba(0,0,0,.18);
+}
+.monetag-click-hint{
+  position:absolute;
+  top:49px;
+  left:50%;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  padding:3px 7px;
+  border-radius:8px;
+  color:#7c3aed;
+  background:#fff;
+  border:1px solid #e9d5ff;
+  box-shadow:0 5px 13px rgba(124,58,237,.15);
+  font-size:.48rem;
+  font-weight:900;
+  letter-spacing:.02em;
+  animation:monetagHintDrop 1.45s ease-in-out infinite;
+}
+.monetag-click-hint:before{
+  content:"";
+  position:absolute;
+  left:50%;top:-5px;
+  width:7px;height:7px;
+  background:#fff;
+  border-left:1px solid #e9d5ff;
+  border-top:1px solid #e9d5ff;
+  transform:translateX(-50%) rotate(45deg);
+}
+@keyframes monetagHeaderFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(1deg)}}
+@keyframes monetagHeaderGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(236,72,153,0))}50%{filter:drop-shadow(0 0 8px rgba(236,72,153,.35))}}
+@keyframes monetagHintDrop{0%,100%{opacity:.65;transform:translate(-50%,0)}50%{opacity:1;transform:translate(-50%,5px)}}
+.monetag-header-button:disabled{
+  animation:none;
+  filter:grayscale(1);
+  background:linear-gradient(145deg,#94a3b8,#64748b);
+  box-shadow:0 6px 13px rgba(15,23,42,.13);
+}
+.monetag-header-button:disabled + .monetag-click-hint{
+  animation:none;
+  opacity:.45;
+  color:#64748b;
+  border-color:#e2e8f0;
+}
+.monetag-header-button:disabled + .monetag-click-hint:before{border-color:#e2e8f0}
+
+/* =========================================================
+   MONETAG REWARD REEL
+   ========================================================= */
+.monetag-reel-wrap{display:none;position:relative;margin:17px 0 12px;padding:5px 0 0}
+.monetag-reel-wrap.show{display:block;animation:reelIn .35s ease both}
+.monetag-reel-glow{position:absolute;inset:4px 18px 14px;border-radius:22px;background:radial-gradient(circle at 50% 50%,rgba(124,58,237,.17),transparent 62%);filter:blur(10px)}
+.monetag-reel-window{
+  position:relative;height:86px;overflow:hidden;border-radius:19px;
+  background:linear-gradient(145deg,#0b1020,#1e1b4b 55%,#31134e);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 15px 30px rgba(15,23,42,.20);
+}
+.monetag-reel-window:before,.monetag-reel-window:after{
+  content:"";position:absolute;top:0;bottom:0;width:62px;z-index:3;pointer-events:none;
+}
+.monetag-reel-window:before{left:0;background:linear-gradient(90deg,#0b1020,transparent)}
+.monetag-reel-window:after{right:0;background:linear-gradient(270deg,#31134e,transparent)}
+.monetag-reel-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:10px;will-change:transform;padding:0 20px}
+.monetag-reel-item{
+  flex:0 0 112px;height:62px;border-radius:15px;display:grid;place-items:center;
+  padding:5px;text-align:center;color:#fff;
+  background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.045));
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+  font-size:.66rem;font-weight:900;
+}
+.monetag-reel-item small{display:block;color:#cbd5e1;font-size:.48rem;margin-top:2px}
+.monetag-reel-center{
+  position:absolute;left:50%;top:-1px;bottom:-1px;width:2px;z-index:5;
+  background:#fff;box-shadow:0 0 13px rgba(255,255,255,.9);transform:translateX(-50%);
+}
+.monetag-reel-caption{margin-top:8px;color:#7c3aed;font-size:.52rem;font-weight:900;letter-spacing:.12em;animation:reelCaptionPulse .8s ease-in-out infinite alternate}
+.monetag-reel-wrap.landed .monetag-reel-window{box-shadow:0 0 0 2px rgba(124,58,237,.18),0 0 35px rgba(124,58,237,.25),inset 0 1px 0 rgba(255,255,255,.15)}
+@keyframes reelIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes reelCaptionPulse{from{opacity:.5}to{opacity:1}}
+.monetag-result.show{animation:monetagResultIn .65s cubic-bezier(.16,1.3,.3,1) both}
+.monetag-result-icon{animation:resultIconBounce .9s cubic-bezier(.16,1.3,.3,1) both}
+@keyframes resultIconBounce{0%{transform:scale(.1) rotate(-25deg)}70%{transform:scale(1.15) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+
+/* =========================================================
+   DASHBOARD FIRST-USE TUTORIAL
+   ========================================================= */
+.dashboard-tutorial{position:fixed;inset:0;z-index:15000;display:none;pointer-events:none}
+.dashboard-tutorial.show{display:block}
+.tutorial-dim{position:absolute;inset:0;background:rgba(2,6,23,.70);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);pointer-events:auto;animation:tutorialDimIn .35s ease both}
+.tutorial-spotlight{
+  position:fixed;z-index:2;display:none;border-radius:17px;
+  box-shadow:0 0 0 9999px rgba(2,6,23,.70),0 0 0 3px rgba(255,255,255,.98),0 0 30px 7px rgba(59,130,246,.45);
+  pointer-events:none;transition:all .38s cubic-bezier(.16,1,.3,1);
+}
+.tutorial-card{
+  position:fixed;z-index:4;width:min(320px,calc(100vw - 30px));padding:19px 17px 16px;
+  border-radius:24px;color:#0f172a;background:linear-gradient(155deg,#fff,#f8fbff 58%,#f5f3ff);
+  border:1px solid rgba(255,255,255,.95);box-shadow:0 30px 80px rgba(0,0,0,.38),0 0 45px rgba(59,130,246,.16);
+  pointer-events:auto;animation:tutorialCardIn .45s cubic-bezier(.16,1,.3,1) both;
+}
+.tutorial-step{display:inline-flex;padding:5px 8px;border-radius:999px;background:#eff6ff;color:#2563eb;font-size:.52rem;font-weight:900;letter-spacing:.05em}
+.tutorial-icon{width:48px;height:48px;margin:12px 0 9px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:1.35rem;box-shadow:0 12px 25px rgba(37,99,235,.22)}
+.tutorial-title{font-size:1.05rem;font-weight:900;letter-spacing:-.03em}
+.tutorial-text{margin-top:6px;color:#64748b;font-size:.68rem;line-height:1.55}
+.tutorial-progress{height:4px;margin:15px 0 13px;border-radius:99px;background:#e2e8f0;overflow:hidden}
+.tutorial-progress:after{content:"";display:block;height:100%;width:var(--tutorial-progress,20%);border-radius:inherit;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);transition:width .35s ease}
+.tutorial-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tutorial-skip,.tutorial-next{border:0;border-radius:13px;padding:11px 14px;font-family:inherit;font-size:.67rem;font-weight:900;cursor:pointer}
+.tutorial-skip{background:#f1f5f9;color:#64748b}
+.tutorial-next{min-width:105px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;box-shadow:0 9px 20px rgba(37,99,235,.22)}
+.tutorial-skip:active,.tutorial-next:active{transform:scale(.96)}
+@keyframes tutorialDimIn{from{opacity:0}to{opacity:1}}
+@keyframes tutorialCardIn{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:480px){
-  .monetag-click-pointer{left:auto;right:4px;top:-2px}
-  .monetag-watch-button{max-width:330px}
-  .monetag-reel-item{flex-basis:104px}
-  .monetag-reel-center{width:108px}
+  .monetag-header-wrap{width:49px}
+  .monetag-header-button{width:43px;height:43px;border-radius:14px}
+  .monetag-header-gift{font-size:1.2rem}
+  .monetag-click-hint{top:47px;font-size:.45rem}
 }
 @media(prefers-reduced-motion:reduce){
-  .monetag-watch-button,.monetag-button-icon,.monetag-click-pointer{animation:none !important}
-  .payme-tutorial-spotlight,.payme-tutorial-card{transition:none !important}
+  .monetag-header-button,.monetag-click-hint,.monetag-reel-caption{animation:none!important}
+  .tutorial-spotlight{transition:none}
 }
 </style>
 
@@ -2074,6 +2146,13 @@ transition-duration: 0.01ms !important;
 <li><a href="/leaderboard.html">Leaderboard</a></li>
 </ul>
 <div class="header-actions">
+<div class="monetag-header-wrap" id="monetagHeaderWrap">
+  <button id="monetagWatchBtn" class="monetag-header-button" onclick="openMonetagReward()" aria-label="Watch ad and get a reward">
+    <span class="monetag-header-gift">🎁</span>
+    <span class="monetag-header-play">▶</span>
+  </button>
+  <div class="monetag-click-hint" aria-hidden="true">Click here</div>
+</div>
 <a href="https://wa.me/+2348034399095" target="_blank" class="support-btn"
 title="WhatsApp Support">
 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2095,19 +2174,6 @@ stroke-width="2">
 <h1 class="welcome-title">Hello, <span id="userNameText"
 class="user-name loading-skeleton name-loading" aria-label="Loading user name"></span></h1>
 <p class="welcome-sub">Manage your wallet, earnings, deposits and referrals.</p>
-</section>
-
-<!-- MONETAG REWARDED AD — COMPACT TOP BUTTON -->
-<section class="monetag-watch-launch" id="monetagWatchCard">
-  <div class="monetag-click-pointer" aria-hidden="true">
-    <span>CLICK</span>
-    <i></i>
-  </div>
-  <button id="monetagWatchBtn" class="monetag-watch-button" onclick="openMonetagReward()" type="button">
-    <span class="monetag-watch-button-icon">▶</span>
-    <span class="monetag-watch-button-label">Watch Ad</span>
-    <span class="monetag-watch-timer" id="monetagWatchTimer"></span>
-  </button>
 </section>
 
 <!-- BALANCE -->
@@ -2153,7 +2219,7 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
 
 <div class="balance-actions">
 
-<a href="/deposit.html"
+<a id="depositBtn" href="/deposit.html"
    class="action-btn deposit-btn">
 
     <svg class="action-btn-icon"
@@ -2437,20 +2503,35 @@ Awesome ✨
 </div>
 
 <!-- MONETAG REWARD MODAL -->
-<div class="monetag-overlay" id="monetagRewardModal">
+<div class="monetag-overlay" id="monetagRewardModal" onclick="if(event.target===this) closeMonetagReward()">
   <div class="monetag-card">
     <button class="monetag-close" onclick="closeMonetagReward()" aria-label="Close">×</button>
-    <div class="monetag-badge">REWARDED AD</div>
-    <div class="monetag-title" id="monetagModalTitle">Watch & unlock a surprise</div>
-    <div class="monetag-subtitle" id="monetagModalSubtitle">Complete the sponsored ad. Your reward is confirmed securely by PAYME.</div>
 
-    <div class="monetag-reel-shell" id="monetagReelShell" aria-live="polite">
-      <div class="monetag-reel-center" aria-hidden="true"></div>
-      <div class="monetag-reel-track" id="monetagReelTrack"></div>
+    <div class="monetag-badge">MONETAG REWARDED AD</div>
+    <div class="monetag-orb" id="monetagOrb">▶</div>
+    <div class="monetag-title" id="monetagModalTitle">Ready for your surprise?</div>
+    <div class="monetag-subtitle" id="monetagModalSubtitle">Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event.</div>
+
+    <div class="monetag-prize-grid" id="monetagPrizeGrid">
+      <div class="monetag-prize"><strong>🎟️ 1 FREE SPIN</strong>Rare</div>
+      <div class="monetag-prize"><strong>₦10</strong>Very rare</div>
+      <div class="monetag-prize"><strong>🎟️🎟️ 2 FREE SPINS</strong>Extremely rare</div>
+      <div class="monetag-prize"><strong>₦5</strong>Rare</div>
     </div>
-    <div class="monetag-reel-status" id="monetagReelStatus">Your prize will spin after the ad is confirmed.</div>
 
-    <button id="monetagRevealBtn" class="monetag-reveal-button" onclick="watchMonetagAd()" type="button">▶ Watch Ad</button>
+    <div class="monetag-reel-wrap" id="monetagReelWrap">
+      <div class="monetag-reel-glow"></div>
+      <div class="monetag-reel-window">
+        <div class="monetag-reel-track" id="monetagReelTrack"></div>
+        <div class="monetag-reel-center"></div>
+      </div>
+      <div class="monetag-reel-caption" id="monetagReelCaption">REVEALING YOUR REWARD</div>
+    </div>
+
+    <button id="monetagRevealBtn" class="monetag-reveal-button" onclick="watchMonetagAd()">
+      ▶ Watch Ad to Reveal
+    </button>
+
     <div class="monetag-status" id="monetagStatus"></div>
 
     <div class="monetag-result" id="monetagResult">
@@ -2458,23 +2539,24 @@ Awesome ✨
       <div class="monetag-result-label" id="monetagResultLabel">Reward</div>
       <div class="monetag-result-copy" id="monetagResultCopy">Your reward has been added.</div>
     </div>
-    <button id="monetagDoneBtn" class="monetag-done-button" onclick="closeMonetagReward()" type="button">Collect & Continue</button>
+
+    <button id="monetagDoneBtn" class="monetag-done-button" onclick="claimMonetagRewardAndClose()">Claim Reward</button>
   </div>
 </div>
 
-<!-- FIRST-TIME PAYME TUTORIAL -->
-<div class="payme-tutorial-overlay" id="paymeTutorialOverlay" aria-hidden="true">
-  <div class="payme-tutorial-spotlight" id="paymeTutorialSpotlight"></div>
-  <div class="payme-tutorial-card" id="paymeTutorialCard" role="dialog" aria-modal="true" aria-labelledby="paymeTutorialTitle">
-    <div class="payme-tutorial-kicker" id="paymeTutorialKicker">QUICK TOUR • 1/5</div>
-    <div class="payme-tutorial-title" id="paymeTutorialTitle">Deposit</div>
-    <div class="payme-tutorial-text" id="paymeTutorialText">Add money to your PAYME wallet here. Your deposit balance can be used across the platform.</div>
-    <div class="payme-tutorial-progress" id="paymeTutorialProgress" aria-hidden="true">
-      <i class="active"></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="payme-tutorial-actions">
-      <button class="payme-tutorial-skip" onclick="skipPaymeTutorial()" type="button">Skip tour</button>
-      <button class="payme-tutorial-next" id="paymeTutorialNext" onclick="nextPaymeTutorial()" type="button">Next →</button>
+<!-- FIRST-USE DASHBOARD TUTORIAL -->
+<div class="dashboard-tutorial" id="dashboardTutorial" aria-hidden="true">
+  <div class="tutorial-dim"></div>
+  <div class="tutorial-spotlight" id="tutorialSpotlight"></div>
+  <div class="tutorial-card" id="tutorialCard">
+    <div class="tutorial-step" id="tutorialStep">1 / 5</div>
+    <div class="tutorial-icon" id="tutorialIcon">💳</div>
+    <div class="tutorial-title" id="tutorialTitle">Deposit</div>
+    <div class="tutorial-text" id="tutorialText">Add money to your deposit balance here when you want to fund your account.</div>
+    <div class="tutorial-progress" id="tutorialProgress"></div>
+    <div class="tutorial-actions">
+      <button class="tutorial-skip" id="tutorialSkipBtn" onclick="skipDashboardTutorial()">Skip</button>
+      <button class="tutorial-next" id="tutorialNextBtn" onclick="nextDashboardTutorial()">Next →</button>
     </div>
   </div>
 </div>
@@ -2731,22 +2813,22 @@ function waitForButtonLoader(ms=360){
 }
 
 /* =========================================================
-   MONETAG REWARDED INTERSTITIAL + 3D PRIZE REEL
+   MONETAG REWARDED INTERSTITIAL
    ========================================================= */
 let monetagAdSessionId = null;
 let monetagAdStartedAt = 0;
 let monetagRewardModalOpen = false;
 let monetagAdInProgress = false;
 let monetagCooldownTimer = null;
-let monetagRewardResult = null;
-
 const MONETAG_CLIENT_COOLDOWN_MS = 30 * 1000;
+const MONETAG_COOLDOWN_KEY = "paymeMonetagCooldownUntil";
+
 const MONETAG_REEL_ITEMS = [
-    {key:"try_again", icon:"↻", label:"Try Again"},
-    {key:"cash_5", icon:"₦", label:"₦5"},
-    {key:"cash_10", icon:"₦", label:"₦10"},
-    {key:"spin_1", icon:"🎟️", label:"1 Free Spin"},
-    {key:"spin_2", icon:"🎟️🎟️", label:"2 Free Spins"}
+    {icon:"🎟️",label:"1 FREE SPIN",sub:"Rare"},
+    {icon:"₦10",label:"₦10",sub:"Very rare"},
+    {icon:"🎟️🎟️",label:"2 FREE SPINS",sub:"Extremely rare"},
+    {icon:"₦5",label:"₦5",sub:"Rare"},
+    {icon:"🔄",label:"TRY AGAIN",sub:"Better luck next time"}
 ];
 
 function monetagSetStatus(text, isError=false){
@@ -2756,127 +2838,91 @@ function monetagSetStatus(text, isError=false){
     el.style.color = isError ? "#ef4444" : "#64748b";
 }
 
-function getMonetagClientUserKey(){
-    try{
-        const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        return String(id || "anonymous");
-    }catch(_){
-        return "anonymous";
-    }
+function getMonetagHeaderButton(){
+    return document.getElementById("monetagWatchBtn");
 }
 
-function getMonetagCooldownKey(){
-    return `paymeMonetagCooldownV2:${getMonetagClientUserKey()}`;
-}
-
-function getMonetagCooldownUntil(){
-    try{
-        return Number(localStorage.getItem(getMonetagCooldownKey()) || 0);
-    }catch(_){
-        return 0;
-    }
-}
-
-function setMonetagCooldown(until){
-    try{ localStorage.setItem(getMonetagCooldownKey(), String(until)); }catch(_){ }
-    renderMonetagCooldown();
-}
-
-function clearMonetagCooldown(){
-    try{ localStorage.removeItem(getMonetagCooldownKey()); }catch(_){ }
-    if(monetagCooldownTimer) clearInterval(monetagCooldownTimer);
-    monetagCooldownTimer = null;
-    renderMonetagCooldown();
-}
-
-function renderMonetagCooldown(){
-    const button = document.getElementById("monetagWatchBtn");
-    const timer = document.getElementById("monetagWatchTimer");
+function updateMonetagCooldownUI(){
+    const button = getMonetagHeaderButton();
+    const hint = document.querySelector(".monetag-click-hint");
     if(!button) return;
 
-    const until = getMonetagCooldownUntil();
+    const until = Number(localStorage.getItem(MONETAG_COOLDOWN_KEY) || 0);
     const remaining = Math.max(0, until - Date.now());
 
-    if(remaining <= 0){
+    if(remaining > 0){
+        button.disabled = true;
+        button.title = `Available in ${Math.ceil(remaining / 1000)} seconds`;
+        if(hint) hint.textContent = `${Math.ceil(remaining / 1000)}s`;
+        if(monetagCooldownTimer) clearTimeout(monetagCooldownTimer);
+        monetagCooldownTimer = setTimeout(updateMonetagCooldownUI, 250);
+    }else{
+        localStorage.removeItem(MONETAG_COOLDOWN_KEY);
         button.disabled = false;
-        const label = button.querySelector(".monetag-watch-button-label");
-        if(label) label.textContent = "Watch Ad";
-        if(timer) timer.textContent = "";
-        if(monetagCooldownTimer){ clearInterval(monetagCooldownTimer); monetagCooldownTimer = null; }
-        return;
+        button.title = "Watch ad and get a reward";
+        if(hint) hint.textContent = "Click here";
     }
+}
 
-    button.disabled = true;
-    const label = button.querySelector(".monetag-watch-button-label");
-    if(label) label.textContent = "Please wait";
-    if(timer) timer.textContent = `${Math.ceil(remaining/1000)}s`;
+function startMonetagCooldown(){
+    const until = Date.now() + MONETAG_CLIENT_COOLDOWN_MS;
+    localStorage.setItem(MONETAG_COOLDOWN_KEY, String(until));
+    updateMonetagCooldownUI();
+}
 
-    if(!monetagCooldownTimer){
-        monetagCooldownTimer = setInterval(renderMonetagCooldown, 250);
-    }
+function monetagPrizeHtml(item){
+    return `<div class="monetag-reel-item"><div>${item.icon}</div><div>${item.label}</div><small>${item.sub}</small></div>`;
 }
 
 function buildMonetagReel(){
     const track = document.getElementById("monetagReelTrack");
     if(!track) return;
-    /* Enough repeated tiles to make the reel feel fast and physical. */
     const sequence = [];
-    for(let round=0; round<7; round++){
-        MONETAG_REEL_ITEMS.forEach(item => sequence.push(item));
+    for(let i=0;i<18;i++){
+        sequence.push(MONETAG_REEL_ITEMS[i % MONETAG_REEL_ITEMS.length]);
     }
-    track.innerHTML = sequence.map(item => `
-        <div class="monetag-reel-item" data-reward-key="${item.key}">
-            <span class="reel-icon">${item.icon}</span>
-            <span class="reel-label">${item.label}</span>
-        </div>
-    `).join("");
+    track.innerHTML = sequence.map(monetagPrizeHtml).join("");
+    track.style.transition = "none";
     track.style.transform = "translate3d(0,0,0)";
 }
 
 function monetagResetModal(){
     const title = document.getElementById("monetagModalTitle");
     const subtitle = document.getElementById("monetagModalSubtitle");
+    const grid = document.getElementById("monetagPrizeGrid");
     const reveal = document.getElementById("monetagRevealBtn");
     const status = document.getElementById("monetagStatus");
     const result = document.getElementById("monetagResult");
     const done = document.getElementById("monetagDoneBtn");
-    const reelStatus = document.getElementById("monetagReelStatus");
-    const shell = document.getElementById("monetagReelShell");
+    const orb = document.getElementById("monetagOrb");
+    const reel = document.getElementById("monetagReelWrap");
 
-    if(title) title.textContent = "Watch & unlock a surprise";
-    if(subtitle) subtitle.textContent = "Complete the sponsored ad. Your reward is confirmed securely by PAYME.";
-    if(reveal){ reveal.style.display = "block"; reveal.disabled = false; reveal.textContent = "▶ Watch Ad"; }
+    if(title) title.textContent = "Ready for your surprise?";
+    if(subtitle) subtitle.textContent = "Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event.";
+    if(grid) grid.style.display = "grid";
+    if(reveal){ reveal.style.display = "block"; reveal.disabled = false; reveal.textContent = "▶ Watch Ad to Reveal"; }
     if(status) status.textContent = "";
     if(result) result.classList.remove("show");
     if(done) done.classList.remove("show");
-    if(reelStatus) reelStatus.textContent = "Your prize will spin after the ad is confirmed.";
-    if(shell) shell.style.display = "block";
+    if(orb) orb.textContent = "▶";
+    if(reel){ reel.classList.remove("show","landed"); reel.style.display = "none"; }
     buildMonetagReel();
-    monetagRewardResult = null;
 }
 
 function closeMonetagReward(){
     if(monetagAdInProgress) return;
-    const wasConfirmed = !!monetagRewardResult;
     const modal = document.getElementById("monetagRewardModal");
     if(modal) modal.classList.remove("show");
     monetagRewardModalOpen = false;
-    if(wasConfirmed){
-        setMonetagCooldown(Date.now() + MONETAG_CLIENT_COOLDOWN_MS);
-    }
-    monetagRewardResult = null;
-    renderMonetagCooldown();
 }
 
-function openMonetagReward(){
-    if(monetagAdInProgress) return;
-    if(getMonetagCooldownUntil() > Date.now()){
-        renderMonetagCooldown();
-        return;
-    }
+async function openMonetagReward(){
+    const button = getMonetagHeaderButton();
+    if(!button || button.disabled || monetagAdInProgress) return;
 
     const modal = document.getElementById("monetagRewardModal");
     if(!modal) return;
+
     monetagResetModal();
     modal.classList.add("show");
     monetagRewardModalOpen = true;
@@ -2891,7 +2937,7 @@ async function startMonetagAdSession(){
     });
 
     let data = {};
-    try{ data = await response.json(); }catch(_){ }
+    try{ data = await response.json(); }catch(e){}
 
     if(!response.ok || !data.success){
         const err = new Error(data.message || "Unable to start the rewarded ad.");
@@ -2904,21 +2950,20 @@ async function startMonetagAdSession(){
     return data;
 }
 
-async function waitForMonetagPostback(timeoutMs=22000, intervalMs=1100){
+async function waitForMonetagPostback(timeoutMs=15000, intervalMs=1200){
     if(!monetagAdSessionId) return null;
     const started = Date.now();
 
     while(Date.now() - started < timeoutMs){
         try{
             const response = await fetch(
-                `/api/monetag/status?sessionId=${encodeURIComponent(monetagAdSessionId)}`,
-                {method:"GET",credentials:"include",cache:"no-store"}
+                `/api/monetag/status?sessionId=${encodeURIComponent(monetagAdSessionId)}&startedAt=${encodeURIComponent(monetagAdStartedAt)}`,
+                {method:"GET",credentials:"include"}
             );
+
             if(response.ok){
                 const data = await response.json();
-                if(data && data.success && data.confirmed && data.reward){
-                    return data;
-                }
+                if(data && data.success && data.confirmed && data.reward) return data;
             }
         }catch(error){
             console.warn("Waiting for Monetag reward confirmation:",error);
@@ -2928,289 +2973,58 @@ async function waitForMonetagPostback(timeoutMs=22000, intervalMs=1100){
     return null;
 }
 
-function updateVisibleBalancesFromMonetag(data){
-    const user = data?.user || data;
-    if(!user) return;
-
-    const balanceEl = document.getElementById("balanceText");
-    const earningsEl = document.getElementById("earningsBalanceText");
-    const depositEl = document.getElementById("depositBalanceText");
-
-    if(balanceEl && user.balance != null) balanceEl.textContent = Number(user.balance).toFixed(2);
-    if(earningsEl && user.withdrawableBalance != null) earningsEl.textContent = Number(user.withdrawableBalance).toFixed(2);
-    if(depositEl && user.depositBalance != null) depositEl.textContent = Number(user.depositBalance).toFixed(2);
-
-    if(user.withdrawableBalance != null) currentEarnings = Number(user.withdrawableBalance);
-
-    /* Keep the existing dashboard cache current without another server read. */
-    try{
-        const name = document.getElementById("userNameText")?.innerText || "User";
-        cacheDashboardData(
-            name,
-            Number(user.balance || 0).toFixed(2),
-            Number(user.withdrawableBalance || 0).toFixed(2),
-            Number(user.depositBalance || 0).toFixed(2)
-        );
-    }catch(_){ }
+function getMonetagRewardIndex(result){
+    if(Number(result.spins || 0) >= 2) return 2;
+    if(Number(result.spins || 0) === 1) return 0;
+    if(Number(result.cash || 0) === 10) return 1;
+    if(Number(result.cash || 0) === 5) return 3;
+    return 4;
 }
 
-function getRewardDisplay(reward){
-    const key = reward?.key || "try_again";
-    return MONETAG_REEL_ITEMS.find(item => item.key === key) || MONETAG_REEL_ITEMS[0];
-}
-
-function spinMonetagReel(reward){
+function runMonetagRewardReel(result){
     return new Promise(resolve=>{
+        const wrap = document.getElementById("monetagReelWrap");
         const track = document.getElementById("monetagReelTrack");
-        const shell = document.getElementById("monetagReelShell");
-        const status = document.getElementById("monetagReelStatus");
-        if(!track || !shell){ resolve(); return; }
+        const caption = document.getElementById("monetagReelCaption");
+        const resultIndex = getMonetagRewardIndex(result);
 
-        const target = getRewardDisplay(reward);
-        const items = Array.from(track.querySelectorAll(".monetag-reel-item"));
-        if(!items.length){ resolve(); return; }
-
-        /* Pick a late occurrence of the authoritative server result so the
-           reel travels a long distance before slowing into the center. */
-        let targetIndex = -1;
-        for(let i=items.length-1;i>=0;i--){
-            if(items[i].dataset.rewardKey === target.key){
-                targetIndex = i;
-                break;
-            }
+        if(!wrap || !track){
+            resolve();
+            return;
         }
-        if(targetIndex < 0){ resolve(); return; }
 
-        const item = items[targetIndex];
-        const shellRect = shell.getBoundingClientRect();
-        const itemRect = item.getBoundingClientRect();
-        const itemCenter = itemRect.left + itemRect.width/2;
-        const shellCenter = shellRect.left + shellRect.width/2;
-        const currentTransform = getComputedStyle(track).transform;
-        let currentX = 0;
-        if(currentTransform && currentTransform !== "none"){
-            try{ currentX = new DOMMatrix(currentTransform).m41; }catch(_){ }
-        }
-        const delta = shellCenter - itemCenter;
-        const finalX = currentX + delta;
+        const items = track.querySelectorAll(".monetag-reel-item");
+        const targetIndex = 13 + resultIndex;
+        const itemWidth = 112;
+        const gap = 10;
+        const step = itemWidth + gap;
+        const windowEl = wrap.querySelector(".monetag-reel-window");
+        const centerOffset = (windowEl?.clientWidth || 300) / 2;
+        const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2);
 
-        track.style.transition = "transform 3.35s cubic-bezier(.08,.72,.12,1)";
-        track.style.transform = `translate3d(${finalX}px,0,0)`;
-        if(status) status.textContent = "Rolling through the rewards…";
+        wrap.style.display = "block";
+        wrap.classList.add("show");
+        if(caption) caption.textContent = "REVEALING YOUR REWARD";
+
+        track.style.transition = "none";
+        track.style.transform = "translate3d(0,0,0)";
+        void track.offsetWidth;
+
+        track.style.transition = "transform 2.7s cubic-bezier(.08,.75,.12,1)";
+        track.style.transform = `translate3d(${targetOffset}px,0,0)`;
 
         setTimeout(()=>{
-            track.style.transition = "transform .35s ease-out";
-            if(status) status.textContent = `Landing on ${target.label}…`;
-            setTimeout(()=>{
-                if(status) status.textContent = "Prize locked in!";
-                resolve();
-            },420);
-        },3380);
+            wrap.classList.add("landed");
+            if(caption) caption.textContent = "REWARD LOCKED IN ✓";
+            resolve();
+        },2850);
     });
 }
 
 function showMonetagResult(result){
     const title = document.getElementById("monetagModalTitle");
-    const subtitle = documen
-/* =========================================================
-   FIRST-TIME PAYME TUTORIAL — LOCAL ONLY, ZERO EGRESS
-   ========================================================= */
-const PAYME_TUTORIAL_STEPS = [
-    {
-        selector: ".deposit-btn",
-        title: "Deposit",
-        text: "Add money to your PAYME wallet here. Your deposit balance is the money you put into the platform.",
-        mobileSelector: ".deposit-btn"
-    },
-    {
-        selector: "#withdrawBtn",
-        title: "Withdraw",
-        text: "Use Withdraw when you want to request a payout from your available earnings balance.",
-        mobileSelector: "#withdrawBtn"
-    },
-    {
-        selector: ".mobile-nav a[href=\"/earn\"], .desktop-nav a[href=\"/earn\"]",
-        title: "Earn",
-        text: "Earn is where you can find the available earning opportunities, tasks and activities on PAYME."
-    },
-    {
-        selector: ".mobile-nav a[href=\"#referrals\"], .desktop-nav a[href=\"#referrals\"]",
-        title: "Refer",
-        text: "Invite friends with your referral link and track your referral activity and earnings here."
-    },
-    {
-        selector: ".mobile-nav a[href=\"/leaderboard.html\"], .desktop-nav a[href=\"/leaderboard.html\"]",
-        title: "Ranking",
-        text: "Ranking shows the leaderboard so you can see how you compare with other PAYME players."
-    }
-];
-let paymeTutorialStep = 0;
-let paymeTutorialActive = false;
-let paymeTutorialResizeTimer = null;
-
-function paymeTutorialStorageKey(){
-    try{
-        const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-        return `paymeTutorialSeenV1:${String(id || "anonymous")}`;
-    }catch(_){
-        return "paymeTutorialSeenV1:anonymous";
-    }
-}
-
-function hasSeenPaymeTutorial(){
-    try{ return localStorage.getItem(paymeTutorialStorageKey()) === "1"; }catch(_){ return false; }
-}
-
-function markPaymeTutorialSeen(){
-    try{ localStorage.setItem(paymeTutorialStorageKey(), "1"); }catch(_){ }
-    try{
-        sessionStorage.removeItem("paymeTutorialPendingV1");
-        sessionStorage.removeItem("paymeSpinGameStartedV1");
-    }catch(_){ }
-}
-
-function getPaymeTutorialTarget(step){
-    const candidates = document.querySelectorAll(step.selector);
-    for(const candidate of candidates){
-        const rect = candidate.getBoundingClientRect();
-        if(rect.width > 0 && rect.height > 0){
-            return candidate;
-        }
-    }
-    if(step.mobileSelector){
-        const fallback = document.querySelector(step.mobileSelector);
-        if(fallback){
-            const rect = fallback.getBoundingClientRect();
-            if(rect.width > 0 && rect.height > 0) return fallback;
-        }
-    }
-    return null;
-}
-
-function positionPaymeTutorial(){
-    if(!paymeTutorialActive) return;
-    const step = PAYME_TUTORIAL_STEPS[paymeTutorialStep];
-    if(!step) return;
-
-    const target = getPaymeTutorialTarget(step);
-    const spotlight = document.getElementById("paymeTutorialSpotlight");
-    const card = document.getElementById("paymeTutorialCard");
-    if(!target || !spotlight || !card) return;
-
-    const rect = target.getBoundingClientRect();
-    const pad = 7;
-    const left = Math.max(5, rect.left - pad);
-    const top = Math.max(5, rect.top - pad);
-    const width = Math.min(window.innerWidth - left - 5, rect.width + pad*2);
-    const height = Math.min(window.innerHeight - top - 5, rect.height + pad*2);
-
-    spotlight.style.left = `${left}px`;
-    spotlight.style.top = `${top}px`;
-    spotlight.style.width = `${Math.max(10,width)}px`;
-    spotlight.style.height = `${Math.max(10,height)}px`;
-    spotlight.style.borderRadius = getComputedStyle(target).borderRadius || "16px";
-
-    const cardHeight = card.offsetHeight || 175;
-    let cardTop;
-    if(rect.bottom + 18 + cardHeight <= window.innerHeight){
-        cardTop = rect.bottom + 18;
-    }else if(rect.top - 18 - cardHeight >= 0){
-        cardTop = rect.top - 18 - cardHeight;
-    }else{
-        cardTop = Math.max(12, window.innerHeight - cardHeight - 12);
-    }
-    card.style.top = `${cardTop}px`;
-}
-
-function renderPaymeTutorialStep(){
-    const step = PAYME_TUTORIAL_STEPS[paymeTutorialStep];
-    if(!step) return;
-
-    const kicker = document.getElementById("paymeTutorialKicker");
-    const title = document.getElementById("paymeTutorialTitle");
-    const text = document.getElementById("paymeTutorialText");
-    const next = document.getElementById("paymeTutorialNext");
-    const progress = document.querySelectorAll("#paymeTutorialProgress i");
-
-    if(kicker) kicker.textContent = `QUICK TOUR • ${paymeTutorialStep + 1}/${PAYME_TUTORIAL_STEPS.length}`;
-    if(title) title.textContent = step.title;
-    if(text) text.textContent = step.text;
-    if(next) next.textContent = paymeTutorialStep === PAYME_TUTORIAL_STEPS.length - 1 ? "Done ✓" : "Next →";
-    progress.forEach((dot,index)=>dot.classList.toggle("active", index <= paymeTutorialStep));
-
-    requestAnimationFrame(()=>positionPaymeTutorial());
-}
-
-function paymeTutorialEligibilityKey(){
-    return `paymeTutorialEligibleV1:${getMonetagClientUserKey()}`;
-}
-
-function markPaymeTutorialEligible(){
-    try{ localStorage.setItem(paymeTutorialEligibilityKey(), "1"); }catch(_){ }
-}
-
-function isPaymeTutorialEligible(){
-    try{ return localStorage.getItem(paymeTutorialEligibilityKey()) === "1"; }catch(_){ return false; }
-}
-
-function startPaymeTutorial(){
-    if(paymeTutorialActive || hasSeenPaymeTutorial() || !isPaymeTutorialEligible()) return;
-
-    /* This flag is created only when the welcome free spin is successfully
-       granted. It survives the dashboard → game → dashboard navigation. */
-    let pending = false;
-    let gameStarted = false;
-    try{
-        pending = sessionStorage.getItem("paymeTutorialPendingV1") === "1";
-        gameStarted = sessionStorage.getItem("paymeSpinGameStartedV1") === "1";
-    }catch(_){ }
-
-    if(!pending || !gameStarted) return;
-
-    const overlay = document.getElementById("paymeTutorialOverlay");
-    if(!overlay) return;
-
-    /* Make sure the dashboard targets are visible before opening the tour. */
-    paymeTutorialActive = true;
-    paymeTutorialStep = 0;
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden","false");
-    document.body.style.overflow = "hidden";
-    renderPaymeTutorialStep();
-}
-
-function nextPaymeTutorial(){
-    if(!paymeTutorialActive) return;
-    if(paymeTutorialStep >= PAYME_TUTORIAL_STEPS.length - 1){
-        closePaymeTutorial();
-        return;
-    }
-    paymeTutorialStep += 1;
-    renderPaymeTutorialStep();
-}
-
-function skipPaymeTutorial(){
-    if(!paymeTutorialActive) return;
-    closePaymeTutorial();
-}
-
-function closePaymeTutorial(){
-    markPaymeTutorialSeen();
-    paymeTutorialActive = false;
-    const overlay = document.getElementById("paymeTutorialOverlay");
-    if(overlay){
-        overlay.classList.remove("show");
-        overlay.setAttribute("aria-hidden","true");
-    }
-    document.body.style.overflow = "";
-}
-
-window.addEventListener("resize",()=>{
-    if(paymeTutorialResizeTimer) clearTimeout(paymeTutorialResizeTimer);
-    paymeTutorialResizeTimer = setTimeout(positionPaymeTutorial,80);
-});
-
-t.getElementById("monetagModalSubtitle");
+    const subtitle = document.getElementById("monetagModalSubtitle");
+    const grid = document.getElementById("monetagPrizeGrid");
     const reveal = document.getElementById("monetagRevealBtn");
     const status = document.getElementById("monetagStatus");
     const resultBox = document.getElementById("monetagResult");
@@ -3218,35 +3032,50 @@ t.getElementById("monetagModalSubtitle");
     const label = document.getElementById("monetagResultLabel");
     const copy = document.getElementById("monetagResultCopy");
     const done = document.getElementById("monetagDoneBtn");
-    const shell = document.getElementById("monetagReelShell");
+    const orb = document.getElementById("monetagOrb");
 
-    if(title) title.textContent = "You won! 🎉";
+    if(title) title.textContent = "🎉 You won!";
     if(subtitle) subtitle.textContent = "Your reward has been confirmed and added to your PAYME account.";
+    if(grid) grid.style.display = "none";
     if(reveal) reveal.style.display = "none";
     if(status) status.textContent = "";
-    if(shell) shell.style.display = "none";
+    if(orb) orb.textContent = "🎉";
 
     if(icon) icon.textContent = result.spins >= 2 ? "🎟️🎟️" : result.spins === 1 ? "🎟️" : result.cash > 0 ? "💰" : "🔄";
     if(label) label.textContent = result.label || "Try Again";
     if(copy){
         if(result.cash > 0) copy.textContent = `₦${Number(result.cash).toLocaleString()} has been added to your earnings balance.`;
         else if(result.spins > 0) copy.textContent = `${result.spins} free spin${result.spins === 1 ? "" : "s"} have been added to your account.`;
-        else copy.textContent = "No reward this time. Come back after the 30-second cooldown.";
+        else copy.textContent = "No cash or free spin was awarded this time.";
     }
     if(resultBox) resultBox.classList.add("show");
     if(done) done.classList.add("show");
+    // The server has already credited the reward at this point, so the
+    // 30-second cooldown begins as soon as the reward is revealed.
+    startMonetagCooldown();
+}
+
+function refreshVisibleBalances(user){
+    if(!user) return;
+    const balanceEl = document.getElementById("balanceText");
+    const earningsEl = document.getElementById("earningsBalanceText");
+    const depositEl = document.getElementById("depositBalanceText");
+    if(balanceEl && user.balance != null) balanceEl.textContent = Number(user.balance).toLocaleString();
+    if(earningsEl && user.withdrawableBalance != null) earningsEl.textContent = Number(user.withdrawableBalance).toLocaleString();
+    if(depositEl && user.depositBalance != null) depositEl.textContent = Number(user.depositBalance).toLocaleString();
+}
+
+function claimMonetagRewardAndClose(){
+    closeMonetagReward();
 }
 
 async function watchMonetagAd(){
     if(monetagAdInProgress) return;
-    if(getMonetagCooldownUntil() > Date.now()){
-        renderMonetagCooldown();
-        closeMonetagReward();
-        return;
-    }
 
     const button = document.getElementById("monetagRevealBtn");
     const status = document.getElementById("monetagStatus");
+    const note = document.getElementById("monetagWatchNote");
+
     monetagAdInProgress = true;
     if(button){ button.disabled = true; button.textContent = "Preparing ad…"; }
     if(status) status.textContent = "Preparing your secure reward session…";
@@ -3259,55 +3088,68 @@ async function watchMonetagAd(){
         }
 
         if(button) button.textContent = "Opening ad…";
-        if(status) status.textContent = "Complete the sponsored ad to unlock your reward.";
+        if(status) status.textContent = "Please complete the rewarded ad. The server will decide your reward.";
 
-        /* The unique session is sent as both YMID and requestVar. The server
-           still awards nothing from this browser callback. */
         await window.show_11688228({
             type:"end",
             ymid:monetagAdSessionId,
-            requestVar:monetagAdSessionId
+            requestVar:"dashboard_watch_ad"
         });
 
-        if(button) button.textContent = "Confirming…";
-        if(status) status.textContent = "Ad completed. Waiting for Monetag confirmation…";
+        if(button) button.textContent = "Confirming reward…";
+        if(status) status.textContent = "Ad completed. Waiting for Monetag's server confirmation…";
 
         const postbackData = await waitForMonetagPostback();
+
         if(!postbackData){
-            if(status) status.textContent = "Monetag is still confirming this reward. Please try again shortly if it does not appear.";
+            if(status) status.textContent = "Ad completed, but Monetag has not confirmed the reward yet. Please check again shortly.";
             return;
         }
 
         const reward = postbackData.reward || {};
         const cash = Number(reward.cash || 0);
         const spins = Number(reward.spins || 0);
-        monetagRewardResult = {label:reward.label || "Try Again", cash, spins, key:reward.key};
 
-        /* No extra /api/user/dashboard request here: the postback status
-           already contains the balances that the server just persisted. */
-        updateVisibleBalancesFromMonetag({
-            balance: postbackData.balance,
-            withdrawableBalance: postbackData.withdrawableBalance,
-            depositBalance: postbackData.depositBalance
-        });
+        try{
+            const refreshResponse = await fetch("/api/user/dashboard", {
+                method:"POST",
+                credentials:"include",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({})
+            });
+            const refreshed = refreshResponse.ok ? await refreshResponse.json() : null;
+            refreshVisibleBalances(refreshed?.user);
+        }catch(refreshError){
+            console.warn("Dashboard refresh after Monetag reward failed:",refreshError);
+        }
 
-        await spinMonetagReel(monetagRewardResult);
-        showMonetagResult(monetagRewardResult);
+        /* Server has already selected/credited the reward. The reel is only
+           a visual reveal and can never change the actual reward. */
+        const result = {label:reward.label || "Try Again",cash,spins};
+        const reelWrap = document.getElementById("monetagReelWrap");
+        const revealButton = document.getElementById("monetagRevealBtn");
+        if(revealButton) revealButton.style.display = "none";
+        await runMonetagRewardReel(result);
+        if(reelWrap) reelWrap.style.display = "none";
+        showMonetagResult(result);
 
-        /* The UI cooldown begins when the player presses Collect & Continue. */
-        if(status) status.textContent = "Reward confirmed. Tap Collect & Continue.";
     }catch(error){
         console.error("Monetag rewarded ad error:",error);
-        monetagSetStatus(error?.message || "Unable to show the rewarded ad.",true);
+        const message = error?.message || "Unable to show the rewarded ad.";
+        monetagSetStatus(message,true);
+        if(error?.nextAllowedAt){
+            const remaining = Math.max(0, Number(error.nextAllowedAt) - Date.now());
+            localStorage.setItem(MONETAG_COOLDOWN_KEY, String(error.nextAllowedAt));
+            updateMonetagCooldownUI();
+            if(status) status.textContent = `Try again in about ${Math.ceil(remaining / 1000)} seconds.`;
+        }
+        if(button){ button.disabled = false; button.textContent = "▶ Watch Ad to Reveal"; }
     }finally{
         monetagAdInProgress = false;
-        renderMonetagCooldown();
-        if(button && !monetagRewardResult){
-            button.disabled = false;
-            button.textContent = "▶ Watch Ad";
-        }
     }
 }
+
+updateMonetagCooldownUI();
 
 /* Internal page links get the same small loading feedback. */
 document.addEventListener("click", function(e){
@@ -3947,20 +3789,15 @@ updateDailyWidgetUI();
 }
 
 if(user.isNewUser){
-
-/* New users become eligible for the one-time walkthrough. The actual
-   tutorial is not shown yet; it waits for the free-spin flow to complete. */
-markPaymeTutorialEligible();
-
-document.getElementById(
-"bonusModal"
-).classList.add("show");
-
-}else if(!user.hasClaimedGiftBox){
-
-showGiftModal();
-
+    const bonusModal = document.getElementById("bonusModal");
+    if(bonusModal && !bonusModal.classList.contains("show")){
+        bonusModal.classList.add("show");
+    }
+}else if(!user.hasClaimedGiftBox && !sessionStorage.getItem("paymeFreeSpinStarted")){
+    showGiftModal();
 }
+
+maybeShowDashboardTutorial(user);
 
 }catch(error){
 
@@ -3971,6 +3808,181 @@ error
 
 }
 
+}
+
+/* =========================================================
+   FIRST-USE DASHBOARD TUTORIAL
+   ========================================================= */
+const dashboardTutorialSteps = [
+    {
+        target:"depositBtn",
+        icon:"💳",
+        title:"Deposit",
+        text:"Use Deposit whenever you want to add funds to your PAYME deposit balance.",
+        position:"bottom"
+    },
+    {
+        target:"withdrawBtn",
+        icon:"💸",
+        title:"Withdraw",
+        text:"When your earnings reach the minimum withdrawal amount, use Withdraw to request your payout.",
+        position:"bottom"
+    },
+    {
+        target:'a[href="/earn"]',
+        icon:"💎",
+        title:"Earn",
+        text:"Tap Earn to discover available earning tasks and opportunities.",
+        position:"top"
+    },
+    {
+        target:'a[href="#referrals"]',
+        icon:"👥",
+        title:"Refer",
+        text:"Use Refer to invite friends and track your referral rewards.",
+        position:"top"
+    },
+    {
+        target:'a[href="/leaderboard.html"]',
+        icon:"🏆",
+        title:"Ranking",
+        text:"Ranking shows the leaderboard so you can see how you compare with other PAYME users.",
+        position:"top"
+    }
+];
+let dashboardTutorialIndex = 0;
+let dashboardTutorialOpen = false;
+
+function isReturningFromFreeSpin(){
+    try{
+        const ref = String(document.referrer || "");
+        const marker = sessionStorage.getItem("paymeFreeSpinStarted");
+        return ref.includes("/game") || marker === "1";
+    }catch(e){
+        return String(document.referrer || "").includes("/game");
+    }
+}
+
+function findTutorialTarget(selector){
+    const el = document.getElementById(selector);
+    if(el) return el;
+    return document.querySelector(selector);
+}
+
+function positionDashboardTutorial(){
+    if(!dashboardTutorialOpen) return;
+
+    const step = dashboardTutorialSteps[dashboardTutorialIndex];
+    const target = findTutorialTarget(step.target);
+    const spotlight = document.getElementById("tutorialSpotlight");
+    const card = document.getElementById("tutorialCard");
+    if(!target || !spotlight || !card) return;
+
+    const rect = target.getBoundingClientRect();
+    const pad = 7;
+    spotlight.style.display = "block";
+    spotlight.style.left = `${Math.max(5,rect.left-pad)}px`;
+    spotlight.style.top = `${Math.max(5,rect.top-pad)}px`;
+    spotlight.style.width = `${Math.min(window.innerWidth-10,rect.width+pad*2)}px`;
+    spotlight.style.height = `${Math.min(window.innerHeight-10,rect.height+pad*2)}px`;
+
+    const cardRect = card.getBoundingClientRect();
+    const gap = 16;
+    let top;
+
+    if(step.position === "top"){
+        top = rect.top - cardRect.height - gap;
+    }else{
+        top = rect.bottom + gap;
+    }
+
+    if(top < 12) top = Math.min(window.innerHeight-cardRect.height-12, rect.bottom+gap);
+    if(top > window.innerHeight-cardRect.height-12) top = Math.max(12, rect.top-cardRect.height-gap);
+
+    let left = rect.left + (rect.width-cardRect.width)/2;
+    left = Math.max(12,Math.min(window.innerWidth-cardRect.width-12,left));
+
+    card.style.left = `${left}px`;
+    card.style.top = `${top}px`;
+}
+
+function renderDashboardTutorialStep(){
+    const step = dashboardTutorialSteps[dashboardTutorialIndex];
+    const total = dashboardTutorialSteps.length;
+    const stepEl = document.getElementById("tutorialStep");
+    const iconEl = document.getElementById("tutorialIcon");
+    const titleEl = document.getElementById("tutorialTitle");
+    const textEl = document.getElementById("tutorialText");
+    const progressEl = document.getElementById("tutorialProgress");
+    const nextEl = document.getElementById("tutorialNextBtn");
+
+    if(stepEl) stepEl.textContent = `${dashboardTutorialIndex+1} / ${total}`;
+    if(iconEl) iconEl.textContent = step.icon;
+    if(titleEl) titleEl.textContent = step.title;
+    if(textEl) textEl.textContent = step.text;
+    if(progressEl) progressEl.style.setProperty("--tutorial-progress",`${((dashboardTutorialIndex+1)/total)*100}%`);
+    if(nextEl) nextEl.textContent = dashboardTutorialIndex === total-1 ? "Finish ✓" : "Next →";
+
+    requestAnimationFrame(()=>{
+        setTimeout(positionDashboardTutorial,40);
+    });
+}
+
+async function persistDashboardTutorialDone(){
+    try{
+        await fetch("/api/user/complete-dashboard-tutorial",{
+            method:"POST",
+            credentials:"include",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({})
+        });
+    }catch(error){
+        console.warn("Unable to save dashboard tutorial state:",error);
+    }
+}
+
+function closeDashboardTutorial(){
+    dashboardTutorialOpen = false;
+    const overlay = document.getElementById("dashboardTutorial");
+    if(overlay){
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden","true");
+    }
+    window.removeEventListener("resize",positionDashboardTutorial);
+    window.removeEventListener("scroll",positionDashboardTutorial,true);
+    try{ sessionStorage.removeItem("paymeFreeSpinStarted"); }catch(e){}
+}
+
+async function skipDashboardTutorial(){
+    await persistDashboardTutorialDone();
+    closeDashboardTutorial();
+}
+
+async function nextDashboardTutorial(){
+    if(dashboardTutorialIndex >= dashboardTutorialSteps.length-1){
+        await persistDashboardTutorialDone();
+        closeDashboardTutorial();
+        return;
+    }
+    dashboardTutorialIndex += 1;
+    renderDashboardTutorialStep();
+}
+
+function maybeShowDashboardTutorial(user){
+    if(dashboardTutorialOpen || !user) return;
+    if(!user.showOnboardingTutorial) return;
+    if(!isReturningFromFreeSpin()) return;
+
+    const overlay = document.getElementById("dashboardTutorial");
+    if(!overlay) return;
+
+    dashboardTutorialIndex = 0;
+    dashboardTutorialOpen = true;
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
+    renderDashboardTutorialStep();
+    window.addEventListener("resize",positionDashboardTutorial);
+    window.addEventListener("scroll",positionDashboardTutorial,true);
 }
 
 /* =========================================================
@@ -4779,15 +4791,6 @@ await res.json();
 
 if(data.success){
 
-/* The tutorial should begin only after this new-user free-spin flow
-   has actually been granted and the player returns from the game.
-   sessionStorage survives the dashboard → game → dashboard navigation
-   without adding any server/Supabase request. */
-try{
-    sessionStorage.setItem("paymeTutorialPendingV1","1");
-    sessionStorage.setItem("paymeSpinGameStartedV1","1");
-}catch(_){ }
-
 alert(
 "Free spin granted! Redirecting to the Spin Game..."
 );
@@ -4797,6 +4800,10 @@ document.getElementById(
 ).classList.remove(
 "show"
 );
+
+try{
+sessionStorage.setItem("paymeFreeSpinStarted","1");
+}catch(e){}
 
 window.location.href =
 "/game.html";
@@ -5106,16 +5113,10 @@ if(pageWasRefreshed){
 
 fetchDashboardData(dashboardEntryLoading);
 
-/* Render the 30-second ad cooldown locally. No polling or Supabase request. */
-renderMonetagCooldown();
-
-/* The tutorial is local-only and is intentionally checked after the dashboard
-   has rendered so all highlight targets have their final positions. */
-setTimeout(()=>startPaymeTutorial(), 700);
-
 dashboardEntryLoading = false;
 
 updateReferralLinkUI();
+
 loadLeaderboard();
 
 /* No timer-based polling at all now — a background interval was the
@@ -5135,10 +5136,8 @@ function refreshDashboardOnReturn(){
     const now = Date.now();
     if(now - lastDashboardRefresh < DASHBOARD_REFRESH_COOLDOWN_MS) return;
     lastDashboardRefresh = now;
-    /* Refresh only the user's wallet/dashboard state on return. The
-       leaderboard is intentionally not reloaded here because it is not
-       required to restore the page and would add another Supabase read. */
     fetchDashboardData();
+    loadLeaderboard();
 }
 
 document.addEventListener("visibilitychange", ()=>{

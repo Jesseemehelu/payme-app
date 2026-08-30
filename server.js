@@ -165,6 +165,10 @@ const MONETAG_REWARD_SLOTS = [
 // userId -> pending watch session
 const monetagPendingSessions = new Map();
 const monetagCompletedSessions = new Map();
+// Short-lived server marker used only to detect that a newly onboarded user
+// actually consumed the free spin before returning to the dashboard. It is
+// intentionally in-memory to avoid another Supabase read/write and expires quickly.
+const recentFreeSpinCompletions = new Map();
 
 function cleanupMonetagSessions() {
   const now = Date.now();
@@ -1676,10 +1680,6 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
         success: true,
         confirmed: true,
         reward: completed.reward,
-        balance: completed.balance,
-        withdrawableBalance: completed.withdrawableBalance,
-        depositBalance: completed.depositBalance,
-        freeSpins: completed.freeSpins,
         completedAt: completed.completedAt
       });
     }
@@ -1689,12 +1689,40 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
       return res.json({ success: true, confirmed: false });
     }
 
-    // IMPORTANT EGRESS OPTIMIZATION:
-    // Do not query Supabase on every browser status poll. If the current
-    // Render process received the postback, the completed session above is
-    // enough to return the authoritative reward and balances. If Render is
-    // restarted mid-ad, the user can simply start a fresh ad session.
-    // This avoids repeated PostgREST reads while the reward animation waits.
+    // If Render restarted after the postback was written to Supabase,
+    // recover the reward from the most recent Monetag transaction.
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('id, amount, description, created_at')
+      .eq('user_id', req.user.id)
+      .eq('type', 'monetag_reward')
+      .gte('created_at', new Date(startedAt > 0 ? startedAt : Date.now()).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    if (Array.isArray(data) && data.length) {
+      const tx = data[0];
+      const description = String(tx.description || 'Monetag Reward');
+      const label = description.replace(/^Monetag Reward\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
+      let spins = 0;
+      if (/2\s*Free Spins/i.test(label)) spins = 2;
+      else if (/1\s*Free Spin/i.test(label)) spins = 1;
+
+      return res.json({
+        success: true,
+        confirmed: true,
+        reward: {
+          key: 'server_confirmed',
+          label,
+          cash: number(tx.amount),
+          spins
+        },
+        completedAt: tx.created_at
+      });
+    }
+
     return res.json({ success: true, confirmed: false });
   } catch (err) {
     console.error('Monetag status error:', err);
@@ -1828,10 +1856,6 @@ app.all('/api/monetag/postback', async (req, res) => {
       monetagCompletedSessions.set(pending.id, {
         userId: user.id,
         reward: rewardResult,
-        balance: number(user.balance),
-        withdrawableBalance: number(user.withdrawableBalance),
-        depositBalance: number(user.depositBalance),
-        freeSpins: number(user.freeSpins),
         completedAt: Date.now(),
         expiresAt: Date.now() + 5 * 60 * 1000
       });
@@ -4135,11 +4159,50 @@ function sanitizeUser(
       ),
 
     hasClaimedGiftBox:
-      !!user.hasClaimedGiftBox
+      !!user.hasClaimedGiftBox,
+
+    hasReceivedWelcomeBonus:
+      !!user.hasReceivedWelcomeBonus,
+
+    hasSeenPopup:
+      !!user.hasSeenPopup,
+
+    showOnboardingTutorial:
+      !!user.hasReceivedWelcomeBonus &&
+      !!user.hasClaimedGiftBox &&
+      !user.hasSeenPopup
 
   };
 
 }
+
+// ======================================================
+ // DASHBOARD FIRST-USE TUTORIAL
+ // ======================================================
+ // `has_seen_popup` is used as the persistent tutorial-complete flag.
+ // It is stored in Supabase, so redeploying Render does not make the
+ // tutorial reappear for users who already skipped/completed it.
+ app.post('/api/user/complete-dashboard-tutorial', requireLogin, async (req, res) => {
+   try {
+     const user = req.user;
+
+     if (!user.hasSeenPopup) {
+       user.hasSeenPopup = true;
+       await updateUser(user);
+     }
+
+     return res.json({
+       success: true,
+       tutorialCompleted: true
+     });
+   } catch (err) {
+     console.error('Dashboard tutorial completion error:', err);
+     return res.status(500).json({
+       success: false,
+       message: 'Unable to save tutorial state.'
+     });
+   }
+ });
 
 // ======================================================
 // HTML ROUTES
@@ -6069,6 +6132,11 @@ app.post(
         user
       );
 
+      if (usedFreeSpin) {
+        recentFreeSpinCompletions.set(String(user.id), Date.now() + (10 * 60 * 1000));
+        setTimeout(() => recentFreeSpinCompletions.delete(String(user.id)), 10 * 60 * 1000).unref();
+      }
+
       await addTransaction(
         user.id,
         {
@@ -7145,19 +7213,7 @@ app.post(
       // object already reflects the persisted state.
       const isNewUser =
         !beforeBonus &&
-        user.hasReceivedWelcomeBonus &&
-        !user.hasSeenPopup;
-
-      if (isNewUser) {
-
-        user.hasSeenPopup =
-          true;
-
-        await updateUser(
-          user
-        );
-
-      }
+        user.hasReceivedWelcomeBonus;
 
       // Same reasoning: `user` already carries the up-to-date fields
       // (mutated + persisted above when relevant), so a second re-fetch
@@ -7171,6 +7227,9 @@ app.post(
       // Fetching both full lists here on every single dashboard load (or
       // every tab-return) was pure wasted Supabase egress for data that
       // was silently discarded on arrival.
+
+      const justCompletedFreeSpin =
+        Number(recentFreeSpinCompletions.get(String(user.id)) || 0) > Date.now();
 
       const daily =
         normalizeDailyReward(
@@ -7228,6 +7287,12 @@ app.post(
           ...sanitizeUser(
             user
           ),
+
+          showOnboardingTutorial:
+            !!user.hasReceivedWelcomeBonus &&
+            !!user.hasClaimedGiftBox &&
+            !user.hasSeenPopup &&
+            justCompletedFreeSpin,
 
           isNewUser,
 
@@ -7579,6 +7644,10 @@ app.post(
       await updateUser(
         user
       );
+
+      if (justCompletedFreeSpin) {
+        recentFreeSpinCompletions.delete(String(user.id));
+      }
 
       return res.json({
 
