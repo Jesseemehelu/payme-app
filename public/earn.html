@@ -10,6 +10,8 @@
 
 <title>PAYME — Earn</title>
 
+<script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -1446,6 +1448,11 @@ body.modal-open {
 /* CLICK LOADING + STRONG GAME CARDS */
 .page-loader{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(3,7,18,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,visibility .15s ease}.page-loader.active{opacity:1;visibility:visible;pointer-events:auto}.loader-dots{display:flex;gap:7px;align-items:center;justify-content:center;padding:14px 18px;border-radius:18px;background:#101a32;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 45px rgba(0,0,0,.45)}.loader-dots span{width:8px;height:8px;border-radius:50%;background:#fff;animation:loadingDot .8s ease-in-out infinite}.loader-dots span:nth-child(2){animation-delay:.13s}.loader-dots span:nth-child(3){animation-delay:.26s}@keyframes loadingDot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-6px);opacity:1}}
 .game-item{background:#172846!important;border:2px solid rgba(255,255,255,.14)!important;box-shadow:0 12px 25px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.06)!important;min-height:88px!important;padding:14px!important}.game-item:nth-child(2){background:#20294f!important}.game-item:nth-child(3){background:#163f43!important}.game-details h4{font-size:.94rem!important;font-weight:900!important;color:#fff!important;letter-spacing:-.02em}.game-details p{color:#cbd5e1!important;font-size:.64rem!important}.game-reward{font-weight:900!important}.game-icon{background:#263b60!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 7px 16px rgba(0,0,0,.28)}.game-arrow{background:#2a3d60!important;border:1px solid rgba(255,255,255,.12);color:#fff!important}
+
+.watchads-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;visibility:hidden;pointer-events:none;transition:.25s}
+.watchads-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+.watchads-card-modal{position:relative;width:min(100%,420px);padding:24px 18px 20px;border-radius:30px;background:radial-gradient(circle at 50% 0%,rgba(6,214,232,.16),transparent 35%),linear-gradient(145deg,#10243a,#071423);border:1px solid rgba(103,232,249,.2);box-shadow:0 30px 80px rgba(0,0,0,.62);text-align:center;transform:translateY(18px) scale(.95);transition:.28s cubic-bezier(.2,.8,.2,1)}
+.watchads-overlay.show .watchads-card-modal{transform:none}.watchads-close{position:absolute;right:13px;top:13px;width:36px;height:36px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;font-size:22px}.watchads-icon{width:62px;height:62px;margin:2px auto 10px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(145deg,#075985,#164e63);font-size:28px;box-shadow:0 14px 28px rgba(6,182,212,.16)}.watchads-kicker{color:#67e8f9;font-size:.55rem;font-weight:900;letter-spacing:.14em}.watchads-card-modal h2{margin-top:5px;color:#fff;font-size:1.25rem;font-weight:900;letter-spacing:-.04em}.watchads-subtitle{margin:7px auto 14px;max-width:330px;color:#94a3b8;font-size:.68rem;line-height:1.5}.watchads-prizes{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:14px}.watchads-prizes span{padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);color:#dbeafe;font-size:.54rem;font-weight:800}.watchads-reel{display:none;margin:10px 0 14px}.watchads-reel.show{display:block}.watchads-reel-window{height:92px;position:relative;overflow:hidden;border-radius:18px;background:#06101d;border:1px solid rgba(103,232,249,.16);box-shadow:inset 0 0 30px rgba(6,182,212,.07)}.watchads-reel-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:10px;padding:0 20px;will-change:transform}.watchads-reel-item{width:112px;min-width:112px;text-align:center;padding:11px 6px;border-radius:14px;background:linear-gradient(145deg,#162b42,#0b192a);border:1px solid rgba(255,255,255,.09);color:#fff;font-size:.65rem;font-weight:900}.watchads-reel-item small{display:block;color:#94a3b8;font-size:.45rem;margin-top:3px}.watchads-reel-center{position:absolute;left:50%;top:4px;bottom:4px;width:2px;transform:translateX(-50%);background:#67e8f9;box-shadow:0 0 15px #06d6e8;pointer-events:none}.watchads-reel-caption{margin-top:7px;color:#67e8f9;font-size:.52rem;font-weight:900;letter-spacing:.12em}.watchads-start,.watchads-done{width:100%;min-height:49px;border:0;border-radius:16px;color:#fff;font-weight:900;font-size:.74rem;background:linear-gradient(135deg,#0891b2,#06b6d4);box-shadow:0 12px 25px rgba(6,182,212,.2)}.watchads-start:disabled{opacity:.65}.watchads-done{display:none;margin-top:10px;background:linear-gradient(135deg,#10b981,#059669)}.watchads-status{min-height:20px;margin-top:8px;color:#94a3b8;font-size:.61rem;line-height:1.4}.watchads-result{display:none;margin-top:10px;padding:14px;border-radius:18px;background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.18)}.watchads-result.show{display:block}.watchads-result-icon{font-size:27px}.watchads-result-title{margin-top:4px;color:#fff;font-size:1rem;font-weight:900}.watchads-result-copy{margin-top:3px;color:#a7f3d0;font-size:.62rem;line-height:1.45}.watchads-reel.landed .watchads-reel-window{box-shadow:0 0 0 2px rgba(103,232,249,.15),0 0 35px rgba(6,182,212,.2),inset 0 0 25px rgba(6,182,212,.06)}
 </style>
 </head>
 
@@ -1812,6 +1819,18 @@ body.modal-open {
 
 
     <!-- ====================================================
+         WATCH ADS & EARN
+    ===================================================== -->
+    <div class="earn-card-item watch-ads-card" id="openWatchAdsModal" role="button" tabindex="0" aria-label="Watch ads and earn">
+      <div>
+        <div class="card-top-row"><div class="icon-wrapper">📺</div><span class="status-badge badge-available">REWARD AD</span></div>
+        <div class="card-body"><h3>Watch Ads &amp; Earn</h3><p>Watch a sponsored advert, then reveal a surprise cash prize or free spins.</p></div>
+      </div>
+      <div class="card-action-row"><span>Watch &amp; Earn</span><div class="arrow-btn">→</div></div>
+    </div>
+
+
+    <!-- ====================================================
          COMMUNITY GIVEAWAYS
     ===================================================== -->
 
@@ -1872,6 +1891,22 @@ body.modal-open {
 </main>
 
 
+
+<!-- WATCH ADS & EARN POPUP -->
+<div class="watchads-overlay" id="watchAdsModal" aria-hidden="true">
+  <div class="watchads-card-modal" role="dialog" aria-modal="true" aria-labelledby="watchAdsTitle">
+    <button class="watchads-close" id="closeWatchAdsModal" type="button" aria-label="Close">×</button>
+    <div class="watchads-icon">📺</div><div class="watchads-kicker">REWARD AD</div>
+    <h2 id="watchAdsTitle">Watch. Reveal. Earn.</h2>
+    <p class="watchads-subtitle">Complete the sponsored advert and reveal your server-selected reward.</p>
+    <div class="watchads-prizes"><span>₦5</span><span>₦10</span><span>🎟️</span><span>🎟️🎟️</span><span>₦50</span><span>₦100</span><span>₦500</span></div>
+    <div class="watchads-reel" id="watchAdsReel"><div class="watchads-reel-window"><div class="watchads-reel-track" id="watchAdsReelTrack"></div><div class="watchads-reel-center"></div></div><div class="watchads-reel-caption" id="watchAdsReelCaption">YOUR REWARD IS WAITING</div></div>
+    <button class="watchads-start" id="watchAdsStartBtn" type="button">▶ Watch Ad</button>
+    <div class="watchads-status" id="watchAdsStatus"></div>
+    <div class="watchads-result" id="watchAdsResult"><div class="watchads-result-icon" id="watchAdsResultIcon">🎁</div><div class="watchads-result-title" id="watchAdsResultTitle">Reward</div><div class="watchads-result-copy" id="watchAdsResultCopy"></div></div>
+    <button class="watchads-done" id="watchAdsDoneBtn" type="button">Done</button>
+  </div>
+</div>
 
 <!-- ========================================================
      GAME POPUP
@@ -2185,8 +2220,13 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 <div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
+
+<script>
+(function(){const modal=document.getElementById('watchAdsModal'),open=document.getElementById('openWatchAdsModal'),close=document.getElementById('closeWatchAdsModal'),start=document.getElementById('watchAdsStartBtn'),done=document.getElementById('watchAdsDoneBtn'),status=document.getElementById('watchAdsStatus'),reel=document.getElementById('watchAdsReel'),track=document.getElementById('watchAdsReelTrack'),caption=document.getElementById('watchAdsReelCaption'),result=document.getElementById('watchAdsResult'),resultIcon=document.getElementById('watchAdsResultIcon'),resultTitle=document.getElementById('watchAdsResultTitle'),resultCopy=document.getElementById('watchAdsResultCopy');let sessionId=null,startedAt=0,busy=false;const items=[{icon:'🔄',label:'TRY AGAIN',sub:'No reward'},{icon:'₦5',label:'₦5',sub:'Rare'},{icon:'₦10',label:'₦10',sub:'Very rare'},{icon:'🎟️',label:'1 FREE SPIN',sub:'Rare'},{icon:'🎟️🎟️',label:'2 FREE SPINS',sub:'Very rare'},{icon:'₦50',label:'₦50',sub:'Extremely rare'},{icon:'₦100',label:'₦100',sub:'Almost impossible'},{icon:'₦500',label:'₦500',sub:'Ultra rare'}];function build(){track.innerHTML=Array.from({length:36},(_,i)=>{const x=items[i%items.length];return `<div class="watchads-reel-item"><div>${x.icon}</div><div>${x.label}</div><small>${x.sub}</small></div>`}).join('');track.style.transition='none';track.style.transform='translate3d(0,0,0)';}function reset(){sessionId=null;startedAt=0;start.disabled=false;start.style.display='block';start.textContent='▶ Watch Ad';status.textContent='';reel.classList.remove('show','landed');reel.style.display='none';result.classList.remove('show');done.style.display='none';build()}function show(){reset();modal.classList.add('show');modal.setAttribute('aria-hidden','false')}function hide(){if(busy)return;modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}async function startSession(){const r=await fetch('/api/monetag/start',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:'{}'});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.message||'Unable to start the rewarded ad.');sessionId=d.sessionId;startedAt=Number(d.createdAt||Date.now())}async function waitStatus(){const t=Date.now();while(Date.now()-t<15000){try{const r=await fetch(`/api/monetag/status?sessionId=${encodeURIComponent(sessionId)}&startedAt=${encodeURIComponent(startedAt)}`,{credentials:'include'});const d=await r.json().catch(()=>({}));if(r.ok&&d.success&&d.confirmed&&d.reward)return d}catch(e){}await new Promise(x=>setTimeout(x,1200))}return null}function idx(r){const l=String(r.label||'').toLowerCase();if(l.includes('500'))return 7;if(l.includes('100'))return 6;if(l.includes('50'))return 5;if(Number(r.spins)>=2)return 4;if(Number(r.spins)===1)return 3;if(Number(r.cash)===10)return 2;if(Number(r.cash)===5)return 1;return 0}function reveal(r){return new Promise(resolve=>{const step=122,center=(reel.querySelector('.watchads-reel-window')?.clientWidth||300)/2,target=28+idx(r),near=target-1,off=i=>-(i*step)+center-56;reel.style.display='block';reel.classList.add('show');caption.textContent='REVEALING YOUR REWARD…';track.style.transition='none';track.style.transform='translate3d(0,0,0)';void track.offsetWidth;track.style.transition='transform 1.05s cubic-bezier(.05,.75,.12,1)';track.style.transform=`translate3d(${off(near)}px,0,0)`;setTimeout(()=>{caption.textContent='SO CLOSE…';track.style.transition='transform 2.45s cubic-bezier(.12,.82,.08,1)';track.style.transform=`translate3d(${off(target)}px,0,0)`},1080);setTimeout(()=>{reel.classList.add('landed');caption.textContent='REWARD LOCKED IN ✓';resolve()},3650)})}function showResult(r){const cash=Number(r.cash||0),spins=Number(r.spins||0);resultIcon.textContent=spins>=2?'🎟️🎟️':spins===1?'🎟️':cash>0?'💰':'🔄';resultTitle.textContent=r.label||'Try Again';resultCopy.textContent=cash>0?`₦${cash.toLocaleString()} has been added to your earnings balance.`:spins>0?`${spins} free spin${spins===1?'':'s'} have been added to your account.`:'No cash or free spin was awarded this time.';result.classList.add('show');done.style.display='block'}async function watch(){if(busy)return;busy=true;start.disabled=true;status.textContent='Preparing your secure reward session…';try{await startSession();if(typeof window.show_11688228!=='function')throw new Error('Rewarded ad is not ready yet. Please wait a moment and try again.');start.textContent='Opening ad…';status.textContent='Please complete the sponsored advert.';await window.show_11688228({type:'end',ymid:sessionId,requestVar:'earn_watch_ad'});start.textContent='Confirming reward…';status.textContent='Ad completed. Confirming your reward…';const d=await waitStatus();if(!d){status.textContent='Ad completed, but confirmation is still pending. Please try again shortly.';return}const r=d.reward||{};status.textContent='';await reveal(r);showResult(r);start.style.display='none'}catch(e){status.textContent=e?.message||'Unable to show the rewarded ad.';start.disabled=false;start.textContent='▶ Watch Ad'}finally{busy=false}}if(open)open.addEventListener('click',show);if(close)close.addEventListener('click',hide);if(done)done.addEventListener('click',hide);if(start)start.addEventListener('click',watch);if(modal)modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))hide()});if(open)open.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')show()})})();
+</script>
 </body>
 </html>
+
 
 
 

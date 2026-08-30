@@ -155,11 +155,16 @@ const MONETAG_REWARD_COOLDOWN = 30 * 1000;
 // Reward table. 10,000 secure-random slots are used server-side.
 // Higher rewards are intentionally rare.
 const MONETAG_REWARD_SLOTS = [
-  { max: 8800, key: 'try_again',  label: 'Try Again',     cash: 0,  spins: 0 },
-  { max: 9700, key: 'cash_5',     label: '₦5',             cash: 5,  spins: 0 },
-  { max: 9950, key: 'cash_10',    label: '₦10',            cash: 10, spins: 0 },
-  { max: 9990, key: 'spin_1',     label: '1 Free Spin',    cash: 0,  spins: 1 },
-  { max: 10000,key: 'spin_2',     label: '2 Free Spins',   cash: 0,  spins: 2 }
+  // 100,000 cryptographically-random slots. Cash prizes and free spins
+  // are deliberately very rare; Try Again is the normal outcome.
+  { max: 85000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  { max: 93000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
+  { max: 98000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
+  { max: 99500, key: 'spin_1',    label: '1 Free Spin',     cash: 0,   spins: 1 },
+  { max: 99950, key: 'spin_2',    label: '2 Free Spins',    cash: 0,   spins: 2 },
+  { max: 99990, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
+  { max: 99999, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
+  { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
 ];
 
 // userId -> pending watch session
@@ -1910,7 +1915,7 @@ function normalizeMonetagTelegramId(value) {
 }
 
 function chooseMonetagReward() {
-  const roll = crypto.randomInt(0, 10000) + 1;
+  const roll = crypto.randomInt(0, 100000) + 1;
   for (const reward of MONETAG_REWARD_SLOTS) {
     if (roll <= reward.max) {
       return reward;

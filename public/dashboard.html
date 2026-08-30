@@ -2510,13 +2510,17 @@ Awesome ✨
     <div class="monetag-badge">MONETAG REWARDED AD</div>
     <div class="monetag-orb" id="monetagOrb">▶</div>
     <div class="monetag-title" id="monetagModalTitle">Ready for your surprise?</div>
-    <div class="monetag-subtitle" id="monetagModalSubtitle">Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event.</div>
+    <div class="monetag-subtitle" id="monetagModalSubtitle">Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event. The reel is only the suspense reveal.</div>
 
     <div class="monetag-prize-grid" id="monetagPrizeGrid">
-      <div class="monetag-prize"><strong>🎟️ 1 FREE SPIN</strong>Rare</div>
-      <div class="monetag-prize"><strong>₦10</strong>Very rare</div>
-      <div class="monetag-prize"><strong>🎟️🎟️ 2 FREE SPINS</strong>Extremely rare</div>
+      <div class="monetag-prize"><strong>🔄 TRY AGAIN</strong>Most common</div>
       <div class="monetag-prize"><strong>₦5</strong>Rare</div>
+      <div class="monetag-prize"><strong>₦10</strong>Very rare</div>
+      <div class="monetag-prize"><strong>🎟️ 1 FREE SPIN</strong>Rare</div>
+      <div class="monetag-prize"><strong>🎟️🎟️ 2 FREE SPINS</strong>Very rare</div>
+      <div class="monetag-prize"><strong>₦50</strong>Extremely rare</div>
+      <div class="monetag-prize"><strong>₦100</strong>Almost impossible</div>
+      <div class="monetag-prize"><strong>₦500</strong>Ultra rare</div>
     </div>
 
     <div class="monetag-reel-wrap" id="monetagReelWrap">
@@ -2824,11 +2828,14 @@ const MONETAG_CLIENT_COOLDOWN_MS = 30 * 1000;
 const MONETAG_COOLDOWN_KEY = "paymeMonetagCooldownUntil";
 
 const MONETAG_REEL_ITEMS = [
-    {icon:"🎟️",label:"1 FREE SPIN",sub:"Rare"},
-    {icon:"₦10",label:"₦10",sub:"Very rare"},
-    {icon:"🎟️🎟️",label:"2 FREE SPINS",sub:"Extremely rare"},
+    {icon:"🔄",label:"TRY AGAIN",sub:"No reward this time"},
     {icon:"₦5",label:"₦5",sub:"Rare"},
-    {icon:"🔄",label:"TRY AGAIN",sub:"Better luck next time"}
+    {icon:"₦10",label:"₦10",sub:"Very rare"},
+    {icon:"🎟️",label:"1 FREE SPIN",sub:"Rare"},
+    {icon:"🎟️🎟️",label:"2 FREE SPINS",sub:"Very rare"},
+    {icon:"₦50",label:"₦50",sub:"Extremely rare"},
+    {icon:"₦100",label:"₦100",sub:"Almost impossible"},
+    {icon:"₦500",label:"₦500",sub:"Ultra rare"}
 ];
 
 function monetagSetStatus(text, isError=false){
@@ -2877,10 +2884,13 @@ function monetagPrizeHtml(item){
 function buildMonetagReel(){
     const track = document.getElementById("monetagReelTrack");
     if(!track) return;
+
+    // A longer reel makes the reveal feel like a real prize wheel.
     const sequence = [];
-    for(let i=0;i<18;i++){
+    for(let i=0;i<36;i++){
         sequence.push(MONETAG_REEL_ITEMS[i % MONETAG_REEL_ITEMS.length]);
     }
+
     track.innerHTML = sequence.map(monetagPrizeHtml).join("");
     track.style.transition = "none";
     track.style.transform = "translate3d(0,0,0)";
@@ -2898,7 +2908,7 @@ function monetagResetModal(){
     const reel = document.getElementById("monetagReelWrap");
 
     if(title) title.textContent = "Ready for your surprise?";
-    if(subtitle) subtitle.textContent = "Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event.";
+    if(subtitle) subtitle.textContent = "Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event. The reel is only the suspense reveal.";
     if(grid) grid.style.display = "grid";
     if(reveal){ reveal.style.display = "block"; reveal.disabled = false; reveal.textContent = "▶ Watch Ad to Reveal"; }
     if(status) status.textContent = "";
@@ -2974,11 +2984,15 @@ async function waitForMonetagPostback(timeoutMs=15000, intervalMs=1200){
 }
 
 function getMonetagRewardIndex(result){
-    if(Number(result.spins || 0) >= 2) return 2;
-    if(Number(result.spins || 0) === 1) return 0;
-    if(Number(result.cash || 0) === 10) return 1;
-    if(Number(result.cash || 0) === 5) return 3;
-    return 4;
+    const label = String(result?.label || "").toLowerCase();
+    if(label.includes("500")) return 7;
+    if(label.includes("100")) return 6;
+    if(label.includes("50")) return 5;
+    if(Number(result.spins || 0) >= 2) return 4;
+    if(Number(result.spins || 0) === 1) return 3;
+    if(Number(result.cash || 0) === 10) return 2;
+    if(Number(result.cash || 0) === 5) return 1;
+    return 0;
 }
 
 function runMonetagRewardReel(result){
@@ -2988,36 +3002,45 @@ function runMonetagRewardReel(result){
         const caption = document.getElementById("monetagReelCaption");
         const resultIndex = getMonetagRewardIndex(result);
 
-        if(!wrap || !track){
-            resolve();
-            return;
-        }
+        if(!wrap || !track){ resolve(); return; }
 
-        const items = track.querySelectorAll(".monetag-reel-item");
-        const targetIndex = 13 + resultIndex;
         const itemWidth = 112;
         const gap = 10;
         const step = itemWidth + gap;
         const windowEl = wrap.querySelector(".monetag-reel-window");
         const centerOffset = (windowEl?.clientWidth || 300) / 2;
+        const targetIndex = 28 + resultIndex;
         const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2);
+        const nearBigIndex = Math.max(1, targetIndex - 1);
+        const nearBigOffset = -(nearBigIndex * step) + centerOffset - (itemWidth / 2);
 
         wrap.style.display = "block";
         wrap.classList.add("show");
-        if(caption) caption.textContent = "REVEALING YOUR REWARD";
+        wrap.classList.remove("landed");
+        if(caption) caption.textContent = "REVEALING YOUR REWARD…";
 
         track.style.transition = "none";
         track.style.transform = "translate3d(0,0,0)";
         void track.offsetWidth;
 
-        track.style.transition = "transform 2.7s cubic-bezier(.08,.75,.12,1)";
-        track.style.transform = `translate3d(${targetOffset}px,0,0)`;
+        // Phase 1: very fast movement.
+        track.style.transition = "transform 1.05s cubic-bezier(.05,.75,.12,1)";
+        track.style.transform = `translate3d(${nearBigOffset}px,0,0)`;
+
+        setTimeout(()=>{
+            if(caption) caption.textContent = "SO CLOSE…";
+            // Phase 2: crawl past the tempting large prize and settle on the
+            // server-selected reward. This is visual only; the server result
+            // remains authoritative.
+            track.style.transition = "transform 2.45s cubic-bezier(.12,.82,.08,1)";
+            track.style.transform = `translate3d(${targetOffset}px,0,0)`;
+        },1080);
 
         setTimeout(()=>{
             wrap.classList.add("landed");
             if(caption) caption.textContent = "REWARD LOCKED IN ✓";
             resolve();
-        },2850);
+        },3650);
     });
 }
 
