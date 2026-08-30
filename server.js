@@ -150,7 +150,7 @@ const MONETAG_POSTBACK_PATH = '/api/monetag/postback';
 // with the logged-in PAYME user while still allowing Monetag to call
 // the postback asynchronously.
 const MONETAG_SESSION_TTL = 10 * 60 * 1000;
-const MONETAG_REWARD_COOLDOWN = 60 * 1000;
+const MONETAG_REWARD_COOLDOWN = 30 * 1000;
 
 // Reward table. 10,000 secure-random slots are used server-side.
 // Higher rewards are intentionally rare.
@@ -1676,6 +1676,10 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
         success: true,
         confirmed: true,
         reward: completed.reward,
+        balance: completed.balance,
+        withdrawableBalance: completed.withdrawableBalance,
+        depositBalance: completed.depositBalance,
+        freeSpins: completed.freeSpins,
         completedAt: completed.completedAt
       });
     }
@@ -1685,40 +1689,12 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
       return res.json({ success: true, confirmed: false });
     }
 
-    // If Render restarted after the postback was written to Supabase,
-    // recover the reward from the most recent Monetag transaction.
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('id, amount, description, created_at')
-      .eq('user_id', req.user.id)
-      .eq('type', 'monetag_reward')
-      .gte('created_at', new Date(startedAt > 0 ? startedAt : Date.now()).toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-
-    if (Array.isArray(data) && data.length) {
-      const tx = data[0];
-      const description = String(tx.description || 'Monetag Reward');
-      const label = description.replace(/^Monetag Reward\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
-      let spins = 0;
-      if (/2\s*Free Spins/i.test(label)) spins = 2;
-      else if (/1\s*Free Spin/i.test(label)) spins = 1;
-
-      return res.json({
-        success: true,
-        confirmed: true,
-        reward: {
-          key: 'server_confirmed',
-          label,
-          cash: number(tx.amount),
-          spins
-        },
-        completedAt: tx.created_at
-      });
-    }
-
+    // IMPORTANT EGRESS OPTIMIZATION:
+    // Do not query Supabase on every browser status poll. If the current
+    // Render process received the postback, the completed session above is
+    // enough to return the authoritative reward and balances. If Render is
+    // restarted mid-ad, the user can simply start a fresh ad session.
+    // This avoids repeated PostgREST reads while the reward animation waits.
     return res.json({ success: true, confirmed: false });
   } catch (err) {
     console.error('Monetag status error:', err);
@@ -1852,6 +1828,10 @@ app.all('/api/monetag/postback', async (req, res) => {
       monetagCompletedSessions.set(pending.id, {
         userId: user.id,
         reward: rewardResult,
+        balance: number(user.balance),
+        withdrawableBalance: number(user.withdrawableBalance),
+        depositBalance: number(user.depositBalance),
+        freeSpins: number(user.freeSpins),
         completedAt: Date.now(),
         expiresAt: Date.now() + 5 * 60 * 1000
       });
@@ -9941,6 +9921,7 @@ app.listen(
   }
 
 );
+
 
 
 
