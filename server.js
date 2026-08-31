@@ -94,6 +94,18 @@ const TELEGRAM_BOT_TOKEN =
     process.env.TELEGRAM_BOT_TOKEN || ''
   ).trim();
 
+// Separate bot dedicated to deposit approve/reject callbacks.
+// This MUST be a different bot from TELEGRAM_BOT_TOKEN above, because
+// that bot is used for Mini App login (initData) and other Telegram
+// API calls. A single bot token can only run ONE update method at a
+// time (getUpdates polling OR a webhook) — since this deposit flow
+// polls with getUpdates, it needs its own bot so it never conflicts
+// with a webhook set on the main bot (e.g. by a menu-builder tool).
+const TELEGRAM_DEPOSIT_BOT_TOKEN =
+  String(
+    process.env.TELEGRAM_DEPOSIT_BOT_TOKEN || ''
+  ).trim();
+
 const TELEGRAM_CHAT_ID =
   String(
     process.env.TELEGRAM_CHAT_ID || ''
@@ -6657,7 +6669,7 @@ app.post(
         `<b>Status:</b> Pending Verification`;
 
       if (
-        !TELEGRAM_BOT_TOKEN ||
+        !TELEGRAM_DEPOSIT_BOT_TOKEN ||
         !TELEGRAM_CHAT_ID
       ) {
 
@@ -6738,7 +6750,7 @@ app.post(
       const telegramResponse =
         await fetch(
 
-          `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
+          `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/sendPhoto`,
 
           {
 
@@ -8643,7 +8655,7 @@ async function answerTelegramCallback(
   text
 ) {
 
-  if (!TELEGRAM_BOT_TOKEN) {
+  if (!TELEGRAM_DEPOSIT_BOT_TOKEN) {
     return;
   }
 
@@ -8651,7 +8663,7 @@ async function answerTelegramCallback(
 
     await fetch(
 
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`,
+      `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/answerCallbackQuery`,
 
       {
 
@@ -8696,7 +8708,7 @@ async function editTelegramMessage(
   text
 ) {
 
-  if (!TELEGRAM_BOT_TOKEN) {
+  if (!TELEGRAM_DEPOSIT_BOT_TOKEN) {
     return;
   }
 
@@ -8704,7 +8716,7 @@ async function editTelegramMessage(
 
     await fetch(
 
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageCaption`,
+      `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/editMessageCaption`,
 
       {
 
@@ -8940,10 +8952,10 @@ setInterval(
 
 async function pollTelegramUpdates() {
 
-  if (!TELEGRAM_BOT_TOKEN) {
+  if (!TELEGRAM_DEPOSIT_BOT_TOKEN) {
 
     console.warn(
-      'Telegram polling disabled: TELEGRAM_BOT_TOKEN is missing.'
+      'Telegram polling disabled: TELEGRAM_DEPOSIT_BOT_TOKEN is missing.'
     );
 
     return;
@@ -8955,7 +8967,7 @@ async function pollTelegramUpdates() {
     const response =
       await fetch(
 
-        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?timeout=25&offset=${telegramUpdateOffset}`
+        `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/getUpdates?timeout=25&offset=${telegramUpdateOffset}`
 
       );
 
