@@ -150,7 +150,7 @@ const MONETAG_POSTBACK_PATH = '/api/monetag/postback';
 // with the logged-in PAYME user while still allowing Monetag to call
 // the postback asynchronously.
 const MONETAG_SESSION_TTL = 10 * 60 * 1000;
-const MONETAG_REWARD_COOLDOWN = 30 * 1000;
+const MONETAG_REWARD_COOLDOWN = 10 * 1000;
 
 // Reward table. 100,000 secure-random slots are used server-side.
 // No free-spin rewards come from this reel anymore — cash only.
@@ -167,15 +167,17 @@ const MONETAG_REWARD_SLOTS = [
 ];
 
 // Reward table for the game page's "Watch Ad" free-spin fraction reward.
-// 100,000 secure-random slots. 0.05 is deliberately the overwhelmingly
-// common outcome; every tier above that gets rarer very fast, and the top
+// 100,000 secure-random slots. 0.02 and 0.05 are deliberately the
+// overwhelmingly common outcomes (together ~85% of plays), 0.1 is fairly
+// common (~11%), and every tier above that gets rarer very fast — the top
 // tiers (1 and especially 2 Free Spins) are made extremely hard to hit.
 const GAME_FREESPIN_AD_REWARD_SLOTS = [
-  { max: 65000, key: 'fs_005', label: '0.05 Free Spin', cash: 0, spins: 0.05 },
-  { max: 90000, key: 'fs_01',  label: '0.1 Free Spin',  cash: 0, spins: 0.1 },
-  { max: 97000, key: 'fs_02',  label: '0.2 Free Spin',  cash: 0, spins: 0.2 },
-  { max: 99500, key: 'fs_05',  label: '0.5 Free Spin',  cash: 0, spins: 0.5 },
-  { max: 99900, key: 'fs_1',   label: '1 Free Spin',    cash: 0, spins: 1 },
+  { max: 50000, key: 'fs_002', label: '0.02 Free Spin', cash: 0, spins: 0.02 },
+  { max: 85000, key: 'fs_005', label: '0.05 Free Spin', cash: 0, spins: 0.05 },
+  { max: 96000, key: 'fs_01',  label: '0.1 Free Spin',  cash: 0, spins: 0.1 },
+  { max: 99000, key: 'fs_02',  label: '0.2 Free Spin',  cash: 0, spins: 0.2 },
+  { max: 99800, key: 'fs_05',  label: '0.5 Free Spin',  cash: 0, spins: 0.5 },
+  { max: 99970, key: 'fs_1',   label: '1 Free Spin',    cash: 0, spins: 1 },
   { max: 100000,key: 'fs_2',   label: '2 Free Spins',   cash: 0, spins: 2 }
 ];
 
@@ -10047,6 +10049,7 @@ app.listen(
   }
 
 );
+
 
 
 

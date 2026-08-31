@@ -2435,16 +2435,21 @@ canvas.spinning {
     <div class="ad-spin-rewards-grid" id="adSpinRewardsGrid">
 
       <div class="ad-spin-reward-chip">
+        <span class="ad-spin-reward-chip-amt">0.02</span>
+        <span class="ad-spin-reward-chip-tag">Common</span>
+      </div>
+
+      <div class="ad-spin-reward-chip">
         <span class="ad-spin-reward-chip-amt">0.05</span>
         <span class="ad-spin-reward-chip-tag">Common</span>
       </div>
 
       <div class="ad-spin-reward-chip">
         <span class="ad-spin-reward-chip-amt">0.1</span>
-        <span class="ad-spin-reward-chip-tag">Common</span>
+        <span class="ad-spin-reward-chip-tag">Fairly Common</span>
       </div>
 
-      <div class="ad-spin-reward-chip">
+      <div class="ad-spin-reward-chip rare">
         <span class="ad-spin-reward-chip-amt">0.2</span>
         <span class="ad-spin-reward-chip-tag">Uncommon</span>
       </div>
@@ -2631,12 +2636,101 @@ let toastTimer = null;
 
 /* =========================================
    DRAW WHEEL
+
+   PERFORMANCE NOTE:
+   The wheel face (segments, gradients, studs,
+   shadows, text) never actually changes shape —
+   only its rotation angle changes while spinning.
+
+   Previously the entire wheel (multiple radial
+   gradients + shadowBlur per segment + per-stud
+   gradients/shadows + text with shadow) was
+   redrawn from scratch on every single
+   requestAnimationFrame call during a 5s spin.
+   That is 200-300 full re-renders of very heavy
+   canvas operations per spin, which is what
+   caused the lag/jank, especially on low-end
+   devices where shadowBlur and gradient creation
+   are expensive.
+
+   Fix: render the static wheel face ONCE onto an
+   offscreen canvas (wheelFaceCanvas). Every
+   animation frame then just rotates the drawing
+   context and blits that cached image with
+   drawImage — a cheap GPU-accelerated operation —
+   instead of recomputing gradients/shadows/text
+   every frame.
 ========================================= */
+
+let wheelFaceCanvas = null;
+let wheelFaceCtx = null;
+
+function buildWheelFace() {
+
+  const width = canvas.width;
+
+  if (!wheelFaceCanvas) {
+    wheelFaceCanvas = document.createElement('canvas');
+  }
+
+  wheelFaceCanvas.width = width;
+  wheelFaceCanvas.height = width;
+
+  wheelFaceCtx = wheelFaceCanvas.getContext('2d');
+
+  renderWheelFace(wheelFaceCtx, width);
+}
 
 function drawWheel(angle = 0) {
 
   const width =
     canvas.width;
+
+  const radius =
+    width / 2;
+
+  if (!wheelFaceCanvas) {
+    buildWheelFace();
+  }
+
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    width
+  );
+
+  ctx.save();
+
+  ctx.translate(
+    radius,
+    radius
+  );
+
+  ctx.rotate(angle);
+
+  /*
+    Blit the pre-rendered wheel face instead of
+    redrawing every gradient/shadow/segment.
+  */
+  ctx.drawImage(
+    wheelFaceCanvas,
+    -radius,
+    -radius,
+    width,
+    width
+  );
+
+  ctx.restore();
+
+}
+
+/*
+  This is the original full-detail render, now only
+  called ONCE (into the offscreen cache) instead of
+  on every animation frame.
+*/
+function renderWheelFace(ctx, width) {
 
   const radius =
     width / 2;
@@ -2654,8 +2748,6 @@ function drawWheel(angle = 0) {
     radius,
     radius
   );
-
-  ctx.rotate(angle);
 
 
   /* Outer shadow ring */
@@ -3586,11 +3678,12 @@ let adSpinSessionId = null;
 let adSpinStartedAt = 0;
 let adSpinInProgress = false;
 const AD_SPIN_COOLDOWN_KEY = 'paymeGameAdSpinCooldownUntil';
-const AD_SPIN_COOLDOWN_MS = 30 * 1000;
+const AD_SPIN_COOLDOWN_MS = 10 * 1000;
 
 // Mirrors the server's GAME_FREESPIN_AD_REWARD_SLOTS order exactly, so the
 // reel always has the correct item to land on.
 const AD_SPIN_REEL_ITEMS = [
+  { icon: '🎟️', label: '0.02' },
   { icon: '🎟️', label: '0.05' },
   { icon: '🎟️', label: '0.1' },
   { icon: '🎟️', label: '0.2' },
@@ -3601,11 +3694,12 @@ const AD_SPIN_REEL_ITEMS = [
 
 function adSpinRewardIndex(spins) {
   const s = Number(spins || 0);
-  if (s >= 2) return 5;
-  if (s >= 1) return 4;
-  if (s >= 0.5) return 3;
-  if (s >= 0.2) return 2;
-  if (s >= 0.1) return 1;
+  if (s >= 2) return 6;
+  if (s >= 1) return 5;
+  if (s >= 0.5) return 4;
+  if (s >= 0.2) return 3;
+  if (s >= 0.1) return 2;
+  if (s >= 0.05) return 1;
   return 0;
 }
 
@@ -4596,4 +4690,5 @@ fetchGameState();
 
 </body>
 </html>
+
 
