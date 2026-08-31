@@ -1108,6 +1108,49 @@ header {
 
 
 /* =========================================================
+   WATCH ADS COOLDOWN (after reward is revealed)
+========================================================= */
+
+.watch-ads-card.on-cooldown {
+
+  opacity:
+    .55;
+
+  cursor:
+    not-allowed;
+
+  filter:
+    grayscale(1);
+
+  pointer-events:
+    none;
+}
+
+
+.watch-ads-card.on-cooldown:active {
+
+  transform:
+    none;
+
+  border-color:
+    rgba(255,255,255,.08);
+}
+
+
+.watch-ads-card.on-cooldown .status-badge {
+
+  color:
+    #94a3b8;
+
+  background:
+    #182237;
+
+  border:
+    1px solid rgba(255,255,255,.07);
+}
+
+
+/* =========================================================
    MOBILE
 ========================================================= */
 
@@ -1869,10 +1912,10 @@ body.modal-open {
     ===================================================== -->
     <div class="earn-card-item watch-ads-card" id="openWatchAdsModal" role="button" tabindex="0" aria-label="Watch ads and earn">
       <div>
-        <div class="card-top-row"><div class="icon-wrapper">📺</div><span class="status-badge badge-available">REWARD AD</span></div>
+        <div class="card-top-row"><div class="icon-wrapper">📺</div><span class="status-badge badge-available" id="watchAdsCardBadge">REWARD AD</span></div>
         <div class="card-body"><h3>Watch Ads &amp; Earn</h3><p>Watch a sponsored advert, then reveal a surprise cash prize.</p></div>
       </div>
-      <div class="card-action-row"><span>Watch &amp; Earn</span><div class="arrow-btn">→</div></div>
+      <div class="card-action-row"><span id="watchAdsCardActionText">Watch &amp; Earn</span><div class="arrow-btn">→</div></div>
     </div>
 
 
@@ -2268,7 +2311,40 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
 
 <script>
-(function(){const modal=document.getElementById('watchAdsModal'),open=document.getElementById('openWatchAdsModal'),close=document.getElementById('closeWatchAdsModal'),start=document.getElementById('watchAdsStartBtn'),done=document.getElementById('watchAdsDoneBtn'),status=document.getElementById('watchAdsStatus'),reel=document.getElementById('watchAdsReel'),track=document.getElementById('watchAdsReelTrack'),caption=document.getElementById('watchAdsReelCaption'),result=document.getElementById('watchAdsResult'),resultIcon=document.getElementById('watchAdsResultIcon'),resultTitle=document.getElementById('watchAdsResultTitle'),resultCopy=document.getElementById('watchAdsResultCopy'),spinFillWrap=document.getElementById('spinFillWrap'),spinFillBar=document.getElementById('spinFillBar'),spinFillLabel=document.getElementById('spinFillLabel'),spinFillLaps=document.getElementById('spinFillLaps');let sessionId=null,startedAt=0,busy=false;
+(function(){const modal=document.getElementById('watchAdsModal'),open=document.getElementById('openWatchAdsModal'),close=document.getElementById('closeWatchAdsModal'),start=document.getElementById('watchAdsStartBtn'),done=document.getElementById('watchAdsDoneBtn'),status=document.getElementById('watchAdsStatus'),reel=document.getElementById('watchAdsReel'),track=document.getElementById('watchAdsReelTrack'),caption=document.getElementById('watchAdsReelCaption'),result=document.getElementById('watchAdsResult'),resultIcon=document.getElementById('watchAdsResultIcon'),resultTitle=document.getElementById('watchAdsResultTitle'),resultCopy=document.getElementById('watchAdsResultCopy'),spinFillWrap=document.getElementById('spinFillWrap'),spinFillBar=document.getElementById('spinFillBar'),spinFillLabel=document.getElementById('spinFillLabel'),spinFillLaps=document.getElementById('spinFillLaps'),cardBadge=document.getElementById('watchAdsCardBadge'),cardActionText=document.getElementById('watchAdsCardActionText');let sessionId=null,startedAt=0,busy=false;
+
+/* Grey out the "Watch Ads & Earn" card for a short cooldown once a reward
+   has been revealed, so the user can't immediately re-open the ad flow. */
+const WATCH_ADS_CARD_COOLDOWN_MS=10*1000;
+const WATCH_ADS_CARD_COOLDOWN_KEY='paymeWatchAdsCardCooldownUntil';
+let watchAdsCardCooldownTimer=null;
+
+function updateWatchAdsCardCooldownUI(){
+  if(!open) return;
+  const until=Number(localStorage.getItem(WATCH_ADS_CARD_COOLDOWN_KEY)||0);
+  const remaining=Math.max(0,until-Date.now());
+
+  if(remaining>0){
+    open.classList.add('on-cooldown');
+    open.setAttribute('aria-disabled','true');
+    if(cardBadge) cardBadge.textContent=`${Math.ceil(remaining/1000)}s`;
+    if(cardActionText) cardActionText.textContent='Come back soon';
+    if(watchAdsCardCooldownTimer) clearTimeout(watchAdsCardCooldownTimer);
+    watchAdsCardCooldownTimer=setTimeout(updateWatchAdsCardCooldownUI,250);
+  }else{
+    localStorage.removeItem(WATCH_ADS_CARD_COOLDOWN_KEY);
+    if(watchAdsCardCooldownTimer){clearTimeout(watchAdsCardCooldownTimer);watchAdsCardCooldownTimer=null}
+    open.classList.remove('on-cooldown');
+    open.removeAttribute('aria-disabled');
+    if(cardBadge) cardBadge.textContent='REWARD AD';
+    if(cardActionText) cardActionText.textContent='Watch & Earn';
+  }
+}
+
+function startWatchAdsCardCooldown(){
+  localStorage.setItem(WATCH_ADS_CARD_COOLDOWN_KEY,String(Date.now()+WATCH_ADS_CARD_COOLDOWN_MS));
+  updateWatchAdsCardCooldownUI();
+}
 
 /* Animated "free spin" meter: fills fully once per whole spin (e.g. 2 spins = 2 full fills),
    and for a fractional spin (e.g. 0.2) it only fills that fraction of the way (won't reach the middle). */
@@ -2314,10 +2390,11 @@ function animateSpinFill(spins){
   }
   step();
 }
-const items=[{icon:'🔄',label:'TRY AGAIN'},{icon:'₦5',label:'₦5'},{icon:'₦10',label:'₦10'},{icon:'₦20',label:'₦20'},{icon:'₦50',label:'₦50'},{icon:'₦100',label:'₦100'},{icon:'₦500',label:'₦500'}];function build(){track.innerHTML=Array.from({length:40},(_,i)=>{const x=items[i%items.length];return `<div class="watchads-reel-item"><div>${x.icon}</div><div>${x.label}</div></div>`}).join('');track.style.transition='none';track.style.transform='translate3d(0,0,0)';}function reset(){sessionId=null;startedAt=0;start.disabled=false;start.style.display='block';start.textContent='▶ Watch Ad';status.textContent='';reel.classList.remove('show','landed');reel.style.display='none';result.classList.remove('show');done.style.display='none';animateSpinFill(0);build()}function show(){reset();modal.classList.add('show');modal.setAttribute('aria-hidden','false')}function hide(){if(busy)return;modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}async function startSession(){const r=await fetch('/api/monetag/start',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'earn_watch_ad'})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.message||'Unable to start the rewarded ad.');sessionId=d.sessionId;startedAt=Number(d.createdAt||Date.now())}async function waitStatus(){const t=Date.now();while(Date.now()-t<15000){try{const r=await fetch(`/api/monetag/status?sessionId=${encodeURIComponent(sessionId)}&startedAt=${encodeURIComponent(startedAt)}`,{credentials:'include'});const d=await r.json().catch(()=>({}));if(r.ok&&d.success&&d.confirmed&&d.reward)return d}catch(e){}await new Promise(x=>setTimeout(x,1200))}return null}function idx(r){const cash=Number(r.cash||0);if(cash===500)return 6;if(cash===100)return 5;if(cash===50)return 4;if(cash===20)return 3;if(cash===10)return 2;if(cash===5)return 1;return 0}function reveal(r){return new Promise(resolve=>{const step=122,trackPadding=20,center=(reel.querySelector('.watchads-reel-window')?.clientWidth||300)/2,target=28+idx(r),off=i=>-(i*step)+center-56-trackPadding;reel.style.display='block';reel.classList.add('show');reel.classList.remove('landed');caption.textContent='REVEALING YOUR REWARD…';track.style.transition='none';track.style.transform='translate3d(0,0,0)';void track.offsetWidth;track.style.transition='transform 2.6s cubic-bezier(.12,.72,.1,1)';track.style.transform=`translate3d(${off(target)}px,0,0)`;setTimeout(()=>{reel.classList.add('landed');caption.textContent='REWARD LOCKED IN ✓';resolve()},2700)})}function showResult(r){const cash=Number(r.cash||0),won=cash>0;resultIcon.textContent=won?'💰':'😕';resultTitle.textContent=won?(r.label||'Reward'):'Oops!';resultCopy.textContent=won?`₦${cash.toLocaleString()} has been added to your earnings balance.`:"You didn't get anything this time.";result.classList.add('show');done.style.display='block';animateSpinFill(0)}async function watch(){if(busy)return;busy=true;start.disabled=true;status.textContent='Preparing your secure reward session…';try{await startSession();if(typeof window.show_11688228!=='function')throw new Error('Rewarded ad is not ready yet. Please wait a moment and try again.');start.textContent='Opening ad…';status.textContent='Please complete the sponsored advert.';await window.show_11688228({type:'end',ymid:sessionId,requestVar:'earn_watch_ad'});start.textContent='Confirming reward…';status.textContent='Ad completed. Confirming your reward…';const d=await waitStatus();if(!d){status.textContent='Ad completed, but confirmation is still pending. Please try again shortly.';return}const r=d.reward||{};status.textContent='';await reveal(r);showResult(r);start.style.display='none'}catch(e){status.textContent=e?.message||'Unable to show the rewarded ad.';start.disabled=false;start.textContent='▶ Watch Ad'}finally{busy=false}}if(open)open.addEventListener('click',show);if(close)close.addEventListener('click',hide);if(done)done.addEventListener('click',hide);if(start)start.addEventListener('click',watch);if(modal)modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))hide()});if(open)open.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')show()})})();
+const items=[{icon:'🔄',label:'TRY AGAIN'},{icon:'₦5',label:'₦5'},{icon:'₦10',label:'₦10'},{icon:'₦20',label:'₦20'},{icon:'₦50',label:'₦50'},{icon:'₦100',label:'₦100'},{icon:'₦500',label:'₦500'}];function build(){track.innerHTML=Array.from({length:40},(_,i)=>{const x=items[i%items.length];return `<div class="watchads-reel-item"><div>${x.icon}</div><div>${x.label}</div></div>`}).join('');track.style.transition='none';track.style.transform='translate3d(0,0,0)';}function reset(){sessionId=null;startedAt=0;start.disabled=false;start.style.display='block';start.textContent='▶ Watch Ad';status.textContent='';reel.classList.remove('show','landed');reel.style.display='none';result.classList.remove('show');done.style.display='none';animateSpinFill(0);build()}function show(){reset();modal.classList.add('show');modal.setAttribute('aria-hidden','false')}function hide(){if(busy)return;modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}async function startSession(){const r=await fetch('/api/monetag/start',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'earn_watch_ad'})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.message||'Unable to start the rewarded ad.');sessionId=d.sessionId;startedAt=Number(d.createdAt||Date.now())}async function waitStatus(){const t=Date.now();while(Date.now()-t<15000){try{const r=await fetch(`/api/monetag/status?sessionId=${encodeURIComponent(sessionId)}&startedAt=${encodeURIComponent(startedAt)}`,{credentials:'include'});const d=await r.json().catch(()=>({}));if(r.ok&&d.success&&d.confirmed&&d.reward)return d}catch(e){}await new Promise(x=>setTimeout(x,1200))}return null}function idx(r){const cash=Number(r.cash||0);if(cash===500)return 6;if(cash===100)return 5;if(cash===50)return 4;if(cash===20)return 3;if(cash===10)return 2;if(cash===5)return 1;return 0}function reveal(r){return new Promise(resolve=>{const step=122,trackPadding=20,center=(reel.querySelector('.watchads-reel-window')?.clientWidth||300)/2,target=28+idx(r),off=i=>-(i*step)+center-56-trackPadding;reel.style.display='block';reel.classList.add('show');reel.classList.remove('landed');caption.textContent='REVEALING YOUR REWARD…';track.style.transition='none';track.style.transform='translate3d(0,0,0)';void track.offsetWidth;track.style.transition='transform 2.6s cubic-bezier(.12,.72,.1,1)';track.style.transform=`translate3d(${off(target)}px,0,0)`;setTimeout(()=>{reel.classList.add('landed');caption.textContent='REWARD LOCKED IN ✓';resolve()},2700)})}function showResult(r){const cash=Number(r.cash||0),won=cash>0;resultIcon.textContent=won?'💰':'😕';resultTitle.textContent=won?(r.label||'Reward'):'Oops!';resultCopy.textContent=won?`₦${cash.toLocaleString()} has been added to your earnings balance.`:"You didn't get anything this time.";result.classList.add('show');done.style.display='block';animateSpinFill(0);startWatchAdsCardCooldown()}async function watch(){if(busy)return;busy=true;start.disabled=true;status.textContent='Preparing your secure reward session…';try{await startSession();if(typeof window.show_11688228!=='function')throw new Error('Rewarded ad is not ready yet. Please wait a moment and try again.');start.textContent='Opening ad…';status.textContent='Please complete the sponsored advert.';await window.show_11688228({type:'end',ymid:sessionId,requestVar:'earn_watch_ad'});start.textContent='Confirming reward…';status.textContent='Ad completed. Confirming your reward…';const d=await waitStatus();if(!d){status.textContent='Ad completed, but confirmation is still pending. Please try again shortly.';return}const r=d.reward||{};status.textContent='';await reveal(r);showResult(r);start.style.display='none'}catch(e){status.textContent=e?.message||'Unable to show the rewarded ad.';start.disabled=false;start.textContent='▶ Watch Ad'}finally{busy=false}}if(open)open.addEventListener('click',e=>{if(open.classList.contains('on-cooldown')){e.preventDefault();e.stopPropagation();return}show()});if(close)close.addEventListener('click',hide);if(done)done.addEventListener('click',hide);if(start)start.addEventListener('click',watch);if(modal)modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))hide()});if(open)open.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){if(open.classList.contains('on-cooldown')){e.preventDefault();return}show()}});updateWatchAdsCardCooldownUI()})();
 </script>
 </body>
 </html>
+
 
 
 

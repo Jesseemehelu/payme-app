@@ -92,6 +92,7 @@ transition:.2s;
 }
 .desktop-nav a:hover, .desktop-nav a.active{ color:var(--blue); }
 .header-actions{
+position:relative;
 display:flex;
 align-items:center;
 gap:8px;
@@ -2023,27 +2024,32 @@ transition-duration: 0.01ms !important;
    COMPACT MONETAG HEADER BUTTON
    ========================================================= */
 .monetag-header-wrap{
-  position:relative;
-  width:52px;
-  height:66px;
+  position:absolute;
+  right:48px;
+  top:50%;
+  transform:translateY(-50%);
+  width:66px;
+  height:82px;
   display:flex;
   align-items:flex-start;
   justify-content:center;
   padding-top:10px;
   z-index:20;
+  pointer-events:none;
 }
+.monetag-header-wrap > *{ pointer-events:auto; }
 .monetag-header-button{
   position:relative;
-  width:46px;
-  height:46px;
+  width:60px;
+  height:60px;
   border:0;
-  border-radius:15px;
+  border-radius:19px;
   display:grid;
   place-items:center;
   cursor:pointer;
   color:#fff;
   background:linear-gradient(145deg,#8b5cf6 0%,#7c3aed 48%,#ec4899 100%);
-  box-shadow:0 11px 22px rgba(124,58,237,.30),inset 0 2px 0 rgba(255,255,255,.30),inset 0 -4px 8px rgba(37,16,82,.20);
+  box-shadow:0 14px 28px rgba(124,58,237,.32),inset 0 2px 0 rgba(255,255,255,.30),inset 0 -4px 8px rgba(37,16,82,.20);
   transform:translateZ(0);
   animation:monetagHeaderFloat 2.1s ease-in-out infinite,monetagHeaderGlow 2.4s ease-in-out infinite;
   overflow:visible;
@@ -2051,36 +2057,36 @@ transition-duration: 0.01ms !important;
 .monetag-header-button:before{
   content:"";
   position:absolute;
-  inset:4px;
-  border-radius:11px;
+  inset:5px;
+  border-radius:14px;
   border:1px solid rgba(255,255,255,.25);
   pointer-events:none;
 }
 .monetag-header-button:after{
   content:"";
   position:absolute;
-  width:10px;height:10px;
-  top:3px;right:5px;
+  width:13px;height:13px;
+  top:4px;right:6px;
   border-radius:50%;
   background:#fff;
   opacity:.75;
   filter:blur(.2px);
 }
 .monetag-header-gift{
-  font-size:1.35rem;
+  font-size:1.75rem;
   filter:drop-shadow(0 3px 5px rgba(0,0,0,.22));
   transform:translateY(-1px);
 }
 .monetag-header-play{
   position:absolute;
-  right:3px;
-  bottom:3px;
-  width:17px;height:17px;
-  border-radius:7px;
+  right:4px;
+  bottom:4px;
+  width:22px;height:22px;
+  border-radius:9px;
   display:grid;place-items:center;
   background:#fff;
   color:#7c3aed;
-  font-size:.55rem;
+  font-size:.7rem;
   box-shadow:0 4px 9px rgba(0,0,0,.18);
 }
 .monetag-click-hint{
@@ -2197,10 +2203,10 @@ transition-duration: 0.01ms !important;
 @keyframes tutorialDimIn{from{opacity:0}to{opacity:1}}
 @keyframes tutorialCardIn{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:480px){
-  .monetag-header-wrap{width:49px}
-  .monetag-header-button{width:43px;height:43px;border-radius:14px}
-  .monetag-header-gift{font-size:1.2rem}
-  .monetag-click-hint{top:47px;font-size:.45rem}
+  .monetag-header-wrap{width:60px}
+  .monetag-header-button{width:54px;height:54px;border-radius:17px}
+  .monetag-header-gift{font-size:1.55rem}
+  .monetag-click-hint{top:58px;font-size:.45rem}
 }
 @media(prefers-reduced-motion:reduce){
   .monetag-header-button,.monetag-click-hint,.monetag-reel-caption{animation:none!important}
@@ -2917,7 +2923,7 @@ let monetagAdStartedAt = 0;
 let monetagRewardModalOpen = false;
 let monetagAdInProgress = false;
 let monetagCooldownTimer = null;
-const MONETAG_CLIENT_COOLDOWN_MS = 30 * 1000;
+const MONETAG_CLIENT_COOLDOWN_MS = 10 * 1000;
 const MONETAG_COOLDOWN_KEY = "paymeMonetagCooldownUntil";
 
 const MONETAG_REEL_ITEMS = [
@@ -2961,7 +2967,7 @@ function updateMonetagCooldownUI(){
         // Explicitly clear the disabled state (and its grey styling, which
         // is driven off :disabled in CSS) rather than relying only on the
         // fact that remaining hit 0 — this is what actually restores the
-        // icon's color once the 30s cooldown is over.
+        // icon's color once the 10s cooldown is over.
         button.disabled = false;
         button.title = "Watch ad and get a reward";
         if(hint) hint.textContent = "Click here";
@@ -3173,7 +3179,7 @@ function showMonetagResult(result){
     if(resultBox) resultBox.classList.add("show");
     if(done) done.classList.add("show");
     // The server has already credited the reward at this point, so the
-    // 30-second cooldown begins as soon as the reward is revealed.
+    // 10-second cooldown begins as soon as the reward is revealed.
     startMonetagCooldown();
 }
 
@@ -5313,7 +5319,7 @@ function refreshDashboardOnReturn(){
     // This re-sync is local only (reads the cooldown timestamp already in
     // localStorage) — no network call, so it never adds egress. It exists
     // because the app runs inside the Telegram WebView, which can pause
-    // timers while backgrounded; without this, the 30s ad-icon cooldown
+    // timers while backgrounded; without this, the 10s ad-icon cooldown
     // could still be counted down in the background but the button would
     // stay visually grey until something else happened to re-render it.
     updateMonetagCooldownUI();
@@ -5341,6 +5347,7 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
 
 
 
