@@ -7,370 +7,803 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg-dark: #0B1020;
-      --bg-light: #F6F8FC;
-      --accent-blue: #2563EB;
-      --accent-blue-hover: #1D4ED8;
-      --accent-green: #10B981;
-      --text-main: #0F172A;
-      --text-muted: #64748B;
-      --border-color: #E2E8F0;
-      --card-bg: #FFFFFF;
-      --radius-sm: 12px;
-      --radius-md: 20px;
-      --radius-lg: 28px;
-      --shadow-card: 0 20px 40px -15px rgba(37, 99, 235, 0.08);
+      --bg: #f4f7fb;
+      --card: rgba(255,255,255,.96);
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e5eaf2;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --green: #10b981;
+      --danger: #ef4444;
+      --shadow: 0 18px 50px rgba(15, 23, 42, .08);
+      --radius: 24px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-light);
-      color: var(--text-main);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(37,99,235,.10), transparent 32%),
+        var(--bg);
+      color: var(--ink);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 16px;
+      padding: 18px 15px 32px;
+    }
+
+    button, input {
+      font: inherit;
     }
 
     .withdraw-container {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       margin: 0 auto;
-      animation: fadeInUp 0.5s ease-out;
+      animation: fadeUp .45s ease both;
     }
 
     .back-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      color: var(--text-muted);
+      color: var(--muted);
       text-decoration: none;
-      font-weight: 700;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-      transition: color 0.2s;
+      font-size: .88rem;
+      font-weight: 800;
+      margin: 3px 0 17px;
+      padding: 8px 2px;
+      transition: .2s ease;
     }
-    .back-btn:hover { color: var(--accent-blue); }
 
-    .header-card {
-      background: linear-gradient(135deg, #0B1020 0%, #1E293B 100%);
-      color: #FFFFFF;
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 20px 40px -10px rgba(11, 16, 32, 0.25);
+    .back-btn:active {
+      transform: translateX(-3px);
+    }
+
+    .hero-card {
       position: relative;
       overflow: hidden;
+      border-radius: 27px;
+      padding: 24px;
+      color: white;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(56,189,248,.28), transparent 32%),
+        linear-gradient(135deg, #071126 0%, #172554 100%);
+      box-shadow: 0 20px 45px rgba(15,23,42,.20);
+      margin-bottom: 14px;
     }
 
-    .header-card::before {
+    .hero-card::after {
       content: '';
       position: absolute;
-      top: -50%;
-      right: -20%;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, rgba(0,0,0,0) 70%);
-      pointer-events: none;
+      width: 130px;
+      height: 130px;
+      right: -48px;
+      bottom: -55px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 0 0 22px rgba(255,255,255,.025), 0 0 0 44px rgba(255,255,255,.018);
     }
 
-    .balance-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #94A3B8; letter-spacing: 0.05em; }
-    .balance-amount { font-size: 2.2rem; font-weight: 800; margin-top: 4px; letter-spacing: -0.02em; color: #38BDF8; }
+    .hero-label {
+      color: #a5b4fc;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-    /* Anti-Money Laundering Notice */
-    .notice-box {
-      background: #EFF6FF;
-      border: 1px solid #BFDBFE;
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      margin-bottom: 20px;
-      font-size: 0.8rem;
-      color: #1E40AF;
-      line-height: 1.4;
+    .balance {
+      margin-top: 5px;
+      font-size: 2.15rem;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      color: #67e8f9;
+    }
+
+    .balance-sub {
+      margin-top: 7px;
+      color: #cbd5e1;
+      font-size: .78rem;
+    }
+
+    .cooldown-card {
       display: flex;
-      align-items: flex-start;
-      gap: 8px;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 15px;
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #eff6ff, #f8fbff);
+      margin-bottom: 14px;
+    }
+
+    .cooldown-icon {
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #dbeafe;
+      color: var(--blue);
+    }
+
+    .cooldown-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .cooldown-title {
+      font-size: .78rem;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+
+    .cooldown-text {
+      margin-top: 2px;
+      font-size: .72rem;
+      line-height: 1.45;
+      color: #475569;
+    }
+
+    .cooldown-time {
+      margin-top: 3px;
+      font-size: .96rem;
+      font-weight: 800;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
     }
 
     .form-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      box-shadow: var(--shadow-card);
+      background: var(--card);
+      border: 1px solid rgba(226,232,240,.9);
+      border-radius: var(--radius);
+      padding: 23px 19px 20px;
+      box-shadow: var(--shadow);
     }
 
-    .form-title { font-size: 1.25rem; font-weight: 800; color: var(--bg-dark); margin-bottom: 6px; }
-    .form-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+    .form-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -.025em;
+    }
+
+    .form-sub {
+      color: var(--muted);
+      font-size: .77rem;
+      line-height: 1.5;
+      margin-top: 5px;
+      margin-bottom: 17px;
+    }
+
+    .notice-box {
+      display: flex;
+      gap: 10px;
+      padding: 12px 13px;
+      margin-bottom: 18px;
+      border: 1px solid #dbeafe;
+      border-radius: 15px;
+      background: #f8fbff;
+      color: #334155;
+      font-size: .72rem;
+      line-height: 1.55;
+    }
+
+    .notice-icon {
+      flex: 0 0 auto;
+      color: var(--blue);
+      font-weight: 800;
+    }
 
     .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .input-group label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-main);
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      display: block;
+      margin-bottom: 6px;
+      color: #334155;
+      font-size: .72rem;
+      font-weight: 800;
     }
 
     .input-group input {
       width: 100%;
-      padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      border: 1.5px solid var(--border-color);
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-main);
-      background: #F8FAFC;
+      height: 50px;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
       outline: none;
-      transition: all 0.2s ease;
+      background: #f8fafc;
+      color: var(--ink);
+      font-size: .86rem;
+      font-weight: 600;
+      transition: .2s ease;
     }
 
     .input-group input:focus {
-      border-color: var(--accent-blue);
-      background: #FFFFFF;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      background: #fff;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 4px rgba(37,99,235,.09);
     }
 
     .btn-submit {
+      position: relative;
       width: 100%;
-      background: var(--accent-blue);
-      color: #FFFFFF;
-      border: none;
-      padding: 16px;
-      border-radius: var(--radius-sm);
+      height: 53px;
+      margin-top: 5px;
+      border: 0;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--blue), #3b82f6);
+      color: white;
+      font-size: .88rem;
       font-weight: 800;
-      font-size: 1rem;
       cursor: pointer;
-      margin-top: 10px;
-      transition: all 0.2s ease;
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 10px 24px rgba(37,99,235,.24);
+      transition: transform .15s ease, opacity .2s ease;
     }
 
-    .btn-submit:active { transform: scale(0.98); }
-
-    /* SUCCESS MODAL */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(11, 16, 32, 0.8);
-      backdrop-filter: blur(6px); display: none; justify-content: center; align-items: center;
-      z-index: 9999; padding: 20px;
-    }
-    .modal-overlay.show { display: flex; }
-
-    .success-card {
-      background: #FFFFFF;
-      border-radius: var(--radius-lg);
-      padding: 32px 24px;
-      text-align: center;
-      max-width: 360px;
-      width: 100%;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    .btn-submit:active:not(:disabled) {
+      transform: scale(.985);
     }
 
-    .check-icon {
-      width: 64px;
-      height: 64px;
-      background: #D1FAE5;
-      color: var(--accent-green);
-      border-radius: 50%;
-      display: flex;
+    .btn-submit:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+      box-shadow: none;
+    }
+
+    .button-loader {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 16px;
+      gap: 5px;
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(15px); }
+    .button-loader span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: dotPulse 1s infinite ease-in-out;
+    }
+
+    .button-loader span:nth-child(2) { animation-delay: .14s; }
+    .button-loader span:nth-child(3) { animation-delay: .28s; }
+
+    /* Full-screen processing animation shown before the success popup. */
+    .processing-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(7, 17, 38, .78);
+      backdrop-filter: blur(9px);
+    }
+
+    .processing-overlay.show {
+      display: flex;
+    }
+
+    .processing-card {
+      width: min(330px, 100%);
+      padding: 30px 24px 26px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 26px;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 25px 70px rgba(0,0,0,.30);
+      animation: popIn .28s ease both;
+    }
+
+    .loader-ring {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 17px;
+      border: 5px solid #dbeafe;
+      border-top-color: var(--blue);
+      border-right-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin  .8s linear infinite;
+    }
+
+    .processing-card h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .processing-card p {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.5;
+    }
+
+    /* Success popup */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 11000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(7,17,38,.80);
+      backdrop-filter: blur(9px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .success-card {
+      width: min(380px, 100%);
+      padding: 28px 22px 21px;
+      text-align: center;
+      border-radius: 27px;
+      background: #fff;
+      box-shadow: 0 28px 80px rgba(0,0,0,.30);
+      animation: popIn .34s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+
+    .success-icon {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px;
+      display: grid;
+      place-items: center;
+      border-radius: 22px;
+      background: #dcfce7;
+      color: var(--green);
+    }
+
+    .success-icon::after {
+      content: '';
+      position: absolute;
+      inset: -7px;
+      border: 2px solid #bbf7d0;
+      border-radius: 27px;
+      animation: ringIn .55s ease both;
+    }
+
+    .success-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .success-card p {
+      margin: 8px 0 18px;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.55;
+    }
+
+    .success-next {
+      margin-bottom: 14px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #475569;
+      font-size: .72rem;
+      line-height: 1.45;
+    }
+
+    .success-next strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--blue);
+      font-size: .9rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes popIn {
-      0% { transform: scale(0.7); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      from { opacity: 0; transform: scale(.88); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes dotPulse {
+      0%, 60%, 100% { transform: translateY(0); opacity: .45; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    @keyframes ringIn {
+      from { opacity: 0; transform: scale(.75); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 380px) {
+      body { padding-left: 12px; padding-right: 12px; }
+      .hero-card { padding: 21px; }
+      .balance { font-size: 1.95rem; }
+      .form-card { padding: 21px 16px 18px; }
     }
   </style>
 </head>
-<body>
 
+<body>
   <div class="withdraw-container">
-    <a href="/dashboard.html" class="back-btn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <a href="/dashboard.html" class="back-btn" aria-label="Back to Dashboard">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5"></path>
+        <path d="M12 19l-7-7 7-7"></path>
+      </svg>
       Back to Dashboard
     </a>
 
-    <div class="header-card">
-      <div class="balance-title">Withdrawable Earnings</div>
-      <div class="balance-amount" id="earningsBalanceText">₦0.00</div>
-    </div>
+    <section class="hero-card">
+      <div class="hero-label">Withdrawable Earnings</div>
+      <div class="balance" id="earningsBalanceText">₦0.00</div>
+      <div class="balance-sub">Only earned funds are available for withdrawal.</div>
+    </section>
 
-    <div class="form-card">
-      <h2 class="form-title">Request Withdrawal</h2>
-      <p class="form-sub">Transfer your earned rewards directly to your bank account.</p>
+    <section class="cooldown-card" id="cooldownCard">
+      <div class="cooldown-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 7v5l3 2"></path>
+        </svg>
+      </div>
+      <div class="cooldown-content">
+        <div class="cooldown-title" id="cooldownTitle">Checking withdrawal availability…</div>
+        <div class="cooldown-text" id="cooldownText">Your withdrawal limit is one request every 24 hours.</div>
+        <div class="cooldown-time" id="cooldownTime">Please wait…</div>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <h1 class="form-title">Request Withdrawal</h1>
+      <p class="form-sub">Enter the bank details you want your earned funds sent to.</p>
 
       <div class="notice-box">
-        <span style="font-size: 1rem;">ℹ️</span>
-        <span><strong>Note:</strong> Deposited funds are strictly for in-app services and cannot be withdrawn. Only earned funds (referrals, bonuses, rewards) can be withdrawn.</span>
+        <span class="notice-icon">ⓘ</span>
+        <span><strong>Important:</strong> Deposited funds are for in-app services and cannot be withdrawn. Only earned funds such as referrals, bonuses and rewards are withdrawable.</span>
       </div>
 
-      <form id="withdrawForm">
+      <form id="withdrawForm" novalidate>
         <div class="input-group">
           <label for="accountName">Account Name</label>
-          <input type="text" id="accountName" placeholder="e.g. John Doe" required>
+          <input type="text" id="accountName" placeholder="e.g. John Doe" autocomplete="name" required>
         </div>
 
         <div class="input-group">
           <label for="bankName">Bank Name</label>
-          <input type="text" id="bankName" placeholder="e.g. Kuda, OPay, GTBank" required>
+          <input type="text" id="bankName" placeholder="e.g. Kuda, OPay, GTBank" autocomplete="organization" required>
         </div>
 
         <div class="input-group">
           <label for="accountNumber">Account Number</label>
-          <input type="number" id="accountNumber" placeholder="10-digit Account Number" required>
+          <input type="tel" id="accountNumber" inputmode="numeric" maxlength="10" placeholder="10-digit account number" autocomplete="off" required>
         </div>
 
         <div class="input-group">
           <label for="amount">Amount (₦)</label>
-          <input type="number" id="amount" placeholder="Min. 100" min="100" required>
+          <input type="number" id="amount" placeholder="Minimum ₦100" min="100" step="0.01" required>
         </div>
 
-        <button type="submit" class="btn-submit" id="submitBtn">Confirm Withdrawal</button>
+        <button type="submit" class="btn-submit" id="submitBtn" disabled>
+          <span id="submitText">Checking availability…</span>
+        </button>
       </form>
+    </section>
+  </div>
+
+  <!-- Processing animation appears immediately after Confirm Withdrawal is clicked. -->
+  <div class="processing-overlay" id="processingOverlay" aria-hidden="true">
+    <div class="processing-card">
+      <div class="loader-ring"></div>
+      <h3>Processing Withdrawal</h3>
+      <p>We're securely submitting your withdrawal request. Please don't close this page.</p>
     </div>
   </div>
 
-  <!-- SUCCESS POPUP -->
-  <div class="modal-overlay" id="successModal">
+  <!-- Success popup appears only after the server confirms the withdrawal. -->
+  <div class="modal-overlay" id="successModal" aria-hidden="true">
     <div class="success-card">
-      <div class="check-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="success-icon">
+        <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
       </div>
-      <h3 style="font-size: 1.3rem; font-weight: 800; color: #0F172A; margin-bottom: 8px;">Withdrawal Placed</h3>
-      <p style="font-size: 0.88rem; color: #64748B; margin-bottom: 24px;">Your request has been submitted successfully and is currently processing.</p>
-      <button onclick="window.location.href='/dashboard.html'" class="btn-submit" style="margin: 0;">Back to Dashboard</button>
+      <h3>Withdrawal Submitted</h3>
+      <p>Your withdrawal request has been received and is now being processed.</p>
+
+      <div class="success-next">
+        You can make your next withdrawal after
+        <strong id="successCountdown">24:00:00</strong>
+      </div>
+
+      <button type="button" class="btn-submit" style="margin-top:0" onclick="window.location.href='/dashboard.html'">
+        Back to Dashboard
+      </button>
     </div>
   </div>
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    let withdrawableBalance = 0;
+    let nextAllowedAt = 0;
+    let cooldownTimer = null;
+    let withdrawalAvailable = false;
+    let loadingWithdrawal = false;
 
+    const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-/* =========================================================
-   WITHDRAWAL PAGE DATA FETCHING (IDENTICAL TO DASHBOARD)
-   ========================================================= */
+    const $ = (id) => document.getElementById(id);
 
-let withdrawableBalance = 0;
-let currentEarnings = 0;
-
-async function fetchDashboardData() {
-  try {
-    // 1. Extract Telegram Mini App native authentication context
-    const tg = window.Telegram?.WebApp;
-    const initData = tg?.initData || "";
-    const tgUser = tg?.initDataUnsafe?.user;
-
-    // 2. Fetch dashboard data using POST to transmit Telegram session proof
-    const response = await fetch("/api/user/dashboard", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        initData: initData,
-        telegramId: tgUser?.id,
-        username: tgUser?.username,
-        firstName: tgUser?.first_name,
-        lastName: tgUser?.last_name
-      })
-    });
-
-    const data = await response.json();
-    if (!data.success) return;
-
-    const user = data.user;
-
-    /* WITHDRAWABLE / EARNINGS BALANCE */
-    // withdrawableBalance includes welcome bonus, spin wins, ref earnings, etc.
-    withdrawableBalance = Number(user.withdrawableBalance ?? user.referralEarnings ?? 0);
-    currentEarnings = withdrawableBalance; // Sets guard limit for withdrawals
-
-    /* DISPLAY WITHDRAWABLE BALANCE IN "TOTAL EARNINGS" BOX */
-    const balanceTextEl = document.getElementById("earningsBalanceText") || document.getElementById("withdrawable Balance");
-    if (balanceTextEl) {
-      balanceTextEl.innerText = withdrawableBalance.toFixed(2);
+    function formatNaira(amount) {
+      return '₦' + Number(amount || 0).toLocaleString('en-NG', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     }
 
-  } catch (error) {
-    console.error("Failed to load dashboard:", error);
-  }
-}
+    function formatCountdown(ms) {
+      const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
 
-// Automatically fetch balance when page opens
-window.addEventListener("DOMContentLoaded", fetchDashboardData);
+      return [
+        String(hours).padStart(2, '0'),
+        String(minutes).padStart(2, '0'),
+        String(seconds).padStart(2, '0')
+      ].join(':');
+    }
 
-/* =========================================================
-   WITHDRAWAL FORM SUBMISSION
-   ========================================================= */
+    function setSubmitState(enabled, text) {
+      const btn = $('submitBtn');
+      btn.disabled = !enabled || loadingWithdrawal;
+      $('submitText').textContent = text;
+    }
 
-document.getElementById('withdrawForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
+    function renderCooldown() {
+      if (!nextAllowedAt) {
+        withdrawalAvailable = true;
+        $('cooldownTitle').textContent = 'Withdrawal available';
+        $('cooldownText').textContent = 'You can submit one withdrawal now. After submitting, another withdrawal is locked for 24 hours.';
+        $('cooldownTime').textContent = 'Ready to withdraw';
+        if (!loadingWithdrawal) setSubmitState(true, 'Confirm Withdrawal');
+        return;
+      }
 
-  const accountName = document.getElementById('accountName').value.trim();
-  const bankName = document.getElementById('bankName').value.trim();
-  const accountNumber = document.getElementById('accountNumber').value.trim();
-  const amount = parseFloat(document.getElementById('amount').value);
+      const remaining = Math.max(0, nextAllowedAt - Date.now());
 
-  if (amount < 100) {
-    alert('Minimum withdrawal amount is ₦100');
-    return;
-  }
+      if (remaining <= 0) {
+        nextAllowedAt = 0;
+        withdrawalAvailable = true;
+        $('cooldownTitle').textContent = 'Withdrawal available';
+        $('cooldownText').textContent = 'Your 24-hour withdrawal cooldown has ended.';
+        $('cooldownTime').textContent = 'Ready to withdraw';
+        if (!loadingWithdrawal) setSubmitState(true, 'Confirm Withdrawal');
+        if (cooldownTimer) {
+          clearInterval(cooldownTimer);
+          cooldownTimer = null;
+        }
+        return;
+      }
 
-  if (amount > withdrawableBalance) {
-    alert('You cannot withdraw more than your earned balance. Deposited funds are non-withdrawable.');
-    return;
-  }
+      withdrawalAvailable = false;
+      $('cooldownTitle').textContent = 'Withdrawal temporarily locked';
+      $('cooldownText').textContent = 'You have already withdrawn once. You can withdraw again when this countdown reaches zero.';
+      $('cooldownTime').textContent = formatCountdown(remaining);
+      if (!loadingWithdrawal) setSubmitState(false, 'Available after ' + formatCountdown(remaining));
+    }
 
-  const btn = document.getElementById('submitBtn');
-  btn.innerText = 'Processing...';
-  btn.disabled = true;
+    function startCooldownTimer() {
+      if (cooldownTimer) clearInterval(cooldownTimer);
+      renderCooldown();
+      if (nextAllowedAt > Date.now()) {
+        cooldownTimer = setInterval(renderCooldown, 1000);
+      }
+    }
 
-  try {
-    const response = await fetch('/api/withdraw', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ accountName, bankName, accountNumber, amount })
+    function showProcessing() {
+      loadingWithdrawal = true;
+      $('processingOverlay').classList.add('show');
+      $('processingOverlay').setAttribute('aria-hidden', 'false');
+      setSubmitState(false, 'Processing…');
+    }
+
+    function hideProcessing() {
+      $('processingOverlay').classList.remove('show');
+      $('processingOverlay').setAttribute('aria-hidden', 'true');
+    }
+
+    function showSuccess() {
+      $('successModal').classList.add('show');
+      $('successModal').setAttribute('aria-hidden', 'false');
+      $('successCountdown').textContent = formatCountdown(Math.max(0, nextAllowedAt - Date.now()));
+    }
+
+    function showMessage(message) {
+      // Keep the existing page lightweight: use the native dialog instead of
+      // another UI library or external request.
+      window.alert(message);
+    }
+
+    async function fetchDashboardData() {
+      const tg = window.Telegram?.WebApp;
+      const initData = tg?.initData || '';
+      const tgUser = tg?.initDataUnsafe?.user;
+
+      const response = await fetch('/api/user/dashboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          initData,
+          telegramId: tgUser?.id,
+          username: tgUser?.username,
+          firstName: tgUser?.first_name,
+          lastName: tgUser?.last_name
+        })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Unable to load your account.');
+      }
+
+      const user = data.user || {};
+
+      withdrawableBalance = Number(
+        user.withdrawableBalance ?? user.referralEarnings ?? 0
+      );
+
+      $('earningsBalanceText').textContent = formatNaira(withdrawableBalance);
+    }
+
+    async function fetchWithdrawalStatus() {
+      const response = await fetch('/api/withdraw/status', {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store'
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Unable to check withdrawal availability.');
+      }
+
+      nextAllowedAt = Number(data.nextAllowedAt || 0);
+      startCooldownTimer();
+    }
+
+    async function loadPage() {
+      try {
+        // Only two small authenticated requests are made on this page:
+        // one for the existing balance and one for one persistent timestamp.
+        await Promise.all([
+          fetchDashboardData(),
+          fetchWithdrawalStatus()
+        ]);
+      } catch (error) {
+        console.error('Withdrawal page load error:', error);
+        $('cooldownTitle').textContent = 'Unable to verify availability';
+        $('cooldownText').textContent = 'Please refresh the page and try again.';
+        $('cooldownTime').textContent = 'Unavailable';
+        setSubmitState(false, 'Try Again');
+      }
+    }
+
+    $('withdrawForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (loadingWithdrawal) return;
+
+      // Client-side check improves the UI, while the server remains
+      // authoritative and checks the same cooldown against Supabase.
+      if (!withdrawalAvailable || (nextAllowedAt && nextAllowedAt > Date.now())) {
+        renderCooldown();
+        showMessage('You can only make one withdrawal every 24 hours.');
+        return;
+      }
+
+      const accountName = $('accountName').value.trim();
+      const bankName = $('bankName').value.trim();
+      const accountNumber = $('accountNumber').value.trim();
+      const amount = Number.parseFloat($('amount').value);
+
+      if (!accountName || !bankName || !accountNumber) {
+        showMessage('Please provide complete bank details.');
+        return;
+      }
+
+      if (!/^\d{10}$/.test(accountNumber)) {
+        showMessage('Please enter a valid 10-digit account number.');
+        return;
+      }
+
+      if (!Number.isFinite(amount) || amount < 100) {
+        showMessage('Minimum withdrawal amount is ₦100.');
+        return;
+      }
+
+      if (amount > withdrawableBalance) {
+        showMessage('You cannot withdraw more than your earned balance. Deposited funds are non-withdrawable.');
+        return;
+      }
+
+      showProcessing();
+
+      try {
+        const response = await fetch('/api/withdraw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            accountName,
+            bankName,
+            accountNumber,
+            amount
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          if (Number(result.nextAllowedAt) > Date.now()) {
+            nextAllowedAt = Number(result.nextAllowedAt);
+            startCooldownTimer();
+          }
+
+          hideProcessing();
+          loadingWithdrawal = false;
+          renderCooldown();
+          showMessage(result.message || 'Withdrawal failed. Please try again.');
+          return;
+        }
+
+        // Use the server timestamp rather than browser local storage.
+        // This keeps the countdown correct across reloads and Render redeploys.
+        nextAllowedAt = Number(
+          result.nextAllowedAt ||
+          (Date.now() + COOLDOWN_MS)
+        );
+
+        startCooldownTimer();
+        $('successCountdown').textContent =
+          formatCountdown(Math.max(0, nextAllowedAt - Date.now()));
+
+        hideProcessing();
+        showSuccess();
+
+      } catch (error) {
+        console.error('Withdrawal error:', error);
+        hideProcessing();
+        loadingWithdrawal = false;
+        renderCooldown();
+        showMessage('An error occurred. Please check your network and try again.');
+      }
     });
 
-    const result = await response.json();
-
-    if (result.success) {
-      document.getElementById('successModal').classList.add('show');
-    } else {
-      alert(result.message || 'Withdrawal failed. Try again.');
-    }
-  } catch (err) {
-    console.error('Withdrawal error:', err);
-    alert('An error occurred. Please check your network.');
-  } finally {
-    btn.innerText = 'Confirm Withdrawal';
-    btn.disabled = false;
-  }
-});
-</script>
-
-
-
+    window.addEventListener('DOMContentLoaded', loadPage);
+  </script>
 </body>
 </html>
+

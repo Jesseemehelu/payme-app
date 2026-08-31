@@ -143,6 +143,10 @@ const REFERRAL_REWARD = 15;
 
 const MIN_WITHDRAWAL_LIMIT = 100;
 
+// One withdrawal per rolling 24-hour period. The timestamp is persisted
+// in the Supabase transactions table, so it survives Render redeploys.
+const WITHDRAWAL_COOLDOWN = 24 * 60 * 60 * 1000;
+
 const MIN_DEPOSIT_AMOUNT = 200;
 
 const SPIN_COST = 50;
@@ -5489,6 +5493,98 @@ app.post(
 );
 
 // ======================================================
+// WITHDRAWAL COOLDOWN HELPERS
+// ======================================================
+
+async function getLastWithdrawalCreatedAt(userId) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('created_at')
+    .eq('user_id', userId)
+    .eq('type', 'Withdrawal')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.created_at || null;
+}
+
+async function getWithdrawalCooldownStatus(userId) {
+  const lastWithdrawalAt = await getLastWithdrawalCreatedAt(userId);
+
+  if (!lastWithdrawalAt) {
+    return {
+      canWithdraw: true,
+      lastWithdrawalAt: null,
+      nextAllowedAt: 0,
+      remainingMs: 0
+    };
+  }
+
+  const lastTime = new Date(lastWithdrawalAt).getTime();
+
+  if (!Number.isFinite(lastTime)) {
+    return {
+      canWithdraw: true,
+      lastWithdrawalAt: null,
+      nextAllowedAt: 0,
+      remainingMs: 0
+    };
+  }
+
+  const nextAllowedAt =
+    lastTime + WITHDRAWAL_COOLDOWN;
+
+  const remainingMs =
+    Math.max(0, nextAllowedAt - Date.now());
+
+  return {
+    canWithdraw: remainingMs <= 0,
+    lastWithdrawalAt,
+    nextAllowedAt,
+    remainingMs
+  };
+}
+
+// Lightweight endpoint used only by the withdrawal page.
+// It downloads one timestamp instead of the user's transaction history.
+app.get(
+  '/api/withdraw/status',
+  requireLogin,
+  async (req, res) => {
+
+    try {
+
+      const status =
+        await getWithdrawalCooldownStatus(
+          req.user.id
+        );
+
+      return res.json({
+        success: true,
+        cooldownMs: WITHDRAWAL_COOLDOWN,
+        ...status
+      });
+
+    } catch (err) {
+
+      console.error(
+        'Withdrawal status error:',
+        err
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          'Unable to check withdrawal availability.'
+      });
+
+    }
+  }
+);
+
+// ======================================================
 // WITHDRAW
 // ======================================================
 
@@ -5508,6 +5604,44 @@ app.post(
 
       const user =
         req.user;
+
+      // Server-side enforcement is authoritative. Because the timestamp
+      // comes from Supabase, browser storage or a Render restart cannot
+      // reset the 24-hour withdrawal restriction.
+      const withdrawalStatus =
+        await getWithdrawalCooldownStatus(
+          user.id
+        );
+
+      if (!withdrawalStatus.canWithdraw) {
+
+        const remainingHours =
+          Math.floor(
+            withdrawalStatus.remainingMs /
+            (60 * 60 * 1000)
+          );
+
+        const remainingMinutes =
+          Math.ceil(
+            (
+              withdrawalStatus.remainingMs %
+              (60 * 60 * 1000)
+            ) /
+            (60 * 1000)
+          );
+
+        return res.status(429).json({
+          success: false,
+          message:
+            `You can withdraw again in ${remainingHours}h ${remainingMinutes}m.`,
+          lastWithdrawalAt:
+            withdrawalStatus.lastWithdrawalAt,
+          nextAllowedAt:
+            withdrawalStatus.nextAllowedAt,
+          remainingMs:
+            withdrawalStatus.remainingMs
+        });
+      }
 
       const withdrawnAmount =
         number(amount);
@@ -5577,6 +5711,9 @@ app.post(
           user.balance
         );
 
+      const withdrawalCreatedAt =
+        new Date().toISOString();
+
       user.withdrawableBalance =
         withdrawable -
         withdrawnAmount;
@@ -5613,7 +5750,10 @@ app.post(
             'Pending',
 
           description:
-            'Withdrawal request'
+            'Withdrawal request',
+
+          createdAt:
+            withdrawalCreatedAt
 
         }
       );
@@ -5653,7 +5793,14 @@ app.post(
           user.withdrawableBalance,
 
         depositBalance:
-          user.depositBalance
+          user.depositBalance,
+
+        lastWithdrawalAt:
+          withdrawalCreatedAt,
+
+        nextAllowedAt:
+          new Date(withdrawalCreatedAt).getTime() +
+          WITHDRAWAL_COOLDOWN
 
       });
 
@@ -8918,6 +9065,18 @@ async function handleTelegramCallback(
 // Pays the previous week's top-2 scorers once the week rolls over.
 // Mirrors the referral competition's rollover check below, reusing
 // the same Monday-00:00-WAT week boundary via getCurrentCompetition().
+//
+// EGRESS FIX: finalizeTapRushWeek() has no early-return guard of its
+// own, so calling it on every 60s tick meant an unconditional
+// tap_rush_scores read (+ an alreadyPaid read per winner) forever,
+// even though the payout only ever needs to happen once per week.
+// `lastFinalizedTapRushCompetitionId` remembers the last week we
+// successfully finalized so every subsequent tick for that same week
+// is a no-op with zero Supabase calls. It only touches Supabase again
+// once competitionId actually changes (i.e. once a week), or again
+// next tick if the previous attempt errored.
+let lastFinalizedTapRushCompetitionId = null;
+
 setInterval(
     () => {
         const currentCompetition = getCurrentCompetition();
@@ -8934,7 +9093,15 @@ setInterval(
             status: 'completed'
         };
 
-        finalizeTapRushWeek(previousCompetition).catch(
+        if (previousCompetition.competitionId === lastFinalizedTapRushCompetitionId) {
+            return;
+        }
+
+        finalizeTapRushWeek(previousCompetition).then(
+            () => {
+                lastFinalizedTapRushCompetitionId = previousCompetition.competitionId;
+            }
+        ).catch(
             err =>
                 console.error(
                     'Tap Rush weekly prize finalization error:',
@@ -9103,6 +9270,17 @@ app.get(
 // ======================================================
 // START WEEKLY CHECK
 // ======================================================
+// EGRESS FIX: finalizeWeeklyCompetition()'s own early-return guard
+// compares Date.now() against the *previous* week's endTime, which by
+// construction has already passed — so it never actually short-
+// circuits here. That meant every 30s tick ran a full
+// getWeeklyLeaderboard() Supabase read plus one alreadyPaid Supabase
+// read per prize, forever, long after that week's prizes were paid.
+// `lastFinalizedReferralCompetitionId` remembers the last week we
+// successfully finalized so repeat ticks for the same week are a
+// no-op with zero Supabase calls, and it only queries again once the
+// competitionId actually changes (once a week) or after an error.
+let lastFinalizedReferralCompetitionId = null;
 
 setInterval(
 
@@ -9135,8 +9313,20 @@ setInterval(
         'completed'
     };
 
+    if (
+      previousCompetition.competitionId ===
+      lastFinalizedReferralCompetitionId
+    ) {
+      return;
+    }
+
     finalizeWeeklyCompetition(
       previousCompetition
+    ).then(
+      () => {
+        lastFinalizedReferralCompetitionId =
+          previousCompetition.competitionId;
+      }
     ).catch(
       err =>
         console.error(
@@ -10061,6 +10251,7 @@ app.listen(
   }
 
 );
+
 
 
 
