@@ -3834,12 +3834,12 @@ async function sendTelegramNotification(
 ) {
 
   if (
-    !TELEGRAM_BOT_TOKEN ||
+    !TELEGRAM_DEPOSIT_BOT_TOKEN ||
     !TELEGRAM_CHAT_ID
   ) {
 
     console.warn(
-      'Telegram notification disabled: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.'
+      'Telegram notification disabled: TELEGRAM_DEPOSIT_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.'
     );
 
     return;
@@ -3850,7 +3850,7 @@ async function sendTelegramNotification(
 
     const response =
       await fetch(
-        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+        `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/sendMessage`,
         {
 
           method:
