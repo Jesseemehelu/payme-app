@@ -709,8 +709,6 @@ canvas.spinning {
     inset 0 1px rgba(255,255,255,.35),
     inset 0 -6px 10px rgba(76,29,149,.25);
 
-  animation: adSpinGlow 1.8s ease-in-out infinite;
-
   transition: transform .12s ease, box-shadow .12s ease, filter .16s ease;
 }
 
@@ -725,28 +723,22 @@ canvas.spinning {
 }
 
 .ad-spin-btn:disabled {
-  opacity: .6;
+  opacity: 1;
   cursor: not-allowed;
   animation: none;
+  color: #cbd5e1;
+  background: linear-gradient(160deg, #64748b 0%, #475569 100%);
+  border-color: rgba(255,255,255,.12);
+  border-bottom-color: rgba(30,41,59,.75);
+  box-shadow:
+    0 8px 0 rgba(30,41,59,.55),
+    0 10px 18px rgba(15,23,42,.25),
+    inset 0 1px rgba(255,255,255,.12),
+    inset 0 -6px 10px rgba(15,23,42,.2);
 }
 
-@keyframes adSpinGlow {
-  0%, 100% {
-    box-shadow:
-      0 0 0 0 rgba(236,72,153,.45),
-      0 8px 0 rgba(76,29,149,.55),
-      0 12px 22px rgba(124,58,237,.35),
-      inset 0 1px rgba(255,255,255,.35),
-      inset 0 -6px 10px rgba(76,29,149,.25);
-  }
-  50% {
-    box-shadow:
-      0 0 0 7px rgba(236,72,153,0),
-      0 8px 0 rgba(76,29,149,.55),
-      0 12px 28px rgba(236,72,153,.45),
-      inset 0 1px rgba(255,255,255,.4),
-      inset 0 -6px 10px rgba(76,29,149,.25);
-  }
+.ad-spin-btn:disabled .ad-spin-play-icon {
+  opacity: .6;
 }
 
 .ad-spin-play-icon {
@@ -2080,7 +2072,7 @@ canvas.spinning {
         <path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/>
       </svg>
 
-      <span>🎁 Watch Ad, Claim Free Spins</span>
+      <span id="adSpinBtnLabel">🎁 Watch Ad, Claim Free Spins</span>
 
     </button>
   </div>
@@ -3633,9 +3625,12 @@ function buildAdSpinReel() {
   track.style.transform = 'translate3d(0,0,0)';
 }
 
+const AD_SPIN_BTN_DEFAULT_LABEL = '🎁 Watch Ad, Claim Free Spins';
+
 function updateAdSpinCooldownUI() {
   const btn = document.getElementById('adSpinViewBtn');
   const headerBtn = document.getElementById('adSpinBtn');
+  const headerBtnLabel = document.getElementById('adSpinBtnLabel');
   const until = Number(localStorage.getItem(AD_SPIN_COOLDOWN_KEY) || 0);
   const remaining = Math.max(0, until - Date.now());
 
@@ -3645,11 +3640,13 @@ function updateAdSpinCooldownUI() {
       btn.textContent = `Available in ${Math.ceil(remaining / 1000)}s`;
     }
     if (headerBtn) headerBtn.disabled = true;
+    if (headerBtnLabel) headerBtnLabel.textContent = `Available in ${Math.ceil(remaining / 1000)}s`;
     setTimeout(updateAdSpinCooldownUI, 500);
   } else {
     localStorage.removeItem(AD_SPIN_COOLDOWN_KEY);
     if (btn) { btn.disabled = false; btn.textContent = '▶ View Ad'; }
     if (headerBtn) headerBtn.disabled = false;
+    if (headerBtnLabel) headerBtnLabel.textContent = AD_SPIN_BTN_DEFAULT_LABEL;
   }
 }
 
