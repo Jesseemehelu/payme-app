@@ -2613,13 +2613,13 @@ Awesome ✨
     <div class="monetag-subtitle" id="monetagModalSubtitle">Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event. The reel is only the suspense reveal.</div>
 
     <div class="monetag-prize-grid" id="monetagPrizeGrid">
-      <div class="monetag-prize"><span class="monetag-prize-icon">🔄</span><strong>Try Again</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦5</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦10</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦20</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦50</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">💵</span><strong>₦100</strong></div>
-      <div class="monetag-prize top-prize"><span class="monetag-prize-icon">💎</span><strong>₦500</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.02 Spin</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.05 Spin</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.1 Spin</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.2 Spin</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🎖️</span><strong>0.5 Spin</strong></div>
+      <div class="monetag-prize"><span class="monetag-prize-icon">🏆</span><strong>1 Spin</strong></div>
+      <div class="monetag-prize top-prize"><span class="monetag-prize-icon">💎</span><strong>2 Spins</strong></div>
     </div>
 
     <div class="monetag-reel-wrap" id="monetagReelWrap">
@@ -3019,13 +3019,13 @@ const MONETAG_CLIENT_COOLDOWN_MS = 10 * 1000;
 const MONETAG_COOLDOWN_KEY = "paymeMonetagCooldownUntil";
 
 const MONETAG_REEL_ITEMS = [
-    {icon:"🔄",label:"TRY AGAIN"},
-    {icon:"₦5",label:"₦5"},
-    {icon:"₦10",label:"₦10"},
-    {icon:"₦20",label:"₦20"},
-    {icon:"₦50",label:"₦50"},
-    {icon:"₦100",label:"₦100"},
-    {icon:"₦500",label:"₦500"}
+    {icon:"🎟️",label:"0.02"},
+    {icon:"🎟️",label:"0.05"},
+    {icon:"🎟️",label:"0.1"},
+    {icon:"🎟️",label:"0.2"},
+    {icon:"🎖️",label:"0.5"},
+    {icon:"🏆",label:"1 SPIN"},
+    {icon:"💎",label:"2 SPINS"}
 ];
 
 function monetagSetStatus(text, isError=false){
@@ -3179,13 +3179,13 @@ async function waitForMonetagPostback(timeoutMs=15000, intervalMs=1200){
 }
 
 function getMonetagRewardIndex(result){
-    const cash = Number(result?.cash || 0);
-    if(cash === 500) return 6;
-    if(cash === 100) return 5;
-    if(cash === 50) return 4;
-    if(cash === 20) return 3;
-    if(cash === 10) return 2;
-    if(cash === 5) return 1;
+    const spins = Number(result?.spins || 0);
+    if(spins >= 2) return 6;
+    if(spins >= 1) return 5;
+    if(spins >= 0.5) return 4;
+    if(spins >= 0.2) return 3;
+    if(spins >= 0.1) return 2;
+    if(spins >= 0.05) return 1;
     return 0;
 }
 
@@ -3250,22 +3250,23 @@ function showMonetagResult(result){
     const done = document.getElementById("monetagDoneBtn");
     const orb = document.getElementById("monetagOrb");
 
-    const won = Number(result.cash || 0) > 0;
+    const spins = Number(result.spins || 0);
+    const won = spins > 0;
 
     if(title) title.textContent = won ? "🎉 You won!" : "Oops!";
     if(subtitle) subtitle.textContent = won
-        ? "Your reward has been confirmed and added to your PAYME account."
-        : "Better luck on your next watch.";
+        ? "Nice! Come back soon for another shot at even bigger free spins."
+        : "Almost! Watch another ad for another shot at free spins.";
     if(grid) grid.style.display = "none";
     if(reveal) reveal.style.display = "none";
     if(status) status.textContent = "";
     if(orb) orb.textContent = won ? "🎉" : "😕";
 
     /* Reward is credited and shown instantly — no fill/loading animation. */
-    if(icon) icon.textContent = won ? "💰" : "😕";
-    if(label) label.textContent = won ? (result.label || "Reward") : "Oops!";
+    if(icon) icon.textContent = won ? "🎟️" : "😕";
+    if(label) label.textContent = won ? `${spins} Free Spin${spins===1?"":"s"}` : "Try Again";
     if(copy){
-        if(won) copy.textContent = `₦${Number(result.cash).toLocaleString()} has been added to your earnings balance.`;
+        if(won) copy.textContent = `${spins} free spin${spins===1?"":"s"} has been added to your account. Keep watching to grow your streak!`;
         else copy.textContent = "You didn't get anything this time.";
     }
     if(resultBox) resultBox.classList.add("show");

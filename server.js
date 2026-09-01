@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
+const compression = require('compression');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -13,6 +14,14 @@ app.set('trust proxy', 1);
 // ======================================================
 // MIDDLEWARE
 // ======================================================
+
+// Gzip/Brotli-compresses every response body (HTML, JSON, CSS, JS) before it
+// goes out over the wire. The dashboard/earn/game pages are large, mostly
+// text (HTML+inline CSS/JS) documents, which typically compress down to a
+// fraction of their raw size — this is the single biggest lever on egress
+// bandwidth, since previously every response left the server uncompressed.
+// Requires the "compression" package (npm install compression).
+app.use(compression());
 
 app.use(cors({
   origin: true,
@@ -28,8 +37,21 @@ app.use(express.urlencoded({
   extended: true
 }));
 
+// maxAge lets the browser skip re-downloading unchanged static assets
+// (images, fonts, client-side libs, etc.) for a day instead of fetching
+// them fresh on every page load. HTML files are excluded from that cache
+// window (they're revalidated every time) so page updates still show up
+// immediately after a deploy.
 app.use(express.static(
-  path.join(__dirname, 'public')
+  path.join(__dirname, 'public'),
+  {
+    maxAge: '1d',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  }
 ));
 
 // ======================================================
@@ -177,26 +199,17 @@ const MONETAG_POSTBACK_PATH = '/api/monetag/postback';
 const MONETAG_SESSION_TTL = 10 * 60 * 1000;
 const MONETAG_REWARD_COOLDOWN = 10 * 1000;
 
-// Reward table. 100,000 secure-random slots are used server-side.
-// No free-spin rewards come from this reel anymore — cash only.
-// Higher cash tiers are intentionally made extremely rare so the vast
-// majority of plays land on "Try Again" or the smallest cash amount.
-const MONETAG_REWARD_SLOTS = [
-  { max: 50000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
-  { max: 70000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
-  { max: 85000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
-  { max: 95000, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
-  { max: 99000, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
-  { max: 99900, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
-  { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
-];
-
-// Reward table for the game page's "Watch Ad" free-spin fraction reward.
-// 100,000 secure-random slots. 0.02 and 0.05 are deliberately the
-// overwhelmingly common outcomes (together ~85% of plays), 0.1 is fairly
-// common (~11%), and every tier above that gets rarer very fast — the top
-// tiers (1 and especially 2 Free Spins) are made extremely hard to hit.
-const GAME_FREESPIN_AD_REWARD_SLOTS = [
+// Shared reward table for every "watch a rewarded ad" surface in the app —
+// the dashboard's floating ad reel, the Earn page's "Watch Ads & Earn"
+// button, and the game page's "Watch Ad, Claim Free Spins" button all pull
+// from this single table now, so all three pay out the same free-spin
+// amounts at the exact same odds. 100,000 secure-random slots are used
+// server-side. 0.02 and 0.05 are deliberately the overwhelmingly common
+// outcomes (together ~85% of plays), 0.1 is fairly common (~11%), and every
+// tier above that gets rarer very fast — the top tiers (1 and especially 2
+// Free Spins) are made extremely hard to hit. There is no cash payout from
+// any of these three ad surfaces anymore.
+const AD_WATCH_FREESPIN_REWARD_SLOTS = [
   { max: 50000, key: 'fs_002', label: '0.02 Free Spin', cash: 0, spins: 0.02 },
   { max: 85000, key: 'fs_005', label: '0.05 Free Spin', cash: 0, spins: 0.05 },
   { max: 96000, key: 'fs_01',  label: '0.1 Free Spin',  cash: 0, spins: 0.1 },
@@ -204,20 +217,6 @@ const GAME_FREESPIN_AD_REWARD_SLOTS = [
   { max: 99800, key: 'fs_05',  label: '0.5 Free Spin',  cash: 0, spins: 0.5 },
   { max: 99970, key: 'fs_1',   label: '1 Free Spin',    cash: 0, spins: 1 },
   { max: 100000,key: 'fs_2',   label: '2 Free Spins',   cash: 0, spins: 2 }
-];
-
-// Reward table for the Earn page's "Watch Ads & Earn" button. Same cash
-// tiers/labels as the dashboard reel, but skewed far more aggressively
-// toward "Try Again" — the higher cash tiers are made deliberately,
-// extremely rare so meaningfully high payouts are a near-never event.
-const EARN_WATCH_AD_REWARD_SLOTS = [
-  { max: 50000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
-  { max: 70000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
-  { max: 85000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
-  { max: 95000, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
-  { max: 99000, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
-  { max: 99900, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
-  { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
 ];
 
 // userId -> pending watch session
@@ -1987,11 +1986,11 @@ function normalizeMonetagTelegramId(value) {
 }
 
 function chooseMonetagReward(context) {
-  const table = context === 'game_free_spin'
-    ? GAME_FREESPIN_AD_REWARD_SLOTS
-    : context === 'earn_watch_ad'
-    ? EARN_WATCH_AD_REWARD_SLOTS
-    : MONETAG_REWARD_SLOTS;
+  // context ('dashboard' | 'earn_watch_ad' | 'game_free_spin') is still used
+  // elsewhere (transaction description text) to indicate where the ad was
+  // watched from, but all three now draw from the exact same reward table
+  // at the exact same odds — see AD_WATCH_FREESPIN_REWARD_SLOTS above.
+  const table = AD_WATCH_FREESPIN_REWARD_SLOTS;
   const roll = crypto.randomInt(0, 100000) + 1;
   for (const reward of table) {
     if (roll <= reward.max) {
