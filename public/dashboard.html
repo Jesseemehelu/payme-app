@@ -2921,30 +2921,41 @@ function waitForButtonLoader(ms=360){
    Non-rewarded Monetag ads are controlled entirely by Monetag.
    This does NOT touch the rewarded-ad/postback system above.
 
-   Balance chosen for monetization + user comfort:
    - frequency: 2 ads
-   - capping: 0.1333 hours = about 8 minutes
-   - interval: 45 seconds between ads
+   - capping: 0.1 hours = 6 minutes
+   - interval: 30 seconds between ads
    - timeout: 5 seconds before the first ad
-   - everyPage: false = keep the Monetag session across navigation
+   - everyPage: true = the Monetag session resets on every page
+     transition, so the frequency/capping counter starts over each
+     time the dashboard is (re)entered, instead of being shared
+     across the whole app session.
 
    Monetag still decides whether an ad is actually available/shown.
    ========================================================= */
 const MONETAG_INAPP_SETTINGS = Object.freeze({
     type: "inApp",
     inAppSettings: {
-        frequency: 3,
-        capping: 0.1667,
-        interval: 45,
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
         timeout: 5,
-        everyPage: false
+        everyPage: true
     }
 });
 
 let monetagInAppStarted = false;
+let monetagInAppRetryTimer = null;
 
-function startMonetagInAppInterstitial(){
-    if(monetagInAppStarted) return;
+/* force=true lets a caller (e.g. "user re-entered the dashboard")
+   restart the interstitial even if it already ran earlier in this
+   page's lifetime. Without force, a call while it's already
+   running/scheduled is a no-op. */
+function startMonetagInAppInterstitial(force){
+    if(monetagInAppStarted && !force) return;
+    if(monetagInAppRetryTimer){
+        clearTimeout(monetagInAppRetryTimer);
+        monetagInAppRetryTimer = null;
+    }
     monetagInAppStarted = true;
 
     const launch = () => {
@@ -2953,7 +2964,7 @@ function startMonetagInAppInterstitial(){
                 // The SDK may still be loading. Retry a few times without
                 // creating an aggressive polling loop.
                 monetagInAppStarted = false;
-                setTimeout(startMonetagInAppInterstitial, 1200);
+                monetagInAppRetryTimer = setTimeout(()=>startMonetagInAppInterstitial(true), 1200);
                 return;
             }
 
@@ -2974,12 +2985,12 @@ function startMonetagInAppInterstitial(){
     setTimeout(launch, 5000);
 }
 
-/* Start only after the dashboard has loaded. Monetag handles the
+/* Start once the dashboard has first loaded. Monetag handles the
    configured frequency/capping/interval from there. */
 if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
+    document.addEventListener("DOMContentLoaded", ()=>startMonetagInAppInterstitial(false), {once:true});
 }else{
-    startMonetagInAppInterstitial();
+    startMonetagInAppInterstitial(false);
 }
 
 /* =========================================================
@@ -5396,6 +5407,12 @@ function refreshDashboardOnReturn(){
     lastDashboardRefresh = now;
     fetchDashboardData();
     loadLeaderboard();
+
+    // Treat "came back to the dashboard tab/app" the same as "entered
+    // the dashboard": restart the In-App Interstitial so a fresh
+    // frequency/capping window (and therefore a new ad) can fire,
+    // matching everyPage:true above.
+    startMonetagInAppInterstitial(true);
 }
 
 document.addEventListener("visibilitychange", ()=>{
