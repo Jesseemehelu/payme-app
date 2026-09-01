@@ -2946,35 +2946,48 @@ const MONETAG_INAPP_SETTINGS = Object.freeze({
 let monetagInAppStarted = false;
 let monetagInAppRetryTimer = null;
 
-/* force=true lets a caller (e.g. "user re-entered the dashboard")
-   restart the interstitial even if it already ran earlier in this
-   page's lifetime. Without force, a call while it's already
-   running/scheduled is a no-op. */
-function startMonetagInAppInterstitial(force){
-    if(monetagInAppStarted && !force) return;
-    if(monetagInAppRetryTimer){
-        clearTimeout(monetagInAppRetryTimer);
-        monetagInAppRetryTimer = null;
-    }
+/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
+   multiple times in a row can reset the SDK's internal logic and
+   interrupt the ad flow. So this must only ever be called ONCE per
+   page load. everyPage:true (below) is what makes Monetag itself
+   reset the frequency/capping session on every navigation/entry —
+   we do NOT need to (and must not) re-call show_11688228 manually
+   when the user returns to the tab. That re-call was removed from
+   the "came back to this tab" handler for that reason. */
+function startMonetagInAppInterstitial(){
+    if(monetagInAppStarted) return;
     monetagInAppStarted = true;
 
     const launch = () => {
-        try{
-            if(typeof window.show_11688228 !== "function"){
-                // The SDK may still be loading. Retry a few times without
-                // creating an aggressive polling loop.
-                monetagInAppStarted = false;
-                monetagInAppRetryTimer = setTimeout(()=>startMonetagInAppInterstitial(true), 1200);
-                return;
-            }
+        if(typeof window.show_11688228 !== "function"){
+            // The SDK script may still be loading. Retry a few times
+            // without creating an aggressive polling loop.
+            monetagInAppStarted = false;
+            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
+            return;
+        }
 
-            /*
-             * IMPORTANT:
-             * Do not await this call and do not attach rewarded-ad
-             * ymid/requestVar values here. In-App Interstitial is
-             * non-rewarded and must remain separate from the reward flow.
-             */
-            window.show_11688228(MONETAG_INAPP_SETTINGS);
+        /*
+         * Do not attach rewarded-ad ymid/requestVar values here.
+         * In-App Interstitial is non-rewarded and must remain
+         * separate from the reward flow.
+         *
+         * catchIfNoFeed:true + .catch() below exist purely for
+         * debugging — by default Monetag silently resolves with no
+         * ad shown when there's nothing to serve (empty feed, zone
+         * still in moderation, domain not approved, etc.), so
+         * without this you'd never see *why* nothing appeared.
+         */
+        try{
+            const result = window.show_11688228({
+                ...MONETAG_INAPP_SETTINGS,
+                catchIfNoFeed: true
+            });
+            if(result && typeof result.catch === "function"){
+                result.catch(error=>{
+                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
+                });
+            }
         }catch(error){
             console.warn("Monetag In-App Interstitial could not start:", error);
             monetagInAppStarted = false;
@@ -2985,12 +2998,13 @@ function startMonetagInAppInterstitial(force){
     setTimeout(launch, 5000);
 }
 
-/* Start once the dashboard has first loaded. Monetag handles the
-   configured frequency/capping/interval from there. */
+/* Start once the dashboard has first loaded — and only once. Monetag
+   handles the configured frequency/capping/interval from there, and
+   everyPage:true resets that session on every fresh page load. */
 if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", ()=>startMonetagInAppInterstitial(false), {once:true});
+    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
 }else{
-    startMonetagInAppInterstitial(false);
+    startMonetagInAppInterstitial();
 }
 
 /* =========================================================
@@ -5408,11 +5422,12 @@ function refreshDashboardOnReturn(){
     fetchDashboardData();
     loadLeaderboard();
 
-    // Treat "came back to the dashboard tab/app" the same as "entered
-    // the dashboard": restart the In-App Interstitial so a fresh
-    // frequency/capping window (and therefore a new ad) can fire,
-    // matching everyPage:true above.
-    startMonetagInAppInterstitial(true);
+    // NOTE: we deliberately do NOT re-call startMonetagInAppInterstitial()
+    // here. Monetag's docs warn that calling show_XXX({type:'inApp'})
+    // more than once per page can reset its internal logic and break
+    // the ad flow. everyPage:true (see MONETAG_INAPP_SETTINGS above)
+    // is what makes a full page reload/navigation count as a fresh
+    // entry — a same-page tab switch does not need a manual re-call.
 }
 
 document.addEventListener("visibilitychange", ()=>{
