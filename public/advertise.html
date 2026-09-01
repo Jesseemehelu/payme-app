@@ -2598,7 +2598,7 @@ header {
           <div>
 
             <div class="bot-copy-row">
-              <div class="bot-name" id="paymeBotUsername">@paymeoobot</div>
+              <div class="bot-name" id="paymeBotUsername">@paymeverifybot</div>
               <button class="bot-copy-btn" id="copyPaymeBotBtn" type="button">Copy</button>
             </div>
 
@@ -2672,7 +2672,7 @@ header {
 
             Search for
             <strong>
-              @paymeoobot
+              @paymeverifybot
             </strong>
             and select the official PAYME bot.
 
@@ -3656,8 +3656,8 @@ confirmTopupBtn.addEventListener("click",async()=>{
 ========================================================= */
 document.getElementById("copyPaymeBotBtn").addEventListener("click",async()=>{
   const button=document.getElementById("copyPaymeBotBtn");
-  try{await navigator.clipboard.writeText("@paymeoobot");}
-  catch{const fallback=document.createElement("textarea");fallback.value="@paymeoobot";document.body.appendChild(fallback);fallback.select();document.execCommand("copy");fallback.remove();}
+  try{await navigator.clipboard.writeText("@paymeverifybot");}
+  catch{const fallback=document.createElement("textarea");fallback.value="@paymeverifybot";document.body.appendChild(fallback);fallback.select();document.execCommand("copy");fallback.remove();}
   button.textContent="Copied!";button.classList.add("copied");
   setTimeout(()=>{button.textContent="Copy";button.classList.remove("copied");},1500);
 });
@@ -3935,7 +3935,7 @@ verifyBtn.addEventListener(
 
         showMessageModal(
           "Verification failed",
-          data.message || "Please make sure @paymeoobot is an administrator of your Telegram community and try again.",
+          data.message || "Please make sure @paymeverifybot is an administrator of your Telegram community and try again.",
           "error"
         );
       }
@@ -4332,6 +4332,7 @@ document
 
 </body>
 </html>
+
 
 
 
