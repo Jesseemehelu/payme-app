@@ -2916,6 +2916,73 @@ function waitForButtonLoader(ms=360){
 }
 
 /* =========================================================
+   MONETAG IN-APP INTERSTITIAL
+   =========================================================
+   Non-rewarded Monetag ads are controlled entirely by Monetag.
+   This does NOT touch the rewarded-ad/postback system above.
+
+   Balance chosen for monetization + user comfort:
+   - frequency: 2 ads
+   - capping: 0.1333 hours = about 8 minutes
+   - interval: 45 seconds between ads
+   - timeout: 5 seconds before the first ad
+   - everyPage: false = keep the Monetag session across navigation
+
+   Monetag still decides whether an ad is actually available/shown.
+   ========================================================= */
+const MONETAG_INAPP_SETTINGS = Object.freeze({
+    type: "inApp",
+    inAppSettings: {
+        frequency: 3,
+        capping: 0.1667,
+        interval: 45,
+        timeout: 5,
+        everyPage: false
+    }
+});
+
+let monetagInAppStarted = false;
+
+function startMonetagInAppInterstitial(){
+    if(monetagInAppStarted) return;
+    monetagInAppStarted = true;
+
+    const launch = () => {
+        try{
+            if(typeof window.show_11688228 !== "function"){
+                // The SDK may still be loading. Retry a few times without
+                // creating an aggressive polling loop.
+                monetagInAppStarted = false;
+                setTimeout(startMonetagInAppInterstitial, 1200);
+                return;
+            }
+
+            /*
+             * IMPORTANT:
+             * Do not await this call and do not attach rewarded-ad
+             * ymid/requestVar values here. In-App Interstitial is
+             * non-rewarded and must remain separate from the reward flow.
+             */
+            window.show_11688228(MONETAG_INAPP_SETTINGS);
+        }catch(error){
+            console.warn("Monetag In-App Interstitial could not start:", error);
+            monetagInAppStarted = false;
+        }
+    };
+
+    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
+    setTimeout(launch, 5000);
+}
+
+/* Start only after the dashboard has loaded. Monetag handles the
+   configured frequency/capping/interval from there. */
+if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
+}else{
+    startMonetagInAppInterstitial();
+}
+
+/* =========================================================
    MONETAG REWARDED INTERSTITIAL
    ========================================================= */
 let monetagAdSessionId = null;
@@ -5347,6 +5414,7 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
 
 
 
