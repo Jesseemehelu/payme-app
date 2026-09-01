@@ -182,12 +182,12 @@ const MONETAG_REWARD_COOLDOWN = 10 * 1000;
 // Higher cash tiers are intentionally made extremely rare so the vast
 // majority of plays land on "Try Again" or the smallest cash amount.
 const MONETAG_REWARD_SLOTS = [
-  { max: 78000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
-  { max: 96000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
-  { max: 99000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
-  { max: 99700, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
-  { max: 99930, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
-  { max: 99985, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
+  { max: 50000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  { max: 70000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
+  { max: 85000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
+  { max: 95000, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
+  { max: 99000, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
+  { max: 99900, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
   { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
 ];
 
@@ -211,12 +211,12 @@ const GAME_FREESPIN_AD_REWARD_SLOTS = [
 // toward "Try Again" — the higher cash tiers are made deliberately,
 // extremely rare so meaningfully high payouts are a near-never event.
 const EARN_WATCH_AD_REWARD_SLOTS = [
-  { max: 95000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
-  { max: 99000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
-  { max: 99700, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
-  { max: 99920, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
-  { max: 99980, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
-  { max: 99997, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
+  { max: 50000, key: 'try_again', label: 'Try Again',      cash: 0,   spins: 0 },
+  { max: 70000, key: 'cash_5',    label: '₦5',              cash: 5,   spins: 0 },
+  { max: 85000, key: 'cash_10',   label: '₦10',             cash: 10,  spins: 0 },
+  { max: 95000, key: 'cash_20',   label: '₦20',             cash: 20,  spins: 0 },
+  { max: 99000, key: 'cash_50',   label: '₦50',             cash: 50,  spins: 0 },
+  { max: 99900, key: 'cash_100',  label: '₦100',            cash: 100, spins: 0 },
   { max: 100000,key: 'cash_500',  label: '₦500',            cash: 500, spins: 0 }
 ];
 
