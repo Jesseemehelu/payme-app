@@ -106,6 +106,15 @@ const TELEGRAM_DEPOSIT_BOT_TOKEN =
     process.env.TELEGRAM_DEPOSIT_BOT_TOKEN || ''
   ).trim();
 
+// This bot is also used for all channel/ad membership verification
+// (Telegram Ads admin/membership checks and the "join our channel"
+// welcome bonus check). Those are plain one-off getChatMember/getChat/
+// getMe REST calls, not another getUpdates poller, so they never
+// conflict with this bot's deposit-approval polling loop. Keeping
+// TELEGRAM_BOT_TOKEN's admin footprint on the channel to a minimum
+// avoids the kind of admin churn that happens when a bot with broad
+// admin rights (Add Admins, etc.) is repeatedly touched.
+
 const TELEGRAM_CHAT_ID =
   String(
     process.env.TELEGRAM_CHAT_ID || ''
@@ -2058,13 +2067,14 @@ const TELEGRAM_AD_PLATFORM_FEE = 25;
 
 async function telegramApi(
   method,
-  params = {}
+  params = {},
+  token = TELEGRAM_BOT_TOKEN
 ) {
 
-  if (!TELEGRAM_BOT_TOKEN) {
+  if (!token) {
 
     throw new Error(
-      'TELEGRAM_BOT_TOKEN is not configured.'
+      'Telegram bot token is not configured.'
     );
 
   }
@@ -2072,7 +2082,7 @@ async function telegramApi(
 
   const response =
     await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${method}`,
+      `https://api.telegram.org/bot${token}/${method}`,
       {
         method: 'POST',
 
@@ -2298,7 +2308,8 @@ async function verifyTelegramAdvertisingCommunity(
         {
           chat_id:
             parsed.username
-        }
+        },
+        TELEGRAM_DEPOSIT_BOT_TOKEN
       );
 
 
@@ -2361,7 +2372,9 @@ async function verifyTelegramAdvertisingCommunity(
 
     const bot =
       await telegramApi(
-        'getMe'
+        'getMe',
+        {},
+        TELEGRAM_DEPOSIT_BOT_TOKEN
       );
 
 
@@ -2380,7 +2393,8 @@ async function verifyTelegramAdvertisingCommunity(
           user_id:
             bot.id
 
-        }
+        },
+        TELEGRAM_DEPOSIT_BOT_TOKEN
       );
 
 
@@ -2400,7 +2414,7 @@ async function verifyTelegramAdvertisingCommunity(
         success: false,
 
         message:
-          'PAYME Bot has not been added as an administrator of this Telegram community.'
+          'Our verification bot has not been added as an administrator of this Telegram community.'
 
       };
 
@@ -2424,7 +2438,8 @@ async function verifyTelegramAdvertisingCommunity(
               advertiserTelegramId
             )
 
-        }
+        },
+        TELEGRAM_DEPOSIT_BOT_TOKEN
       );
 
 
@@ -3553,7 +3568,7 @@ app.post(
         });
       }
 
-      if (!TELEGRAM_BOT_TOKEN) {
+      if (!TELEGRAM_DEPOSIT_BOT_TOKEN) {
         return res.status(500).json({
           success: false,
           message:
@@ -3639,7 +3654,8 @@ app.post(
 
             user_id:
               Number(user.telegramId)
-          }
+          },
+          TELEGRAM_DEPOSIT_BOT_TOKEN
         );
 
       } catch (telegramError) {
@@ -5947,7 +5963,7 @@ app.post(
 
       }
 
-      if (!TELEGRAM_BOT_TOKEN) {
+      if (!TELEGRAM_DEPOSIT_BOT_TOKEN) {
 
         return res.status(500).json({
 
@@ -5964,7 +5980,7 @@ app.post(
       const response =
         await fetch(
 
-          `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getChatMember?chat_id=@paymechannel&user_id=${encodeURIComponent(user.telegramId)}`
+          `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/getChatMember?chat_id=@paymechannel&user_id=${encodeURIComponent(user.telegramId)}`
 
         );
 
@@ -10251,6 +10267,7 @@ app.listen(
   }
 
 );
+
 
 
 
