@@ -2392,8 +2392,102 @@ function animateSpinFill(spins){
 }
 const items=[{icon:'🔄',label:'TRY AGAIN'},{icon:'₦5',label:'₦5'},{icon:'₦10',label:'₦10'},{icon:'₦20',label:'₦20'},{icon:'₦50',label:'₦50'},{icon:'₦100',label:'₦100'},{icon:'₦500',label:'₦500'}];function build(){track.innerHTML=Array.from({length:40},(_,i)=>{const x=items[i%items.length];return `<div class="watchads-reel-item"><div>${x.icon}</div><div>${x.label}</div></div>`}).join('');track.style.transition='none';track.style.transform='translate3d(0,0,0)';}function reset(){sessionId=null;startedAt=0;start.disabled=false;start.style.display='block';start.textContent='▶ Watch Ad';status.textContent='';reel.classList.remove('show','landed');reel.style.display='none';result.classList.remove('show');done.style.display='none';animateSpinFill(0);build()}function show(){reset();modal.classList.add('show');modal.setAttribute('aria-hidden','false')}function hide(){if(busy)return;modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}async function startSession(){const r=await fetch('/api/monetag/start',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'earn_watch_ad'})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.message||'Unable to start the rewarded ad.');sessionId=d.sessionId;startedAt=Number(d.createdAt||Date.now())}async function waitStatus(){const t=Date.now();while(Date.now()-t<15000){try{const r=await fetch(`/api/monetag/status?sessionId=${encodeURIComponent(sessionId)}&startedAt=${encodeURIComponent(startedAt)}`,{credentials:'include'});const d=await r.json().catch(()=>({}));if(r.ok&&d.success&&d.confirmed&&d.reward)return d}catch(e){}await new Promise(x=>setTimeout(x,1200))}return null}function idx(r){const cash=Number(r.cash||0);if(cash===500)return 6;if(cash===100)return 5;if(cash===50)return 4;if(cash===20)return 3;if(cash===10)return 2;if(cash===5)return 1;return 0}function reveal(r){return new Promise(resolve=>{const step=122,trackPadding=20,center=(reel.querySelector('.watchads-reel-window')?.clientWidth||300)/2,target=28+idx(r),off=i=>-(i*step)+center-56-trackPadding;reel.style.display='block';reel.classList.add('show');reel.classList.remove('landed');caption.textContent='REVEALING YOUR REWARD…';track.style.transition='none';track.style.transform='translate3d(0,0,0)';void track.offsetWidth;track.style.transition='transform 2.6s cubic-bezier(.12,.72,.1,1)';track.style.transform=`translate3d(${off(target)}px,0,0)`;setTimeout(()=>{reel.classList.add('landed');caption.textContent='REWARD LOCKED IN ✓';resolve()},2700)})}function showResult(r){const cash=Number(r.cash||0),won=cash>0;resultIcon.textContent=won?'💰':'😕';resultTitle.textContent=won?(r.label||'Reward'):'Oops!';resultCopy.textContent=won?`₦${cash.toLocaleString()} has been added to your earnings balance.`:"You didn't get anything this time.";result.classList.add('show');done.style.display='block';animateSpinFill(0);startWatchAdsCardCooldown()}async function watch(){if(busy)return;busy=true;start.disabled=true;status.textContent='Preparing your secure reward session…';try{await startSession();if(typeof window.show_11688228!=='function')throw new Error('Rewarded ad is not ready yet. Please wait a moment and try again.');start.textContent='Opening ad…';status.textContent='Please complete the sponsored advert.';await window.show_11688228({type:'end',ymid:sessionId,requestVar:'earn_watch_ad'});start.textContent='Confirming reward…';status.textContent='Ad completed. Confirming your reward…';const d=await waitStatus();if(!d){status.textContent='Ad completed, but confirmation is still pending. Please try again shortly.';return}const r=d.reward||{};status.textContent='';await reveal(r);showResult(r);start.style.display='none'}catch(e){status.textContent=e?.message||'Unable to show the rewarded ad.';start.disabled=false;start.textContent='▶ Watch Ad'}finally{busy=false}}if(open)open.addEventListener('click',e=>{if(open.classList.contains('on-cooldown')){e.preventDefault();e.stopPropagation();return}show()});if(close)close.addEventListener('click',hide);if(done)done.addEventListener('click',hide);if(start)start.addEventListener('click',watch);if(modal)modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))hide()});if(open)open.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){if(open.classList.contains('on-cooldown')){e.preventDefault();return}show()}});updateWatchAdsCardCooldownUI()})();
 </script>
+
+<script>
+/* =========================================================
+   MONETAG IN-APP INTERSTITIAL
+   =========================================================
+   Non-rewarded Monetag ads are controlled entirely by Monetag.
+   This does NOT touch the rewarded-ad/postback system above.
+
+   - frequency: 2 ads
+   - capping: 0.1 hours = 6 minutes
+   - interval: 30 seconds between ads
+   - timeout: 5 seconds before the first ad
+   - everyPage: true = the Monetag session resets on every page
+     transition, so the frequency/capping counter starts over each
+     time this page is (re)entered, instead of being shared
+     across the whole app session.
+
+   Monetag still decides whether an ad is actually available/shown.
+   ========================================================= */
+const MONETAG_INAPP_SETTINGS = Object.freeze({
+    type: "inApp",
+    inAppSettings: {
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
+        timeout: 5,
+        everyPage: true
+    }
+});
+
+let monetagInAppStarted = false;
+let monetagInAppRetryTimer = null;
+
+/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
+   multiple times in a row can reset the SDK's internal logic and
+   interrupt the ad flow. So this must only ever be called ONCE per
+   page load. everyPage:true (below) is what makes Monetag itself
+   reset the frequency/capping session on every navigation/entry —
+   we do NOT need to (and must not) re-call show_11688228 manually
+   when the user returns to the tab. */
+function startMonetagInAppInterstitial(){
+    if(monetagInAppStarted) return;
+    monetagInAppStarted = true;
+
+    const launch = () => {
+        if(typeof window.show_11688228 !== "function"){
+            // The SDK script may still be loading. Retry a few times
+            // without creating an aggressive polling loop.
+            monetagInAppStarted = false;
+            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
+            return;
+        }
+
+        /*
+         * Do not attach rewarded-ad ymid/requestVar values here.
+         * In-App Interstitial is non-rewarded and must remain
+         * separate from the reward flow.
+         *
+         * catchIfNoFeed:true + .catch() below exist purely for
+         * debugging — by default Monetag silently resolves with no
+         * ad shown when there's nothing to serve (empty feed, zone
+         * still in moderation, domain not approved, etc.), so
+         * without this you'd never see *why* nothing appeared.
+         */
+        try{
+            const result = window.show_11688228({
+                ...MONETAG_INAPP_SETTINGS,
+                catchIfNoFeed: true
+            });
+            if(result && typeof result.catch === "function"){
+                result.catch(error=>{
+                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
+                });
+            }
+        }catch(error){
+            console.warn("Monetag In-App Interstitial could not start:", error);
+            monetagInAppStarted = false;
+        }
+    };
+
+    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
+    setTimeout(launch, 5000);
+}
+
+/* Start once this page has first loaded — and only once. Monetag
+   handles the configured frequency/capping/interval from there, and
+   everyPage:true resets that session on every fresh page load. */
+if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
+}else{
+    startMonetagInAppInterstitial();
+}
+</script>
 </body>
 </html>
+
 
 
 
