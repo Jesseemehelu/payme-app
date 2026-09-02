@@ -84,11 +84,11 @@ box-shadow:0 6px 0 rgba(0,0,0,.4),0 16px 26px var(--glow),0 0 0 3px rgba(255,255
 .option p{margin:3px 0 0;color:var(--muted);font-size:9.5px}
 .option strong{color:var(--gold)}
 
-.stakes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stake{padding:16px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));text-align:left;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.stakes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stake{padding:13px 10px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.25)}
 .stake.active{border-color:var(--gold);background:linear-gradient(160deg,rgba(255,204,51,.2),rgba(255,138,61,.08));box-shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(255,204,51,.18)}
-.stake b{display:block;font-size:19px;color:#fff}
-.stake span{font-size:9px;color:var(--muted)}
+.stake b{display:block;font-size:16px;color:#fff}
+.stake span{font-size:8.5px;color:var(--muted)}
 
 .cta{width:100%;margin-top:13px;padding:16px;border-radius:17px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(115deg,var(--pink),var(--purple) 55%,var(--cyan));background-size:200% 100%;color:#fff;font-weight:950;font-size:14.5px;box-shadow:0 7px 0 rgba(55,15,90,.7),0 18px 34px rgba(139,47,255,.35);animation:shine 4s linear infinite}
 @keyframes shine{to{background-position:200% 0}}
@@ -144,7 +144,7 @@ transform:scale(.6);opacity:.2;transition:.5s}
 <section class="hero"><div class="kicker">✨ LUCKY 3 • TICKET PLAY</div><h1>Choose your 3 lucky numbers</h1><p>Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.</p><div class="ticket-total"><span>YOUR TICKET WALLET</span><strong id="heroTickets">0 🪙</strong></div></section>
 <section class="section"><div class="section-head"><h2>Choose 3 numbers</h2><span>Tap any 3 numbers</span></div><div class="numbers" id="numbers"></div><div style="margin-top:9px;text-align:center;color:var(--muted);font-size:9px;font-weight:800">Choose 3 different numbers • Tap again to remove</div><div class="selected-card"><div class="selected-label">YOUR PICKS • 3 REQUIRED</div><div class="slots"><div class="slot" id="slot0">--</div><div class="slot" id="slot1">--</div><div class="slot" id="slot2">--</div></div></div></section>
 <section class="section"><div class="section-head"><h2>Choose game</h2><span>Instant result</span></div><div class="options" id="games"></div></section>
-<section class="section"><div class="section-head"><h2>Entry tickets</h2><span>Not cash</span></div><div class="stakes" id="stakes"></div><button class="cta" id="playBtn">Reveal My Lucky 3 ✨</button><div class="hint">200 Tickets uses the original ₦200 payout table. 400 Tickets uses the original ₦500 payout table.</div></section>
+<section class="section"><div class="section-head"><h2>Entry tickets</h2><span>Not cash</span></div><div class="stakes" id="stakes"></div><button class="cta" id="playBtn">Reveal My Lucky 3 ✨</button><div class="hint">Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.</div></section>
 </main>
 <div class="overlay" id="ticketShortage"><div class="modal center shortage-modal">
 <div class="shortage-icon">🪙</div>
@@ -160,11 +160,12 @@ transform:scale(.6);opacity:.2;transition:.5s}
 <div class="toast" id="toast"></div>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id);const PAYOUTS={200:{jackpot:5000,cash:1500,bonus:5},400:{jackpot:15000,cash:4000,bonus:12}};const GAMES={jackpot:{title:'3/3 JACKPOT',icon:'👑',desc:'Match all 3 numbers',key:'jackpot'},cash:{title:'2/3 CASH WIN',icon:'💎',desc:'Match at least 2 numbers',key:'cash'},bonus:{title:'1/3 FREE SPINS',icon:'✨',desc:'Match at least 1 number',key:'bonus'}};const state={selected:[],game:'jackpot',stake:200,tickets:0,busy:false};
+const $=id=>document.getElementById(id);const PAYOUTS={100:{jackpot:2000,cash:700,bonus:2},200:{jackpot:5000,cash:1500,bonus:5},400:{jackpot:15000,cash:4000,bonus:12}};const GAMES={jackpot:{title:'3/3 JACKPOT',icon:'👑',desc:'Match all 3 numbers',key:'jackpot'},cash:{title:'2/3 CASH WIN',icon:'💎',desc:'Match at least 2 numbers',key:'cash'},bonus:{title:'1/3 FREE SPINS',icon:'✨',desc:'Match at least 1 number',key:'bonus'}};const state={selected:[],game:'jackpot',stake:200,tickets:0,busy:false};
 function money(n){return '₦'+Number(n||0).toLocaleString('en-NG')}function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2500)}function open(id){$(id).classList.add('open')}function close(id){$(id).classList.remove('open')}function requestId(){return 'l3_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12)}
 function renderNumbers(){$('numbers').innerHTML=Array.from({length:30},(_,i)=>{const n=i+1,a=state.selected.includes(n);return `<button class="num ${a?'selected':''}" data-number="${n}">${String(n).padStart(2,'0')}</button>`}).join('')}
 function renderGames(){$('games').innerHTML=Object.values(GAMES).map(g=>{const p=PAYOUTS[state.stake];const win=g.key==='bonus'?`${p.bonus} FREE SPINS`:money(p[g.key]);return `<button class="option ${state.game===g.key?'active':''}" data-game="${g.key}"><div class="option-top"><div class="option-icon">${g.icon}</div><div><h3>${g.title}</h3><p>${g.desc} • Win <strong>${win}</strong></p></div></div></button>`}).join('')}
-function renderStakes(){$('stakes').innerHTML=[200,400].map(s=>`<button class="stake ${state.stake===s?'active':''}" data-stake="${s}"><b>${s.toLocaleString()} 🪙</b><span>${s===200?'Original ₦200 payout table':'Original ₦500 payout table'}</span></button>`).join('')}
+const STAKE_LABELS={100:'Starter stake',200:'Popular pick',400:'High roller'};
+function renderStakes(){$('stakes').innerHTML=[100,200,400].map(s=>`<button class="stake ${state.stake===s?'active':''}" data-stake="${s}"><b>${s.toLocaleString()} 🪙</b><span>${STAKE_LABELS[s]}</span></button>`).join('')}
 function payoutLabel(){const p=PAYOUTS[state.stake];return state.game==='bonus'?`${p.bonus} FREE SPINS`:money(p[state.game])}
 function render(){renderNumbers();renderGames();renderStakes();$('ticketBalance').textContent=state.tickets.toLocaleString();$('heroTickets').textContent=state.tickets.toLocaleString()+' 🪙';for(let i=0;i<3;i++){const e=$('slot'+i),n=state.selected[i];e.textContent=n?String(n).padStart(2,'0'):'--';e.classList.toggle('filled',!!n)}$('playBtn').disabled=state.busy||state.selected.length!==3}
 async function loadTickets(){try{const r=await fetch('/api/luck/chests',{credentials:'same-origin',headers:{Accept:'application/json'}});const d=await r.json();if(!r.ok||!d.success)throw Error(d.message||'Unable to load Luck Tickets.');state.tickets=Number(d.luckTickets||0);render()}catch(e){toast(e.message||'Unable to load ticket wallet.')}}

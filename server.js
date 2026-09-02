@@ -254,6 +254,7 @@ const LUCKY3_CONFIG = {
   numberMin: 1,
   numberMax: 30,
   stakes: {
+    100: { jackpot: 2000, cash: 700, bonusFreeSpins: 2 },
     200: { jackpot: 5000, cash: 1500, bonusFreeSpins: 5 },
     400: { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 }
   }
@@ -6723,10 +6724,10 @@ app.post(
       }
 
       const stake = Number(body.stake);
-      if (![200, 400].includes(stake)) {
+      if (![100, 200, 400].includes(stake)) {
         return res.status(400).json({
           success: false,
-          message: 'Choose 200 or 400 Luck Tickets.'
+          message: 'Choose 100, 200, or 400 Luck Tickets.'
         });
       }
 
@@ -6741,11 +6742,8 @@ app.post(
         });
       }
 
-      // The 200-ticket option uses the original ₦200 payout table.
-      // The 400-ticket option uses the original ₦500 payout table.
-      const payoutConfig = stake === 200
-        ? { jackpot: 5000, cash: 1500, bonusFreeSpins: 5 }
-        : { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 };
+      // Payout table is centralized in LUCKY3_CONFIG.stakes above.
+      const payoutConfig = LUCKY3_CONFIG.stakes[stake];
 
       // Generate the draw on the server with cryptographically secure randomness.
       const winningNumbers = lucky3GenerateNumbers();
