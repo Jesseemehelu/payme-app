@@ -172,7 +172,7 @@ const WELCOME_BONUS = 10;
 
 const REFERRAL_REWARD = 15;
 
-const MIN_WITHDRAWAL_LIMIT = 100;
+const MIN_WITHDRAWAL_LIMIT = 200;
 
 // One withdrawal per rolling 24-hour period. The timestamp is persisted
 // in the Supabase transactions table, so it survives Render redeploys.
@@ -256,7 +256,7 @@ const LUCKY3_CONFIG = {
   stakes: {
     100: { jackpot: 2000, cash: 700, bonusFreeSpins: 2 },
     200: { jackpot: 5000, cash: 1500, bonusFreeSpins: 5 },
-    400: { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 }
+    500: { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 }
   }
 };
 
@@ -6772,10 +6772,10 @@ app.post(
       }
 
       const stake = Number(body.stake);
-      if (![100, 200, 400].includes(stake)) {
+      if (![100, 200, 500].includes(stake)) {
         return res.status(400).json({
           success: false,
-          message: 'Choose 100, 200, or 400 Luck Tickets.'
+          message: 'Choose 100, 200, or 500 Luck Tickets.'
         });
       }
 

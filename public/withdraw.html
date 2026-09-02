@@ -500,7 +500,7 @@
 
         <div class="input-group">
           <label for="amount">Amount (₦)</label>
-          <input type="number" id="amount" placeholder="Minimum ₦100" min="100" step="0.01" required>
+          <input type="number" id="amount" placeholder="Minimum ₦200" min="200" step="0.01" required>
         </div>
 
         <button type="submit" class="btn-submit" id="submitBtn" disabled>
@@ -739,8 +739,8 @@
         return;
       }
 
-      if (!Number.isFinite(amount) || amount < 100) {
-        showMessage('Minimum withdrawal amount is ₦100.');
+      if (!Number.isFinite(amount) || amount < 200) {
+        showMessage('Minimum withdrawal amount is ₦200.');
         return;
       }
 
@@ -806,4 +806,5 @@
   </script>
 </body>
 </html>
+
 
