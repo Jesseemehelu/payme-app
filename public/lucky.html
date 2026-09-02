@@ -1,703 +1,271 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#08090d">
-  <meta name="description" content="Lucky 3 — Pick 3 numbers and reveal your result instantly.">
-  <title>Lucky 3 — PAYME</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #07080b;
-      --card: #12141c;
-      --line: rgba(255, 255, 255, 0.08);
-      --text: #ffffff;
-      --muted: #8e93a4;
-      --gold: #f6c85f;
-      --gold2: #ffdf83;
-      --gold-glow: rgba(246, 200, 95, 0.35);
-      --purple: #8b6cff;
-      --success: #79e7a8;
-      --radius: 20px;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(139, 108, 255, 0.12), transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(246, 200, 95, 0.08), transparent 40%),
-                  var(--bg);
-      color: var(--text);
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      padding-bottom: 40px;
-    }
-    button { font: inherit; border: none; outline: none; }
-    
-    .app {
-      width: min(100%, 640px);
-      margin: 0 auto;
-      padding: 16px 18px;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0620">
+<meta name="description" content="Lucky 3 — play with Luck Tickets.">
+<title>Lucky 3 — PAYME</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="//libtl.com/sdk.js" data-zone="11688228" data-sdk="show_11688228"></script>
+<style>
+:root{--bg:#0b0620;--bg2:#1a0f38;--card:#1b1236;--line:rgba(255,255,255,.18);--text:#fff;--muted:#c7c1e8;--pink:#ff3fa4;--purple:#8b2fff;--violet:#5b1bd8;--cyan:#22e8ff;--gold:#ffcc33;--orange:#ff8a3d;--green:#33e29c;--red:#ff4d6d;--shadow:0 22px 60px rgba(0,0,0,.5)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;-webkit-appearance:none;appearance:none;cursor:pointer}
+a{color:inherit}
+body{touch-action:manipulation;margin:0;min-height:100vh;color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden;position:relative;
+background:
+radial-gradient(circle at 12% 0%,rgba(255,63,164,.28),transparent 34%),
+radial-gradient(circle at 100% 10%,rgba(34,232,255,.22),transparent 36%),
+radial-gradient(circle at 85% 78%,rgba(139,47,255,.28),transparent 40%),
+radial-gradient(circle at 8% 85%,rgba(255,204,51,.14),transparent 38%),
+linear-gradient(160deg,#100a28,#0b0620 55%,#150a2c);
+padding-bottom:35px}
+.orb{position:fixed;border-radius:50%;filter:blur(60px);opacity:.35;pointer-events:none;z-index:0;animation:drift 9s ease-in-out infinite alternate}
+.orb1{width:220px;height:220px;top:-60px;left:-70px;background:var(--pink)}
+.orb2{width:200px;height:200px;top:30%;right:-80px;background:var(--cyan);animation-delay:-3s}
+.orb3{width:240px;height:240px;bottom:-90px;left:20%;background:var(--purple);animation-delay:-6s}
+@keyframes drift{to{transform:translate(18px,-22px) scale(1.12)}}
+.app{width:min(100%,680px);margin:auto;padding:14px 16px;position:relative;z-index:1}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}
+.back{border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.03));border-radius:14px;color:#fff;text-decoration:none;padding:9px 13px;font-size:12px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.3)}
+.wallet{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 7px;border:1px solid rgba(255,204,51,.4);border-radius:16px;background:linear-gradient(160deg,rgba(255,204,51,.16),rgba(255,138,61,.05));box-shadow:0 4px 0 rgba(0,0,0,.3),0 8px 18px rgba(255,204,51,.1)}
+.wallet small{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
+.wallet b{font-size:14px;color:#ffe9a8}
+.ticket{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(160deg,#ffe58a,var(--gold) 45%,#c97f00);color:#3a1e00;font-size:15px;box-shadow:inset 0 2px 0 rgba(255,255,255,.65),inset 0 -3px 4px rgba(0,0,0,.25),0 4px 10px rgba(255,204,51,.35)}
 
-    /* Topbar & Navigation */
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0 16px;
-      gap: 12px;
-    }
+.hero{padding:24px 20px;border-radius:28px;border:1px solid rgba(255,63,164,.35);background:linear-gradient(150deg,rgba(46,20,72,.98),rgba(15,9,32,.98));box-shadow:0 3px 0 rgba(0,0,0,.4),0 24px 55px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);overflow:hidden;position:relative}
+.hero:after{content:"3";position:absolute;right:-14px;top:-34px;font-size:190px;font-weight:950;background:linear-gradient(160deg,rgba(255,63,164,.16),rgba(34,232,255,.1));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+.kicker{display:inline-flex;align-items:center;gap:6px;font-size:9px;font-weight:950;letter-spacing:.16em;color:#ffd6ef;text-transform:uppercase;background:linear-gradient(120deg,rgba(255,63,164,.35),rgba(139,47,255,.35));padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.15)}
+.hero h1{margin:10px 0 6px;font-size:31px;letter-spacing:-.04em;position:relative;z-index:1;
+background:linear-gradient(100deg,#fff 10%,#ffd6ef 35%,#bfe9ff 60%,#fff 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:0;max-width:540px;color:#e4e0ff;font-size:11.5px;line-height:1.6;position:relative;z-index:1}
+.ticket-total{margin-top:16px;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border:1px solid rgba(255,255,255,.16);border-radius:17px;background:linear-gradient(120deg,rgba(255,63,164,.14),rgba(34,232,255,.1));position:relative;z-index:1}
+.ticket-total span{color:#e4e0ff;font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.ticket-total strong{font-size:20px;color:var(--gold);text-shadow:0 2px 10px rgba(255,204,51,.4)}
 
-    .btn-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--line);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .btn-back:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateX(-2px);
-    }
+.section{margin-top:20px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-head h2{margin:0;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#fff}
+.section-head span{font-size:9px;color:#d9d4ff;font-weight:700}
 
-    /* 3D Modern Brand Styling */
-    .brand { text-align: left; }
-    .brand strong {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      color: #fff;
-      display: block;
-      text-shadow: 0 3px 0 #3a2d04, 0 6px 10px rgba(0,0,0,0.6);
-      background: linear-gradient(180deg, #ffffff 0%, #ffdf83 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .brand span {
-      font-size: 9px;
-      font-weight: 800;
-      letter-spacing: 0.22em;
-      color: var(--gold2);
-      text-transform: uppercase;
-      text-shadow: 0 0 8px rgba(246,200,95,0.4);
-    }
-    
-    .wallet {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 6px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    }
-    .wallet small { display: block; color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
-    .wallet b { font-size: 14px; font-weight: 800; color: #fff; }
-    .plus {
-      width: 24px; height: 24px; border-radius: 8px;
-      background: linear-gradient(135deg, var(--gold2), var(--gold));
-      color: #000; font-weight: 900; display: grid; place-items: center; font-size: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    }
+.numbers{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.numbers .num:nth-child(7n+1){--c1:#ff3fa4;--c2:#b81a72;--glow:rgba(255,63,164,.55)}
+.numbers .num:nth-child(7n+2){--c1:#22e8ff;--c2:#0a8fa8;--glow:rgba(34,232,255,.55)}
+.numbers .num:nth-child(7n+3){--c1:#a35bff;--c2:#5f1fc9;--glow:rgba(163,91,255,.55)}
+.numbers .num:nth-child(7n+4){--c1:#ffd35e;--c2:#d98a00;--glow:rgba(255,211,94,.55)}
+.numbers .num:nth-child(7n+5){--c1:#33e29c;--c2:#149268;--glow:rgba(51,226,156,.55)}
+.numbers .num:nth-child(7n+6){--c1:#ff8a3d;--c2:#cc5300;--glow:rgba(255,138,61,.55)}
+.numbers .num:nth-child(7n){--c1:#ff4d6d;--c2:#c41c3f;--glow:rgba(255,77,109,.55)}
+.num{position:relative;aspect-ratio:1;border:2px solid rgba(255,255,255,.28);border-radius:15px;
+background:linear-gradient(160deg,var(--c1),var(--c2));color:#fff;font-size:14px;font-weight:950;transition:.15s;
+box-shadow:0 5px 0 rgba(0,0,0,.35),0 10px 18px var(--glow),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -4px 8px rgba(0,0,0,.2);
+text-shadow:0 1px 3px rgba(0,0,0,.45)}
+.num:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.35)}
+.num.selected{border-color:#fff;transform:translateY(-2px) scale(1.06);
+box-shadow:0 6px 0 rgba(0,0,0,.4),0 16px 26px var(--glow),0 0 0 3px rgba(255,255,255,.5) inset,inset 0 2px 0 rgba(255,255,255,.5)}
+.num.selected:after{content:"✓";position:absolute;right:4px;top:3px;font-size:9px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.selected-card{margin-top:11px;padding:13px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015))}
+.selected-label{font-size:8px;color:#d9d4ff;font-weight:900;letter-spacing:.12em}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:9px}
+.slot{height:50px;display:grid;place-items:center;border-radius:14px;border:2px dashed rgba(255,255,255,.3);color:#b7b0e0;font-size:17px;font-weight:950;background:rgba(0,0,0,.2)}
+.slot.filled{color:#fff;border-style:solid;border-color:var(--cyan);background:linear-gradient(160deg,rgba(34,232,255,.3),rgba(34,232,255,.08));box-shadow:inset 0 0 20px rgba(34,232,255,.2),0 6px 16px rgba(34,232,255,.2);text-shadow:0 0 10px rgba(34,232,255,.6)}
 
-    /* Modern 3D Hero Section */
-    .hero {
-      position: relative;
-      padding: 20px 22px;
-      border: 1px solid rgba(246, 200, 95, 0.3);
-      border-radius: 22px;
-      background: linear-gradient(145deg, rgba(28, 30, 42, 0.95), rgba(13, 14, 19, 0.95));
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 12px 30px rgba(0, 0, 0, 0.6);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      transform-style: preserve-3d;
-    }
-    .hero-content { max-width: 70%; }
-    .eyebrow { display: flex; align-items: center; gap: 6px; color: var(--gold2); font-size: 10px; font-weight: 800; letter-spacing: 0.1em; }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .hero h1 {
-      margin: 4px 0 2px;
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
-    .hero p { color: var(--muted); margin: 0; font-size: 11px; font-weight: 500; }
+.options{display:grid;gap:9px}
+.option{padding:14px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));transition:.15s;text-align:left;width:100%;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.option:nth-child(1) .option-icon{background:linear-gradient(160deg,#ffd35e,#d98a00);box-shadow:0 4px 10px rgba(255,211,94,.4)}
+.option:nth-child(2) .option-icon{background:linear-gradient(160deg,#22e8ff,#0a8fa8);box-shadow:0 4px 10px rgba(34,232,255,.4)}
+.option:nth-child(3) .option-icon{background:linear-gradient(160deg,#ff3fa4,#b81a72);box-shadow:0 4px 10px rgba(255,63,164,.4)}
+.option.active{border-color:rgba(255,255,255,.6);background:linear-gradient(135deg,rgba(255,63,164,.22),rgba(139,47,255,.22));box-shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(255,63,164,.18)}
+.option-top{display:flex;align-items:center;gap:12px}
+.option-icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex:none}
+.option h3{margin:0;font-size:12.5px;color:#fff}
+.option p{margin:3px 0 0;color:var(--muted);font-size:9.5px}
+.option strong{color:var(--gold)}
 
-    /* Glowing How Button */
-    .btn-glow-how {
-      background: linear-gradient(135deg, rgba(246,200,95,0.15), rgba(139,108,255,0.15));
-      border: 1px solid var(--gold);
-      color: var(--gold2);
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      box-shadow: 0 0 12px var(--gold-glow);
-      animation: pulse-glow 2s infinite alternate;
-      white-space: nowrap;
-    }
-    @keyframes pulse-glow {
-      0% { box-shadow: 0 0 8px rgba(246,200,95,0.2); transform: scale(1); }
-      100% { box-shadow: 0 0 18px rgba(246,200,95,0.6); transform: scale(1.03); }
-    }
+.stakes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stake{padding:16px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.015));text-align:left;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.stake.active{border-color:var(--gold);background:linear-gradient(160deg,rgba(255,204,51,.2),rgba(255,138,61,.08));box-shadow:0 3px 0 rgba(0,0,0,.25),0 12px 26px rgba(255,204,51,.18)}
+.stake b{display:block;font-size:19px;color:#fff}
+.stake span{font-size:9px;color:var(--muted)}
 
-    /* Sections */
-    .section { margin-bottom: 20px; }
-    .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .section-head h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.05em; margin: 0; text-transform: uppercase; color: #d0d3de; }
-    .clear { background: transparent; color: var(--gold2); font-size: 11px; font-weight: 800; cursor: pointer; }
+.cta{width:100%;margin-top:13px;padding:16px;border-radius:17px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(115deg,var(--pink),var(--purple) 55%,var(--cyan));background-size:200% 100%;color:#fff;font-weight:950;font-size:14.5px;box-shadow:0 7px 0 rgba(55,15,90,.7),0 18px 34px rgba(139,47,255,.35);animation:shine 4s linear infinite}
+@keyframes shine{to{background-position:200% 0}}
+.cta:active{transform:translateY(3px);box-shadow:0 4px 0 rgba(55,15,90,.7)}
+.cta:disabled{opacity:.4;animation:none;transform:none}
+.hint{margin-top:10px;text-align:center;color:var(--muted);font-size:8.5px}
 
-    /* Number Grid */
-    .numbers { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-    .num {
-      aspect-ratio: 1;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: linear-gradient(145deg, #151720, #0d0e14);
-      color: #fff;
-      font-weight: 800;
-      font-size: 15px;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .num:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
-    .num.selected {
-      background: linear-gradient(135deg, var(--gold2), var(--gold));
-      color: #000;
-      border-color: var(--gold);
-      box-shadow: 0 4px 15px var(--gold-glow);
-      transform: scale(1.05);
-    }
+.overlay{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(4,2,10,.9)}
+.overlay.open{display:flex}
+.modal{width:min(100%,420px);padding:24px;border-radius:26px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(155deg,#241638,#100a20);box-shadow:0 30px 80px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.1)}
+.modal:before{content:"";display:block;width:60px;height:5px;margin:-10px auto 16px;border-radius:99px;background:linear-gradient(90deg,var(--pink),var(--gold),var(--cyan))}
+.modal.center{text-align:center}
+.modal h2{margin:4px 0 6px;font-size:22px;color:#fff}
+.modal p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.6}
+.summary{display:grid;gap:8px;margin:16px 0}
+.row{display:flex;justify-content:space-between;padding:11px 12px;border-radius:13px;background:rgba(255,255,255,.06);font-size:10.5px}
+.row span{color:var(--muted)}.row b{color:#fff}
+.modal-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:9px}
+.secondary,.primary{padding:14px;border-radius:14px;font-weight:900;border:1px solid rgba(255,255,255,.22);box-shadow:0 6px 0 rgba(0,0,0,.3),0 12px 22px rgba(0,0,0,.3);transition:transform .15s,box-shadow .15s}
+.secondary:active,.primary:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.secondary{background:rgba(255,255,255,.08);color:#fff}
+.primary{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff}
+.balls{display:flex;justify-content:center;gap:14px;margin:26px 0}
+.ball{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;
+background:radial-gradient(circle at 32% 25%,#fff,var(--pink) 26%,var(--purple) 65%,#28123f);
+color:#fff;font-size:23px;font-weight:950;text-shadow:0 1px 3px rgba(0,0,0,.4);
+box-shadow:inset -8px -9px 16px rgba(0,0,0,.35),inset 4px 5px 8px rgba(255,255,255,.4),0 16px 32px rgba(255,63,164,.35);
+transform:scale(.6);opacity:.2;transition:.5s}
+.ball:nth-child(2){background:radial-gradient(circle at 32% 25%,#fff,var(--cyan) 26%,#0a8fa8 65%,#0c2d36)}
+.ball:nth-child(3){background:radial-gradient(circle at 32% 25%,#fff,var(--gold) 26%,#c97f00 65%,#3a2400)}
+.ball.show{transform:scale(1);opacity:1}
+.result{text-align:center}
+.win{color:var(--green);font-weight:950;text-shadow:0 0 12px rgba(51,226,156,.4)}
+.lose{color:var(--muted);font-weight:900}
+.prize{font-size:29px;font-weight:950;color:var(--gold);margin:9px 0 15px;text-shadow:0 2px 12px rgba(255,204,51,.4)}
+.toast{position:fixed;z-index:50;left:50%;bottom:18px;transform:translate(-50%,25px);opacity:0;pointer-events:none;padding:12px 17px;border-radius:25px;background:linear-gradient(120deg,#2a1a44,#1b1030);border:1px solid var(--line);font-size:10px;font-weight:900;transition:.25s;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:430px){.numbers{gap:6px}.num{border-radius:12px;font-size:12px}.ball{width:62px;height:62px}.hero h1{font-size:26px}}
 
-    /* Slots Card */
-    .selected-card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-top: 12px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-    }
-    .selected-label { font-size: 10px; font-weight: 800; color: var(--muted); letter-spacing: 0.1em; }
-    .selected-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
-    .slot {
-      height: 48px; border-radius: 12px; display: grid; place-items: center;
-      background: #08090d; border: 1px dashed rgba(255,255,255,0.15);
-      font-size: 18px; font-weight: 900; color: #404454; transition: 0.3s;
-    }
-    .slot.filled {
-      border: 1px solid var(--gold);
-      color: var(--gold2);
-      background: radial-gradient(circle, rgba(246, 200, 95, 0.15), #08090d);
-      box-shadow: inset 0 0 10px rgba(246, 200, 95, 0.2);
-    }
-
-    /* Option Cards */
-    .games { display: grid; gap: 8px; }
-    .game-card, .stake-card {
-      background: var(--card); border: 1px solid var(--line);
-      border-radius: 16px; padding: 12px 16px; cursor: pointer; transition: 0.2s;
-    }
-    .game-card.active, .stake-card.active {
-      border-color: var(--gold);
-      background: linear-gradient(145deg, rgba(246,200,95,0.1), rgba(18,20,28,0.95));
-      box-shadow: 0 6px 20px rgba(246,200,95,0.1);
-    }
-    .game-top { display: flex; gap: 12px; align-items: center; }
-    .game-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(246, 200, 95, 0.1); display: grid; place-items: center; color: var(--gold); font-size: 16px; }
-    .game-card h3 { margin: 0; font-size: 13px; font-weight: 800; }
-    .game-card .desc { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
-
-    .stakes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stake-amount { font-size: 18px; font-weight: 900; }
-    .stake-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
-    /* CTA Button */
-    .cta {
-      width: 100%; margin-top: 14px; border-radius: 16px; padding: 16px;
-      background: linear-gradient(180deg, var(--gold2) 0%, var(--gold) 100%);
-      color: #0c0a06; font-weight: 900; font-size: 15px; letter-spacing: 0.02em;
-      box-shadow: 0 6px 0 #b37d14, 0 10px 25px var(--gold-glow); cursor: pointer; transition: all 0.15s ease;
-    }
-    .cta:active { transform: translateY(3px); box-shadow: 0 3px 0 #b37d14, 0 5px 15px var(--gold-glow); }
-    .cta[disabled] { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
-
-    /* Modals & Popups */
-    .modal-wrap {
-      position: fixed; inset: 0; z-index: 100; display: none;
-      align-items: center; justify-content: center;
-      background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(12px); padding: 16px;
-    }
-    .modal-wrap.open { display: flex; animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-    .modal {
-      width: min(100%, 420px); background: linear-gradient(145deg, #181a26, #0f1017);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 24px; padding: 22px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2);
-      transform: scale(0.95); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .modal-wrap.open .modal { transform: scale(1); }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    /* Confirm Slip Modal */
-    .slip-header { text-align: center; border-bottom: 1px dashed var(--line); padding-bottom: 14px; margin-bottom: 14px; }
-    .slip-title { font-size: 18px; font-weight: 900; letter-spacing: 0.05em; color: var(--gold2); text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    .slip-details { display: grid; gap: 10px; margin-bottom: 20px; }
-    .slip-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--muted); }
-    .slip-row span:last-child { color: #fff; font-weight: 800; }
-    .slip-row.total span:last-child { color: var(--gold2); font-size: 16px; }
-
-    .modal-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; }
-    .btn-sec, .btn-pri { padding: 14px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; }
-    .btn-sec { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid var(--line); }
-    .btn-pri {
-      background: linear-gradient(180deg, var(--gold2), var(--gold));
-      color: #000;
-      box-shadow: 0 4px 0 #b37d14, 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .btn-pri:active { transform: translateY(2px); box-shadow: 0 2px 0 #b37d14; }
-
-    /* Modern 3D Sphere Reveal Visualizer */
-    .reveal-wrap {
-      position: fixed; inset: 0; z-index: 120; display: none;
-      place-items: center; background: #000000; /* Pure Black Background */
-      padding: 20px;
-    }
-    .reveal-wrap.open { display: grid; animation: fadeIn 0.3s ease; }
-    .balls-container { display: flex; gap: 16px; justify-content: center; margin: 30px 0; perspective: 1000px; }
-    
-    .ball-3d {
-      width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
-      font-size: 26px; font-weight: 900; color: #fff;
-      background: radial-gradient(circle at 35% 25%, #ffffff 0%, #f6c85f 25%, #b37d14 65%, #201402 100%);
-      box-shadow: inset -6px -6px 15px rgba(0,0,0,0.9), 0 15px 30px rgba(0,0,0,0.8), 0 0 25px rgba(246, 200, 95, 0.4);
-      transform: scale(0.5) translateY(30px) rotateX(45deg); opacity: 0.1;
-      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .ball-3d.revealed { transform: scale(1) translateY(0) rotateX(0deg); opacity: 1; }
-
-    /* Modern 3D Result Popup Card */
-    .result-modal-3d {
-      background: linear-gradient(145deg, #181b29, #0d0e17);
-      border: 1px solid rgba(246,200,95,0.3);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.2);
-      transform: translateY(0);
-      animation: popupSlideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes popupSlideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: #1e202d; color: #fff; border: 1px solid var(--line); padding: 10px 18px;
-      border-radius: 30px; font-size: 12px; font-weight: 800; opacity: 0; pointer-events: none; transition: 0.25s; z-index: 200;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  </style>
+.shortage-modal{border:1px solid rgba(255,204,51,.4);background:linear-gradient(150deg,#2a1c46,#100a20);box-shadow:0 30px 90px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.1)}
+.shortage-icon{width:78px;height:78px;margin:0 auto 11px;display:grid;place-items:center;border-radius:24px;font-size:40px;background:linear-gradient(150deg,#ffe58a,#f6a63d);box-shadow:inset 0 4px 0 rgba(255,255,255,.6),0 9px 0 #8a4d0c,0 20px 35px rgba(255,183,62,.3);transform:translateY(-2px)}
+.shortage-modal h2{color:#fff;font-size:23px}
+.shortage-modal p{color:#e4e0ff;font-size:11px}
+.shortage-balance{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#e4e0ff;font-size:10.5px}
+.shortage-balance b{color:#ffd75e;font-size:13px}
+.earn-btn{width:100%;margin-top:14px;background:linear-gradient(150deg,#ff70c6,#8e68ff);box-shadow:0 7px 0 #4b2b7d,0 18px 32px rgba(155,108,255,.3)}
+</style>
 </head>
 <body>
-
-  <main class="app">
-    <header class="topbar">
-      <a href="earn.html" class="btn-back" id="backBtn" aria-label="Go to Earn Page">
-        ‹ Back
-      </a>
-      <div class="brand">
-        <strong>LUCKY 3</strong>
-        <span>PAYME INSTANT</span>
-      </div>
-      <button class="wallet" id="walletBtn" aria-label="Wallet balance">
-        <div>
-          <small>Balance</small>
-          <b id="balance">₦—</b>
-        </div>
-        <span class="plus" aria-hidden="true">+</span>
-      </button>
-    </header>
-
-    <section class="hero">
-      <div class="hero-content">
-        <div class="eyebrow"><span class="dot"></span> INSTANT DRAW</div>
-        <h1>Your luck in 3 numbers.</h1>
-        <p>Pick 3 numbers & reveal instantly.</p>
-      </div>
-      <button class="btn-glow-how" id="howBtn">HOW TO PLAY</button>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <h2>1. CHOOSE 3 NUMBERS</h2>
-        <button class="clear" id="clearBtn">CLEAR</button>
-      </div>
-      <div class="numbers" id="numbers"></div>
-      
-      <div class="selected-card">
-        <div class="selected-label">SELECTED NUMBERS</div>
-        <div class="selected-slots">
-          <div class="slot" id="slot0">--</div>
-          <div class="slot" id="slot1">--</div>
-          <div class="slot" id="slot2">--</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head"><h2>2. CHOOSE GAME MODE</h2></div>
-      <div class="games" id="games"></div>
-    </section>
-
-    <section class="section">
-      <div class="section-head"><h2>3. SELECT STAKE</h2></div>
-      <div class="stakes" id="stakes"></div>
-    </section>
-
-    <button class="cta" id="playBtn">PLACE STAKE NOW</button>
-  </main>
-
-  <!-- CONFIRM STAKE SLIP POPUP -->
-  <div class="modal-wrap" id="confirmModal">
-    <div class="modal">
-      <div class="slip-header">
-        <div class="slip-title">CONFIRM STAKE</div>
-        <small style="color:var(--muted);">Verify selection details</small>
-      </div>
-      <div class="slip-details">
-        <div class="slip-row"><span>Numbers Selected</span><span id="confirmNumbers">--</span></div>
-        <div class="slip-row"><span>Game Mode</span><span id="confirmGame">--</span></div>
-        <div class="slip-row"><span>Stake Amount</span><span id="confirmStake">₦0</span></div>
-        <div class="slip-row total"><span>Potential Payout</span><span id="confirmWin">₦0</span></div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-sec" id="cancelConfirm">CANCEL</button>
-        <button class="btn-pri" id="playNow">CONFIRM & PLAY</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- HOW TO PLAY MODAL -->
-  <div class="modal-wrap" id="howModal">
-    <div class="modal">
-      <h3 style="margin: 0 0 10px; font-size:18px;">How To Play Lucky 3</h3>
-      <p style="color:var(--muted); font-size:12px; line-height:1.6; margin-bottom:16px;">
-        1. Select <b>3 unique numbers</b> ranging from 1 to 30.<br>
-        2. Pick a <b>Game Mode</b> (3/3 Jackpot, 2/3 Win Cash, or 1/3 Free Spins).<br>
-        3. Choose your <b>Stake Amount</b>.<br>
-        4. Confirm your selection slip to trigger the 3D instant reveal draw.
-      </p>
-      <button class="btn-pri" style="width:100%" id="closeHow">GOT IT</button>
-    </div>
-  </div>
-
-  <!-- 3D SPHERE REVEAL MODAL (BLACK BACKGROUND) -->
-  <div class="reveal-wrap" id="reveal">
-    <div style="text-align: center; width: 100%; max-width: 400px;">
-      <div style="font-size:11px; font-weight:800; color:var(--gold2); letter-spacing:0.1em;">INSTANT DRAW</div>
-      <h2 style="font-size:24px; font-weight:900; margin: 4px 0 20px;">REVEALING RESULT...</h2>
-      
-      <div class="balls-container">
-        <div class="ball-3d" id="ball0">?</div>
-        <div class="ball-3d" id="ball1">?</div>
-        <div class="ball-3d" id="ball2">?</div>
-      </div>
-
-      <div id="revealStatus" style="font-size:12px; font-weight:700; color:var(--muted); min-height: 20px;">Fetching server calculation...</div>
-
-      <div id="resultCard" class="result-modal-3d" style="display:none; margin-top:20px;">
-        <h3 id="resultTitle" style="margin:0; font-size:18px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,0.5);">RESULT</h3>
-        <div id="resultMatch" style="font-size:28px; font-weight:900; margin:6px 0; color:var(--gold2);">0/3 MATCHED</div>
-        <div id="resultPayout" style="font-size:20px; color:#fff; font-weight:800;">₦0</div>
-        <button class="btn-pri" id="playAgain" style="width:100%; margin-top:16px;">PLAY AGAIN</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<main class="app">
+<header class="top"><a href="tap.html" class="back">‹ Luck Vault</a><div class="wallet"><div class="ticket">🪙</div><div><small>Luck Tickets</small><b id="ticketBalance">0</b></div></div></header>
+<section class="hero"><div class="kicker">✨ LUCKY 3 • TICKET PLAY</div><h1>Choose your 3 lucky numbers</h1><p>Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.</p><div class="ticket-total"><span>YOUR TICKET WALLET</span><strong id="heroTickets">0 🪙</strong></div></section>
+<section class="section"><div class="section-head"><h2>Choose 3 numbers</h2><span>Tap any 3 numbers</span></div><div class="numbers" id="numbers"></div><div style="margin-top:9px;text-align:center;color:var(--muted);font-size:9px;font-weight:800">Choose 3 different numbers • Tap again to remove</div><div class="selected-card"><div class="selected-label">YOUR PICKS • 3 REQUIRED</div><div class="slots"><div class="slot" id="slot0">--</div><div class="slot" id="slot1">--</div><div class="slot" id="slot2">--</div></div></div></section>
+<section class="section"><div class="section-head"><h2>Choose game</h2><span>Instant result</span></div><div class="options" id="games"></div></section>
+<section class="section"><div class="section-head"><h2>Entry tickets</h2><span>Not cash</span></div><div class="stakes" id="stakes"></div><button class="cta" id="playBtn">Reveal My Lucky 3 ✨</button><div class="hint">200 Tickets uses the original ₦200 payout table. 400 Tickets uses the original ₦500 payout table.</div></section>
+</main>
+<div class="overlay" id="ticketShortage"><div class="modal center shortage-modal">
+<div class="shortage-icon">🪙</div>
+<div class="kicker">NOT ENOUGH LUCK TICKETS</div>
+<h2>You need more tickets</h2>
+<p>You don't have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.</p>
+<div class="shortage-balance"><span>Your tickets</span><b id="shortageHave">0 🪙</b></div>
+<div class="shortage-balance"><span>Needed</span><b id="shortageNeed">0 🪙</b></div>
+<button class="primary earn-btn" id="goEarnTickets">🎁 Earn More Luck Tickets</button>
+<button class="secondary" id="closeShortage" style="width:100%;margin-top:8px">Maybe Later</button>
+</div></div><div class="overlay" id="confirm"><div class="modal"><div class="kicker">READY TO DRAW</div><h2>Confirm your Lucky 3</h2><p>Your ticket entry will be deducted before the server performs the draw.</p><div class="summary"><div class="row"><span>Your numbers</span><b id="confirmNumbers">--</b></div><div class="row"><span>Game</span><b id="confirmGame">—</b></div><div class="row"><span>Entry</span><b id="confirmStake">0 🪙</b></div><div class="row"><span>Possible win</span><b id="confirmWin">—</b></div></div><div class="modal-actions"><button class="secondary" id="cancelConfirm">Cancel</button><button class="primary" id="confirmPlay">Draw Now</button></div></div></div>
+<div class="overlay" id="reveal"><div class="modal center"><div class="kicker">SERVER DRAW</div><h2 id="revealTitle">Revealing your numbers…</h2><div class="balls"><div class="ball" id="ball0">?</div><div class="ball" id="ball1">?</div><div class="ball" id="ball2">?</div></div><p id="revealStatus">Generating a secure draw.</p><div id="result" style="display:none" class="result"><div id="resultMatch"></div><div class="prize" id="resultPrize">—</div><button class="primary" id="again" style="width:100%">Play Again</button></div></div></div>
+<div class="toast" id="toast"></div>
 <script>
-(() => {
-  'use strict';
-
-  // --- AUDIO SYNTHESIS ENGINE ---
-  let audioCtx = null;
-  let bgOsc = null;
-  let bgGain = null;
-
-  function initAudio() {
-    if (audioCtx) return;
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // Ambient Background Synth Sound Loop
-      bgOsc = audioCtx.createOscillator();
-      bgGain = audioCtx.createGain();
-      
-      bgOsc.type = 'sine';
-      bgOsc.frequency.setValueAtTime(110, audioCtx.currentTime); // Low smooth A2 note
-      bgGain.gain.setValueAtTime(0.015, audioCtx.currentTime); // Subtle sound volume
-      
-      bgOsc.connect(bgGain);
-      bgGain.connect(audioCtx.destination);
-      bgOsc.start();
-    } catch(e) {
-      console.log('Web Audio API not supported/allowed');
-    }
-  }
-
-  function playCheerSound() {
-    if (!audioCtx) return;
-    const now = audioCtx.currentTime;
-    
-    // Play celebratory chord sequence (C Major Arpeggio Fanfare)
-    const freqs = [523.25, 659.25, 783.99, 1046.50];
-    freqs.forEach((freq, idx) => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, now + (idx * 0.08));
-      
-      gain.gain.setValueAtTime(0, now + (idx * 0.08));
-      gain.gain.linearRampToValueAtTime(0.15, now + (idx * 0.08) + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.08) + 0.5);
-      
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      osc.start(now + (idx * 0.08));
-      osc.stop(now + (idx * 0.08) + 0.55);
-    });
-  }
-
-  // Trigger audio context startup on initial interaction
-  document.addEventListener('pointerdown', initAudio, { once: true });
-
-  const PAYOUTS = {
-    500: { jackpot: 15000, cash: 4000, bonus: { freeSpins: 12 } },
-    200: { jackpot: 5000, cash: 1500, bonus: { freeSpins: 5 } }
-  };
-
-  const GAMES = {
-    jackpot: { title:'3/3 JACKPOT', icon:'♛', desc:'Match all 3 numbers', key:'jackpot' },
-    cash:    { title:'2/3 WIN CASH', icon:'◈', desc:'Match at least 2 numbers', key:'cash' },
-    bonus:   { title:'1/3 FREE SPINS', icon:'✦', desc:'Match at least 1 number', key:'bonus' }
-  };
-
-  const state = {
-    selected: [],
-    game: 'jackpot',
-    stake: 200,
-    balance: null,
-    busy: false
-  };
-
-  const $ = id => document.getElementById(id);
-  const money = n => `₦${Number(n || 0).toLocaleString('en-NG')}`;
-  const nums = a => a.length ? a.map(n => String(n).padStart(2,'0')).join(' • ') : '-- • -- • --';
-
-  function toast(message){
-    const el = $('toast'); el.textContent = message; el.classList.add('show');
-    clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
-  }
-
-  function renderNumbers(){
-    const root = $('numbers');
-    root.innerHTML = Array.from({length:30},(_,i)=>{
-      const n=i+1, active=state.selected.includes(n);
-      return `<button class="num ${active?'selected':''}" data-number="${n}">${String(n).padStart(2,'0')}</button>`;
-    }).join('');
-  }
-
-  function renderGames(){
-    $('games').innerHTML = Object.values(GAMES).map(g => {
-      const p = PAYOUTS[state.stake];
-      const payout = g.key === 'bonus' ? `${p.bonus.freeSpins} FREE SPINS` : money(p[g.key]);
-      return `<div class="game-card ${state.game===g.key?'active':''}" data-game="${g.key}">
-        <div class="game-top">
-          <div class="game-icon">${g.icon}</div>
-          <div>
-            <h3>${g.title}</h3>
-            <div class="desc">${g.desc} — Win <b>${payout}</b></div>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  function renderStakes(){
-    $('stakes').innerHTML = [200,500].map(s =>
-      `<div class="stake-card ${state.stake===s?'active':''}" data-stake="${s}">
-        <div class="stake-amount">${money(s)}</div>
-        <div class="stake-sub">Select Stake</div>
-      </div>`
-    ).join('');
-  }
-
-  function payoutLabel(){
-    const p=PAYOUTS[state.stake][state.game];
-    return state.game==='bonus' ? `${p.freeSpins} FREE SPINS` : money(p);
-  }
-
-  function render(){
-    renderNumbers(); renderGames(); renderStakes();
-    for(let i=0;i<3;i++){
-      const el=$(`slot${i}`), n=state.selected[i];
-      el.textContent=n ? String(n).padStart(2,'0') : '--';
-      el.classList.toggle('filled',!!n);
-    }
-    $('playBtn').disabled=state.busy;
-  }
-
-  async function loadState(){
-    try{
-      const r=await fetch('/api/game/state',{credentials:'same-origin',headers:{'Accept':'application/json'}});
-      const data=await r.json();
-      if(!r.ok || !data.success) throw new Error(data.message || 'Unable to load game state.');
-      state.balance=Number(data.balance||0);
-      $('balance').textContent=money(state.balance);
-    }catch(err){
-      $('balance').textContent='₦—';
-    }
-  }
-
-  function open(id){ $(id).classList.add('open'); }
-  function close(id){ $(id).classList.remove('open'); }
-
-  $('numbers').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-number]'); if(!btn || state.busy) return;
-    const n=Number(btn.dataset.number);
-    if(state.selected.includes(n)){
-      state.selected=state.selected.filter(x=>x!==n);
-    }else{
-      if(state.selected.length>=3){ toast('Pick exactly 3 numbers'); return; }
-      state.selected.push(n);
-    }
-    render();
-  });
-
-  $('games').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-game]'); if(!btn) return;
-    state.game=btn.dataset.game; render();
-  });
-
-  $('stakes').addEventListener('click',e=>{
-    const btn=e.target.closest('[data-stake]'); if(!btn) return;
-    state.stake=Number(btn.dataset.stake); render();
-  });
-
-  $('clearBtn').onclick=()=>{ state.selected=[]; render(); };
-  $('howBtn').onclick=()=>open('howModal');
-  $('closeHow').onclick=()=>close('howModal');
-  $('walletBtn').onclick=()=>location.href='/deposit.html';
-
-  $('playBtn').onclick=()=>{
-    if(state.selected.length!==3){toast('Pick 3 numbers first');return;}
-    open('confirmModal');
-    $('confirmNumbers').textContent=nums(state.selected);
-    $('confirmGame').textContent=GAMES[state.game].title;
-    $('confirmStake').textContent=money(state.stake);
-    $('confirmWin').textContent=payoutLabel();
-  };
-  $('cancelConfirm').onclick=()=>close('confirmModal');
-
-  async function playLucky3(){
-    if(state.busy) return;
-    state.busy=true; render(); close('confirmModal'); open('reveal');
-    $('revealStatus').textContent='Drawing numbers...';
-    $('resultCard').style.display = 'none';
-
-    for(let i=0;i<3;i++){
-      $(`ball${i}`).classList.remove('revealed');
-      $(`ball${i}`).textContent='?';
-    }
-
-    try{
-      const r=await fetch('/api/games/lucky3/play',{
-        method:'POST',credentials:'same-origin',
-        headers:{'Content-Type':'application/json','Accept':'application/json'},
-        body:JSON.stringify({
-          numbers:[...state.selected],
-          gameType:state.game,
-          stake:state.stake
-        })
-      });
-      const data=await r.json().catch(()=>({}));
-      if(!r.ok || !data.success) throw new Error(data.message || data.error || 'Play execution failed.');
-
-      const winning=Array.isArray(data.winningNumbers) ? data.winningNumbers : [];
-
-      for(let i=0;i<3;i++){
-        await new Promise(res=>setTimeout(res, 500));
-        $(`ball${i}`).textContent=String(winning[i]).padStart(2,'0');
-        $(`ball${i}`).classList.add('revealed');
-      }
-
-      const matches=Number.isFinite(Number(data.matchCount))
-        ? Number(data.matchCount)
-        : state.selected.filter(n=>winning.includes(n)).length;
-
-      const won = (state.game==='jackpot' && matches===3) ||
-                  (state.game==='cash' && matches>=2) ||
-                  (state.game==='bonus' && matches>=1);
-
-      if (won) {
-        playCheerSound();
-      }
-
-      $('revealStatus').textContent='Draw Complete!';
-      $('resultTitle').textContent=won ? '🎉 CONGRATULATIONS!' : 'NO MATCH';
-      $('resultMatch').textContent=`${matches}/3 MATCHED`;
-      $('resultPayout').textContent=(Number(data.payout)>0 ? money(data.payout) : (Number(data.freeSpinsAwarded)>0 ? `${data.freeSpinsAwarded} FREE SPINS` : '₦0'));
-      $('resultCard').style.display = 'block';
-
-      if(Number.isFinite(Number(data.balance))){
-        state.balance=Number(data.balance); $('balance').textContent=money(state.balance);
-      }else{
-        await loadState();
-      }
-    }catch(err){
-      close('reveal');
-      toast(err.message || 'Error occurred while processing.');
-    }finally{
-      state.busy=false; render();
-    }
-  }
-
-  $('playNow').onclick=playLucky3;
-  $('playAgain').onclick=()=>{
-    close('reveal'); state.selected=[]; render();
-  };
-
-  render();
-  loadState();
+(()=>{'use strict';
+const $=id=>document.getElementById(id);const PAYOUTS={200:{jackpot:5000,cash:1500,bonus:5},400:{jackpot:15000,cash:4000,bonus:12}};const GAMES={jackpot:{title:'3/3 JACKPOT',icon:'👑',desc:'Match all 3 numbers',key:'jackpot'},cash:{title:'2/3 CASH WIN',icon:'💎',desc:'Match at least 2 numbers',key:'cash'},bonus:{title:'1/3 FREE SPINS',icon:'✨',desc:'Match at least 1 number',key:'bonus'}};const state={selected:[],game:'jackpot',stake:200,tickets:0,busy:false};
+function money(n){return '₦'+Number(n||0).toLocaleString('en-NG')}function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2500)}function open(id){$(id).classList.add('open')}function close(id){$(id).classList.remove('open')}function requestId(){return 'l3_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12)}
+function renderNumbers(){$('numbers').innerHTML=Array.from({length:30},(_,i)=>{const n=i+1,a=state.selected.includes(n);return `<button class="num ${a?'selected':''}" data-number="${n}">${String(n).padStart(2,'0')}</button>`}).join('')}
+function renderGames(){$('games').innerHTML=Object.values(GAMES).map(g=>{const p=PAYOUTS[state.stake];const win=g.key==='bonus'?`${p.bonus} FREE SPINS`:money(p[g.key]);return `<button class="option ${state.game===g.key?'active':''}" data-game="${g.key}"><div class="option-top"><div class="option-icon">${g.icon}</div><div><h3>${g.title}</h3><p>${g.desc} • Win <strong>${win}</strong></p></div></div></button>`}).join('')}
+function renderStakes(){$('stakes').innerHTML=[200,400].map(s=>`<button class="stake ${state.stake===s?'active':''}" data-stake="${s}"><b>${s.toLocaleString()} 🪙</b><span>${s===200?'Original ₦200 payout table':'Original ₦500 payout table'}</span></button>`).join('')}
+function payoutLabel(){const p=PAYOUTS[state.stake];return state.game==='bonus'?`${p.bonus} FREE SPINS`:money(p[state.game])}
+function render(){renderNumbers();renderGames();renderStakes();$('ticketBalance').textContent=state.tickets.toLocaleString();$('heroTickets').textContent=state.tickets.toLocaleString()+' 🪙';for(let i=0;i<3;i++){const e=$('slot'+i),n=state.selected[i];e.textContent=n?String(n).padStart(2,'0'):'--';e.classList.toggle('filled',!!n)}$('playBtn').disabled=state.busy||state.selected.length!==3}
+async function loadTickets(){try{const r=await fetch('/api/luck/chests',{credentials:'same-origin',headers:{Accept:'application/json'}});const d=await r.json();if(!r.ok||!d.success)throw Error(d.message||'Unable to load Luck Tickets.');state.tickets=Number(d.luckTickets||0);render()}catch(e){toast(e.message||'Unable to load ticket wallet.')}}
+$('numbers').addEventListener('click',e=>{const b=e.target.closest('[data-number]');if(!b||state.busy)return;const n=Number(b.dataset.number);if(state.selected.includes(n))state.selected=state.selected.filter(x=>x!==n);else if(state.selected.length<3)state.selected.push(n);else return toast('Pick only 3 numbers.');render()});$('games').addEventListener('click',e=>{const b=e.target.closest('[data-game]');if(!b||state.busy)return;state.game=b.dataset.game;render()});$('stakes').addEventListener('click',e=>{const b=e.target.closest('[data-stake]');if(!b||state.busy)return;state.stake=Number(b.dataset.stake);render()});
+$('playBtn').onclick=()=>{if(state.selected.length!==3)return toast('Pick 3 numbers first.');if(state.tickets<state.stake){$('shortageHave').textContent=state.tickets.toLocaleString()+' 🪙';$('shortageNeed').textContent=state.stake.toLocaleString()+' 🪙';open('ticketShortage');return}$('confirmNumbers').textContent=state.selected.map(n=>String(n).padStart(2,'0')).join(' • ');$('confirmGame').textContent=GAMES[state.game].title;$('confirmStake').textContent=state.stake+' 🪙';$('confirmWin').textContent=payoutLabel();open('confirm')};$('cancelConfirm').onclick=()=>close('confirm');$('confirmPlay').onclick=play;
+async function play(){if(state.busy)return;state.busy=true;close('confirm');open('reveal');$('result').style.display='none';$('revealTitle').textContent='Revealing your numbers…';$('revealStatus').textContent='Secure draw in progress.';for(let i=0;i<3;i++){$('ball'+i).classList.remove('show');$('ball'+i).textContent='?'}render();try{const r=await fetch('/api/games/lucky3/play',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({numbers:[...state.selected],gameType:state.game,stake:state.stake,requestId:requestId()})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw Error(d.message||d.error||'Lucky 3 could not be completed.');state.tickets=Number(d.luckTickets||0);for(let i=0;i<3;i++){await new Promise(x=>setTimeout(x,430));$('ball'+i).textContent=String(d.winningNumbers[i]).padStart(2,'0');$('ball'+i).classList.add('show')}const m=Number(d.matchCount||0);const won=(state.game==='jackpot'&&m===3)||(state.game==='cash'&&m>=2)||(state.game==='bonus'&&m>=1);$('revealTitle').textContent=won?'🎉 YOU HIT!':'DRAW COMPLETE';$('revealStatus').textContent=`${m}/3 numbers matched • ${state.tickets.toLocaleString()} tickets left`;$('resultMatch').innerHTML=won?`<span class="win">${m}/3 MATCHED • WINNER!</span>`:`<span class="lose">${m}/3 MATCHED • No win this time</span>`;$('resultPrize').textContent=Number(d.payout)>0?money(d.payout):(Number(d.freeSpinsAwarded)>0?`${d.freeSpinsAwarded} FREE SPINS`:'No prize');$('result').style.display='block';render()}catch(e){close('reveal');toast(e.message||'Something went wrong.')}finally{state.busy=false;render()}}
+$('again').onclick=()=>{close('reveal');state.selected=[];render()};$('closeShortage').onclick=()=>close('ticketShortage');$('goEarnTickets').onclick=()=>{window.location.href='tap.html'};$('ticketShortage').addEventListener('click',e=>{if(e.target===$('ticketShortage'))close('ticketShortage')});$('reveal').addEventListener('click',e=>{if(e.target===$('reveal')&&!state.busy)close('reveal')});render();loadTickets();document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 })();
 </script>
-</body>
-</html>
+
+<script>
+/* =========================================================
+   MONETAG IN-APP INTERSTITIAL
+   =========================================================
+   Non-rewarded Monetag ads are controlled entirely by Monetag.
+   This does NOT touch the rewarded-ad/postback system above.
+
+   - frequency: 2 ads
+   - capping: 0.1 hours = 6 minutes
+   - interval: 30 seconds between ads
+   - timeout: 5 seconds before the first ad
+   - everyPage: true = the Monetag session resets on every page
+     transition, so the frequency/capping counter starts over each
+     time this page is (re)entered, instead of being shared
+     across the whole app session.
+
+   Monetag still decides whether an ad is actually available/shown.
+   ========================================================= */
+const MONETAG_INAPP_SETTINGS = Object.freeze({
+    type: "inApp",
+    inAppSettings: {
+        frequency: 2,
+        capping: 0.1,
+        interval: 30,
+        timeout: 5,
+        everyPage: true
+    }
+});
+
+let monetagInAppStarted = false;
+let monetagInAppRetryTimer = null;
+
+/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
+   multiple times in a row can reset the SDK's internal logic and
+   interrupt the ad flow. So this must only ever be called ONCE per
+   page load. everyPage:true (below) is what makes Monetag itself
+   reset the frequency/capping session on every navigation/entry —
+   we do NOT need to (and must not) re-call show_11688228 manually
+   when the user returns to the tab. */
+function startMonetagInAppInterstitial(){
+    if(monetagInAppStarted) return;
+    monetagInAppStarted = true;
+
+    const launch = () => {
+        if(typeof window.show_11688228 !== "function"){
+            // The SDK script may still be loading. Retry a few times
+            // without creating an aggressive polling loop.
+            monetagInAppStarted = false;
+            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
+            return;
+        }
+
+        /*
+         * Do not attach rewarded-ad ymid/requestVar values here.
+         * In-App Interstitial is non-rewarded and must remain
+         * separate from the reward flow.
+         *
+         * catchIfNoFeed:true + .catch() below exist purely for
+         * debugging — by default Monetag silently resolves with no
+         * ad shown when there's nothing to serve (empty feed, zone
+         * still in moderation, domain not approved, etc.), so
+         * without this you'd never see *why* nothing appeared.
+         */
+        try{
+            const result = window.show_11688228({
+                ...MONETAG_INAPP_SETTINGS,
+                catchIfNoFeed: true
+            });
+            if(result && typeof result.catch === "function"){
+                result.catch(error=>{
+                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
+                });
+            }
+        }catch(error){
+            console.warn("Monetag In-App Interstitial could not start:", error);
+            monetagInAppStarted = false;
+        }
+    };
+
+    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
+    setTimeout(launch, 5000);
+}
+
+/* Start once this page has first loaded — and only once. Monetag
+   handles the configured frequency/capping/interval from there, and
+   everyPage:true resets that session on every fresh page load. */
+if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
+}else{
+    startMonetagInAppInterstitial();
+}
+</script>
+</body></html>
+

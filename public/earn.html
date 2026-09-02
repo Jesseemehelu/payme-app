@@ -2,1984 +2,439 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PAYME — Earn</title>
-
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-  href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-  rel="stylesheet"
->
-
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-
 /* =========================================================
-   ROOT
+   ROOT — new candy / 3D palette (no glass, solid color blocks)
 ========================================================= */
+:root{
+  --bg:#0a0716;
+  --ink:#050310;
+  --text:#ffffff;
+  --muted:rgba(255,255,255,.72);
 
-:root {
-
-  --bg: #050816;
-  --bg2: #091126;
-
-  --card: #101a32;
-  --card2: #14203b;
-
-  --blue: #3b82f6;
-  --cyan: #06d6e8;
-  --purple: #8b5cf6;
-  --pink: #ec4899;
-  --green: #10b981;
-  --yellow: #f59e0b;
-  --orange: #f97316;
-
-  --white: #ffffff;
-  --text: #f8fafc;
-  --muted: #94a3b8;
-
-  --border: rgba(255,255,255,.08);
+  --blue:#3b82f6;
+  --cyan:#22e0ff;
+  --purple:#8b5cf6;
+  --pink:#ff4fb8;
+  --green:#2fe89a;
+  --gold:#ffcc33;
+  --orange:#ff8a3d;
+  --red:#ff4d6d;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:pan-y}
+html,body{width:100%;min-height:100%}
+button{font:inherit;color:inherit;background:none;border:0;-webkit-appearance:none;appearance:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
 
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-
-  -webkit-tap-highlight-color: transparent;
-
-  user-select: none;
-  -webkit-user-select: none;
-
-  touch-action: pan-y;
-}
-
-
-html,
-body {
-  width: 100%;
-  min-height: 100%;
-}
-
-
-body {
-
-  font-family:
-    'Plus Jakarta Sans',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-
-  color: var(--text);
-
+body{
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:var(--text);
+  overflow-x:hidden;
+  position:relative;
+  padding-bottom:calc(30px + var(--safe-bottom));
   background:
-
-    radial-gradient(
-      circle at 5% 0%,
-      rgba(59,130,246,.25),
-      transparent 28%
-    ),
-
-    radial-gradient(
-      circle at 95% 10%,
-      rgba(139,92,246,.24),
-      transparent 27%
-    ),
-
-    radial-gradient(
-      circle at 20% 100%,
-      rgba(6,214,232,.14),
-      transparent 30%
-    ),
-
-    linear-gradient(
-      145deg,
-      #040611,
-      #071027 50%,
-      #050816
-    );
-
-  overflow-x: hidden;
-
-  padding-bottom:
-    calc(30px + var(--safe-bottom));
+    radial-gradient(circle at 8% 0%,rgba(255,79,184,.30),transparent 30%),
+    radial-gradient(circle at 100% 12%,rgba(34,224,255,.26),transparent 32%),
+    radial-gradient(circle at 90% 70%,rgba(139,92,246,.30),transparent 36%),
+    radial-gradient(circle at 10% 92%,rgba(255,204,51,.16),transparent 34%),
+    linear-gradient(165deg,#0d0820,#070310 55%,#0b0618);
 }
 
+.bg-orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.32;pointer-events:none;z-index:0;animation:orbMove 9s ease-in-out infinite alternate}
+.orb-a{width:240px;height:240px;top:-70px;left:-80px;background:var(--pink)}
+.orb-b{width:230px;height:230px;top:38%;right:-90px;background:var(--cyan);animation-delay:-3s}
+.orb-c{width:260px;height:260px;bottom:-100px;left:20%;background:var(--purple);animation-delay:-6s}
+@keyframes orbMove{to{transform:translate(20px,-22px) scale(1.12)}}
 
-/* =========================================================
-   BACKGROUND ORBS
-========================================================= */
-
-.bg-orb {
-
-  position: fixed;
-
-  width: 210px;
-  height: 210px;
-
-  border-radius: 50%;
-
-  filter: blur(65px);
-
-  opacity: .18;
-
-  pointer-events: none;
-
-  z-index: -1;
-
-  animation:
-    orbMove 8s ease-in-out infinite alternate;
-}
-
-
-.orb-blue {
-
-  top: 15%;
-  left: -100px;
-
-  background: var(--blue);
-}
-
-
-.orb-purple {
-
-  right: -100px;
-  top: 42%;
-
-  background: var(--purple);
-
-  animation-delay: -3s;
-}
-
-
-.orb-cyan {
-
-  bottom: -100px;
-  left: 35%;
-
-  background: var(--cyan);
-
-  animation-delay: -5s;
-}
-
-
-@keyframes orbMove {
-
-  from {
-    transform:
-      translate(0,0)
-      scale(1);
-  }
-
-  to {
-    transform:
-      translate(20px,-20px)
-      scale(1.12);
-  }
-}
-
+@keyframes pageEnter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 /* =========================================================
    HEADER
 ========================================================= */
-
-header {
-
-  position: sticky;
-
-  top: 0;
-
-  z-index: 100;
-
-  background:
-    #070d1d;
-
-  border-bottom:
-    1px solid rgba(255,255,255,.06);
-
-  box-shadow:
-    0 8px 25px rgba(0,0,0,.18);
-}
-
-
-.nav-container {
-
-  max-width: 900px;
-
-  margin: auto;
-
-  padding:
-    calc(12px + var(--safe-top))
-    15px
-    12px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-}
-
-
-.brand-logo {
-
-  color: white;
-
-  text-decoration: none;
-
-  font-size: 1.25rem;
-
-  font-weight: 800;
-
-  letter-spacing: -.05em;
-}
-
-
-.brand-logo span {
-
-  color: var(--cyan);
-
-  text-shadow:
-    0 0 15px rgba(6,214,232,.8);
-}
-
-
-.icon-btn {
-
-  width: 40px;
-  height: 40px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 13px;
-
-  color: white;
-
-  text-decoration: none;
-
-  background:
-    #121d36;
-
-  border:
-    1px solid rgba(255,255,255,.09);
-
-  box-shadow:
-    0 7px 18px rgba(0,0,0,.25);
-
-  transition:
-    .2s ease;
-}
-
-
-.icon-btn:active {
-  transform: scale(.9);
-}
-
+header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d0820,rgba(13,8,32,.92));border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:none}
+.nav-container{max-width:900px;margin:auto;padding:calc(12px + var(--safe-top)) 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.brand-logo{font-size:1.3rem;font-weight:900;letter-spacing:-.05em;color:#fff}
+.brand-logo span{color:var(--cyan);text-shadow:0 0 16px rgba(34,224,255,.8)}
+.icon-btn{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;color:#fff;background:linear-gradient(155deg,#1b2748,#0f1730);border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 0 rgba(0,0,0,.4),0 8px 18px rgba(0,0,0,.35);transition:.15s}
+.icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
 
 /* =========================================================
-   MAIN
+   MAIN / LAYOUT
 ========================================================= */
+.earn-container{width:100%;max-width:900px;margin:auto;padding:20px 15px 35px;position:relative;z-index:1;animation:pageEnter .5s ease both}
 
-.earn-container {
-
-  width: 100%;
-
-  max-width: 900px;
-
-  margin: auto;
-
-  padding:
-    20px
-    15px
-    35px;
-
-  animation:
-    pageEnter .5s ease both;
-}
-
-
-@keyframes pageEnter {
-
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+.back-link{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;margin-bottom:16px}
+.back-link:active{color:#fff;transform:translateX(-3px)}
 
 /* =========================================================
-   BACK LINK
+   HERO — bold, colorful, 3D panel (not a flat translucent card)
 ========================================================= */
-
-.back-link {
-
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  color: #94a3b8;
-
-  text-decoration: none;
-
-  font-size: .78rem;
-
-  font-weight: 700;
-
-  margin-bottom: 18px;
-
-  transition: .2s ease;
+.earn-header-section{
+  position:relative;
+  overflow:hidden;
+  margin-bottom:22px;
+  padding:26px 20px 22px;
+  border-radius:26px;
+  background:linear-gradient(145deg,#3a1264 0%,#161c66 48%,#023a52 100%);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 4px 0 rgba(0,0,0,.4),0 26px 55px rgba(60,20,110,.4),inset 0 1px 0 rgba(255,255,255,.14);
 }
+.earn-header-section:before{content:"";position:absolute;width:220px;height:220px;right:-90px;top:-100px;border-radius:50%;background:var(--pink);opacity:.30;filter:blur(45px)}
+.earn-header-section:after{content:"";position:absolute;width:150px;height:150px;left:-60px;bottom:-70px;border-radius:50%;background:var(--cyan);opacity:.22;filter:blur(40px)}
 
+.earn-eyebrow{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;margin-bottom:12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#ffe9ff;font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:dotPulse 1.5s infinite}
+@keyframes dotPulse{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.25);opacity:1}}
 
-.back-link:active {
+.earn-title{position:relative;z-index:1;font-size:clamp(1.9rem,8vw,2.6rem);line-height:1.05;font-weight:900;letter-spacing:-.05em;color:#fff}
+.earn-title em{font-style:normal;background:linear-gradient(100deg,#ffe27a,#ff8ad4 60%,#7ee8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  color: white;
+.earn-sub{position:relative;z-index:1;margin-top:10px;max-width:520px;color:#e7e2ff;font-size:.86rem;line-height:1.55}
 
-  transform:
-    translateX(-3px);
-}
-
+.hero-tags{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.hero-tag{padding:8px 12px;border-radius:13px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:.68rem;font-weight:800;display:flex;align-items:center;gap:6px}
 
 /* =========================================================
-   HERO
+   SECTION LABELS
 ========================================================= */
-
-.earn-header-section {
-
-  margin-bottom: 22px;
-}
-
-
-.earn-eyebrow {
-
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  padding:
-    6px
-    10px;
-
-  margin-bottom: 10px;
-
-  border-radius: 999px;
-
-  background:
-    #101e3b;
-
-  border:
-    1px solid rgba(59,130,246,.25);
-
-  color:
-    #60a5fa;
-
-  font-size: .62rem;
-
-  font-weight: 800;
-
-  text-transform: uppercase;
-
-  letter-spacing: .08em;
-}
-
-
-.eyebrow-dot {
-
-  width: 6px;
-  height: 6px;
-
-  border-radius: 50%;
-
-  background:
-    var(--cyan);
-
-  box-shadow:
-    0 0 12px var(--cyan);
-
-  animation:
-    dotPulse 1.5s infinite;
-}
-
-
-@keyframes dotPulse {
-
-  0%,
-  100% {
-    transform: scale(.8);
-    opacity: .6;
-  }
-
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-}
-
-
-.earn-title {
-
-  font-size:
-    clamp(1.8rem, 8vw, 2.5rem);
-
-  line-height: 1.04;
-
-  font-weight: 800;
-
-  letter-spacing: -.055em;
-
-  background:
-    linear-gradient(
-      110deg,
-      #ffffff,
-      #60a5fa 45%,
-      #c084fc 80%,
-      #67e8f9
-    );
-
-  -webkit-background-clip: text;
-  background-clip: text;
-
-  color: transparent;
-}
-
-
-.earn-sub {
-
-  margin-top: 9px;
-
-  max-width: 520px;
-
-  color: var(--muted);
-
-  font-size: .8rem;
-
-  line-height: 1.5;
-}
-
+.section-label{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 10px}
+.section-label h2{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:900}
+.section-label span{font-size:.66rem;color:var(--muted);font-weight:700}
 
 /* =========================================================
-   CARD GRID
+   ARCADE GAMES — inlined directly on the page (no popup)
 ========================================================= */
-
-.earn-cards-grid {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, minmax(0,1fr));
-
-  gap: 12px;
+.arcade-panel{
+  position:relative;
+  overflow:hidden;
+  border-radius:26px;
+  padding:18px;
+  background:linear-gradient(150deg,#241143 0%,#0e1a3d 55%,#04222e 100%);
+  border:1px solid rgba(139,92,246,.4);
+  box-shadow:0 4px 0 rgba(0,0,0,.4),0 22px 50px rgba(60,20,110,.35),inset 0 1px 0 rgba(255,255,255,.1);
 }
+.arcade-panel:before{content:"";position:absolute;width:200px;height:200px;right:-80px;top:-90px;border-radius:50%;background:var(--purple);opacity:.3;filter:blur(40px)}
+.arcade-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.arcade-head-left{display:flex;align-items:center;gap:12px}
+.arcade-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:1.4rem;background:linear-gradient(155deg,#ffd35e,#d98a00);box-shadow:0 4px 0 rgba(0,0,0,.3),0 10px 20px rgba(255,211,94,.3);animation:floaty 4s ease-in-out infinite}
+.arcade-head h3{font-size:1.05rem;font-weight:900;letter-spacing:-.02em}
+.arcade-head p{font-size:.72rem;color:var(--muted);margin-top:2px}
+.arcade-max-badge{position:relative;z-index:1;text-align:right;flex:none}
+.arcade-max-badge b{display:block;font-size:.95rem;color:var(--gold);text-shadow:0 2px 10px rgba(255,204,51,.4)}
+.arcade-max-badge span{font-size:.56rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 
+.game-list{position:relative;z-index:1;display:grid;gap:10px}
+.game-item{
+  display:flex;align-items:center;gap:13px;
+  padding:14px;
+  border-radius:18px;
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.game-item:active{transform:translateY(3px) scale(.99)}
+
+.game-tap{background:linear-gradient(120deg,rgba(255,79,184,.22),rgba(255,79,184,.06));border:1px solid rgba(255,79,184,.4);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.game-spin{background:linear-gradient(120deg,rgba(255,204,51,.22),rgba(255,204,51,.06));border:1px solid rgba(255,204,51,.4);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.game-lucky{background:linear-gradient(120deg,rgba(34,224,255,.22),rgba(34,224,255,.06));border:1px solid rgba(34,224,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+
+.game-icon{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 6px 14px rgba(0,0,0,.25)}
+.game-tap .game-icon{background:linear-gradient(155deg,#ff7fce,#c81e7a)}
+.game-spin .game-icon{background:linear-gradient(155deg,#ffe58a,#c97f00)}
+.game-lucky .game-icon{background:linear-gradient(155deg,#7ee8ff,#0a8fa8)}
+
+.game-details{flex:1;min-width:0}
+.game-details h4{font-size:.92rem;font-weight:900;color:#fff}
+.game-details p{font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.4}
+.game-reward{display:inline-block;margin-top:6px;font-size:.62rem;font-weight:900;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff}
+
+.game-arrow{width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);font-weight:900}
 
 /* =========================================================
-   CARD
+   EARN CARDS GRID — solid 3D color blocks (glassmorphism removed)
 ========================================================= */
+.earn-cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 
-.earn-card-item {
-
-  position: relative;
-
-  min-height: 185px;
-
-  overflow: hidden;
-
-  display: flex;
-
-  flex-direction: column;
-
-  justify-content: space-between;
-
-  padding: 15px;
-
-  text-decoration: none;
-
-  color: white;
-
-  border-radius: 21px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #14213e,
-      #0c152a
-    );
-
-  border:
-    1px solid rgba(255,255,255,.08);
-
-  box-shadow:
-
-    0 16px 30px rgba(0,0,0,.35),
-
-    inset 0 1px 0
-      rgba(255,255,255,.05);
-
-  transition:
-    transform .2s ease,
-    border-color .2s ease,
-    box-shadow .2s ease;
+.earn-card-item{
+  position:relative;
+  overflow:hidden;
+  min-height:190px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:16px;
+  border-radius:22px;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+  transition:transform .15s ease,box-shadow .15s ease;
 }
+.earn-card-item:active{transform:translateY(4px) scale(.98)}
 
+.watch-ads-card{background:linear-gradient(150deg,#0891b2 0%,#075985 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(8,145,178,.35),inset 0 1px 0 rgba(255,255,255,.2)}
+.referral-card{background:linear-gradient(150deg,#ff5fc4 0%,#a21caf 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(217,70,239,.32),inset 0 1px 0 rgba(255,255,255,.2)}
+.advertise-card{background:linear-gradient(150deg,#ffa14f 0%,#c2410c 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(249,115,22,.32),inset 0 1px 0 rgba(255,255,255,.2)}
+.join-card{background:linear-gradient(150deg,#34e39c 0%,#047857 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(16,185,129,.32),inset 0 1px 0 rgba(255,255,255,.2)}
+.disabled-option{background:linear-gradient(150deg,#3a4256 0%,#1c2334 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 16px 30px rgba(0,0,0,.3);opacity:.85}
+.disabled-option:active{transform:none}
 
-.earn-card-item::before {
+.watch-ads-card.on-cooldown{opacity:.55;filter:grayscale(.4)}
+.watch-ads-card.on-cooldown:active{transform:none}
 
-  content: "";
+.card-top-row{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.icon-wrapper{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;font-size:1.3rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);animation:floaty 4s ease-in-out infinite}
 
-  position: absolute;
+.status-badge{display:inline-flex;align-items:center;white-space:nowrap;padding:5px 9px;border-radius:999px;font-size:.58rem;font-weight:900;letter-spacing:.03em;text-transform:uppercase;background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.badge-coming{background:rgba(255,255,255,.1);color:#c7cbe0}
 
-  width: 130px;
-  height: 130px;
+.card-body{position:relative;z-index:2}
+.card-body h3{font-size:1rem;font-weight:900;margin-bottom:5px;letter-spacing:-.02em}
+.card-body p{color:rgba(255,255,255,.85);font-size:.72rem;line-height:1.45}
+.ref-amount-highlight{color:#fff173}
 
-  right: -65px;
-  top: -65px;
+.card-action-row{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:.74rem;font-weight:900}
+.arrow-btn{width:32px;height:32px;display:grid;place-items:center;border-radius:11px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.2)}
 
-  border-radius: 50%;
-
-  background:
-    var(--blue);
-
-  opacity: .15;
-
-  filter: blur(25px);
-}
-
-
-.earn-card-item:active {
-
-  transform:
-    scale(.96)
-    translateY(2px);
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,.4);
-
-  border-color:
-    rgba(96,165,250,.35);
-}
-
+.notification-dot{position:absolute;top:12px;left:12px;width:11px;height:11px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(255,77,109,.28),0 0 10px rgba(255,77,109,.6);z-index:3;animation:dotPulse 1.4s infinite}
 
 /* =========================================================
-   GAMES CARD
+   HOW IT WORKS — quick 3-step explainer for clarity
 ========================================================= */
-
-.games-card {
-
-  grid-column:
-    span 2;
-
-  min-height:
-    215px;
-
-  background:
-
-    linear-gradient(
-      135deg,
-      #25174f 0%,
-      #172b60 45%,
-      #073f50 100%
-    );
-
-  border:
-    1px solid
-    rgba(139,92,246,.4);
-
-  box-shadow:
-
-    0 20px 45px
-      rgba(77,43,150,.28),
-
-    inset 0 1px 0
-      rgba(255,255,255,.08);
-}
-
-
-.games-card::before {
-
-  width: 220px;
-  height: 220px;
-
-  right: -80px;
-  top: -100px;
-
-  background:
-    #8b5cf6;
-
-  opacity: .28;
-
-  filter: blur(35px);
-}
-
-
-.games-card::after {
-
-  content: "";
-
-  position: absolute;
-
-  width: 100px;
-  height: 100px;
-
-  left: -50px;
-  bottom: -50px;
-
-  border-radius: 50%;
-
-  background:
-    #06d6e8;
-
-  opacity: .18;
-
-  filter: blur(25px);
-}
-
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.how-card{padding:14px 10px;border-radius:17px;text-align:center;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.14);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.how-num{width:30px;height:30px;margin:0 auto 8px;display:grid;place-items:center;border-radius:10px;font-weight:900;font-size:.85rem;background:linear-gradient(150deg,var(--cyan),var(--purple));box-shadow:0 3px 8px rgba(139,92,246,.35)}
+.how-card p{font-size:.66rem;color:var(--muted);line-height:1.4}
 
 /* =========================================================
-   CARD TOP
+   WATCH ADS & EARN MODAL — solid 3D card, no blur glass
 ========================================================= */
-
-.card-top-row {
-
-  position: relative;
-
-  z-index: 2;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 8px;
-
-  margin-bottom: 16px;
-}
-
-
-.icon-wrapper {
-
-  width: 48px;
-  height: 48px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 15px;
-
-  font-size: 1.4rem;
-
-  background:
-    #172746;
-
-  border:
-    1px solid rgba(255,255,255,.1);
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,.3),
-
-    inset 0 1px 0
-      rgba(255,255,255,.08);
-
-  animation:
-    iconFloat 4s ease-in-out infinite;
-}
-
-
-@keyframes iconFloat {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-
-/* =========================================================
-   BADGES
-========================================================= */
-
-.status-badge {
-
-  display: inline-flex;
-
-  align-items: center;
-
-  white-space: nowrap;
-
-  padding:
-    5px 8px;
-
-  border-radius: 999px;
-
-  font-size: .57rem;
-
-  font-weight: 800;
-
-  letter-spacing: .04em;
-
-  text-transform: uppercase;
-}
-
-
-.badge-hot {
-
-  color:
-    #f5d0fe;
-
-  background:
-    #4c1d73;
-
-  border:
-    1px solid #7e22ce;
-
-  box-shadow:
-    0 0 18px rgba(168,85,247,.2);
-}
-
-
-.badge-available {
-
-  color:
-    #99f6e4;
-
-  background:
-    #063d45;
-
-  border:
-    1px solid #0e7490;
-}
-
-
-.badge-coming {
-
-  color:
-    #94a3b8;
-
-  background:
-    #182237;
-
-  border:
-    1px solid rgba(255,255,255,.07);
-}
-
-
-/* =========================================================
-   CARD BODY
-========================================================= */
-
-.card-body {
-
-  position: relative;
-
-  z-index: 2;
-}
-
-
-.card-body h3 {
-
-  font-size:
-    1rem;
-
-  font-weight:
-    800;
-
-  margin-bottom:
-    5px;
-
-  letter-spacing:
-    -.025em;
-}
-
-
-.card-body p {
-
-  color:
-    #9aa9c0;
-
-  font-size:
-    .7rem;
-
-  line-height:
-    1.45;
-
-  max-width:
-    300px;
-}
-
-
-/* =========================================================
-   ACTION
-========================================================= */
-
-.card-action-row {
-
-  position: relative;
-
-  z-index: 2;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  margin-top:
-    14px;
-
-  font-size:
-    .73rem;
-
-  font-weight:
-    800;
-
-  color:
-    #93c5fd;
-}
-
-
-.games-card .card-action-row {
-  color: #d8b4fe;
-}
-
-
-.arrow-btn {
-
-  width: 32px;
-  height: 32px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 11px;
-
-  background:
-    rgba(255,255,255,.09);
-
-  border:
-    1px solid rgba(255,255,255,.1);
-
-  font-size:
-    .9rem;
-}
-
-
-.earn-card-item:active .arrow-btn {
-
-  transform:
-    translateX(4px);
-
-  background:
-    rgba(255,255,255,.16);
-}
-
-
-/* =========================================================
-   REFERRAL CARD
-========================================================= */
-
-.referral-card {
-
-  background:
-    linear-gradient(
-      145deg,
-      #073d4c,
-      #0d2742
-    );
-
-  border-color:
-    rgba(6,214,232,.22);
-}
-
-
-.referral-card::before {
-
-  background:
-    var(--cyan);
-
-  opacity:
-    .17;
-}
-
-
-.referral-card .icon-wrapper {
-
-  background:
-    #0d5260;
-
-  border-color:
-    rgba(6,214,232,.2);
-}
-
-
-.referral-card .status-badge.badge-available {
-
-  background:
-    linear-gradient(135deg,#06b6d4,#0891b2);
-
-  color:
-    #ffffff;
-
-  border-color:
-    rgba(6,214,232,.4);
-
-  font-size:
-    .68rem;
-
-  padding:
-    6px 11px;
-
-  box-shadow:
-    0 8px 18px rgba(6,182,212,.35);
-}
-
-
-.ref-amount-highlight {
-
-  color:
-    #67e8f9;
-
-  font-weight:
-    900;
-
-  font-size:
-    .82rem;
-}
-
-
-/* =========================================================
-   GET MORE TELEGRAM USERS
-========================================================= */
-
-.advertise-card {
-
-  background:
-    linear-gradient(
-      145deg,
-      #40200d,
-      #30182b
-    );
-
-  border-color:
-    rgba(249,115,22,.28);
-}
-
-
-.advertise-card::before {
-
-  background:
-    var(--orange);
-
-  opacity:
-    .24;
-}
-
-
-.advertise-card .icon-wrapper {
-
-  background:
-    #5a2b16;
-
-  border-color:
-    rgba(249,115,22,.3);
-
-  box-shadow:
-    0 8px 20px
-      rgba(249,115,22,.12);
-}
-
-
-.advertise-card .card-action-row {
-
-  color:
-    #fdba74;
-}
-
-
-/* =========================================================
-   JOIN GROUPS & EARN
-========================================================= */
-
-.join-card {
-
-  background:
-    linear-gradient(
-      145deg,
-      #073f36,
-      #092c3e
-    );
-
-  border-color:
-    rgba(16,185,129,.28);
-}
-
-
-.join-card::before {
-
-  background:
-    var(--green);
-
-  opacity:
-    .2;
-}
-
-
-.join-card .icon-wrapper {
-
-  background:
-    #0c5144;
-
-  border-color:
-    rgba(16,185,129,.3);
-
-  box-shadow:
-    0 8px 20px
-      rgba(16,185,129,.12);
-}
-
-
-.join-card .card-action-row {
-
-  color:
-    #6ee7b7;
-}
-
-
-/* =========================================================
-   COMING SOON
-========================================================= */
-
-.disabled-option {
-
-  opacity:
-    .55;
-
-  cursor:
-    not-allowed;
-}
-
-
-.disabled-option:active {
-
-  transform:
-    none;
-
-  border-color:
-    rgba(255,255,255,.08);
-}
-
-
-/* =========================================================
-   WATCH ADS COOLDOWN (after reward is revealed)
-========================================================= */
-
-.watch-ads-card.on-cooldown {
-
-  opacity:
-    .55;
-
-  cursor:
-    not-allowed;
-
-  filter:
-    grayscale(1);
-
-  pointer-events:
-    none;
-}
-
-
-.watch-ads-card.on-cooldown:active {
-
-  transform:
-    none;
-
-  border-color:
-    rgba(255,255,255,.08);
-}
-
-
-.watch-ads-card.on-cooldown .status-badge {
-
-  color:
-    #94a3b8;
-
-  background:
-    #182237;
-
-  border:
-    1px solid rgba(255,255,255,.07);
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 420px) {
-
-  .earn-container {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .earn-cards-grid {
-    gap: 9px;
-  }
-
-  .earn-card-item {
-    min-height: 175px;
-    padding: 13px;
-  }
-
-  .games-card {
-    min-height: 205px;
-  }
-
-  .icon-wrapper {
-    width: 43px;
-    height: 43px;
-    border-radius: 13px;
-  }
-
-  .card-body h3 {
-    font-size: .92rem;
-  }
-
-  .card-body p {
-    font-size: .65rem;
-  }
-
-  .status-badge {
-    font-size: .51rem;
-    padding: 4px 6px;
-  }
-
-}
-
-
-/* =========================================================
-   VERY SMALL SCREENS
-========================================================= */
-
-@media (max-width: 350px) {
-
-  .earn-cards-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .games-card {
-    grid-column: span 1;
-  }
-
-  .earn-card-item[style] {
-    grid-column: span 1 !important;
-  }
-
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-
-    animation-duration:
-      .01ms !important;
-
-    animation-iteration-count:
-      1 !important;
-
-    transition-duration:
-      .01ms !important;
-  }
-
-}
-
-
-/* =========================================================
-   ARCADE GAMES MODAL — FULL DESIGNED PAYME UI
-========================================================= */
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2, 6, 23, .78);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 99999;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  overflow-y: auto;
-  transition: opacity .22s ease, visibility .22s ease;
-}
-
-.modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.modal-content {
-  position: relative;
-  width: min(100%, 430px);
-  max-height: min(720px, calc(100vh - 36px));
-  overflow: hidden auto;
-  padding: 18px;
-  border-radius: 26px;
-  background:
-    radial-gradient(circle at 90% 0%, rgba(59,130,246,.18), transparent 34%),
-    radial-gradient(circle at 0% 100%, rgba(139,92,246,.14), transparent 35%),
-    linear-gradient(145deg, #111c36, #080f22);
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow:
-    0 30px 80px rgba(0,0,0,.58),
-    inset 0 1px 0 rgba(255,255,255,.07);
-  transform: translateY(18px) scale(.96);
-  transition: transform .25s cubic-bezier(.2,.8,.2,1);
-}
-
-.modal-overlay.active .modal-content {
-  transform: translateY(0) scale(1);
-}
-
-.modal-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.16);
-  border-radius: 20px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.modal-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.modal-main-icon {
-  width: 50px;
-  height: 50px;
-  flex: 0 0 50px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  font-size: 25px;
-  background: linear-gradient(145deg, rgba(59,130,246,.24), rgba(139,92,246,.2));
-  border: 1px solid rgba(96,165,250,.25);
-  box-shadow: 0 10px 28px rgba(59,130,246,.14);
-}
-
-.modal-title {
-  font-size: 1.08rem;
-  font-weight: 800;
-  letter-spacing: -.025em;
-  color: #fff;
-}
-
-.modal-subtitle {
-  margin-top: 4px;
-  color: #94a3b8;
-  font-size: .7rem;
-  line-height: 1.45;
-}
-
-.close-btn {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px;
-  background: rgba(255,255,255,.055);
-  color: #cbd5e1;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform .16s ease, background .16s ease;
-}
-
-.close-btn:active {
-  transform: scale(.92);
-  background: rgba(255,255,255,.1);
-}
-
-.reward-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 12px;
-  border-radius: 15px;
-  background: linear-gradient(135deg, rgba(16,185,129,.11), rgba(6,214,232,.07));
-  border: 1px solid rgba(16,185,129,.18);
-}
-
-.reward-info-icon {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  background: rgba(16,185,129,.16);
-  color: #6ee7b7;
-  font-weight: 800;
-}
-
-.reward-info-text {
-  color: #94a3b8;
-  font-size: .66rem;
-  line-height: 1.45;
-}
-
-.reward-info-text strong {
-  color: #d1fae5;
-  font-weight: 700;
-}
-
-.game-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.game-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 78px;
-  padding: 12px;
-  text-decoration: none;
-  color: #fff;
-  border-radius: 18px;
-  background: linear-gradient(145deg, #172543, #0d172d);
-  border: 1px solid rgba(255,255,255,.075);
-  box-shadow:
-    0 10px 22px rgba(0,0,0,.22),
-    inset 0 1px 0 rgba(255,255,255,.035);
-  transition: transform .16s ease, border-color .16s ease;
-}
-
-.game-item:active {
-  transform: scale(.975);
-  border-color: rgba(96,165,250,.3);
-}
-
-.game-info {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-}
-
-.game-icon {
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  font-size: 23px;
-  background: linear-gradient(145deg, rgba(59,130,246,.18), rgba(139,92,246,.16));
-  border: 1px solid rgba(255,255,255,.07);
-}
-
-.game-details {
-  min-width: 0;
-}
-
-.game-details h4 {
-  color: #f8fafc;
-  font-size: .82rem;
-  font-weight: 800;
-  margin-bottom: 3px;
-}
-
-.game-details p {
-  color: #94a3b8;
-  font-size: .61rem;
-  line-height: 1.35;
-}
-
-.game-reward {
-  display: inline-block;
-  margin-top: 5px;
-  color: #67e8f9;
-  font-size: .56rem;
-  font-weight: 700;
-}
-
-.game-arrow {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: rgba(255,255,255,.055);
-  color: #94a3b8;
-  font-size: 17px;
-}
-
-body.modal-open {
-  overflow: hidden;
-  touch-action: none;
-}
-
-#openGamesModal {
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: pan-y;
-}
-
-/* RED NOTIFICATION DOTS */
-.notification-dot {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ef4444;
-  border: 2px solid rgba(8, 15, 34, .95);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, .14), 0 0 12px rgba(239, 68, 68, .65);
-  z-index: 8;
-  animation: notificationPulse 1.6s ease-in-out infinite;
-}
-
-@keyframes notificationPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.16);
-    opacity: .78;
-  }
-}
-
-
-/* CLICK LOADING + STRONG GAME CARDS */
-.page-loader{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(3,7,18,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,visibility .15s ease}.page-loader.active{opacity:1;visibility:visible;pointer-events:auto}.loader-dots{display:flex;gap:7px;align-items:center;justify-content:center;padding:14px 18px;border-radius:18px;background:#101a32;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 45px rgba(0,0,0,.45)}.loader-dots span{width:8px;height:8px;border-radius:50%;background:#fff;animation:loadingDot .8s ease-in-out infinite}.loader-dots span:nth-child(2){animation-delay:.13s}.loader-dots span:nth-child(3){animation-delay:.26s}@keyframes loadingDot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-6px);opacity:1}}
-.game-item{background:#172846!important;border:2px solid rgba(255,255,255,.14)!important;box-shadow:0 12px 25px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.06)!important;min-height:88px!important;padding:14px!important}.game-item:nth-child(2){background:#20294f!important}.game-item:nth-child(3){background:#163f43!important}.game-details h4{font-size:.94rem!important;font-weight:900!important;color:#fff!important;letter-spacing:-.02em}.game-details p{color:#cbd5e1!important;font-size:.64rem!important}.game-reward{font-weight:900!important}.game-icon{background:#263b60!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 7px 16px rgba(0,0,0,.28)}.game-arrow{background:#2a3d60!important;border:1px solid rgba(255,255,255,.12);color:#fff!important}
-
-.watchads-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;visibility:hidden;pointer-events:none;transition:.25s}
+.watchads-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,2,10,.86);opacity:0;visibility:hidden;pointer-events:none;transition:.25s}
 .watchads-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.watchads-card-modal{position:relative;width:min(100%,420px);padding:24px 18px 20px;border-radius:30px;background:radial-gradient(circle at 50% 0%,rgba(6,214,232,.16),transparent 35%),linear-gradient(145deg,#10243a,#071423);border:1px solid rgba(103,232,249,.2);box-shadow:0 30px 80px rgba(0,0,0,.62);text-align:center;transform:translateY(18px) scale(.95);transition:.28s cubic-bezier(.2,.8,.2,1)}
-.watchads-overlay.show .watchads-card-modal{transform:none}.watchads-close{position:absolute;right:13px;top:13px;width:36px;height:36px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;font-size:22px}.watchads-icon{width:62px;height:62px;margin:2px auto 10px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(145deg,#075985,#164e63);font-size:28px;box-shadow:0 14px 28px rgba(6,182,212,.16)}.watchads-kicker{color:#67e8f9;font-size:.55rem;font-weight:900;letter-spacing:.14em}.watchads-card-modal h2{margin-top:5px;color:#fff;font-size:1.25rem;font-weight:900;letter-spacing:-.04em}.watchads-subtitle{margin:7px auto 14px;max-width:330px;color:#94a3b8;font-size:.68rem;line-height:1.5}.watchads-prizes{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:14px}.watchads-prizes span{padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);color:#dbeafe;font-size:.54rem;font-weight:800}.watchads-prizes span.watchads-top-prize{background:linear-gradient(135deg,#f59e0b,#d97706);border-color:#fbbf24;color:#fff;box-shadow:0 4px 12px rgba(245,158,11,.35)}.watchads-reel{display:none;margin:10px 0 14px}.watchads-reel.show{display:block}.watchads-reel-window{height:92px;position:relative;overflow:hidden;border-radius:18px;background:#06101d;border:1px solid rgba(103,232,249,.16);box-shadow:inset 0 0 30px rgba(6,182,212,.07)}.watchads-reel-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:10px;padding:0 20px;will-change:transform}.watchads-reel-item{width:112px;min-width:112px;text-align:center;padding:11px 6px;border-radius:14px;background:linear-gradient(145deg,#162b42,#0b192a);border:1px solid rgba(255,255,255,.09);color:#fff;font-size:.65rem;font-weight:900}.watchads-reel-item small{display:block;color:#94a3b8;font-size:.45rem;margin-top:3px}.watchads-reel-center{position:absolute;left:50%;top:4px;bottom:4px;width:2px;transform:translateX(-50%);background:#67e8f9;box-shadow:0 0 15px #06d6e8;pointer-events:none}.watchads-reel-caption{margin-top:7px;color:#67e8f9;font-size:.52rem;font-weight:900;letter-spacing:.12em}.watchads-start,.watchads-done{width:100%;min-height:49px;border:0;border-radius:16px;color:#fff;font-weight:900;font-size:.74rem;background:linear-gradient(135deg,#0891b2,#06b6d4);box-shadow:0 12px 25px rgba(6,182,212,.2)}.watchads-start:disabled{opacity:.65}.watchads-done{display:none;margin-top:10px;background:linear-gradient(135deg,#10b981,#059669)}.watchads-status{min-height:20px;margin-top:8px;color:#94a3b8;font-size:.61rem;line-height:1.4}.watchads-result{display:none;margin-top:10px;padding:14px;border-radius:18px;background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.18)}.watchads-result.show{display:block}.watchads-result-icon{font-size:27px}.watchads-result-title{margin-top:4px;color:#fff;font-size:1rem;font-weight:900}.watchads-result-copy{margin-top:3px;color:#a7f3d0;font-size:.62rem;line-height:1.45}.watchads-reel.landed .watchads-reel-window{box-shadow:0 0 0 2px rgba(103,232,249,.15),0 0 35px rgba(6,182,212,.2),inset 0 0 25px rgba(6,182,212,.06)}
-.spin-fill-wrap{display:none;margin-top:12px;padding:12px 14px;border-radius:16px;background:linear-gradient(145deg,rgba(139,92,246,.14),rgba(6,214,232,.08));border:1px solid rgba(139,92,246,.28)}
+.watchads-card-modal{position:relative;width:min(100%,420px);padding:26px 18px 20px;border-radius:28px;background:linear-gradient(155deg,#123354 0%,#071a2c 100%);border:1px solid rgba(34,224,255,.35);box-shadow:0 30px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.12);text-align:center;transform:translateY(18px) scale(.95);transition:.28s cubic-bezier(.2,.8,.2,1)}
+.watchads-overlay.show .watchads-card-modal{transform:none}
+.watchads-card-modal:before{content:"";display:block;width:60px;height:5px;margin:-12px auto 16px;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--gold),var(--pink))}
+.watchads-close{position:absolute;right:13px;top:13px;width:36px;height:36px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(255,255,255,.1);color:#fff;font-size:22px}
+.watchads-icon{width:64px;height:64px;margin:2px auto 10px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(155deg,#22e0ff,#0a8fa8);font-size:28px;box-shadow:0 4px 0 rgba(0,0,0,.3),0 14px 28px rgba(6,182,212,.3)}
+.watchads-kicker{color:#7ee8ff;font-size:.58rem;font-weight:900;letter-spacing:.14em}
+.watchads-card-modal h2{margin-top:6px;color:#fff;font-size:1.3rem;font-weight:900;letter-spacing:-.04em}
+.watchads-subtitle{margin:8px auto 14px;max-width:330px;color:var(--muted);font-size:.7rem;line-height:1.5}
+.watchads-prizes{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:14px}
+.watchads-prizes span{padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);color:#dceeff;font-size:.56rem;font-weight:800}
+.watchads-prizes span.watchads-top-prize{background:linear-gradient(135deg,var(--gold),var(--orange));border-color:#fff3;color:#241300;box-shadow:0 4px 12px rgba(245,158,11,.35)}
+.watchads-reel{display:none;margin:10px 0 14px}
+.watchads-reel.show{display:block}
+.watchads-reel-window{height:94px;position:relative;overflow:hidden;border-radius:18px;background:#020a14;border:1px solid rgba(34,224,255,.22);box-shadow:inset 0 0 30px rgba(6,182,212,.1)}
+.watchads-reel-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:10px;padding:0 20px;will-change:transform}
+.watchads-reel-item{width:112px;min-width:112px;text-align:center;padding:11px 6px;border-radius:14px;background:linear-gradient(155deg,#1b3a5c,#0a1a2c);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:.65rem;font-weight:900}
+.watchads-reel-center{position:absolute;left:50%;top:4px;bottom:4px;width:2px;transform:translateX(-50%);background:var(--cyan);box-shadow:0 0 15px var(--cyan);pointer-events:none}
+.watchads-reel-caption{margin-top:7px;color:var(--cyan);font-size:.54rem;font-weight:900;letter-spacing:.12em}
+.watchads-reel.landed .watchads-reel-window{box-shadow:0 0 0 2px rgba(34,224,255,.25),0 0 35px rgba(6,182,212,.3),inset 0 0 25px rgba(6,182,212,.1)}
+.watchads-start,.watchads-done{width:100%;min-height:50px;border-radius:16px;color:#052033;font-weight:900;font-size:.78rem;background:linear-gradient(135deg,#22e0ff,#7ee8ff);box-shadow:0 5px 0 rgba(0,0,0,.3),0 14px 26px rgba(6,182,212,.28)}
+.watchads-start:active,.watchads-done:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.watchads-start:disabled{opacity:.6}
+.watchads-done{display:none;margin-top:10px;background:linear-gradient(135deg,var(--green),#059669);color:#04241a}
+.watchads-status{min-height:20px;margin-top:8px;color:var(--muted);font-size:.63rem;line-height:1.4}
+.watchads-result{display:none;margin-top:10px;padding:16px;border-radius:18px;background:linear-gradient(150deg,rgba(47,232,154,.18),rgba(47,232,154,.05));border:1px solid rgba(47,232,154,.3)}
+.watchads-result.show{display:block}
+.watchads-result-icon{font-size:28px}
+.watchads-result-title{margin-top:4px;color:#fff;font-size:1.05rem;font-weight:900}
+.watchads-result-copy{margin-top:3px;color:#b9f4dd;font-size:.64rem;line-height:1.45}
+.spin-fill-wrap{display:none;margin-top:12px;padding:12px 14px;border-radius:16px;background:linear-gradient(150deg,rgba(139,92,246,.2),rgba(34,224,255,.1));border:1px solid rgba(139,92,246,.35)}
 .spin-fill-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.spin-fill-header span:first-child{color:#c4b5fd;font-size:.56rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-.spin-fill-header span:last-child{color:#fff;font-size:.74rem;font-weight:900}
+.spin-fill-header span:first-child{color:#d4c5ff;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.spin-fill-header span:last-child{color:#fff;font-size:.76rem;font-weight:900}
 .spin-fill-laps{display:flex;gap:5px;justify-content:center;margin-bottom:8px}
-.spin-fill-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.12);transition:.3s ease}
-.spin-fill-dot.filled{background:linear-gradient(135deg,#8b5cf6,#06d6e8);border-color:transparent;box-shadow:0 0 10px rgba(139,92,246,.7)}
-.spin-fill-dot.partial{background:linear-gradient(135deg,rgba(139,92,246,.55),rgba(6,214,232,.55));border-color:transparent}
-.spin-fill-track{position:relative;height:14px;border-radius:999px;background:#0b1526;border:1px solid rgba(255,255,255,.08);overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.4)}
-.spin-fill-track::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.18);z-index:1}
-.spin-fill-bar{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:999px;background:linear-gradient(90deg,#8b5cf6,#06d6e8);box-shadow:0 0 14px rgba(6,214,232,.55)}
+.spin-fill-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.14)}
+.spin-fill-dot.filled{background:linear-gradient(135deg,var(--purple),var(--cyan));border-color:transparent;box-shadow:0 0 10px rgba(139,92,246,.7)}
+.spin-fill-dot.partial{background:linear-gradient(135deg,rgba(139,92,246,.6),rgba(34,224,255,.6));border-color:transparent}
+.spin-fill-track{position:relative;height:14px;border-radius:999px;background:#0b1526;border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.4)}
+.spin-fill-bar{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 14px rgba(34,224,255,.55)}
+
+/* =========================================================
+   PAGE LOADER
+========================================================= */
+.page-loader{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(4,2,12,.8);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,visibility .15s ease}
+.page-loader.active{opacity:1;visibility:visible;pointer-events:auto}
+.loader-dots{display:flex;gap:7px;align-items:center;justify-content:center;padding:15px 19px;border-radius:18px;background:linear-gradient(155deg,#221347,#0c0a1e);border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 45px rgba(0,0,0,.5)}
+.loader-dots span{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--cyan));animation:loadingDot .8s ease-in-out infinite}
+.loader-dots span:nth-child(2){animation-delay:.13s}
+.loader-dots span:nth-child(3){animation-delay:.26s}
+@keyframes loadingDot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-6px);opacity:1}}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width:420px){
+  .earn-title{font-size:1.9rem}
+  .earn-card-item{min-height:172px;padding:14px}
+  .how-grid{gap:8px}
+}
+@media (max-width:350px){
+  .earn-cards-grid{gap:9px}
+  .game-details h4{font-size:.85rem}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
 </style>
 </head>
-
-
 <body>
 
-
-<!-- ========================================================
-     BACKGROUND
-========================================================= -->
-
-<div class="bg-orb orb-blue"></div>
-<div class="bg-orb orb-purple"></div>
-<div class="bg-orb orb-cyan"></div>
-
-
-
-<!-- ========================================================
-     HEADER
-========================================================= -->
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
+<div class="bg-orb orb-c"></div>
 
 <header>
-
   <div class="nav-container">
-
-    <a
-      href="/dashboard.html"
-      class="brand-logo"
-    >
-      PAYME<span>.</span>
-    </a>
-
-
-    <a
-      href="https://wa.me/+2348034399095"
-      target="_blank"
-      class="icon-btn"
-      aria-label="Contact Support"
-    >
-
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-
-        <path
-          d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
-        />
-
+    <a href="/dashboard.html" class="brand-logo">PAYME<span>.</span></a>
+    <a href="https://wa.me/+2348034399095" target="_blank" class="icon-btn" aria-label="Contact Support">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
       </svg>
-
     </a>
-
   </div>
-
 </header>
-
-
-
-<!-- ========================================================
-     MAIN
-========================================================= -->
 
 <main class="earn-container">
 
-
-  <!-- BACK -->
-
-  <a
-    href="/dashboard.html"
-    class="back-link"
-  >
-
-    <span>←</span>
-
-    <span>
-      Back to Dashboard
-    </span>
-
-  </a>
-
-
+  <a href="/dashboard.html" class="back-link"><span>←</span><span>Back to Dashboard</span></a>
 
   <!-- HERO -->
-
   <section class="earn-header-section">
-<h1 class="earn-title">
-
-      Turn your activity
-      <br>
-      into rewards.
-
-    </h1>
-
-
-    <p class="earn-sub">
-
-      Play games, invite friends, promote
-      communities and earn rewards on PAYME.
-
-    </p>
-
+    <div class="earn-eyebrow"><span class="eyebrow-dot"></span>PAYME REWARDS</div>
+    <h1 class="earn-title">Turn your activity<br>into <em>real rewards.</em></h1>
+    <p class="earn-sub">Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.</p>
+    <div class="hero-tags">
+      <div class="hero-tag">🎮 3 games to play</div>
+      <div class="hero-tag">📺 Instant ad rewards</div>
+      <div class="hero-tag">🔗 ₦15 per referral</div>
+    </div>
   </section>
 
+  <!-- ======================================================
+       ARCADE GAMES — inlined directly on the page, no popup
+  ======================================================= -->
+  <div class="section-label"><h2>Arcade Games</h2><span>Tap a game to play</span></div>
 
+  <div class="arcade-panel">
+    <div class="arcade-head">
+      <div class="arcade-head-left">
+        <div class="arcade-icon">🎮</div>
+        <div>
+          <h3>3 Games Active</h3>
+          <p>Tap, spin and match for PAYME rewards.</p>
+        </div>
+      </div>
+      <div class="arcade-max-badge"><b>₦25,000</b><span>Max Payout</span></div>
+    </div>
+
+    <div class="game-list">
+
+      <a href="tap.html" class="game-item game-tap">
+        <div class="game-icon">🗝️</div>
+        <div class="game-details">
+          <h4>Luck Vault</h4>
+          <p>Watch rewarded ads to charge the treasure chests and unlock Luck Tickets.</p>
+          <span class="game-reward">🪙 20–70 Luck Tickets per chest</span>
+        </div>
+        <div class="game-arrow">→</div>
+      </a>
+
+      <a href="/game" class="game-item game-spin">
+        <div class="game-icon">🎡</div>
+        <div class="game-details">
+          <h4>PAYME Spin</h4>
+          <p>Spin the wheel and try your luck for instant cash prizes.</p>
+          <span class="game-reward">🎯 Up to ₦50 prize opportunity</span>
+        </div>
+        <div class="game-arrow">→</div>
+      </a>
+
+      <a href="lucky.html" class="game-item game-lucky">
+        <div class="game-icon">🎰</div>
+        <div class="game-details">
+          <h4>Lucky3</h4>
+          <p>Pick 3 numbers and stake your Luck Tickets for cash or free spins.</p>
+          <span class="game-reward">🍀 Win up to ₦15,000</span>
+        </div>
+        <div class="game-arrow">→</div>
+      </a>
+
+    </div>
+  </div>
 
   <!-- ======================================================
-       EARN CARDS
+       MORE WAYS TO EARN
   ======================================================= -->
+  <div class="section-label"><h2>More Ways To Earn</h2><span>Pick any option below</span></div>
 
   <div class="earn-cards-grid">
 
-
-    <!-- ====================================================
-         GAMES
-    ===================================================== -->
-
-    <div
-      class="earn-card-item games-card"
-      id="openGamesModal"
-      role="button"
-      tabindex="0"
-      aria-label="Open arcade games"
-    >
-
-      <span class="notification-dot" aria-label="New arcade games available"></span>
-
-      <div>
-
-        <div class="card-top-row">
-
-          <div class="icon-wrapper">
-            🎮
-          </div>
-
-
-          <span class="status-badge badge-hot">
-            3 Games Active
-          </span>
-
-        </div>
-
-
-        <div class="card-body">
-
-          <h3>
-            Arcade Games
-          </h3>
-
-
-          <p>
-            Tap, spin and match lucky combinations
-            for PAYME rewards.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="card-action-row">
-
-        <span class="arcade-earn-max">Earn Up to ₦25,000</span>
-
-
-        <div class="arrow-btn">
-          →
-        </div>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- ====================================================
-         REFERRAL
-    ===================================================== -->
-
-    <a
-      href="/dashboard.html#referrals"
-      class="earn-card-item referral-card"
-    >
-
-      <div>
-
-        <div class="card-top-row">
-
-          <div class="icon-wrapper">
-            🔗
-          </div>
-
-
-          <span class="status-badge badge-available">
-            Earn ₦15
-          </span>
-
-        </div>
-
-
-        <div class="card-body">
-
-          <h3>
-            Invite Friends
-          </h3>
-
-
-          <p>
-            Invite friends and earn <strong class="ref-amount-highlight">₦15</strong> for every
-            active referral.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="card-action-row">
-
-        <span>
-          Invite & Earn
-        </span>
-
-
-        <div class="arrow-btn">
-          →
-        </div>
-
-      </div>
-
-    </a>
-
-
-
-    <!-- ====================================================
-         GET MORE TELEGRAM USERS
-    ===================================================== -->
-
-    <a
-      href="/advertise.html"
-      class="earn-card-item advertise-card"
-    >
-
-      <div>
-
-        <div class="card-top-row">
-
-          <div class="icon-wrapper">
-            📣
-          </div>
-
-
-          <span class="status-badge badge-available">
-            Place Ads
-          </span>
-
-        </div>
-
-
-        <div class="card-body">
-
-          <h3>
-            Get More Telegram Users
-          </h3>
-
-
-          <p>
-            Promote your Telegram group or channel
-            and get real members.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="card-action-row">
-
-        <span>
-          Advertise Now
-        </span>
-
-
-        <div class="arrow-btn">
-          →
-        </div>
-
-      </div>
-
-    </a>
-
-
-
-    <!-- ====================================================
-         JOIN GROUPS & EARN
-    ===================================================== -->
-
-    <a
-      href="/join.html"
-      class="earn-card-item join-card"
-    >
-
-      <span
-        class="notification-dot"
-        id="joinNotificationDot"
-        aria-label="New join tasks available"
-        style="display:none;"
-      ></span>
-
-      <div>
-
-        <div class="card-top-row">
-
-          <div class="icon-wrapper">
-            💰
-          </div>
-
-
-          <span class="status-badge badge-available">
-            ₦25 / Join
-          </span>
-
-        </div>
-
-
-        <div class="card-body">
-
-          <h3>
-            Join Groups & Earn
-          </h3>
-
-
-          <p>
-            Join promoted Telegram communities
-            and earn ₦25 for every verified join.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="card-action-row">
-
-        <span>
-          Join Groups & Earn
-        </span>
-
-
-        <div class="arrow-btn">
-          →
-        </div>
-
-      </div>
-
-    </a>
-
-
-
-    <!-- ====================================================
-         WATCH ADS & EARN
-    ===================================================== -->
+    <!-- WATCH ADS & EARN -->
     <div class="earn-card-item watch-ads-card" id="openWatchAdsModal" role="button" tabindex="0" aria-label="Watch ads and earn">
       <div>
-        <div class="card-top-row"><div class="icon-wrapper">📺</div><span class="status-badge badge-available" id="watchAdsCardBadge">REWARD AD</span></div>
+        <div class="card-top-row"><div class="icon-wrapper">📺</div><span class="status-badge" id="watchAdsCardBadge">REWARD AD</span></div>
         <div class="card-body"><h3>Watch Ads &amp; Earn</h3><p>Watch a sponsored advert, then reveal a surprise free spin.</p></div>
       </div>
       <div class="card-action-row"><span id="watchAdsCardActionText">Watch &amp; Earn</span><div class="arrow-btn">→</div></div>
     </div>
 
-
-    <!-- ====================================================
-         COMMUNITY GIVEAWAYS
-    ===================================================== -->
-
-    <div
-      class="earn-card-item disabled-option"
-      style="grid-column: span 2;"
-    >
-
+    <!-- REFERRAL -->
+    <a href="/dashboard.html#referrals" class="earn-card-item referral-card">
       <div>
-
-        <div class="card-top-row">
-
-          <div class="icon-wrapper">
-            🎁
-          </div>
-
-
-          <span class="status-badge badge-coming">
-            Soon
-          </span>
-
-        </div>
-
-
-        <div class="card-body">
-
-          <h3>
-            Community Giveaways
-          </h3>
-
-
-          <p>
-            Join future community reward pools
-            and special PAYME cash drops.
-          </p>
-
-        </div>
-
+        <div class="card-top-row"><div class="icon-wrapper">🔗</div><span class="status-badge">Earn ₦15</span></div>
+        <div class="card-body"><h3>Invite Friends</h3><p>Invite friends and earn <strong class="ref-amount-highlight">₦15</strong> for every active referral.</p></div>
       </div>
+      <div class="card-action-row"><span>Invite &amp; Earn</span><div class="arrow-btn">→</div></div>
+    </a>
 
-
-      <div
-        class="card-action-row"
-        style="color:#64748b;"
-      >
-
-        <span>
-          Coming Soon
-        </span>
-
+    <!-- ADVERTISE -->
+    <a href="/advertise.html" class="earn-card-item advertise-card">
+      <div>
+        <div class="card-top-row"><div class="icon-wrapper">📣</div><span class="status-badge">Place Ads</span></div>
+        <div class="card-body"><h3>Get More Telegram Users</h3><p>Promote your Telegram group or channel and get real members.</p></div>
       </div>
+      <div class="card-action-row"><span>Advertise Now</span><div class="arrow-btn">→</div></div>
+    </a>
 
+    <!-- JOIN GROUPS -->
+    <a href="/join.html" class="earn-card-item join-card">
+      <span class="notification-dot" id="joinNotificationDot" aria-label="New join tasks available" style="display:none;"></span>
+      <div>
+        <div class="card-top-row"><div class="icon-wrapper">💰</div><span class="status-badge">₦25 / Join</span></div>
+        <div class="card-body"><h3>Join Groups &amp; Earn</h3><p>Join promoted Telegram communities and earn ₦25 for every verified join.</p></div>
+      </div>
+      <div class="card-action-row"><span>Join Groups &amp; Earn</span><div class="arrow-btn">→</div></div>
+    </a>
+
+    <!-- COMMUNITY GIVEAWAYS -->
+    <div class="earn-card-item disabled-option" style="grid-column: span 2;">
+      <div>
+        <div class="card-top-row"><div class="icon-wrapper">🎁</div><span class="status-badge badge-coming">Soon</span></div>
+        <div class="card-body"><h3>Community Giveaways</h3><p>Join future community reward pools and special PAYME cash drops.</p></div>
+      </div>
+      <div class="card-action-row" style="color:#94a3b8;"><span>Coming Soon</span></div>
     </div>
-
 
   </div>
 
+  <!-- ======================================================
+       HOW IT WORKS — kept simple and easy to understand
+  ======================================================= -->
+  <div class="section-label"><h2>How Earning Works</h2><span>Simple &amp; fair</span></div>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-num">1</div><p>Pick any option above — a game, an ad, or a task.</p></div>
+    <div class="how-card"><div class="how-num">2</div><p>Complete it — your progress saves automatically.</p></div>
+    <div class="how-card"><div class="how-num">3</div><p>Get your reward instantly, straight to your PAYME account.</p></div>
+  </div>
+
 </main>
-
-
 
 <!-- WATCH ADS & EARN POPUP -->
 <div class="watchads-overlay" id="watchAdsModal" aria-hidden="true">
@@ -1997,226 +452,7 @@ body.modal-open {
   </div>
 </div>
 
-<!-- ========================================================
-     GAME POPUP
-========================================================= -->
-
-<div
-  class="modal-overlay"
-  id="gamesModal"
-  aria-hidden="true"
->
-
-  <div
-    class="modal-content"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="gamesModalTitle"
-  >
-
-    <div class="modal-header">
-
-      <div class="modal-heading">
-
-        <div class="modal-main-icon">
-          🎮
-        </div>
-
-
-        <div>
-
-          <h3
-            class="modal-title"
-            id="gamesModalTitle"
-          >
-            Choose Your Game
-          </h3>
-
-
-          <p class="modal-subtitle">
-            Select a game and start earning.
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <button
-        class="close-btn"
-        id="closeGamesModal"
-        type="button"
-        aria-label="Close"
-      >
-        ×
-      </button>
-
-    </div>
-
-
-    <div class="reward-info">
-
-      <div class="reward-info-icon">
-        ₦
-      </div>
-
-
-      <div class="reward-info-text">
-
-        <strong>
-          See the reward opportunity first.
-        </strong>
-
-        <br>
-
-        Each game has its own reward system.
-
-      </div>
-
-    </div>
-
-
-    <div class="game-list">
-
-
-      <!-- TAP PLAY -->
-
-      <a
-        href="tap.html"
-        class="game-item"
-      >
-
-        <div class="game-info">
-
-          <div class="game-icon">
-            👆
-          </div>
-
-
-          <div class="game-details">
-
-            <h4>
-              Tap Play
-            </h4>
-
-
-            <p>
-              Tap to gather points and submit
-              your score for rewards.
-            </p>
-
-
-            <span class="game-reward">
-              ⚡ Score based rewards
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div class="game-arrow">
-          →
-        </div>
-
-      </a>
-
-
-
-      <!-- PAYME SPIN -->
-
-      <a
-        href="/game"
-        class="game-item"
-      >
-
-        <div class="game-info">
-
-          <div class="game-icon">
-            🎡
-          </div>
-
-
-          <div class="game-details">
-
-            <h4>
-              PAYME Spin
-            </h4>
-
-
-            <p>
-              Spin the wheel and try your luck
-              for instant cash prizes.
-            </p>
-
-
-            <span class="game-reward">
-              🎯 Up to ₦50 prize opportunity
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div class="game-arrow">
-          →
-        </div>
-
-      </a>
-
-
-
-      <!-- LUCKY3 -->
-
-      <a
-        href="lucky.html"
-        class="game-item"
-      >
-
-        <div class="game-info">
-
-          <div class="game-icon">
-            🎰
-          </div>
-
-
-          <div class="game-details">
-
-            <h4>
-              Lucky3
-            </h4>
-
-
-            <p>
-              Match lucky combinations and
-              chase bigger payouts.
-            </p>
-
-
-            <span class="game-reward">
-              🍀 Lucky combination rewards
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div class="game-arrow">
-          →
-        </div>
-
-      </a>
-
-
-    </div>
-
-  </div>
-
-</div>
-
-
+<div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
 
 <script>
 document.addEventListener('DOMContentLoaded',function(){
@@ -2306,9 +542,6 @@ document.addEventListener('DOMContentLoaded',function(){
  });
 });
 </script>
-
-
-<div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
 
 <script>
 (function(){const modal=document.getElementById('watchAdsModal'),open=document.getElementById('openWatchAdsModal'),close=document.getElementById('closeWatchAdsModal'),start=document.getElementById('watchAdsStartBtn'),done=document.getElementById('watchAdsDoneBtn'),status=document.getElementById('watchAdsStatus'),reel=document.getElementById('watchAdsReel'),track=document.getElementById('watchAdsReelTrack'),caption=document.getElementById('watchAdsReelCaption'),result=document.getElementById('watchAdsResult'),resultIcon=document.getElementById('watchAdsResultIcon'),resultTitle=document.getElementById('watchAdsResultTitle'),resultCopy=document.getElementById('watchAdsResultCopy'),spinFillWrap=document.getElementById('spinFillWrap'),spinFillBar=document.getElementById('spinFillBar'),spinFillLabel=document.getElementById('spinFillLabel'),spinFillLaps=document.getElementById('spinFillLaps'),cardBadge=document.getElementById('watchAdsCardBadge'),cardActionText=document.getElementById('watchAdsCardActionText');let sessionId=null,startedAt=0,busy=false;
@@ -2487,12 +720,4 @@ if(document.readyState === "loading"){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 

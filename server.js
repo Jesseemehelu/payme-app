@@ -255,7 +255,7 @@ const LUCKY3_CONFIG = {
   numberMax: 30,
   stakes: {
     200: { jackpot: 5000, cash: 1500, bonusFreeSpins: 5 },
-    500: { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 }
+    400: { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 }
   }
 };
 
@@ -265,6 +265,45 @@ const LUCKY3_GAME_TYPES = new Set([
   'cash',
   'bonus'
 ]);
+
+// ======================================================
+// LUCK TICKETS / TREASURE CHESTS
+// ======================================================
+// Luck Tickets live inside the existing daily_reward JSON column so this
+// feature does not require a new Supabase column. The state is server-owned
+// and therefore survives page exits and Render redeploys.
+const LUCK_CHEST_CONFIG = {
+  chest20: {
+    ads: 20,
+    min: 10,
+    max: 50,
+    rewards: [
+      { max: 45, tickets: 10 },
+      { max: 70, tickets: 12 },
+      { max: 85, tickets: 15 },
+      { max: 93, tickets: 18 },
+      { max: 97, tickets: 20 },
+      { max: 99, tickets: 30 },
+      { max: 99.7, tickets: 40 },
+      { max: 100, tickets: 50 }
+    ]
+  },
+  chest30: {
+    ads: 30,
+    min: 20,
+    max: 70,
+    rewards: [
+      { max: 45, tickets: 20 },
+      { max: 70, tickets: 25 },
+      { max: 85, tickets: 30 },
+      { max: 93, tickets: 35 },
+      { max: 97, tickets: 40 },
+      { max: 99, tickets: 50 },
+      { max: 99.7, tickets: 60 },
+      { max: 100, tickets: 70 }
+    ]
+  }
+};
 
 const CLAIM_COOLDOWN =
   24 *
@@ -483,25 +522,36 @@ function mapUser(row) {
     sessionVersion:
       number(row.session_version),
 
-    dailyReward: {
+    luckTickets:
+      number(daily.luckTickets),
 
+    luckChests: {
+      chest20: {
+        progress: Math.max(0, Math.min(20, number(daily.luckChests?.chest20?.progress))),
+        claimed: !!daily.luckChests?.chest20?.claimed
+      },
+      chest30: {
+        progress: Math.max(0, Math.min(30, number(daily.luckChests?.chest30?.progress))),
+        claimed: !!daily.luckChests?.chest30?.claimed
+      }
+    },
+
+    dailyReward: {
+      ...daily,
       currentDay:
         number(
           daily.currentDay
         ) || 1,
-
       lastClaimTimestamp:
         number(
           daily.lastClaimTimestamp
         ),
-
       claimedDays:
         Array.isArray(
           daily.claimedDays
         )
           ? daily.claimedDays.map(Number)
           : []
-
     },
 
     createdAt:
@@ -1696,7 +1746,9 @@ app.post('/api/monetag/start', requireLogin, async (req, res) => {
     }
 
     const rawContext = String(req.body?.context || 'dashboard').trim();
-    const context = rawContext === 'game_free_spin'
+    const context = ['luck_chest_20', 'luck_chest_30'].includes(rawContext)
+      ? rawContext
+      : rawContext === 'game_free_spin'
       ? 'game_free_spin'
       : rawContext === 'earn_watch_ad'
       ? 'earn_watch_ad'
@@ -1745,6 +1797,8 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
         success: true,
         confirmed: true,
         reward: completed.reward,
+        luck: completed.reward?.luck || null,
+        tickets: number(completed.reward?.tickets),
         completedAt: completed.completedAt
       });
     }
@@ -1769,6 +1823,18 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
 
     if (Array.isArray(data) && data.length) {
       const tx = data[0];
+      if (/^Luck Chest (chest20|chest30) Ad$/i.test(String(tx.description || ''))) {
+        const freshUser = await getUserById(req.user.id);
+        const luck = freshUser ? getLuckChestSnapshot(freshUser) : null;
+        return res.json({
+          success: true,
+          confirmed: true,
+          reward: { key: 'luck_chest_ad', label: 'Luck Chest Ad', cash: 0, spins: 0 },
+          luck,
+          tickets: 0,
+          completedAt: tx.created_at
+        });
+      }
       const description = String(tx.description || 'Monetag Reward');
       const label = description.replace(/^(Monetag Reward|Watch Ad Free Spin|Earn Watch Ad Reward)\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
       let spins = 0;
@@ -1892,11 +1958,59 @@ app.all('/api/monetag/postback', async (req, res) => {
     // is won. The context (dashboard cash reel vs. game free-spin reel)
     // comes from the pending session created when the ad was requested.
     const pendingContext = pending && pending.session && pending.session.context;
-    const adContext = pendingContext === 'game_free_spin'
+    const adContext = ['luck_chest_20', 'luck_chest_30'].includes(pendingContext)
+      ? pendingContext
+      : pendingContext === 'game_free_spin'
       ? 'game_free_spin'
       : pendingContext === 'earn_watch_ad'
       ? 'earn_watch_ad'
       : 'dashboard';
+
+    // Chest ads are progress events, not cash/free-spin rewards.
+    if (adContext === 'luck_chest_20' || adContext === 'luck_chest_30') {
+      const chestId = adContext === 'luck_chest_20' ? 'chest20' : 'chest30';
+      const rewardResult = { key: chestId, label: 'Luck Chest Ad', cash: 0, spins: 0 };
+
+      // Use the Monetag transaction ID as the idempotency lock before changing
+      // progress. A duplicate postback therefore cannot count twice.
+      await addTransaction(user.id, {
+        id: transactionId,
+        type: 'monetag_reward',
+        description: `Luck Chest ${chestId} Ad`,
+        amount: 0,
+        currency: 'LUCK_TICKETS',
+        status: 'completed',
+        bank: `Monetag ${MONETAG_ZONE_ID}`
+      });
+
+      const result = applyLuckChestCompletion(user, chestId);
+      syncUserBalance(user);
+      await updateUser(user);
+
+      if (result.granted) {
+        await addTransaction(user.id, {
+          id: generateTransactionId('tx_luck_chest_reward'),
+          type: 'luck_ticket_reward',
+          description: `Luck Chest ${chestId} opened — ${result.tickets} Luck Tickets`,
+          amount: result.tickets,
+          currency: 'LUCK_TICKETS',
+          status: 'completed',
+          bank: 'Luck Ticket Wallet'
+        });
+      }
+
+      if (pending) {
+        monetagCompletedSessions.set(pending.id, {
+          userId: user.id,
+          reward: { ...rewardResult, tickets: result.tickets, granted: result.granted, luck: result.state },
+          completedAt: Date.now(),
+          expiresAt: Date.now() + 5 * 60 * 1000
+        });
+      }
+
+      return res.status(200).send('ok');
+    }
+
     const reward = chooseMonetagReward(adContext);
     const rewardResult = buildMonetagRewardResult(reward);
 
@@ -4246,6 +4360,15 @@ function sanitizeUser(
         user.freeSpins
       ),
 
+    luckTickets:
+      number(user.luckTickets),
+
+    luckChests:
+      user.luckChests || {
+        chest20: { progress: 0, claimed: false },
+        chest30: { progress: 0, claimed: false }
+      },
+
     hasClaimedGiftBox:
       !!user.hasClaimedGiftBox,
 
@@ -6455,6 +6578,76 @@ app.post(
 );
 
 // ======================================================
+// LUCK TICKET TREASURE CHESTS
+// ======================================================
+
+function chooseLuckTicketReward(chestId) {
+  const cfg = LUCK_CHEST_CONFIG[chestId];
+  if (!cfg) throw new Error('Invalid Luck Chest.');
+  const roll = crypto.randomInt(0, 100000) / 1000; // 0.000 - 99.999
+  for (const tier of cfg.rewards) {
+    if (roll < tier.max) return tier.tickets;
+  }
+  return cfg.rewards[0].tickets;
+}
+
+function getLuckChestSnapshot(user) {
+  const daily = normalizeDailyReward(user);
+  return {
+    luckTickets: number(daily.luckTickets),
+    chests: {
+      chest20: {
+        requiredAds: LUCK_CHEST_CONFIG.chest20.ads,
+        progress: number(daily.luckChests.chest20.progress),
+        claimed: !!daily.luckChests.chest20.claimed
+      },
+      chest30: {
+        requiredAds: LUCK_CHEST_CONFIG.chest30.ads,
+        progress: number(daily.luckChests.chest30.progress),
+        claimed: !!daily.luckChests.chest30.claimed
+      }
+    }
+  };
+}
+
+function applyLuckChestCompletion(user, chestId) {
+  const cfg = LUCK_CHEST_CONFIG[chestId];
+  const daily = normalizeDailyReward(user);
+  const chest = daily.luckChests[chestId];
+
+  if (chest.claimed || chest.progress >= cfg.ads) {
+    return { granted: false, tickets: 0, state: getLuckChestSnapshot(user) };
+  }
+
+  chest.progress += 1;
+  let granted = false;
+  let tickets = 0;
+
+  if (chest.progress >= cfg.ads) {
+    tickets = chooseLuckTicketReward(chestId);
+    daily.luckTickets = number(daily.luckTickets) + tickets;
+    // Chests are repeatable: after opening, the next cycle starts at 0/required.
+    chest.progress = 0;
+    chest.claimed = false;
+    granted = true;
+  }
+
+  user.dailyReward = daily;
+  user.luckTickets = number(daily.luckTickets);
+  user.luckChests = daily.luckChests;
+  return { granted, tickets, state: getLuckChestSnapshot(user) };
+}
+
+app.get('/api/luck/chests', requireLogin, async (req, res) => {
+  try {
+    return res.json({ success: true, ...getLuckChestSnapshot(req.user) });
+  } catch (err) {
+    console.error('Luck chest state error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to load Luck Chest progress.' });
+  }
+});
+
+// ======================================================
 // LUCKY 3 — SECURE INSTANT GAME
 // ======================================================
 // IMPORTANT:
@@ -6521,10 +6714,7 @@ app.post(
         'Selected numbers'
       );
 
-      const gameType = String(
-        body.gameType || ''
-      ).trim().toLowerCase();
-
+      const gameType = String(body.gameType || '').trim().toLowerCase();
       if (!LUCKY3_GAME_TYPES.has(gameType)) {
         return res.status(400).json({
           success: false,
@@ -6533,16 +6723,13 @@ app.post(
       }
 
       const stake = Number(body.stake);
-      if (!Object.prototype.hasOwnProperty.call(LUCKY3_CONFIG.stakes, stake)) {
+      if (![200, 400].includes(stake)) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid Lucky 3 stake.'
+          message: 'Choose 200 or 400 Luck Tickets.'
         });
       }
 
-      // This ID is generated by the server when the client does not provide
-      // one. For full retry/idempotency protection, Luck.html should send the
-      // same requestId when retrying the same user action.
       const requestId = String(
         body.requestId || generateTransactionId('l3req')
       ).trim();
@@ -6554,15 +6741,20 @@ app.post(
         });
       }
 
+      // The 200-ticket option uses the original ₦200 payout table.
+      // The 400-ticket option uses the original ₦500 payout table.
+      const payoutConfig = stake === 200
+        ? { jackpot: 5000, cash: 1500, bonusFreeSpins: 5 }
+        : { jackpot: 15000, cash: 4000, bonusFreeSpins: 12 };
+
+      // Generate the draw on the server with cryptographically secure randomness.
       const winningNumbers = lucky3GenerateNumbers();
       const matchCount = selectedNumbers.filter(
         n => winningNumbers.includes(n)
       ).length;
 
-      const payoutConfig = LUCKY3_CONFIG.stakes[stake];
       let payout = 0;
       let freeSpinsAwarded = 0;
-
       if (gameType === 'jackpot' && matchCount === 3) {
         payout = payoutConfig.jackpot;
       } else if (gameType === 'cash' && matchCount >= 2) {
@@ -6571,66 +6763,114 @@ app.post(
         freeSpinsAwarded = payoutConfig.bonusFreeSpins;
       }
 
-      const gameId = generateTransactionId('lucky3');
-      const entryTransactionId = generateTransactionId('tx_lucky3_entry');
-      const rewardTransactionId = payout > 0 || freeSpinsAwarded > 0
-        ? generateTransactionId('tx_lucky3_reward')
-        : null;
+      // Idempotency: reject a repeated request before touching the ticket wallet.
+      const { data: existingRequest, error: requestLookupError } = await supabase
+        .from('transactions')
+        .select('id, description, amount, created_at')
+        .eq('user_id', user.id)
+        .eq('type', 'lucky3_ticket_entry')
+        .eq('description', `Lucky 3 Request — ${requestId}`)
+        .maybeSingle();
 
-      // The RPC is the authoritative commit point. It locks the user row,
-      // re-checks the balance and inputs, applies the debit/reward, inserts
-      // the Lucky 3 game record and transactions, then returns the committed
-      // wallet state. The service-role key never leaves this server.
-      const { data, error } = await supabase.rpc(
-        'play_lucky3_atomic',
-        {
-          p_game_id: gameId,
-          p_request_id: requestId,
-          p_user_id: user.id,
-          p_selected_numbers: selectedNumbers,
-          p_winning_numbers: winningNumbers,
-          p_game_type: gameType,
-          p_stake: stake,
-          p_match_count: matchCount,
-          p_payout: payout,
-          p_free_spins_awarded: freeSpinsAwarded,
-          p_entry_transaction_id: entryTransactionId,
-          p_reward_transaction_id: rewardTransactionId
-        }
-      );
-
-      if (error) {
-        console.error('Lucky 3 RPC error:', error);
-
-        const message = String(error.message || 'Lucky 3 transaction failed.');
-
-        if (/insufficient balance/i.test(message)) {
-          return res.status(400).json({
-            success: false,
-            code: 'INSUFFICIENT_BALANCE',
-            message: 'Insufficient balance for this Lucky 3 stake.'
-          });
-        }
-
-        if (/duplicate|unique|request/i.test(message)) {
-          return res.status(409).json({
-            success: false,
-            code: 'DUPLICATE_REQUEST',
-            message: 'This Lucky 3 request has already been processed.'
-          });
-        }
-
-        return res.status(500).json({
+      if (requestLookupError) throw requestLookupError;
+      if (existingRequest) {
+        return res.status(409).json({
           success: false,
-          code: 'TRANSACTION_FAILED',
-          message: 'Lucky 3 could not be completed. No entry was confirmed.'
+          code: 'DUPLICATE_REQUEST',
+          message: 'This Lucky 3 request has already been processed.'
         });
       }
 
-      const result = Array.isArray(data) ? data[0] : data;
+      const daily = normalizeDailyReward(user);
+      let oldDaily = JSON.parse(JSON.stringify(daily));
+      const tickets = number(daily.luckTickets);
 
-      if (!result) {
-        throw new Error('Lucky 3 returned an empty transaction result.');
+      if (tickets < stake) {
+        return res.status(400).json({
+          success: false,
+          code: 'INSUFFICIENT_TICKETS',
+          message: `You need ${stake} Luck Tickets to play.`
+        });
+      }
+
+      daily.luckTickets = tickets - stake;
+      user.dailyReward = daily;
+      user.luckTickets = daily.luckTickets;
+      user.luckChests = daily.luckChests;
+
+      // Optimistic concurrency check prevents two rapid clicks from spending
+      // the same ticket balance. Retry against the newest row if necessary.
+      let committed = false;
+      for (let attempt = 0; attempt < 3 && !committed; attempt++) {
+        const { data: updatedRows, error: updateError } = await supabase
+          .from('users')
+          .update({ daily_reward: user.dailyReward })
+          .eq('id', user.id)
+          .eq('daily_reward', oldDaily)
+          .select('id');
+
+        if (updateError) throw updateError;
+        committed = Array.isArray(updatedRows) && updatedRows.length > 0;
+
+        if (!committed) {
+          const fresh = await getUserById(user.id);
+          if (!fresh) throw new Error('User session not found.');
+          const freshDaily = normalizeDailyReward(fresh);
+          if (number(freshDaily.luckTickets) < stake) {
+            return res.status(400).json({
+              success: false,
+              code: 'INSUFFICIENT_TICKETS',
+              message: `You need ${stake} Luck Tickets to play.`
+            });
+          }
+          oldDaily = JSON.parse(JSON.stringify(freshDaily));
+          freshDaily.luckTickets = number(freshDaily.luckTickets) - stake;
+          fresh.dailyReward = freshDaily;
+          user.dailyReward = freshDaily;
+          user.luckTickets = freshDaily.luckTickets;
+          user.luckChests = freshDaily.luckChests;
+        }
+      }
+
+      if (!committed) {
+        return res.status(409).json({
+          success: false,
+          code: 'RETRY',
+          message: 'Please try Lucky 3 again.'
+        });
+      }
+
+      const gameId = generateTransactionId('lucky3');
+      await addTransaction(user.id, {
+        id: generateTransactionId('tx_lucky3_entry'),
+        type: 'lucky3_ticket_entry',
+        description: `Lucky 3 Request — ${requestId}`,
+        amount: stake,
+        currency: 'LUCK_TICKETS',
+        status: 'completed',
+        bank: 'Luck Ticket Wallet'
+      });
+
+      if (payout > 0) {
+        user.withdrawableBalance = getWithdrawableBalance(user) + payout;
+      }
+      if (freeSpinsAwarded > 0) {
+        user.freeSpins = number(user.freeSpins) + freeSpinsAwarded;
+      }
+      await updateUser(user);
+
+      if (payout > 0 || freeSpinsAwarded > 0) {
+        await addTransaction(user.id, {
+          id: generateTransactionId('tx_lucky3_reward'),
+          type: 'lucky3_reward',
+          description: payout > 0
+            ? `Lucky 3 Reward — ${gameType} — ₦${payout}`
+            : `Lucky 3 Reward — ${gameType} — ${freeSpinsAwarded} Free Spins`,
+          amount: payout,
+          currency: payout > 0 ? 'NGN' : 'LUCK_TICKETS',
+          status: 'completed',
+          bank: 'Lucky 3'
+        });
       }
 
       return res.json({
@@ -6642,16 +6882,16 @@ app.post(
         matchCount,
         gameType,
         stake,
-        payout: number(result.payout),
-        freeSpinsAwarded: number(result.free_spins_awarded),
-        balance: number(result.balance),
-        depositBalance: number(result.deposit_balance),
-        withdrawableBalance: number(result.withdrawable_balance),
-        freeSpins: number(result.free_spins)
+        payout,
+        freeSpinsAwarded,
+        luckTickets: number(user.dailyReward.luckTickets),
+        balance: number(user.balance),
+        depositBalance: number(user.depositBalance),
+        withdrawableBalance: number(user.withdrawableBalance),
+        freeSpins: number(user.freeSpins)
       });
     } catch (err) {
-      console.error('Lucky 3 error:', err);
-
+      console.error('Lucky 3 ticket error:', err);
       return res.status(500).json({
         success: false,
         code: 'LUCKY3_SERVER_ERROR',
@@ -7351,6 +7591,23 @@ function normalizeDailyReward(
 
   user.dailyReward.currentDay =
     currentDay;
+
+  if (!Number.isFinite(Number(user.dailyReward.luckTickets))) {
+    user.dailyReward.luckTickets = 0;
+  }
+
+  if (!user.dailyReward.luckChests || typeof user.dailyReward.luckChests !== 'object') {
+    user.dailyReward.luckChests = {};
+  }
+
+  for (const chestId of ['chest20', 'chest30']) {
+    const cfg = LUCK_CHEST_CONFIG[chestId];
+    const existing = user.dailyReward.luckChests[chestId] || {};
+    user.dailyReward.luckChests[chestId] = {
+      progress: Math.max(0, Math.min(cfg.ads, number(existing.progress))),
+      claimed: !!existing.claimed
+    };
+  }
 
   return user.dailyReward;
 
@@ -10266,6 +10523,7 @@ app.listen(
   }
 
 );
+
 
 
 
