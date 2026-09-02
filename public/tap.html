@@ -46,7 +46,7 @@ async function load(){try{const r=await fetch('/api/luck/chests',{credentials:'s
 async function watch(chest){if(busy)return;const id=chest==='20'?'chest20':'chest30';const c=state?.chests?.[id];if(!c)return;if(Number(c.progress)>=Number(chest)){toast('This chest is opening…');return}busy=true;const btn=$('watch'+chest);btn.disabled=true;btn.innerHTML='<span class="busy"><i></i><i></i><i></i> Loading ad</span>';
 try{const start=await fetch('/api/monetag/start',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({context:'luck_chest_'+chest})});const sd=await start.json();if(!start.ok||!sd.success)throw Error(sd.message||'Unable to start rewarded ad.');
 if(typeof window.show_11688228!=='function')throw Error('Rewarded ad is not available right now.');
-await window.show_11688228();
+await window.show_11688228({ ymid: sd.sessionId, requestVar: 'luck_chest_'+chest });
 let confirmed=null;for(let i=0;i<12;i++){await new Promise(r=>setTimeout(r,i<5?900:1500));const sr=await fetch('/api/monetag/status?sessionId='+encodeURIComponent(sd.sessionId)+'&startedAt='+encodeURIComponent(sd.createdAt),{credentials:'same-origin',headers:{Accept:'application/json'}});const x=await sr.json().catch(()=>({}));if(x.confirmed){confirmed=x;break}}
 if(!confirmed){toast('Ad finished. Waiting for confirmation — please try again in a moment.');await load();return}
 if(confirmed.luck){state.luckTickets=confirmed.luck.luckTickets;state.chests=confirmed.luck.chests;render();}
