@@ -6223,6 +6223,9 @@ app.get(
         freeSpins:
           req.user.freeSpins || 0,
 
+        luckTickets:
+          number(normalizeDailyReward(req.user).luckTickets),
+
         hasClaimedGiftBox:
           !!req.user.hasClaimedGiftBox
 
@@ -6372,55 +6375,64 @@ app.post(
 
         {
           amount: 0,
-          weight: 2000,
-          label: '₦0'
+          ticketAmount: 2,
+          weight: 3849,
+          label: '2 Luck Tickets'
         },
 
         {
           amount: 10,
-          weight: 2500,
+          ticketAmount: 0,
+          weight: 2000,
           label: '₦10'
         },
 
         {
           amount: 20,
-          weight: 2500,
+          ticketAmount: 0,
+          weight: 2000,
           label: '₦20'
         },
 
         {
           amount: 50,
-          weight: 1800,
+          ticketAmount: 0,
+          weight: 1300,
           label: '₦50'
         },
 
         {
           amount: 100,
-          weight: 800,
+          ticketAmount: 0,
+          weight: 350,
           label: '₦100'
         },
 
         {
-          amount: 250,
+          amount: 0,
+          ticketAmount: 300,
           weight: 250,
-          label: '₦250'
+          label: '300 Luck Tickets'
         },
 
         {
-          amount: 500,
+          amount: 0,
+          ticketAmount: 500,
           weight: 100,
-          label: '₦500'
+          label: '500 Luck Tickets'
         },
 
         {
-          amount: 1000,
-          weight: 45,
-          label: '₦1000'
+          amount: 0,
+          ticketAmount: 1000,
+          weight: 150,
+          label: '1000 Luck Tickets'
         },
 
         {
           amount: 2000,
-          weight: 5,
+          ticketAmount: 0,
+          weight: 1,
           label: '₦2000'
         }
 
@@ -6483,6 +6495,26 @@ app.post(
 
       }
 
+      // Luck Ticket prizes are stored in the existing daily_reward JSON
+      // wallet so the reward survives page exits and Render redeploys.
+      if (
+        Number(selectedPrize.ticketAmount || 0) >
+        0
+      ) {
+
+        const daily =
+          normalizeDailyReward(user);
+
+        daily.luckTickets =
+          number(daily.luckTickets) +
+          Number(selectedPrize.ticketAmount);
+
+        user.dailyReward = daily;
+        user.luckTickets = number(daily.luckTickets);
+        user.luckChests = daily.luckChests;
+
+      }
+
       await updateUser(
         user
       );
@@ -6510,7 +6542,14 @@ app.post(
             'PAYME Wallet',
 
           amount:
-            selectedPrize.amount,
+            selectedPrize.ticketAmount > 0
+              ? selectedPrize.ticketAmount
+              : selectedPrize.amount,
+
+          currency:
+            selectedPrize.ticketAmount > 0
+              ? 'LUCK_TICKETS'
+              : 'NGN',
 
           description:
             selectedPrize.label
@@ -6536,6 +6575,15 @@ app.post(
 
         prize:
           selectedPrize.amount,
+
+        ticketReward:
+          Number(selectedPrize.ticketAmount || 0),
+
+        prizeLabel:
+          selectedPrize.label,
+
+        luckTickets:
+          number(user.dailyReward?.luckTickets),
 
         prizeIndex:
           prizes.indexOf(
@@ -6804,7 +6852,7 @@ app.post(
           .from('users')
           .update({ daily_reward: user.dailyReward })
           .eq('id', user.id)
-          .eq('daily_reward', oldDaily)
+          .eq('daily_reward', JSON.stringify(oldDaily))
           .select('id');
 
         if (updateError) throw updateError;
@@ -10521,6 +10569,7 @@ app.listen(
   }
 
 );
+
 
 
 

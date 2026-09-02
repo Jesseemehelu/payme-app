@@ -230,6 +230,165 @@ header {
 }
 
 /* =========================
+   LUCK TICKET MINI BALANCE
+========================= */
+
+.luck-ticket-mini {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-width:72px;
+  justify-content:center;
+  margin-right:7px;
+  padding:8px 10px;
+  border-radius:30px;
+  background:linear-gradient(135deg,rgba(255,204,51,.20),rgba(245,158,11,.08));
+  border:1px solid rgba(255,204,51,.28);
+  color:#ffe08a;
+  font-size:.78rem;
+  font-weight:900;
+  box-shadow:0 0 18px rgba(255,204,51,.08),inset 0 1px rgba(255,255,255,.10);
+}
+
+.luck-ticket-mini-icon {
+  font-size:.92rem;
+  filter:drop-shadow(0 2px 4px rgba(255,204,51,.35));
+}
+
+/* =========================
+   LUCK TICKET WIN MODAL
+========================= */
+
+.ticket-win-card {
+  position:relative;
+  overflow:hidden;
+  text-align:center;
+  border:1px solid rgba(255,204,51,.38);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,204,51,.20),transparent 42%),
+    linear-gradient(155deg,#2b1d49,#100a20 78%);
+  box-shadow:0 35px 100px rgba(0,0,0,.88),0 0 45px rgba(255,204,51,.12),inset 0 1px rgba(255,255,255,.12);
+  animation:ticketWinIn .42s cubic-bezier(.16,1,.3,1);
+}
+
+.ticket-win-card::before,
+.ticket-win-card::after {
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+
+.ticket-win-card::before {
+  width:180px;
+  height:180px;
+  top:-110px;
+  left:-90px;
+  background:rgba(255,204,51,.14);
+  filter:blur(15px);
+}
+
+.ticket-win-card::after {
+  width:150px;
+  height:150px;
+  right:-80px;
+  bottom:-90px;
+  background:rgba(56,189,248,.12);
+  filter:blur(18px);
+}
+
+.ticket-win-icon {
+  width:92px;
+  height:92px;
+  margin:0 auto 13px;
+  display:grid;
+  place-items:center;
+  border-radius:29px;
+  font-size:48px;
+  background:linear-gradient(145deg,#fff0a8,#ffcc33 48%,#d98a00);
+  box-shadow:inset 0 4px 0 rgba(255,255,255,.70),0 8px 0 #8a4d0c,0 24px 45px rgba(255,183,62,.30);
+  animation:ticketFloat 1.8s ease-in-out infinite;
+}
+
+.ticket-win-kicker {
+  display:inline-flex;
+  padding:6px 11px;
+  border-radius:999px;
+  color:#fff0ad;
+  background:rgba(255,204,51,.12);
+  border:1px solid rgba(255,204,51,.24);
+  font-size:.62rem;
+  font-weight:950;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+.ticket-win-title {
+  margin-top:10px;
+  font-size:24px;
+  font-weight:950;
+  letter-spacing:-.04em;
+  background:linear-gradient(100deg,#fff,#ffe8a1,#ffd35e);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.ticket-win-amount {
+  margin:8px 0 8px;
+  font-size:31px;
+  font-weight:950;
+  color:#ffd75e;
+  text-shadow:0 0 22px rgba(255,204,51,.34);
+}
+
+.ticket-win-copy {
+  color:#ddd6f7;
+  font-size:.76rem;
+  line-height:1.65;
+}
+
+.ticket-win-copy strong {
+  color:#fff;
+}
+
+.ticket-win-btn {
+  width:100%;
+  margin-top:17px;
+  padding:15px 16px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.24);
+  background:linear-gradient(135deg,#f59e0b,#f97316 50%,#ec4899);
+  color:#fff;
+  font-size:.88rem;
+  font-weight:950;
+  box-shadow:0 7px 0 rgba(113,54,6,.65),0 18px 34px rgba(245,158,11,.25),inset 0 1px rgba(255,255,255,.30);
+  transition:transform .15s ease,filter .15s ease;
+}
+
+.ticket-win-btn:active { transform:translateY(3px); }
+.ticket-win-close {
+  width:100%;
+  margin-top:9px;
+  padding:11px;
+  border-radius:13px;
+  background:rgba(255,255,255,.07);
+  color:#cbd5e1;
+  font-size:.72rem;
+  font-weight:900;
+}
+
+@keyframes ticketWinIn {
+  from { transform:translateY(22px) scale(.92); opacity:0; }
+  to { transform:translateY(0) scale(1); opacity:1; }
+}
+
+@keyframes ticketFloat {
+  0%,100% { transform:translateY(0) rotate(-2deg); }
+  50% { transform:translateY(-7px) rotate(2deg); }
+}
+
+/* =========================
    MAIN
 ========================= */
 
@@ -1933,29 +2092,635 @@ canvas.spinning {
   }
 
 }
+
+/* =========================================================
+   PAYME GAME 3.0 — COMPACT MODERN HEADER + BALANCE DECK
+   ========================================================= */
+
+.game-header{
+  max-width:520px;
+  padding:10px 16px;
+  min-height:50px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+
+.back-btn{
+  padding:7px 11px;
+  gap:6px;
+  background:rgba(255,255,255,.045);
+  border-color:rgba(255,255,255,.07);
+  box-shadow:0 8px 22px rgba(0,0,0,.16);
+  font-size:.74rem;
+}
+
+.back-arrow{
+  font-size:1.25rem;
+  line-height:.7;
+  transform:translateY(-1px);
+}
+
+.header-brand{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:.58rem;
+  font-weight:950;
+  letter-spacing:.14em;
+  color:#94a3b8;
+}
+
+.header-brand-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#38bdf8;
+  box-shadow:0 0 13px rgba(56,189,248,.8);
+}
+
+/* =========================================================
+   BALANCE DECK — glass segmented bar
+   ========================================================= */
+
+.balance-deck{
+  width:100%;
+  max-width:500px;
+  margin:8px auto 0;
+  padding:0 14px;
+  display:grid;
+  grid-template-columns:1.18fr 1fr 1fr;
+  gap:0;
+  position:relative;
+  z-index:5;
+}
+
+.balance-card{
+  min-width:0;
+  position:relative;
+  overflow:hidden;
+  padding:9px 10px 8px;
+  border-radius:0;
+  border:1px solid rgba(255,255,255,.08);
+  border-left:none;
+  background:rgba(255,255,255,.03);
+  box-shadow:none;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  transform:translateZ(0);
+  transition:transform .18s ease;
+}
+.balance-card:active{ transform:scale(.97); }
+
+.balance-card:first-child{
+  border-left:1px solid rgba(255,255,255,.08);
+  border-radius:16px 0 0 16px;
+}
+.balance-card:last-child{
+  border-radius:0 16px 16px 0;
+}
+
+.balance-deck::before{
+  content:"";
+  position:absolute;
+  inset:0 14px;
+  border-radius:16px;
+  box-shadow:0 14px 32px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.05);
+  pointer-events:none;
+  z-index:-1;
+}
+
+.balance-card-main{
+  background:
+    linear-gradient(180deg,rgba(56,189,248,.14),rgba(56,189,248,.03) 60%),
+    rgba(15,25,45,.55);
+}
+.balance-card-ticket{
+  background:
+    linear-gradient(180deg,rgba(255,204,51,.13),rgba(255,204,51,.02) 60%),
+    rgba(15,25,45,.55);
+}
+.balance-card-free{
+  background:
+    linear-gradient(180deg,rgba(217,70,239,.13),rgba(217,70,239,.02) 60%),
+    rgba(15,25,45,.55);
+}
+
+.balance-card-main::after,
+.balance-card-ticket::after,
+.balance-card-free::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:2px;
+}
+.balance-card-main::after{ background:linear-gradient(90deg,transparent,#38bdf8,transparent); }
+.balance-card-ticket::after{ background:linear-gradient(90deg,transparent,#ffcc33,transparent); }
+.balance-card-free::after{ background:linear-gradient(90deg,transparent,#d946ef,transparent); }
+
+.balance-card-top{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+}
+
+.balance-icon{
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  display:grid;
+  place-items:center;
+  border-radius:6px;
+  color:#dff7ff;
+  background:rgba(56,189,248,.14);
+  font-size:.66rem;
+  font-weight:950;
+}
+.balance-icon.ticket{
+  background:rgba(255,204,51,.15);
+}
+.balance-card-free .balance-icon{
+  background:rgba(217,70,239,.15);
+}
+
+.balance-label{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#7c8ba6;
+  font-size:.44rem;
+  font-weight:950;
+  letter-spacing:.06em;
+}
+
+.balance-value{
+  margin-top:3px;
+  color:#f8fbff;
+  font-size:clamp(.78rem,3.4vw,.94rem);
+  font-weight:950;
+  letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.balance-card-main .balance-value{color:#7dd3fc}
+.balance-card-ticket .balance-value{color:#ffd866}
+.balance-card-free .balance-value{color:#f0abfc}
+
+.balance-mini-note{ display:none; }
+.balance-shine{ display:none; }
+
+@media(max-width:370px){
+  .balance-deck{padding:0 12px}
+  .balance-card{padding:8px 7px}
+  .balance-icon{width:16px;height:16px;flex-basis:16px;font-size:.6rem}
+  .balance-label{font-size:.4rem}
+  .balance-value{font-size:.74rem}
+}
+
+/* =========================================================
+   HERO — tightened
+   ========================================================= */
+.hero{
+  margin-top:8px;
+}
+.hero-badge{
+  padding:4px 10px;
+  margin-bottom:6px;
+  font-size:.58rem;
+}
+.hero h1{
+  font-size:clamp(1.5rem,7vw,1.9rem);
+  text-shadow:0 8px 30px rgba(56,189,248,.12);
+}
+.hero p{
+  margin-top:4px;
+  font-size:.68rem;
+}
+.cost-tag-wrapper{
+  margin-top:8px;
+  padding:5px 8px 5px 12px;
+}
+.cost-text{ font-size:.62rem; }
+
+/* =========================================================
+   WHEEL — compact + richer 3D
+   ========================================================= */
+.wheel-stage{
+  width:min(272px,66vw);
+  height:min(272px,66vw);
+  max-width:66vw;
+  max-height:66vw;
+  margin:2px auto 0;
+  perspective:900px;
+}
+.wheel-stage::before{
+  width:min(290px,72vw);
+  height:min(290px,72vw);
+  max-width:72vw;
+  max-height:72vw;
+  filter:blur(10px);
+  opacity:.55;
+  animation:haloRotate 8s linear infinite;
+}
+.wheel-outer-ring{
+  width:min(266px,64vw);
+  height:min(266px,64vw);
+  max-width:64vw;
+  max-height:64vw;
+  box-shadow:0 22px 48px rgba(0,0,0,.58),
+             0 0 0 4px rgba(255,255,255,.015),
+             0 0 26px rgba(37,99,235,.20),
+             inset 0 0 18px rgba(56,189,248,.07);
+}
+canvas{
+  width:min(240px,58vw);
+  height:min(240px,58vw);
+  max-width:58vw;
+  max-height:58vw;
+  transform:rotateX(9deg);
+  box-shadow:0 16px 30px rgba(0,0,0,.55),
+             0 0 34px rgba(37,99,235,.16);
+  will-change:transform;
+  backface-visibility:hidden;
+}
+canvas.spinning{
+  filter:brightness(1.06) saturate(1.1)
+         drop-shadow(0 0 16px rgba(56,189,248,.25));
+}
+.pointer-3d{
+  top:-6px;
+  width:36px;
+  height:43px;
+}
+
+/* Make action area feel more game-like */
+.spin-btn{
+  min-height:56px;
+  border-radius:20px;
+  box-shadow:0 10px 24px rgba(37,99,235,.25),
+             inset 0 1px rgba(255,255,255,.28);
+}
+.spin-btn::after{
+  content:"";
+  position:absolute;
+  top:-55%;
+  left:-30%;
+  width:35%;
+  height:210%;
+  transform:rotate(20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent);
+  animation:buttonShine 3.8s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes buttonShine{
+  0%,55%{left:-40%}
+  100%{left:130%}
+}
+
+/* Ad-spin promo now sits below the spin button — tighten spacing */
+.ad-spin-promo{
+  margin-top:2px;
+  margin-bottom:0;
+}
+.ad-spin-btn{
+  min-height:42px;
+  font-size:.75rem;
+}
+
+.container{
+  gap:11px;
+}
+/* =========================================================
+   LUCK TICKET WIN MODAL — PREMIUM 3D REDESIGN
+   ========================================================= */
+
+.ticket-win-card{
+  width:min(92vw,380px);
+  padding:34px 22px 22px;
+  border-radius:28px;
+  border:1px solid rgba(255,214,91,.30);
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,196,64,.22),transparent 40%),
+    radial-gradient(circle at 100% 100%,rgba(139,92,246,.16),transparent 45%),
+    radial-gradient(circle at 0% 100%,rgba(56,189,248,.10),transparent 40%),
+    linear-gradient(165deg,#1a1330 0%,#100a20 55%,#08050f 100%);
+  box-shadow:
+    0 40px 100px rgba(0,0,0,.85),
+    0 0 0 1px rgba(255,255,255,.03),
+    0 0 70px rgba(255,193,55,.16),
+    inset 0 1px rgba(255,255,255,.14);
+  overflow:hidden;
+  transform-style:preserve-3d;
+  perspective:800px;
+  animation:ticketWinIn .5s cubic-bezier(.16,1,.3,1);
+}
+
+/* faint holographic edge sweep */
+.ticket-win-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:28px;
+  padding:1px;
+  background:linear-gradient(120deg,rgba(255,214,91,.6),transparent 30%,transparent 70%,rgba(139,92,246,.5));
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  pointer-events:none;
+  z-index:3;
+}
+
+.ticket-win-glow{
+  position:absolute;
+  width:280px;
+  height:280px;
+  left:50%;
+  top:-150px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,204,51,.28),transparent 65%);
+  filter:blur(20px);
+  pointer-events:none;
+  animation:ticketGlowPulse 2.4s ease-in-out infinite;
+}
+@keyframes ticketGlowPulse{
+  0%,100%{opacity:.75;transform:translateX(-50%) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.12)}
+}
+
+/* radiant light-ray burst behind the coin */
+.ticket-win-card::after{
+  content:"";
+  position:absolute;
+  top:52px;
+  left:50%;
+  width:340px;
+  height:340px;
+  transform:translateX(-50%);
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(255,214,91,.16) 0deg 4deg,
+      transparent 4deg 18deg
+    );
+  border-radius:50%;
+  animation:ticketRayRotate 14s linear infinite;
+  pointer-events:none;
+  z-index:0;
+}
+@keyframes ticketRayRotate{
+  to{ transform:translateX(-50%) rotate(360deg); }
+}
+
+.ticket-confetti-layer{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:2;
+}
+.ticket-confetti-layer span{
+  position:absolute;
+  color:#ffd85a;
+  opacity:.55;
+  font-size:.8rem;
+  animation:ticketFloatBits 3.2s ease-in-out infinite;
+}
+.ticket-confetti-layer span:nth-child(1){left:8%;top:22%}
+.ticket-confetti-layer span:nth-child(2){right:10%;top:18%;animation-delay:.5s;color:#c084fc}
+.ticket-confetti-layer span:nth-child(3){left:15%;bottom:20%;animation-delay:1s;color:#38bdf8}
+.ticket-confetti-layer span:nth-child(4){right:15%;bottom:25%;animation-delay:1.5s}
+.ticket-confetti-layer span:nth-child(5){left:50%;top:10%;animation-delay:.8s;color:#c084fc}
+@keyframes ticketFloatBits{
+  0%,100%{transform:translateY(0) rotate(0) scale(1);opacity:.3}
+  50%{transform:translateY(-12px) rotate(22deg) scale(1.2);opacity:.9}
+}
+
+/* =========================================================
+   SPINNING 3D COIN
+   ========================================================= */
+.ticket-3d{
+  width:116px;
+  height:116px;
+  margin:0 auto 16px;
+  position:relative;
+  z-index:2;
+  transform-style:preserve-3d;
+  animation:ticketCoinToss 1.1s cubic-bezier(.22,1,.36,1),
+            ticketHover 2.8s ease-in-out 1.1s infinite;
+}
+@keyframes ticketCoinToss{
+  0%{ transform:translateY(-40px) rotateY(0deg) scale(.5); opacity:0; }
+  55%{ transform:translateY(4px) rotateY(900deg) scale(1.05); opacity:1; }
+  100%{ transform:translateY(0) rotateY(1080deg) scale(1); opacity:1; }
+}
+@keyframes ticketHover{
+  0%,100%{transform:translateY(0) rotateY(0deg) rotateZ(-1deg)}
+  50%{transform:translateY(-9px) rotateY(14deg) rotateZ(1deg)}
+}
+
+.ticket-3d-rim{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  transform:translateZ(-8px);
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      #a3670a 0deg 6deg,
+      #7a4700 6deg 12deg
+    );
+  box-shadow:0 18px 32px rgba(0,0,0,.55);
+}
+.ticket-3d-face{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  transform:translateZ(8px);
+  background:
+    radial-gradient(circle at 32% 28%,#fff8dc 0%,#ffe27a 30%,#ffc233 62%,#e08a00 100%);
+  border:2px solid rgba(255,255,255,.65);
+  box-shadow:
+    inset 0 4px 8px rgba(255,255,255,.75),
+    inset 0 -10px 16px rgba(150,80,0,.35),
+    0 18px 34px rgba(255,178,30,.30);
+}
+.ticket-3d-face::before{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:50%;
+  border:1.5px dashed rgba(150,80,0,.35);
+}
+.ticket-3d-symbol{
+  font-size:42px;
+  filter:drop-shadow(0 4px 5px rgba(104,54,0,.4));
+}
+.ticket-3d-word{
+  margin-top:-3px;
+  color:#754500;
+  font-size:.56rem;
+  font-weight:950;
+  letter-spacing:.16em;
+}
+.ticket-3d-edge{
+  position:absolute;
+  width:70px;
+  height:14px;
+  left:23px;
+  bottom:-10px;
+  border-radius:50%;
+  background:rgba(0,0,0,.45);
+  filter:blur(7px);
+  animation:ticketShadowPulse 2.8s ease-in-out 1.1s infinite;
+}
+@keyframes ticketShadowPulse{
+  0%,100%{transform:scale(1);opacity:.45}
+  50%{transform:scale(.75);opacity:.25}
+}
+
+.ticket-win-kicker{
+  position:relative;
+  z-index:2;
+  display:inline-block;
+  padding:6px 14px;
+  color:#ffe89b;
+  background:rgba(255,204,51,.12);
+  border:1px solid rgba(255,204,51,.28);
+  border-radius:30px;
+  box-shadow:inset 0 1px rgba(255,255,255,.1);
+  font-size:.58rem;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.ticket-win-title{
+  position:relative;
+  z-index:2;
+  margin-top:10px;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:-.05em;
+  background:linear-gradient(100deg,#fff,#ffe9a8,#ffc83d,#fff);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:ticketTitleShine 3s linear infinite;
+}
+@keyframes ticketTitleShine{
+  to{ background-position:200% center; }
+}
+.ticket-win-amount-wrap{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin-top:4px;
+}
+.ticket-win-plus{
+  color:#fbbf24;
+  font-size:1.3rem;
+  font-weight:950;
+}
+.ticket-win-amount{
+  margin:0;
+  font-size:1.5rem;
+  font-weight:950;
+  color:#ffd85a;
+  text-shadow:0 0 24px rgba(255,204,51,.4);
+}
+.ticket-win-copy{
+  position:relative;
+  z-index:2;
+  margin-top:10px;
+  color:#cbd5e1;
+  font-size:.70rem;
+  line-height:1.65;
+}
+.ticket-win-copy strong{color:#fff}
+
+.ticket-win-action-row{
+  position:relative;
+  z-index:2;
+  margin-top:18px;
+}
+.ticket-win-btn{
+  margin-top:0;
+  min-height:53px;
+  border-radius:17px;
+  font-weight:950;
+  letter-spacing:.02em;
+  background:linear-gradient(135deg,#ffd84d,#f59e0b 50%,#ec4899);
+  box-shadow:0 6px 0 rgba(100,48,4,.7),
+             0 15px 28px rgba(245,158,11,.28),
+             inset 0 1px rgba(255,255,255,.45);
+}
+.ticket-win-close{
+  margin-top:10px;
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.045);
+}
 </style>
 </head>
 
 <body>
 
-<header>
+<header class="game-header">
 
   <a href="/dashboard.html" class="back-btn">
-    ‹ Dashboard
+    <span class="back-arrow">‹</span>
+    <span>Dashboard</span>
   </a>
 
-  <div class="free-spin-balance" id="freeSpinBalance">
-    <span class="free-spin-balance-icon">🎟️</span>
-    <span class="free-spin-balance-value" id="freeSpinBalanceValue">0.00</span>
-  </div>
-
-  <div class="header-right">
-    <div class="balance-badge" id="headerBalance">
-      ₦0.00
-    </div>
+  <div class="header-brand">
+    <span class="header-brand-dot"></span>
+    <span>PAYME PLAY</span>
   </div>
 
 </header>
+
+<!-- =========================
+     MODERN BALANCE DECK
+========================= -->
+<section class="balance-deck" aria-label="Your balances">
+
+  <div class="balance-card balance-card-main" id="mainBalanceCard">
+    <div class="balance-card-top">
+      <span class="balance-icon">₦</span>
+      <span class="balance-label">MAIN BALANCE</span>
+    </div>
+    <div class="balance-value" id="headerBalance">₦0.00</div>
+    <div class="balance-shine"></div>
+  </div>
+
+  <div class="balance-card balance-card-ticket" id="luckTicketMini" title="Luck Tickets">
+    <div class="balance-card-top">
+      <span class="balance-icon ticket">🪙</span>
+      <span class="balance-label">LUCK TICKETS</span>
+    </div>
+    <div class="balance-value" id="luckTicketMiniValue">0</div>
+    <div class="balance-mini-note">Play Lucky 3</div>
+  </div>
+
+  <div class="balance-card balance-card-free" id="freeSpinBalance">
+    <div class="balance-card-top">
+      <span class="balance-icon">🎟️</span>
+      <span class="balance-label">FREE SPINS</span>
+    </div>
+    <div class="balance-value free" id="freeSpinBalanceValue">0.00</div>
+    <div class="balance-mini-note">Ready to use</div>
+  </div>
+
+</section>
 
 
 <div class="container">
@@ -2038,43 +2803,10 @@ canvas.spinning {
 
     <canvas
       id="wheelCanvas"
-      width="600"
-      height="600">
+      width="480"
+      height="480">
     </canvas>
 
-  </div>
-
-
-  <!-- =========================
-       WATCH AD & SPIN
-  ========================= -->
-
-  <div class="ad-spin-promo">
-    <div class="ad-spin-hint">
-      Free spins are waiting
-      <span class="ad-spin-hint-arrow">↓</span>
-    </div>
-
-    <button
-      class="ad-spin-btn"
-      id="adSpinBtn"
-      onclick="openAdSpinModal()">
-
-      <svg
-        class="ad-spin-play-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/>
-      </svg>
-
-      <span id="adSpinBtnLabel">🎁 Watch Ad, Claim Free Spins</span>
-
-    </button>
   </div>
 
 
@@ -2112,6 +2844,39 @@ canvas.spinning {
     </span>
 
   </button>
+
+
+  <!-- =========================
+       WATCH AD & SPIN
+  ========================= -->
+
+  <div class="ad-spin-promo">
+    <div class="ad-spin-hint">
+      Free spins are waiting
+      <span class="ad-spin-hint-arrow">↓</span>
+    </div>
+
+    <button
+      class="ad-spin-btn"
+      id="adSpinBtn"
+      onclick="openAdSpinModal()">
+
+      <svg
+        class="ad-spin-play-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/>
+      </svg>
+
+      <span id="adSpinBtnLabel">🎁 Watch Ad, Claim Free Spins</span>
+
+    </button>
+  </div>
 
 
   <!-- =========================
@@ -2250,6 +3015,52 @@ canvas.spinning {
 
 </div>
 
+
+<!-- =========================
+     LUCK TICKET WIN MODAL
+========================= -->
+
+<div class="modal-overlay" id="luckTicketWinModal">
+  <div class="modal-card ticket-win-card">
+
+    <div class="ticket-win-glow"></div>
+    <div class="ticket-confetti-layer" aria-hidden="true">
+      <span>✦</span><span>◆</span><span>✦</span><span>●</span><span>◆</span>
+    </div>
+
+    <div class="ticket-3d">
+      <div class="ticket-3d-rim"></div>
+      <div class="ticket-3d-face">
+        <span class="ticket-3d-symbol">🪙</span>
+        <span class="ticket-3d-word">LUCK</span>
+      </div>
+      <div class="ticket-3d-edge"></div>
+    </div>
+
+    <div class="ticket-win-kicker">✨ REWARD UNLOCKED</div>
+    <div class="ticket-win-title">LUCKY HIT!</div>
+
+    <div class="ticket-win-amount-wrap">
+      <span class="ticket-win-plus">+</span>
+      <div class="ticket-win-amount" id="luckTicketWinAmount">500 Luck Tickets</div>
+    </div>
+
+    <div class="ticket-win-copy">
+      Your tickets are safely in your wallet.<br>
+      <strong>Use them to enter Lucky 3 and chase bigger rewards.</strong>
+    </div>
+
+    <div class="ticket-win-action-row">
+      <button class="ticket-win-btn" onclick="goToLucky3()">
+        🪙 PLAY LUCKY 3
+      </button>
+      <button class="ticket-win-close" onclick="closeLuckTicketWinModal()">
+        Keep Spinning
+      </button>
+    </div>
+
+  </div>
+</div>
 
 <!-- =========================
      RESULT MODAL
@@ -2534,7 +3345,7 @@ canvas.spinning {
 const segments = [
 
   {
-    label: '₦0',
+    label: '2 🪙',
     color1: '#263247',
     color2: '#0f172a',
     text: '#94a3b8'
@@ -2569,21 +3380,21 @@ const segments = [
   },
 
   {
-    label: '₦250',
+    label: '300 🪙',
     color1: '#38bdf8',
     color2: '#0284c7',
     text: '#ffffff'
   },
 
   {
-    label: '₦500',
+    label: '500 🪙',
     color1: '#10b981',
     color2: '#047857',
     text: '#ffffff'
   },
 
   {
-    label: '₦1000',
+    label: '1000 🪙',
     color1: '#f59e0b',
     color2: '#d97706',
     text: '#ffffff'
@@ -2603,7 +3414,7 @@ const canvas =
   document.getElementById('wheelCanvas');
 
 const ctx =
-  canvas.getContext('2d');
+  canvas.getContext('2d', { alpha: false, desynchronized: true });
 
 const numSegments =
   segments.length;
@@ -2621,6 +3432,8 @@ let isSpinning = false;
 let userFreeSpins = 0;
 
 let currentBalance = 0;
+
+let currentLuckTickets = 0;
 
 
 /* =========================================
@@ -3175,6 +3988,19 @@ function updateFreeSpinBalanceDisplay() {
 }
 
 
+function updateLuckTicketMini() {
+
+  const value =
+    document.getElementById('luckTicketMiniValue');
+
+  if (value) {
+    value.innerText =
+      Number(currentLuckTickets || 0).toLocaleString('en-NG');
+  }
+
+}
+
+
 function updateSpinButtonState() {
 
   const btn =
@@ -3448,6 +4274,10 @@ async function fetchGameState() {
           data.freeSpins || 0
         );
 
+      currentLuckTickets =
+        Number(data.luckTickets || 0);
+
+      updateLuckTicketMini();
 
       updateSpinButtonState();
 
@@ -4207,7 +5037,7 @@ async function startSpin() {
 
 
     const duration =
-      5000;
+      3800;
 
 
     function animateSpin(timestamp) {
@@ -4359,6 +5189,25 @@ function finishSpin(data) {
       data.prize || 0
     );
 
+  const ticketReward =
+    Number(data.ticketReward || 0);
+
+  if (typeof data.luckTickets !== 'undefined') {
+    currentLuckTickets = Number(data.luckTickets || 0);
+    updateLuckTicketMini();
+  }
+
+  if (ticketReward > 0) {
+    // A ticket win deserves a full-screen celebration even when Auto Spin
+    // is enabled, so the user clearly sees the ticket reward and can jump
+    // directly into Lucky 3.
+    stopAutoSpin();
+    showLuckTicketWinModal(ticketReward);
+    btn.disabled = false;
+    updateSpinButtonState();
+    return;
+  }
+
 
   /*
     AUTO SPIN MODE
@@ -4473,6 +5322,42 @@ function showSimpleError(message) {
 /* =========================================
    RESULT MODAL
 ========================================= */
+
+function showLuckTicketWinModal(ticketReward) {
+
+  const modal =
+    document.getElementById('luckTicketWinModal');
+
+  const amount =
+    document.getElementById('luckTicketWinAmount');
+
+  if (amount) {
+    amount.innerText =
+      `${Number(ticketReward).toLocaleString('en-NG')} Luck Tickets`;
+  }
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+}
+
+
+function closeLuckTicketWinModal() {
+
+  document
+    .getElementById('luckTicketWinModal')
+    .classList.remove('active');
+
+  document.body.style.overflow = '';
+
+}
+
+
+function goToLucky3() {
+  window.location.href = '/lucky.html';
+
+}
+
 
 function showResultModal(prize) {
 
@@ -4638,6 +5523,22 @@ document
 
 document
   .getElementById(
+    'luckTicketWinModal'
+  )
+  .addEventListener(
+    'click',
+    function(e) {
+
+      if (e.target === this) {
+        closeLuckTicketWinModal();
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
     'resultModal'
   )
   .addEventListener(
@@ -4672,6 +5573,8 @@ document.addEventListener(
 
       closeInsufficientModal();
 
+      closeLuckTicketWinModal();
+
     }
 
   }
@@ -4683,6 +5586,7 @@ document.addEventListener(
 ========================================= */
 
 drawWheel();
+updateLuckTicketMini();
 
 fetchGameState();
 
@@ -4783,6 +5687,7 @@ if(document.readyState === "loading"){
 
 </body>
 </html>
+
 
 
 
