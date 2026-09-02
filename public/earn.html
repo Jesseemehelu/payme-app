@@ -179,8 +179,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 .watch-ads-card{background:linear-gradient(150deg,#0891b2 0%,#075985 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(8,145,178,.35),inset 0 1px 0 rgba(255,255,255,.2)}
 .referral-card{background:linear-gradient(150deg,#ff5fc4 0%,#a21caf 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(217,70,239,.32),inset 0 1px 0 rgba(255,255,255,.2)}
-.advertise-card{background:linear-gradient(150deg,#ffa14f 0%,#c2410c 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(249,115,22,.32),inset 0 1px 0 rgba(255,255,255,.2)}
-.join-card{background:linear-gradient(150deg,#34e39c 0%,#047857 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(16,185,129,.32),inset 0 1px 0 rgba(255,255,255,.2)}
 .disabled-option{background:linear-gradient(150deg,#3a4256 0%,#1c2334 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 16px 30px rgba(0,0,0,.3);opacity:.85}
 .disabled-option:active{transform:none}
 
@@ -394,25 +392,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
       <div class="card-action-row"><span>Invite &amp; Earn</span><div class="arrow-btn">→</div></div>
     </a>
 
-    <!-- ADVERTISE -->
-    <a href="/advertise.html" class="earn-card-item advertise-card">
-      <div>
-        <div class="card-top-row"><div class="icon-wrapper">📣</div><span class="status-badge">Place Ads</span></div>
-        <div class="card-body"><h3>Get More Telegram Users</h3><p>Promote your Telegram group or channel and get real members.</p></div>
-      </div>
-      <div class="card-action-row"><span>Advertise Now</span><div class="arrow-btn">→</div></div>
-    </a>
-
-    <!-- JOIN GROUPS -->
-    <a href="/join.html" class="earn-card-item join-card">
-      <span class="notification-dot" id="joinNotificationDot" aria-label="New join tasks available" style="display:none;"></span>
-      <div>
-        <div class="card-top-row"><div class="icon-wrapper">💰</div><span class="status-badge">₦25 / Join</span></div>
-        <div class="card-body"><h3>Join Groups &amp; Earn</h3><p>Join promoted Telegram communities and earn ₦25 for every verified join.</p></div>
-      </div>
-      <div class="card-action-row"><span>Join Groups &amp; Earn</span><div class="arrow-btn">→</div></div>
-    </a>
-
     <!-- COMMUNITY GIVEAWAYS -->
     <div class="earn-card-item disabled-option" style="grid-column: span 2;">
       <div>
@@ -457,7 +436,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 <script>
 document.addEventListener('DOMContentLoaded',function(){
  const modal=document.getElementById('gamesModal'),openBtn=document.getElementById('openGamesModal'),closeBtn=document.getElementById('closeGamesModal'),loader=document.getElementById('pageLoader');
- const joinNotificationDot=document.getElementById('joinNotificationDot');
 
  function showLoader(){if(loader){loader.classList.add('active');loader.setAttribute('aria-hidden','false')}}
  function hideLoader(){if(loader){loader.classList.remove('active');loader.setAttribute('aria-hidden','true')}}
@@ -509,33 +487,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
    go(h);
  }));
-
- /* Check the same Telegram task endpoint used by Join12.txt. */
- async function updateJoinNotification(){
-   if(!joinNotificationDot) return;
-
-   try{
-     const response=await fetch('/api/telegram-ads',{
-       method:'GET',
-       credentials:'include',
-       headers:{'Accept':'application/json'}
-     });
-
-     const data=await response.json().catch(()=>({}));
-     const tasks=Array.isArray(data.ads) ? data.ads : [];
-     const hasTasks=response.ok && data.success !== false && tasks.length > 0;
-
-     joinNotificationDot.style.display=hasTasks ? 'block' : 'none';
-     joinNotificationDot.setAttribute('aria-hidden',hasTasks ? 'false' : 'true');
-   }catch(error){
-     /* If the task endpoint cannot be checked, do not show a false notification. */
-     joinNotificationDot.style.display='none';
-     joinNotificationDot.setAttribute('aria-hidden','true');
-     console.warn('Unable to check Telegram task notification:',error);
-   }
- }
-
- updateJoinNotification();
 
  document.addEventListener('keydown',e=>{
    if(e.key==='Escape'&&modal&&modal.classList.contains('active')) closeModal(e);
@@ -720,5 +671,6 @@ if(document.readyState === "loading"){
 </script>
 </body>
 </html>
+
 
 

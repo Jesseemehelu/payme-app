@@ -2821,8 +2821,11 @@
 
         validateForm();
 
-
-        fetchDeposits();
+        // No fetchDeposits() call here — the list was already refreshed
+        // right after the successful submit (see the submit handler
+        // above), and nothing changes between then and closing this
+        // modal, so calling it again here would just repeat the same
+        // history request for no new data.
 
     }
 
@@ -2883,3 +2886,4 @@
 
 </body>
 </html>
+

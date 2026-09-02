@@ -2444,6 +2444,14 @@ async function loadLeaderboardData() {
             await lbRes.json();
 
 
+        // The countdown timer uses the same competition object this
+        // request already returned — no separate /api/weekly-competition
+        // call needed just to start the clock.
+        startCountdownTimer(
+            lbData.competition
+        );
+
+
         const userData =
             userRes.ok
                 ? await userRes.json()
@@ -3030,25 +3038,14 @@ let countdownInterval =
     null;
 
 
-async function syncAndStartTimer() {
+function startCountdownTimer(competition) {
 
     try {
 
 
-        const res =
-            await fetch(
-                '/api/weekly-competition'
-            );
-
-
-        const data =
-            await res.json();
-
-
         if (
-            !data.success ||
-            !data.competition ||
-            !data.competition.endTime
+            !competition ||
+            !competition.endTime
         ) {
 
             document
@@ -3065,7 +3062,7 @@ async function syncAndStartTimer() {
 
         const targetTime =
             new Date(
-                data.competition.endTime
+                competition.endTime
             ).getTime();
 
 
@@ -3200,9 +3197,10 @@ window.addEventListener(
     'DOMContentLoaded',
     () => {
 
+        // startCountdownTimer() is called from inside loadLeaderboardData()
+        // itself once its single /api/weekly-competition response arrives —
+        // no second fetch needed just to seed the clock.
         loadLeaderboardData();
-
-        syncAndStartTimer();
 
     }
 );
@@ -3239,4 +3237,5 @@ window.addEventListener("pageshow", refreshLeaderboardOnReturn);
 
 </body>
 </html>
+
 
