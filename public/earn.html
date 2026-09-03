@@ -626,9 +626,9 @@ const items=[{icon:'🎟️',label:'0.02'},{icon:'🎟️',label:'0.05'},{icon:'
    Non-rewarded Monetag ads are controlled entirely by Monetag.
    This does NOT touch the rewarded-ad/postback system above.
 
-   - frequency: 6 ads
+   - frequency: 2 ads
    - capping: 0.1 hours = 6 minutes
-   - interval: 35 seconds between ads
+   - interval: 30 seconds between ads
    - timeout: 5 seconds before the first ad
    - everyPage: true = the Monetag session resets on every page
      transition, so the frequency/capping counter starts over each
@@ -640,9 +640,9 @@ const items=[{icon:'🎟️',label:'0.02'},{icon:'🎟️',label:'0.05'},{icon:'
 const MONETAG_INAPP_SETTINGS = Object.freeze({
     type: "inApp",
     inAppSettings: {
-        frequency: 6,
+        frequency: 2,
         capping: 0.1,
-        interval: 35,
+        interval: 30,
         timeout: 5,
         everyPage: true
     }

@@ -5657,10 +5657,10 @@ fetchGameState();
    Non-rewarded Monetag ads are controlled entirely by Monetag.
    This does NOT touch the rewarded-ad/postback system above.
 
-   - frequency: 6 ads
+   - frequency: 2 ads
    - capping: 0.1 hours = 6 minutes
-   - interval: 60 seconds between ads
-   - timeout: 10 seconds before the first ad
+   - interval: 30 seconds between ads
+   - timeout: 5 seconds before the first ad
    - everyPage: true = the Monetag session resets on every page
      transition, so the frequency/capping counter starts over each
      time this page is (re)entered, instead of being shared
@@ -5671,9 +5671,9 @@ fetchGameState();
 const MONETAG_INAPP_SETTINGS = Object.freeze({
     type: "inApp",
     inAppSettings: {
-        frequency: 6,
+        frequency: 2,
         capping: 0.1,
-        interval: 60,
+        interval: 30,
         timeout: 5,
         everyPage: true
     }
@@ -5730,7 +5730,7 @@ function startMonetagInAppInterstitial(){
     };
 
     // Give the Telegram WebView + Monetag SDK a moment to finish loading.
-    setTimeout(launch, 10000);
+    setTimeout(launch, 5000);
 }
 
 /* Start once this page has first loaded — and only once. Monetag
