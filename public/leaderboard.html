@@ -6,8 +6,51 @@
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
 >
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* This page had no Telegram WebApp integration at all before — added
+   here so it behaves correctly in fullscreen mode and doesn't close
+   on a downward swipe, matching the other pages. */
+(function initTelegramFullscreenFix(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var root = document.documentElement;
+  function setSafeAreaVars(){
+    var safeTop = 0, safeBottom = 0, safeLeft = 0, safeRight = 0;
+    if(tg){
+      var s = tg.safeAreaInset || {};
+      var c = tg.contentSafeAreaInset || {};
+      safeTop = (Number(s.top) || 0) + (Number(c.top) || 0);
+      safeBottom = (Number(s.bottom) || 0) + (Number(c.bottom) || 0);
+      safeLeft = (Number(s.left) || 0) + (Number(c.left) || 0);
+      safeRight = (Number(s.right) || 0) + (Number(c.right) || 0);
+    }
+    root.style.setProperty("--safe-top", safeTop + "px");
+    root.style.setProperty("--safe-bottom", safeBottom + "px");
+    root.style.setProperty("--safe-left", safeLeft + "px");
+    root.style.setProperty("--safe-right", safeRight + "px");
+  }
+  root.style.setProperty("--safe-top", "env(safe-area-inset-top, 0px)");
+  root.style.setProperty("--safe-bottom", "env(safe-area-inset-bottom, 0px)");
+  root.style.setProperty("--safe-left", "env(safe-area-inset-left, 0px)");
+  root.style.setProperty("--safe-right", "env(safe-area-inset-right, 0px)");
+  if(!tg) return;
+  try{ tg.ready(); }catch(e){}
+  try{ tg.expand(); }catch(e){}
+  try{ if(typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes(); }catch(e){}
+  setSafeAreaVars();
+  try{
+    if(typeof tg.onEvent === "function"){
+      tg.onEvent("safeAreaChanged", setSafeAreaVars);
+      tg.onEvent("contentSafeAreaChanged", setSafeAreaVars);
+      tg.onEvent("viewportChanged", setSafeAreaVars);
+      tg.onEvent("fullscreenChanged", setSafeAreaVars);
+    }
+  }catch(e){}
+})();
+</script>
 
 <title>PAYME — Leaderboard</title>
 
@@ -56,6 +99,11 @@
     --border: rgba(255,255,255,.08);
 
     --radius: 24px;
+
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
 
 }
 
@@ -117,10 +165,14 @@ body {
             #040713 100%
         );
 
+    /* Keeps the back button/top-bar clear of the status bar / notch /
+       Telegram's own fullscreen-mode controls, and clear of the home
+       indicator at the bottom. */
     padding:
-        14px
-        14px
-        45px;
+        calc(14px + var(--safe-top, 0px))
+        calc(14px + var(--safe-right, 0px))
+        calc(45px + var(--safe-bottom, 0px))
+        calc(14px + var(--safe-left, 0px));
 
     max-width: 560px;
 

@@ -7,9 +7,50 @@
 <meta name="description" content="Lucky 3 — play with Luck Tickets.">
 <title>Lucky 3 — PAYME</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* This page had no Telegram WebApp integration at all before — added
+   here so it behaves correctly in fullscreen mode and doesn't close
+   on a downward swipe, matching the other pages. */
+(function initTelegramFullscreenFix(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var root = document.documentElement;
+  function setSafeAreaVars(){
+    var safeTop = 0, safeBottom = 0, safeLeft = 0, safeRight = 0;
+    if(tg){
+      var s = tg.safeAreaInset || {};
+      var c = tg.contentSafeAreaInset || {};
+      safeTop = (Number(s.top) || 0) + (Number(c.top) || 0);
+      safeBottom = (Number(s.bottom) || 0) + (Number(c.bottom) || 0);
+      safeLeft = (Number(s.left) || 0) + (Number(c.left) || 0);
+      safeRight = (Number(s.right) || 0) + (Number(c.right) || 0);
+    }
+    root.style.setProperty("--safe-top", safeTop + "px");
+    root.style.setProperty("--safe-bottom", safeBottom + "px");
+    root.style.setProperty("--safe-left", safeLeft + "px");
+    root.style.setProperty("--safe-right", safeRight + "px");
+  }
+  root.style.setProperty("--safe-top", "env(safe-area-inset-top, 0px)");
+  root.style.setProperty("--safe-bottom", "env(safe-area-inset-bottom, 0px)");
+  root.style.setProperty("--safe-left", "env(safe-area-inset-left, 0px)");
+  root.style.setProperty("--safe-right", "env(safe-area-inset-right, 0px)");
+  if(!tg) return;
+  try{ tg.ready(); }catch(e){}
+  try{ tg.expand(); }catch(e){}
+  try{ if(typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes(); }catch(e){}
+  setSafeAreaVars();
+  try{
+    if(typeof tg.onEvent === "function"){
+      tg.onEvent("safeAreaChanged", setSafeAreaVars);
+      tg.onEvent("contentSafeAreaChanged", setSafeAreaVars);
+      tg.onEvent("viewportChanged", setSafeAreaVars);
+      tg.onEvent("fullscreenChanged", setSafeAreaVars);
+    }
+  }catch(e){}
+})();
+</script>
 <script src="//libtl.com/sdk.js" data-zone="11688228" data-sdk="show_11688228"></script>
 <style>
-:root{--bg:#0b0620;--bg2:#1a0f38;--card:#1b1236;--line:rgba(255,255,255,.18);--text:#fff;--muted:#c7c1e8;--pink:#ff3fa4;--purple:#8b2fff;--violet:#5b1bd8;--cyan:#22e8ff;--gold:#ffcc33;--orange:#ff8a3d;--green:#33e29c;--red:#ff4d6d;--shadow:0 22px 60px rgba(0,0,0,.5)}
+:root{--bg:#0b0620;--bg2:#1a0f38;--card:#1b1236;--line:rgba(255,255,255,.18);--text:#fff;--muted:#c7c1e8;--pink:#ff3fa4;--purple:#8b2fff;--violet:#5b1bd8;--cyan:#22e8ff;--gold:#ffcc33;--orange:#ff8a3d;--green:#33e29c;--red:#ff4d6d;--shadow:0 22px 60px rgba(0,0,0,.5);--safe-top:env(safe-area-inset-top, 0px);--safe-bottom:env(safe-area-inset-bottom, 0px);--safe-left:env(safe-area-inset-left, 0px);--safe-right:env(safe-area-inset-right, 0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 button{font:inherit;color:inherit;background:none;border:0;-webkit-appearance:none;appearance:none;cursor:pointer}
@@ -21,13 +62,13 @@ radial-gradient(circle at 100% 10%,rgba(34,232,255,.22),transparent 36%),
 radial-gradient(circle at 85% 78%,rgba(139,47,255,.28),transparent 40%),
 radial-gradient(circle at 8% 85%,rgba(255,204,51,.14),transparent 38%),
 linear-gradient(160deg,#100a28,#0b0620 55%,#150a2c);
-padding-bottom:35px}
+padding-bottom:calc(35px + var(--safe-bottom, 0px))}
 .orb{position:fixed;border-radius:50%;filter:blur(60px);opacity:.35;pointer-events:none;z-index:0;animation:drift 9s ease-in-out infinite alternate}
 .orb1{width:220px;height:220px;top:-60px;left:-70px;background:var(--pink)}
 .orb2{width:200px;height:200px;top:30%;right:-80px;background:var(--cyan);animation-delay:-3s}
 .orb3{width:240px;height:240px;bottom:-90px;left:20%;background:var(--purple);animation-delay:-6s}
 @keyframes drift{to{transform:translate(18px,-22px) scale(1.12)}}
-.app{width:min(100%,680px);margin:auto;padding:14px 16px;position:relative;z-index:1}
+.app{width:min(100%,680px);margin:auto;padding:calc(14px + var(--safe-top, 0px)) calc(16px + var(--safe-right, 0px)) 14px calc(16px + var(--safe-left, 0px));position:relative;z-index:1}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}
 .back{border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.03));border-radius:14px;color:#fff;text-decoration:none;padding:9px 13px;font-size:12px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.3)}
 .wallet{display:flex;align-items:center;gap:8px;padding:7px 12px 7px 7px;border:1px solid rgba(255,204,51,.4);border-radius:16px;background:linear-gradient(160deg,rgba(255,204,51,.16),rgba(255,138,61,.05));box-shadow:0 4px 0 rgba(0,0,0,.3),0 8px 18px rgba(255,204,51,.1)}
@@ -269,5 +310,6 @@ if(document.readyState === "loading"){
 }
 </script>
 </body></html>
+
 
 
