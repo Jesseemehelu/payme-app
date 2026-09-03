@@ -169,6 +169,20 @@ transform:scale(.6);opacity:.2;transition:.5s}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:430px){.numbers{gap:6px}.num{border-radius:12px;font-size:12px}.ball{width:62px;height:62px}.hero h1{font-size:26px}}
 
+.howto-overlay .modal{animation:howtoPop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes howtoPop{0%{opacity:0;transform:scale(.75) translateY(30px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.howto-modal{position:relative}
+.howto-close-x{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid var(--line);display:grid;place-items:center;font-size:13px;color:#fff;line-height:1}
+.howto-steps{display:grid;gap:9px;margin:15px 0 6px;text-align:left}
+.howto-step{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line);opacity:0;transform:translateX(-12px);animation:howtoStepIn .45s ease forwards}
+.howto-step:nth-child(1){animation-delay:.15s}.howto-step:nth-child(2){animation-delay:.28s}.howto-step:nth-child(3){animation-delay:.41s}.howto-step:nth-child(4){animation-delay:.54s}
+@keyframes howtoStepIn{to{opacity:1;transform:translateX(0)}}
+.howto-num{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:950;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;box-shadow:0 3px 8px rgba(255,63,164,.4);margin-top:1px}
+.howto-step b{display:block;font-size:11.5px;color:#fff}
+.howto-step p{margin:2px 0 0;font-size:9.5px;color:var(--muted);line-height:1.5}
+.dontshow{display:flex;align-items:center;gap:9px;margin:15px 0 5px;padding:11px 12px;border-radius:13px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:10px;color:var(--muted);cursor:pointer;user-select:none}
+.dontshow input{width:16px;height:16px;flex:none;accent-color:var(--pink);cursor:pointer}
+
 .shortage-modal{border:1px solid rgba(255,204,51,.4);background:linear-gradient(150deg,#2a1c46,#100a20);box-shadow:0 30px 90px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.1)}
 .shortage-icon{width:78px;height:78px;margin:0 auto 11px;display:grid;place-items:center;border-radius:24px;font-size:40px;background:linear-gradient(150deg,#ffe58a,#f6a63d);box-shadow:inset 0 4px 0 rgba(255,255,255,.6),0 9px 0 #8a4d0c,0 20px 35px rgba(255,183,62,.3);transform:translateY(-2px)}
 .shortage-modal h2{color:#fff;font-size:23px}
@@ -198,6 +212,20 @@ transform:scale(.6);opacity:.2;transition:.5s}
 <button class="secondary" id="closeShortage" style="width:100%;margin-top:8px">Maybe Later</button>
 </div></div><div class="overlay" id="confirm"><div class="modal"><div class="kicker">READY TO DRAW</div><h2>Confirm your Lucky 3</h2><p>Your ticket entry will be deducted before the server performs the draw.</p><div class="summary"><div class="row"><span>Your numbers</span><b id="confirmNumbers">--</b></div><div class="row"><span>Game</span><b id="confirmGame">—</b></div><div class="row"><span>Entry</span><b id="confirmStake">0 🪙</b></div><div class="row"><span>Possible win</span><b id="confirmWin">—</b></div></div><div class="modal-actions"><button class="secondary" id="cancelConfirm">Cancel</button><button class="primary" id="confirmPlay">Draw Now</button></div></div></div>
 <div class="overlay" id="reveal"><div class="modal center"><div class="kicker">SERVER DRAW</div><h2 id="revealTitle">Revealing your numbers…</h2><div class="balls"><div class="ball" id="ball0">?</div><div class="ball" id="ball1">?</div><div class="ball" id="ball2">?</div></div><p id="revealStatus">Generating a secure draw.</p><div id="result" style="display:none" class="result"><div id="resultMatch"></div><div class="prize" id="resultPrize">—</div><button class="primary" id="again" style="width:100%">Play Again</button></div></div></div>
+<div class="overlay" id="howtoModal"><div class="modal howto-modal">
+<button class="howto-close-x" id="howtoCloseX" aria-label="Close">✕</button>
+<div class="kicker">✨ HOW TO PLAY</div>
+<h2>Lucky 3 — quick guide</h2>
+<p>A simple pick-3 number game. Here's all you need to know:</p>
+<div class="howto-steps">
+<div class="howto-step"><div class="howto-num">1</div><div><b>Pick 3 numbers</b><p>Tap any 3 numbers from 01–30. Tap a number again to remove it.</p></div></div>
+<div class="howto-step"><div class="howto-num">2</div><div><b>Choose a game mode</b><p>👑 Jackpot pays the biggest prize if all 3 numbers match. 💎 Cash Win pays if 2 or more match. ✨ Free Spins pays if just 1 matches — easiest to win.</p></div></div>
+<div class="howto-step"><div class="howto-num">3</div><div><b>Choose your entry</b><p>Pick how many Luck Tickets to spend. Bigger entries unlock bigger prizes — tickets are deducted before the draw.</p></div></div>
+<div class="howto-step"><div class="howto-num">4</div><div><b>Reveal your result</b><p>Tap "Reveal My Lucky 3". 3 numbers are drawn instantly — match them to your picks to win!</p></div></div>
+</div>
+<label class="dontshow" id="howtoDontShowLabel"><input type="checkbox" id="howtoDontShow"><span>Don't show this again</span></label>
+<button class="primary" id="howtoGotIt" style="width:100%;margin-top:6px">Got it, let's play! ✨</button>
+</div></div>
 <div class="toast" id="toast"></div>
 <script>
 (()=>{'use strict';
@@ -214,6 +242,23 @@ $('numbers').addEventListener('click',e=>{const b=e.target.closest('[data-number
 $('playBtn').onclick=()=>{if(state.selected.length!==3)return toast('Pick 3 numbers first.');if(state.tickets<state.stake){$('shortageHave').textContent=state.tickets.toLocaleString()+' 🪙';$('shortageNeed').textContent=state.stake.toLocaleString()+' 🪙';open('ticketShortage');return}$('confirmNumbers').textContent=state.selected.map(n=>String(n).padStart(2,'0')).join(' • ');$('confirmGame').textContent=GAMES[state.game].title;$('confirmStake').textContent=state.stake+' 🪙';$('confirmWin').textContent=payoutLabel();open('confirm')};$('cancelConfirm').onclick=()=>close('confirm');$('confirmPlay').onclick=play;
 async function play(){if(state.busy)return;state.busy=true;close('confirm');open('reveal');$('result').style.display='none';$('revealTitle').textContent='Revealing your numbers…';$('revealStatus').textContent='Secure draw in progress.';for(let i=0;i<3;i++){$('ball'+i).classList.remove('show');$('ball'+i).textContent='?'}render();try{const r=await fetch('/api/games/lucky3/play',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({numbers:[...state.selected],gameType:state.game,stake:state.stake,requestId:requestId()})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw Error(d.message||d.error||'Lucky 3 could not be completed.');state.tickets=Number(d.luckTickets||0);for(let i=0;i<3;i++){await new Promise(x=>setTimeout(x,430));$('ball'+i).textContent=String(d.winningNumbers[i]).padStart(2,'0');$('ball'+i).classList.add('show')}const m=Number(d.matchCount||0);const won=(state.game==='jackpot'&&m===3)||(state.game==='cash'&&m>=2)||(state.game==='bonus'&&m>=1);$('revealTitle').textContent=won?'🎉 YOU HIT!':'DRAW COMPLETE';$('revealStatus').textContent=`${m}/3 numbers matched • ${state.tickets.toLocaleString()} tickets left`;$('resultMatch').innerHTML=won?`<span class="win">${m}/3 MATCHED • WINNER!</span>`:`<span class="lose">${m}/3 MATCHED • No win this time</span>`;$('resultPrize').textContent=Number(d.payout)>0?money(d.payout):(Number(d.freeSpinsAwarded)>0?`${d.freeSpinsAwarded} FREE SPINS`:'No prize');$('result').style.display='block';render()}catch(e){close('reveal');toast(e.message||'Something went wrong.')}finally{state.busy=false;render()}}
 $('again').onclick=()=>{close('reveal');state.selected=[];render()};$('closeShortage').onclick=()=>close('ticketShortage');$('goEarnTickets').onclick=()=>{window.location.href='tap.html'};$('ticketShortage').addEventListener('click',e=>{if(e.target===$('ticketShortage'))close('ticketShortage')});$('reveal').addEventListener('click',e=>{if(e.target===$('reveal')&&!state.busy)close('reveal')});render();loadTickets();document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+
+/* How to Play popup — shows on entry unless the user previously
+   checked "Don't show this again", which is remembered in
+   localStorage so it stays dismissed on future visits to this page. */
+const HOWTO_KEY='lucky3_hide_howto';
+function closeHowto(){
+    if($('howtoDontShow').checked){
+        try{ localStorage.setItem(HOWTO_KEY,'1'); }catch(e){}
+    }
+    close('howtoModal');
+}
+$('howtoCloseX').onclick=closeHowto;
+$('howtoGotIt').onclick=closeHowto;
+$('howtoModal').addEventListener('click',e=>{ if(e.target===$('howtoModal')) closeHowto(); });
+let howtoHidden=false;
+try{ howtoHidden = localStorage.getItem(HOWTO_KEY)==='1'; }catch(e){}
+if(!howtoHidden){ open('howtoModal'); }
 })();
 </script>
 
