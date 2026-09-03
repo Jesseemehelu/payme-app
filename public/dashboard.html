@@ -3,8 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
-user-scalable=no">
+user-scalable=no, viewport-fit=cover">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+/* ================================================================
+   TELEGRAM WEBAPP: FULLSCREEN / SAFE-AREA / SWIPE-CLOSE FIX
+   This runs as early as possible (before the rest of the page's CSS
+   is applied) so the header never flashes under the status bar and
+   the safe-area variables exist before layout happens.
+   - tg.expand() + tg.ready() : opens the app to full available
+     height instead of the small "half sheet" size.
+   - disableVerticalSwipes()  : stops a swipe-down on the page from
+     being interpreted by Telegram as "swipe to minimise/close".
+   - safe-area CSS variables  : Telegram reports how much of the top
+     (status bar / notch / its own floating controls in fullscreen
+     mode) and bottom (home indicator) is unsafe to put content in.
+     We mirror those into --safe-top / --safe-bottom so any element
+     in this page can pad/offset itself away from them.
+================================================================ */
+(function initTelegramFullscreenFix(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var root = document.documentElement;
+
+  function setSafeAreaVars(){
+    var safeTop = 0, safeBottom = 0, safeLeft = 0, safeRight = 0;
+    if(tg){
+      var s = tg.safeAreaInset || {};
+      var c = tg.contentSafeAreaInset || {};
+      /* Both insets can be non-zero at once in fullscreen mode (device
+         notch/status bar AND Telegram's own overlaid controls), so we
+         add them together to get the true unsafe distance. */
+      safeTop = (Number(s.top) || 0) + (Number(c.top) || 0);
+      safeBottom = (Number(s.bottom) || 0) + (Number(c.bottom) || 0);
+      safeLeft = (Number(s.left) || 0) + (Number(c.left) || 0);
+      safeRight = (Number(s.right) || 0) + (Number(c.right) || 0);
+    }
+    root.style.setProperty("--safe-top", safeTop + "px");
+    root.style.setProperty("--safe-bottom", safeBottom + "px");
+    root.style.setProperty("--safe-left", safeLeft + "px");
+    root.style.setProperty("--safe-right", safeRight + "px");
+  }
+
+  /* Sensible fallback so layout is correct even outside Telegram
+     (e.g. testing the page directly in a normal mobile browser). */
+  root.style.setProperty("--safe-top", "env(safe-area-inset-top, 0px)");
+  root.style.setProperty("--safe-bottom", "env(safe-area-inset-bottom, 0px)");
+  root.style.setProperty("--safe-left", "env(safe-area-inset-left, 0px)");
+  root.style.setProperty("--safe-right", "env(safe-area-inset-right, 0px)");
+
+  if(!tg) return;
+
+  try{ tg.ready(); }catch(e){}
+  try{ tg.expand(); }catch(e){}
+
+  /* Stops "slide down from the top" from minimising/closing the app. */
+  try{
+    if(typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes();
+  }catch(e){}
+
+  setSafeAreaVars();
+
+  try{
+    if(typeof tg.onEvent === "function"){
+      tg.onEvent("safeAreaChanged", setSafeAreaVars);
+      tg.onEvent("contentSafeAreaChanged", setSafeAreaVars);
+      tg.onEvent("viewportChanged", setSafeAreaVars);
+      tg.onEvent("fullscreenChanged", setSafeAreaVars);
+    }
+  }catch(e){}
+})();
+</script>
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
 <title>PAYME Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,6 +98,10 @@ href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;60
 --border:#e5eaf1;
 --radius:24px;
 --shadow: 0 20px 45px rgba(15,23,42,.07), 0 4px 12px rgba(15,23,42,.04);
+--safe-top: env(safe-area-inset-top, 0px);
+--safe-bottom: env(safe-area-inset-bottom, 0px);
+--safe-left: env(safe-area-inset-left, 0px);
+--safe-right: env(safe-area-inset-right, 0px);
 }
 *{
 box-sizing:border-box;
@@ -46,7 +118,7 @@ radial-gradient(circle at 10% 0%,rgba(37,99,235,.07), transparent 30%),
 radial-gradient(circle at 90% 20%,rgba(6,182,212,.06), transparent 30%),
 var(--bg);
 color:var(--text);
-padding-bottom:92px;
+padding-bottom:calc(92px + var(--safe-bottom, 0px));
 min-height:100vh;
 }
 button, a{ font-family:inherit; }
@@ -60,12 +132,16 @@ background:rgba(255,255,255,.82);
 backdrop-filter:blur(25px);
 -webkit-backdrop-filter:blur(25px);
 border-bottom:1px solid rgba(226,232,240,.7);
+/* Pushes the whole header below the status bar / notch / Telegram's
+   own fullscreen-mode controls, so the logo and buttons are never
+   hidden underneath them. */
+padding-top:var(--safe-top, 0px);
 }
 .nav-container{
 max-width: 1200px;
 min-height:70px;
 margin:auto;
-padding:12px 18px;
+padding:12px calc(18px + var(--safe-right, 0px)) 12px calc(18px + var(--safe-left, 0px));
 display:flex;
 align-items:center;
 justify-content:space-between;
@@ -925,9 +1001,9 @@ to{ opacity:1; transform:scale(1); }
 /* MOBILE NAV */
 .mobile-nav{
 position:fixed;
-left: 10px;
-right: 10px;
-bottom:10px;
+left: calc(10px + var(--safe-left, 0px));
+right: calc(10px + var(--safe-right, 0px));
+bottom:calc(10px + var(--safe-bottom, 0px));
 height:68px;
 z-index:2000;
 display:flex;
@@ -1323,8 +1399,8 @@ cursor:pointer;
 .coupon-note{ font-size:.6rem; color:#94a3b8; margin-top:11px; }
 .gift-floating-widget{
 position:fixed;
-right: 18px;
-bottom:90px;
+right: calc(18px + var(--safe-right, 0px));
+bottom:calc(90px + var(--safe-bottom, 0px));
 width:55px;
 height:55px;
 display:none;
@@ -1385,8 +1461,8 @@ rotateZ(0); }
 .daily-widget {
 position: fixed;
 
-right: 18px;
-bottom: 155px;
+right: calc(18px + var(--safe-right, 0px));
+bottom: calc(155px + var(--safe-bottom, 0px));
 z-index: 4000;
 display: flex;
 align-items: center;
@@ -1782,8 +1858,8 @@ transition-duration: 0.01ms !important;
    ========================================================= */
 .lucky-floating-widget{
     position:fixed;
-    left:10px;
-    bottom:92px;
+    left:calc(10px + var(--safe-left, 0px));
+    bottom:calc(92px + var(--safe-bottom, 0px));
     z-index:4500;
     width:62px;
     height:62px;
