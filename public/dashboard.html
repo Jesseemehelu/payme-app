@@ -769,54 +769,88 @@ letter-spacing:.03em;
 }
 .stat-value{ color:var(--dark); font-size:1.03rem; font-weight:800; }
 
-/* LEADERBOARD */
-.leaderboard-card{ padding:20px; }
-.section-head{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-margin-bottom:13px;
-}
-.section-title{ font-size:1.04rem; font-weight:800; letter-spacing:-.03em; }
-
-.section-sub{ color:var(--muted); font-size: .64rem; margin-top:3px; }
-.view-btn{
-border:0;
-background:#eff6ff;
-color:var(--blue);
-padding:8px 11px;
-border-radius:11px;
-font-size:.65rem;
-font-weight:800;
-cursor:pointer;
-transition:.2s;
-}
-.view-btn:active{ transform:scale(.94); }
-.podium-list{ display:flex; flex-direction:column; gap:8px; }
-.podium-item{
+/* TOP EARNERS + WEEKLY CHALLENGE CTA
+   Replaces the old inline leaderboard widget. That widget called
+   /api/leaderboard on every dashboard load AND every time the user
+   returned to the tab — pure egress with no click required from the
+   user. This is now a static button: zero network cost until the
+   user actually taps it and is taken to /leaderboard.html. */
+.earners-cta-card{
 position:relative;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:12px;
-border-radius:16px;
-background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-border:1px solid transparent;
+overflow:hidden;
+display:block;
+width:100%;
+text-align:left;
+border:0;
+cursor:pointer;
+padding:22px 20px;
+border-radius:26px;
+color:#fff;
+background:
+radial-gradient(circle at 100% 0%, rgba(6,182,212,.35), transparent 45%),
+radial-gradient(circle at 0% 100%, rgba(124,58,237,.30), transparent 50%),
+linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #0891b2 100%);
+box-shadow: 0 25px 45px rgba(37,99,235,.25), 0 8px 16px rgba(15,23,42,.12);
 transition:.2s;
 }
-.podium-item:hover{ transform:translateX(2px); }
-.podium-item.rank-1{ background: linear-gradient(135deg, #fffdf1, #fffbeb);
-border-color:#fde68a; box-shadow: 0 7px 18px rgba(234,179,8,.08); }
-.podium-item.rank-2{ background: linear-gradient(135deg, #ffffff, #f8fafc); border-color:#e2e8f0;
+.earners-cta-card:active{ transform:scale(.98); }
+.earners-cta-card::before{
+content:"";
+position:absolute;
+width:190px;
+height:190px;
+right:-70px;
+top:-90px;
+border-radius:50%;
+border:1px solid rgba(255,255,255,.14);
+box-shadow: 0 0 0 22px rgba(255,255,255,.03), 0 0 0 44px rgba(255,255,255,.02);
+pointer-events:none;
 }
-.podium-item.rank-3{ background: linear-gradient(135deg, #fffaf5, #fff7ed);
-border-color:#fed7aa; }
-.user-info{ display:flex; align-items:center; gap:9px; }
-.rank{ font-size:1rem; }
-.username{ font-size:.77rem; font-weight:800; }
-.ref-count{ color:var(--muted); font-size:.61rem; margin-top:2px; }
-.earnings{ color:var(--blue); font-size:.76rem; font-weight:800; }
+.earners-cta-badge{
+position:relative;
+display:inline-flex;
+align-items:center;
+gap:6px;
+background:rgba(255,255,255,.16);
+border:1px solid rgba(255,255,255,.22);
+color:#fff;
+padding:6px 11px;
+border-radius:99px;
+font-size:.6rem;
+font-weight:800;
+letter-spacing:.06em;
+text-transform:uppercase;
+margin-bottom:12px;
+}
+.earners-cta-title{
+position:relative;
+font-size:1.18rem;
+font-weight:800;
+letter-spacing:-.03em;
+margin-bottom:6px;
+}
+.earners-cta-sub{
+position:relative;
+color:rgba(255,255,255,.82);
+font-size:.74rem;
+line-height:1.5;
+margin-bottom:16px;
+max-width:320px;
+}
+.earners-cta-action{
+position:relative;
+display:inline-flex;
+align-items:center;
+gap:8px;
+background:#fff;
+color:#1d4ed8;
+padding:10px 16px;
+border-radius:13px;
+font-size:.74rem;
+font-weight:800;
+}
+.earners-cta-arrow{ transition:.2s; }
+.earners-cta-card:active .earners-cta-arrow{ transform:translateX(3px); }
 
 /* COMING SOON CARD */
 .coming-card{
@@ -2533,22 +2567,13 @@ Share WhatsApp
 <!-- SIDE -->
 <div class="side-col">
 
-<!-- LEADERBOARD -->
-<section class="card leaderboard-card" id="leaderboard">
-<div class="section-head">
-<div>
-<div class="section-title">Top Earners</div>
-<div class="section-sub">Updated in real-time</div>
-</div>
-<button class="view-btn" onclick="goToLeaderboard(this)">View All</button>
-</div>
-
-<div class="podium-list" id="leaderboardList">
-<div style="text-align:center; padding:20px; color:#64748b; font-size:.75rem;">
-Loading leaderboard...
-</div>
-</div>
-</section>
+<!-- TOP EARNERS + WEEKLY CHALLENGE CTA -->
+<button class="earners-cta-card" id="leaderboard" onclick="goToLeaderboard(this)">
+<span class="earners-cta-badge">🔥 Weekly Challenge Live</span>
+<div class="earners-cta-title">Top Earners This Week</div>
+<div class="earners-cta-sub">See who's leading, find your own rank, and check what it takes to win this week's referral prizes.</div>
+<span class="earners-cta-action">View Leaderboard <span class="earners-cta-arrow">→</span></span>
+</button>
 
 <!-- COMING SOON -->
 <section class="card coming-card">
@@ -3678,137 +3703,6 @@ await waitForButtonLoader(360);
 
 window.location.href =
 "/leaderboard.html";
-
-}
-
-async function loadLeaderboard(){
-
-try{
-
-const response =
-await fetch(
-"/api/leaderboard",
-{
-method:"GET",
-credentials:"include"
-}
-);
-
-if(!response.ok){
-throw new Error("Leaderboard request failed");
-}
-
-const data =
-await response.json();
-
-if(!data.success){
-throw new Error(
-data.error || "Leaderboard error"
-);
-}
-
-const list =
-document.getElementById(
-"leaderboardList"
-);
-
-if(!list) return;
-
-if(!data.leaderboard ||
-!data.leaderboard.length){
-
-list.innerHTML =
-`<div style="text-align:center; padding:20px; color:#64748b; font-size:.75rem;">
-No earners yet.
-</div>`;
-
-return;
-}
-
-const medals=[
-"🥇",
-"🥈",
-"🥉"
-];
-
-const classes=[
-"rank-1",
-"rank-2",
-"rank-3"
-];
-
-list.innerHTML =
-data.leaderboard.map(
-(user,index)=>{
-
-const username =
-user.username
-? "@"+user.username
-: "@User";
-
-const referrals =
-Number(
-user.totalReferrals || 0
-);
-
-const earnings =
-Number(
-user.referralEarnings || 0
-);
-
-return `
-<div class="podium-item ${classes[index] || ""}">
-
-<div class="user-info">
-
-<span class="rank">
-${medals[index] || ""}
-</span>
-
-<div>
-
-<div class="username">
-${username}
-</div>
-
-<div class="ref-count">
-${referrals}
-Referral${referrals===1?"":"s"}
-</div>
-
-</div>
-</div>
-
-<div class="earnings">
-₦${earnings.toLocaleString()}
-</div>
-
-</div>
-`;
-
-}
-).join("");
-
-}catch(error){
-
-console.error(
-"Leaderboard error:",
-error
-);
-
-const list =
-document.getElementById(
-"leaderboardList"
-);
-
-if(list){
-
-list.innerHTML =
-'<div style="text-align:center; padding:20px; color:#ef4444; font-size:.75rem;">Unable to load leaderboard.</div>';
-
-}
-
-}
 
 }
 
@@ -5471,8 +5365,6 @@ dashboardEntryLoading = false;
 
 updateReferralLinkUI();
 
-loadLeaderboard();
-
 /* No timer-based polling at all now — a background interval was the
    main source of egress even with nobody looking at the page. Instead,
    data only refreshes:
@@ -5499,7 +5391,6 @@ function refreshDashboardOnReturn(){
     if(now - lastDashboardRefresh < DASHBOARD_REFRESH_COOLDOWN_MS) return;
     lastDashboardRefresh = now;
     fetchDashboardData();
-    loadLeaderboard();
 
     // NOTE: we deliberately do NOT re-call startMonetagInAppInterstitial()
     // here. Monetag's docs warn that calling show_XXX({type:'inApp'})

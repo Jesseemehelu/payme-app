@@ -1717,6 +1717,37 @@ async function checkUserAccountStatus() {
   }
 
 
+  /*
+   * RETURNING USER — SKIP THE EXTRA ROUND TRIP
+   *
+   * If this device already completed Telegram sign-up before,
+   * localStorage already knows that. There's no need to spend a
+   * GET /api/auth/check-user request just to confirm it again —
+   * that request fired on every single visit and was pure egress.
+   *
+   * Instead, go straight into the login flow. handleTelegramAuth()
+   * still calls /api/auth/telegram-signup, which is the request that
+   * actually verifies the Telegram signature and opens the session,
+   * so nothing insecure is skipped — only the redundant lookup is.
+   * If it ever fails (e.g. the account was removed server-side),
+   * handleTelegramAuth() falls back to a normal clickable login
+   * button automatically.
+   */
+
+  const alreadySignedUp =
+    localStorage.getItem('hasSignedUp') === 'true';
+
+  if (alreadySignedUp) {
+
+    renderLoginUI();
+
+    await handleTelegramAuth();
+
+    return;
+
+  }
+
+
   try {
 
     const response =
@@ -1747,6 +1778,8 @@ async function checkUserAccountStatus() {
 
 
       renderLoginUI();
+
+      await handleTelegramAuth();
 
     } else {
 
@@ -2527,4 +2560,5 @@ function redirectDashboard() {
 
 </body>
 </html>
+
 
