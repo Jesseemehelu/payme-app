@@ -192,7 +192,6 @@
   let balance = 0;
   let nextAllowedAt = 0;
   let loading = false;
-  let statusTimer = null;
 
   const money = n => '$' + Number(n || 0).toLocaleString('en-US',{
     minimumFractionDigits:2,maximumFractionDigits:2
@@ -316,8 +315,14 @@
     renderLatest(wd);
     renderForm();
 
-    clearInterval(statusTimer);
-    statusTimer = setInterval(refreshStatus,5000);
+    // Egress fix: this used to re-poll /api/withdraw/status and
+    // /api/user/dashboard every 5 seconds for as long as the tab stayed
+    // open (two Supabase-backed requests, forever, even with nothing
+    // pending). The status is now only fetched once on page load, plus
+    // once right after a withdrawal is submitted (see withdraw()) and
+    // once when refreshStatus() is explicitly called. renderForm() stays
+    // on a 1s local timer since it only redraws the on-screen countdown
+    // and makes no network request.
     setInterval(renderForm,1000);
   }
 
