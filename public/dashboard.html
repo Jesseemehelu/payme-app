@@ -3758,7 +3758,7 @@ function setDashboardLoading(isLoading){
 async function fetchDashboardData(showLoading = false){
 
 /* Only the initial dashboard entry may trigger the shimmer.
-   Background refreshes every 5 seconds never touch the loading state. */
+   Silent background refreshes (on tab/app return) never touch the loading state. */
 if(showLoading){
     setDashboardLoading(true);
 }
@@ -5307,6 +5307,7 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
 
 
 
