@@ -10,7 +10,6 @@
 >
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="//libtl.com/sdk.js" data-zone="11688228" data-sdk="show_11688228"></script>
 <script>
 /* This page had no Telegram WebApp integration at all before — added
    here so it behaves correctly in fullscreen mode and doesn't close
@@ -2263,7 +2262,7 @@ body::after {
             </div>
 
             <div class="prize-amount">
-                ₦500</div>
+                💎500</div>
 
         </div>
 
@@ -2275,7 +2274,7 @@ body::after {
             </div>
 
             <div class="prize-amount">
-                ₦1,000</div>
+                💎1,000</div>
 
         </div>
 
@@ -2287,7 +2286,7 @@ body::after {
             </div>
 
             <div class="prize-amount">
-                ₦200</div>
+                💎200</div>
 
         </div>
 
@@ -3287,102 +3286,11 @@ window.addEventListener("pageshow", refreshLeaderboardOnReturn);
 
 </script>
 
-<script>
-/* =========================================================
-   MONETAG IN-APP INTERSTITIAL
-   =========================================================
-   Non-rewarded Monetag ads are controlled entirely by Monetag.
-   This does NOT touch the rewarded-ad/postback system above.
-
-   - frequency: 2 ads
-   - capping: 0.1 hours = 6 minutes
-   - interval: 30 seconds between ads
-   - timeout: 5 seconds before the first ad
-   - everyPage: true = the Monetag session resets on every page
-     transition, so the frequency/capping counter starts over each
-     time this page is (re)entered, instead of being shared
-     across the whole app session.
-
-   Monetag still decides whether an ad is actually available/shown.
-   ========================================================= */
-const MONETAG_INAPP_SETTINGS = Object.freeze({
-    type: "inApp",
-    inAppSettings: {
-        frequency: 2,
-        capping: 0.1,
-        interval: 30,
-        timeout: 5,
-        everyPage: true
-    }
-});
-
-let monetagInAppStarted = false;
-let monetagInAppRetryTimer = null;
-
-/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
-   multiple times in a row can reset the SDK's internal logic and
-   interrupt the ad flow. So this must only ever be called ONCE per
-   page load. everyPage:true (below) is what makes Monetag itself
-   reset the frequency/capping session on every navigation/entry —
-   we do NOT need to (and must not) re-call show_11688228 manually
-   when the user returns to the tab. */
-function startMonetagInAppInterstitial(){
-    if(monetagInAppStarted) return;
-    monetagInAppStarted = true;
-
-    const launch = () => {
-        if(typeof window.show_11688228 !== "function"){
-            // The SDK script may still be loading. Retry a few times
-            // without creating an aggressive polling loop.
-            monetagInAppStarted = false;
-            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
-            return;
-        }
-
-        /*
-         * Do not attach rewarded-ad ymid/requestVar values here.
-         * In-App Interstitial is non-rewarded and must remain
-         * separate from the reward flow.
-         *
-         * catchIfNoFeed:true + .catch() below exist purely for
-         * debugging — by default Monetag silently resolves with no
-         * ad shown when there's nothing to serve (empty feed, zone
-         * still in moderation, domain not approved, etc.), so
-         * without this you'd never see *why* nothing appeared.
-         */
-        try{
-            const result = window.show_11688228({
-                ...MONETAG_INAPP_SETTINGS,
-                catchIfNoFeed: true
-            });
-            if(result && typeof result.catch === "function"){
-                result.catch(error=>{
-                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
-                });
-            }
-        }catch(error){
-            console.warn("Monetag In-App Interstitial could not start:", error);
-            monetagInAppStarted = false;
-        }
-    };
-
-    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
-    setTimeout(launch, 5000);
-}
-
-/* Start once this page has first loaded — and only once. Monetag
-   handles the configured frequency/capping/interval from there, and
-   everyPage:true resets that session on every fresh page load. */
-if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
-}else{
-    startMonetagInAppInterstitial();
-}
-</script>
-
 
 </body>
 </html>
+
+
 
 
 

@@ -46,7 +46,6 @@
   }catch(e){}
 })();
 </script>
-<script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
 
 <title>PAYME Wheel - Spin & Win</title>
 
@@ -852,418 +851,6 @@ canvas.spinning {
     0 13px 30px rgba(16,185,129,.27),
     inset 0 1px rgba(255,255,255,.28);
 }
-
-/* =========================
-   WATCH AD & SPIN PROMO
-========================= */
-
-.ad-spin-promo {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.ad-spin-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #fbbf24;
-  font-size: .74rem;
-  font-weight: 800;
-  letter-spacing: -.01em;
-}
-
-.ad-spin-hint-arrow {
-  display: inline-block;
-  animation: adSpinHintBounce 1.3s ease-in-out infinite;
-}
-
-@keyframes adSpinHintBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
-}
-
-.ad-spin-btn {
-  width: 100%;
-  min-height: 46px;
-  position: relative;
-  overflow: hidden;
-
-  border: 1px solid rgba(255,255,255,.22);
-  border-bottom: 3px solid rgba(76,29,149,.75);
-  border-radius: 16px;
-
-  color: #fff;
-  font-size: .80rem;
-  font-weight: 900;
-  letter-spacing: -.01em;
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  background:
-    linear-gradient(
-      160deg,
-      #9152f5 0%,
-      #7c3aed 42%,
-      #a855f7 70%,
-      #ec4899 100%
-    );
-
-  box-shadow:
-    0 0 0 0 rgba(236,72,153,.55),
-    0 8px 0 rgba(76,29,149,.55),
-    0 12px 22px rgba(124,58,237,.35),
-    inset 0 1px rgba(255,255,255,.35),
-    inset 0 -6px 10px rgba(76,29,149,.25);
-
-  transition: transform .12s ease, box-shadow .12s ease, filter .16s ease;
-}
-
-.ad-spin-btn:active {
-  transform: translateY(4px) scale(.98);
-  box-shadow:
-    0 0 0 0 rgba(236,72,153,.45),
-    0 2px 0 rgba(76,29,149,.55),
-    0 4px 10px rgba(124,58,237,.30),
-    inset 0 1px rgba(255,255,255,.3),
-    inset 0 -4px 8px rgba(76,29,149,.25);
-}
-
-.ad-spin-btn:disabled {
-  opacity: 1;
-  cursor: not-allowed;
-  animation: none;
-  color: #cbd5e1;
-  background: linear-gradient(160deg, #64748b 0%, #475569 100%);
-  border-color: rgba(255,255,255,.12);
-  border-bottom-color: rgba(30,41,59,.75);
-  box-shadow:
-    0 8px 0 rgba(30,41,59,.55),
-    0 10px 18px rgba(15,23,42,.25),
-    inset 0 1px rgba(255,255,255,.12),
-    inset 0 -6px 10px rgba(15,23,42,.2);
-}
-
-.ad-spin-btn:disabled .ad-spin-play-icon {
-  opacity: .6;
-}
-
-.ad-spin-play-icon {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-}
-
-/* Modal content specific to the Watch Ad popup */
-
-.ad-spin-icon {
-  width: 74px;
-  height: 74px;
-  margin: 4px auto 12px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 2rem;
-  background: linear-gradient(135deg, #7c3aed, #ec4899);
-  box-shadow: 0 16px 34px rgba(124,58,237,.35);
-}
-
-.ad-spin-title {
-  font-size: 1.08rem;
-  font-weight: 900;
-  letter-spacing: -.02em;
-  color: #f8fafc;
-}
-
-.ad-spin-subtitle {
-  margin-top: 7px;
-  color: #94a3b8;
-  font-size: .74rem;
-  line-height: 1.55;
-}
-
-.ad-spin-rewards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.ad-spin-reward-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 9px 4px;
-  border-radius: 13px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.10);
-}
-
-.ad-spin-reward-chip-amt {
-  font-size: .92rem;
-  font-weight: 900;
-  color: #f1f5f9;
-}
-
-.ad-spin-reward-chip-amt::after {
-  content: " spins";
-  font-size: .58rem;
-  font-weight: 800;
-  color: #94a3b8;
-}
-
-.ad-spin-reward-chip-tag {
-  font-size: .58rem;
-  font-weight: 800;
-  letter-spacing: .02em;
-  color: #94a3b8;
-  text-transform: uppercase;
-}
-
-.ad-spin-reward-chip.rare {
-  background: rgba(56,189,248,.10);
-  border-color: rgba(56,189,248,.30);
-}
-
-.ad-spin-reward-chip.rare .ad-spin-reward-chip-tag {
-  color: #7dd3fc;
-}
-
-.ad-spin-reward-chip.epic {
-  background: rgba(168,85,247,.12);
-  border-color: rgba(168,85,247,.35);
-}
-
-.ad-spin-reward-chip.epic .ad-spin-reward-chip-tag {
-  color: #c4b5fd;
-}
-
-.ad-spin-reward-chip.legendary {
-  background: linear-gradient(135deg, rgba(251,191,36,.16), rgba(236,72,153,.14));
-  border-color: rgba(251,191,36,.4);
-}
-
-.ad-spin-reward-chip.legendary .ad-spin-reward-chip-tag {
-  color: #fbbf24;
-}
-
-.ad-spin-view-btn {
-  width: 100%;
-  min-height: 50px;
-  margin-top: 18px;
-  border: 0;
-  border-radius: 15px;
-  color: #fff;
-  font-size: .82rem;
-  font-weight: 900;
-  cursor: pointer;
-  background: linear-gradient(135deg, #7c3aed, #ec4899);
-  box-shadow: 0 12px 26px rgba(124,58,237,.30);
-}
-
-.ad-spin-view-btn:disabled {
-  opacity: .6;
-  cursor: not-allowed;
-}
-
-.ad-spin-status {
-  min-height: 16px;
-  margin-top: 10px;
-  color: #94a3b8;
-  font-size: .68rem;
-  font-weight: 700;
-}
-
-/* Left-to-right prize reveal strip */
-
-.ad-spin-reel-wrap {
-  display: none;
-  position: relative;
-  margin: 18px 0 4px;
-}
-
-.ad-spin-reel-wrap.show {
-  display: block;
-}
-
-.ad-spin-reel-window {
-  position: relative;
-  height: 74px;
-  overflow: hidden;
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
-  border: 1px solid rgba(255,255,255,.09);
-}
-
-.ad-spin-reel-window::before,
-.ad-spin-reel-window::after {
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 46px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.ad-spin-reel-window::before {
-  left: 0;
-  background: linear-gradient(90deg, #0b1020, transparent);
-}
-
-.ad-spin-reel-window::after {
-  right: 0;
-  background: linear-gradient(270deg, #0b1020, transparent);
-}
-
-.ad-spin-reel-track {
-  position: absolute;
-  left: 0; top: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 20px;
-  will-change: transform;
-}
-
-.ad-spin-reel-item {
-  flex: 0 0 auto;
-  width: 84px;
-  height: 58px;
-  border-radius: 13px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
-  color: #e2e8f0;
-  font-size: .72rem;
-  font-weight: 900;
-}
-
-.ad-spin-reel-item span {
-  font-size: 1.05rem;
-  line-height: 1;
-}
-
-.ad-spin-reel-center {
-  position: absolute;
-  left: 50%;
-  top: -6px;
-  bottom: -6px;
-  width: 2px;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, #fbbf24, #ec4899);
-  box-shadow: 0 0 10px rgba(251,191,36,.7);
-  z-index: 3;
-}
-
-.ad-spin-reel-wrap.landed .ad-spin-reel-window {
-  box-shadow: 0 0 0 2px rgba(236,72,153,.25), 0 0 28px rgba(124,58,237,.3);
-}
-
-.ad-spin-reel-caption {
-  margin-top: 9px;
-  text-align: center;
-  color: #a855f7;
-  font-size: .58rem;
-  font-weight: 900;
-  letter-spacing: .12em;
-}
-
-/* Result box after the reel lands */
-
-.ad-spin-result {
-  display: none;
-  margin-top: 4px;
-  padding: 16px 12px;
-  border-radius: 17px;
-  background: linear-gradient(135deg, rgba(124,58,237,.14), rgba(236,72,153,.10));
-  border: 1px solid rgba(168,85,247,.30);
-  text-align: center;
-}
-
-.ad-spin-result.show {
-  display: block;
-}
-
-.ad-spin-result-icon {
-  font-size: 1.9rem;
-}
-
-.ad-spin-result-label {
-  margin-top: 4px;
-  font-size: 1.2rem;
-  font-weight: 900;
-  background: linear-gradient(90deg, #a855f7, #ec4899, #fbbf24);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.ad-spin-result-copy {
-  margin-top: 4px;
-  color: #94a3b8;
-  font-size: .70rem;
-  font-weight: 700;
-}
-
-.ad-spin-done-btn {
-  display: none;
-  width: 100%;
-  margin-top: 12px;
-  min-height: 46px;
-  border: 0;
-  border-radius: 14px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.14);
-  color: #f8fafc;
-  font-size: .78rem;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.ad-spin-done-btn.show {
-  display: block;
-}
-
-/* Secondary "View Ad" button inside the insufficient-balance popup */
-
-.view-ad-btn {
-  width: 100%;
-  min-height: 50px;
-  margin-top: 10px;
-  border-radius: 15px;
-  border: 1px solid rgba(168,85,247,.35);
-  background: rgba(124,58,237,.14);
-  color: #d8b4fe;
-  font-size: .80rem;
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.view-ad-btn:active {
-  transform: scale(.985);
-}
-
-/* =========================
-   AUTO SPIN CONTROL
-========================= */
 
 .auto-spin-card {
   width: 100%;
@@ -2127,9 +1714,6 @@ canvas.spinning {
     min-height: 57px;
   }
 
-  .ad-spin-btn {
-    min-height: 44px;
-  }
 }
 
 /* =========================
@@ -2437,15 +2021,6 @@ canvas.spinning{
   100%{left:130%}
 }
 
-/* Ad-spin promo now sits below the spin button — tighten spacing */
-.ad-spin-promo{
-  margin-top:2px;
-  margin-bottom:0;
-}
-.ad-spin-btn{
-  min-height:42px;
-  font-size:.75rem;
-}
 
 .container{
   gap:11px;
@@ -2753,10 +2328,10 @@ canvas.spinning{
 
   <div class="balance-card balance-card-main" id="mainBalanceCard">
     <div class="balance-card-top">
-      <span class="balance-icon">₦</span>
+      <span class="balance-icon">💎</span>
       <span class="balance-label">MAIN BALANCE</span>
     </div>
-    <div class="balance-value" id="headerBalance">₦0.00</div>
+    <div class="balance-value" id="headerBalance">💎 0.00</div>
     <div class="balance-shine"></div>
   </div>
 
@@ -2803,7 +2378,7 @@ canvas.spinning{
     <div class="cost-tag-wrapper">
 
       <span class="cost-text">
-        SPIN COST: ₦50
+        SPIN COST: 💎 50
       </span>
 
       <span
@@ -2898,43 +2473,12 @@ canvas.spinning{
     </svg>
 
     <span id="spinBtnText">
-      SPIN FOR ₦50
+      SPIN FOR 💎 50
     </span>
 
   </button>
 
 
-  <!-- =========================
-       WATCH AD & SPIN
-  ========================= -->
-
-  <div class="ad-spin-promo">
-    <div class="ad-spin-hint">
-      Free spins are waiting
-      <span class="ad-spin-hint-arrow">↓</span>
-    </div>
-
-    <button
-      class="ad-spin-btn"
-      id="adSpinBtn"
-      onclick="openAdSpinModal()">
-
-      <svg
-        class="ad-spin-play-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/>
-      </svg>
-
-      <span id="adSpinBtnLabel">🎁 Watch Ad, Claim Free Spins</span>
-
-    </button>
-  </div>
 
 
   <!-- =========================
@@ -2997,7 +2541,7 @@ canvas.spinning{
     <div class="info-box">
 
       <span class="info-value">
-        ₦50
+        💎 50
       </span>
 
       <span class="info-label">
@@ -3009,7 +2553,7 @@ canvas.spinning{
     <div class="info-box">
 
       <span class="info-value">
-        ₦2,000
+        💎 2,000
       </span>
 
       <span class="info-label">
@@ -3145,7 +2689,7 @@ canvas.spinning{
     <div
       class="modal-desc"
       id="modalDesc">
-      You won ₦100
+      You won 💎 100
     </div>
 
     <button
@@ -3189,7 +2733,7 @@ canvas.spinning{
 
       You need at least
       <strong style="color:#fbbf24;">
-        ₦50
+        💎 50
       </strong>
       to spin the wheel.
 
@@ -3208,7 +2752,7 @@ canvas.spinning{
         <span
           class="balance-comparison-value current"
           id="insufficientCurrentBalance">
-          ₦0.00
+          💎 0.00
         </span>
 
       </div>
@@ -3224,7 +2768,7 @@ canvas.spinning{
         </span>
 
         <span class="balance-comparison-value required">
-          ₦50
+          💎 50
         </span>
 
       </div>
@@ -3259,11 +2803,6 @@ canvas.spinning{
 
     </button>
 
-    <button
-      class="view-ad-btn"
-      onclick="openAdSpinModal()">
-      ▶ View Ad for a Free Spin
-    </button>
 
     <div class="deposit-note">
       Add funds to continue spinning
@@ -3274,105 +2813,6 @@ canvas.spinning{
 </div>
 
 
-<!-- =========================
-     WATCH AD FOR FREE SPIN
-========================= -->
-
-<div
-  class="modal-overlay"
-  id="adSpinModal">
-
-  <div class="modal-card" id="adSpinCard">
-
-    <button
-      class="insufficient-close"
-      onclick="closeAdSpinModal()">
-      ×
-    </button>
-
-    <div class="ad-spin-icon" id="adSpinIcon">🎬</div>
-
-    <div class="ad-spin-title" id="adSpinTitle">
-      Watch &amp; Unlock Free Spins!
-    </div>
-
-    <div class="ad-spin-subtitle" id="adSpinSubtitle">
-      One quick ad stands between you and a free spin on the wheel.
-      Watch now and see what you land on!
-    </div>
-
-    <div class="ad-spin-rewards-grid" id="adSpinRewardsGrid">
-
-      <div class="ad-spin-reward-chip">
-        <span class="ad-spin-reward-chip-amt">0.02</span>
-        <span class="ad-spin-reward-chip-tag">Common</span>
-      </div>
-
-      <div class="ad-spin-reward-chip">
-        <span class="ad-spin-reward-chip-amt">0.05</span>
-        <span class="ad-spin-reward-chip-tag">Common</span>
-      </div>
-
-      <div class="ad-spin-reward-chip">
-        <span class="ad-spin-reward-chip-amt">0.1</span>
-        <span class="ad-spin-reward-chip-tag">Fairly Common</span>
-      </div>
-
-      <div class="ad-spin-reward-chip rare">
-        <span class="ad-spin-reward-chip-amt">0.2</span>
-        <span class="ad-spin-reward-chip-tag">Uncommon</span>
-      </div>
-
-      <div class="ad-spin-reward-chip rare">
-        <span class="ad-spin-reward-chip-amt">0.5</span>
-        <span class="ad-spin-reward-chip-tag">Rare</span>
-      </div>
-
-      <div class="ad-spin-reward-chip epic">
-        <span class="ad-spin-reward-chip-amt">1</span>
-        <span class="ad-spin-reward-chip-tag">Super Rare</span>
-      </div>
-
-      <div class="ad-spin-reward-chip legendary">
-        <span class="ad-spin-reward-chip-amt">2</span>
-        <span class="ad-spin-reward-chip-tag">Jackpot</span>
-      </div>
-
-    </div>
-
-    <div class="ad-spin-reel-wrap" id="adSpinReelWrap">
-      <div class="ad-spin-reel-window">
-        <div class="ad-spin-reel-track" id="adSpinReelTrack"></div>
-        <div class="ad-spin-reel-center"></div>
-      </div>
-      <div class="ad-spin-reel-caption" id="adSpinReelCaption">REVEALING YOUR REWARD</div>
-    </div>
-
-    <div class="ad-spin-result" id="adSpinResult">
-      <div class="ad-spin-result-icon" id="adSpinResultIcon">🎟️</div>
-      <div class="ad-spin-result-label" id="adSpinResultLabel">Reward</div>
-      <div class="ad-spin-result-copy" id="adSpinResultCopy">Your free spin has been added.</div>
-    </div>
-
-    <button
-      class="ad-spin-view-btn"
-      id="adSpinViewBtn"
-      onclick="watchAdForFreeSpin()">
-      ▶ View Ad
-    </button>
-
-    <div class="ad-spin-status" id="adSpinStatus"></div>
-
-    <button
-      class="ad-spin-done-btn"
-      id="adSpinDoneBtn"
-      onclick="closeAdSpinModal()">
-      Done
-    </button>
-
-  </div>
-
-</div>
 
 
 <!-- =========================
@@ -3410,28 +2850,28 @@ const segments = [
   },
 
   {
-    label: '₦10',
+    label: '💎 10',
     color1: '#2563eb',
     color2: '#1d4ed8',
     text: '#ffffff'
   },
 
   {
-    label: '₦20',
+    label: '💎 20',
     color1: '#0284c7',
     color2: '#0369a1',
     text: '#ffffff'
   },
 
   {
-    label: '₦50',
+    label: '💎 50',
     color1: '#3b82f6',
     color2: '#1e40af',
     text: '#ffffff'
   },
 
   {
-    label: '₦100',
+    label: '💎 100',
     color1: '#8b5cf6',
     color2: '#6d28d9',
     text: '#ffffff'
@@ -3459,7 +2899,7 @@ const segments = [
   },
 
   {
-    label: '₦2000',
+    label: '💎 2000',
     color1: '#ec4899',
     color2: '#be185d',
     text: '#ffffff'
@@ -3995,7 +3435,7 @@ function renderWheelFace(ctx, width) {
   ctx.fill();
 
 
-  /* Naira symbol */
+  /* Gem symbol */
 
   ctx.fillStyle =
     '#ffffff';
@@ -4010,7 +3450,7 @@ function renderWheelFace(ctx, width) {
     'middle';
 
   ctx.fillText(
-    '₦',
+    '💎',
     0,
     1
   );
@@ -4096,7 +3536,7 @@ function updateSpinButtonState() {
     btn.classList.remove('is-free');
 
     btnText.innerText =
-      'SPIN FOR ₦50';
+      'SPIN FOR 💎 50';
 
     freePill.style.display =
       'none';
@@ -4369,7 +3809,7 @@ function updateBalanceDisplay() {
       'headerBalance'
     )
     .innerText =
-      '₦' +
+      '💎 ' +
       Number(
         currentBalance || 0
       ).toLocaleString(
@@ -4474,7 +3914,7 @@ function renderHistory(spins) {
                     : ''
                 }
 
-                ₦${
+                💎 ${
                   Number(
                     s.amount || 0
                   ).toLocaleString()
@@ -4511,7 +3951,7 @@ function showInsufficientModal() {
 
 
   balanceText.innerText =
-    '₦' +
+    '💎 ' +
     Number(
       currentBalance || 0
     ).toLocaleString(
@@ -4558,302 +3998,6 @@ function goToDeposit() {
 }
 
 
-/* =========================================
-   WATCH AD FOR FREE SPIN
-========================================= */
-
-let adSpinSessionId = null;
-let adSpinStartedAt = 0;
-let adSpinInProgress = false;
-const AD_SPIN_COOLDOWN_KEY = 'paymeGameAdSpinCooldownUntil';
-const AD_SPIN_COOLDOWN_MS = 10 * 1000;
-
-// Mirrors the server's GAME_FREESPIN_AD_REWARD_SLOTS order exactly, so the
-// reel always has the correct item to land on.
-const AD_SPIN_REEL_ITEMS = [
-  { icon: '🎟️', label: '0.02' },
-  { icon: '🎟️', label: '0.05' },
-  { icon: '🎟️', label: '0.1' },
-  { icon: '🎟️', label: '0.2' },
-  { icon: '🎖️', label: '0.5' },
-  { icon: '🏆', label: '1 SPIN' },
-  { icon: '💎', label: '2 SPINS' }
-];
-
-function adSpinRewardIndex(spins) {
-  const s = Number(spins || 0);
-  if (s >= 2) return 6;
-  if (s >= 1) return 5;
-  if (s >= 0.5) return 4;
-  if (s >= 0.2) return 3;
-  if (s >= 0.1) return 2;
-  if (s >= 0.05) return 1;
-  return 0;
-}
-
-function adSpinPrizeHtml(item) {
-  return `<div class="ad-spin-reel-item"><span>${item.icon}</span><div>${item.label}</div></div>`;
-}
-
-function buildAdSpinReel() {
-  const track = document.getElementById('adSpinReelTrack');
-  if (!track) return;
-  const sequence = [];
-  for (let i = 0; i < 36; i++) {
-    sequence.push(AD_SPIN_REEL_ITEMS[i % AD_SPIN_REEL_ITEMS.length]);
-  }
-  track.innerHTML = sequence.map(adSpinPrizeHtml).join('');
-  track.style.transition = 'none';
-  track.style.transform = 'translate3d(0,0,0)';
-}
-
-const AD_SPIN_BTN_DEFAULT_LABEL = '🎁 Watch Ad, Claim Free Spins';
-
-function updateAdSpinCooldownUI() {
-  const btn = document.getElementById('adSpinViewBtn');
-  const headerBtn = document.getElementById('adSpinBtn');
-  const headerBtnLabel = document.getElementById('adSpinBtnLabel');
-  const until = Number(localStorage.getItem(AD_SPIN_COOLDOWN_KEY) || 0);
-  const remaining = Math.max(0, until - Date.now());
-
-  if (remaining > 0) {
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = `Available in ${Math.ceil(remaining / 1000)}s`;
-    }
-    if (headerBtn) headerBtn.disabled = true;
-    if (headerBtnLabel) headerBtnLabel.textContent = `Available in ${Math.ceil(remaining / 1000)}s`;
-    setTimeout(updateAdSpinCooldownUI, 500);
-  } else {
-    localStorage.removeItem(AD_SPIN_COOLDOWN_KEY);
-    if (btn) { btn.disabled = false; btn.textContent = '▶ View Ad'; }
-    if (headerBtn) headerBtn.disabled = false;
-    if (headerBtnLabel) headerBtnLabel.textContent = AD_SPIN_BTN_DEFAULT_LABEL;
-  }
-}
-
-function startAdSpinCooldown() {
-  localStorage.setItem(AD_SPIN_COOLDOWN_KEY, String(Date.now() + AD_SPIN_COOLDOWN_MS));
-  updateAdSpinCooldownUI();
-}
-
-function resetAdSpinModal() {
-  const title = document.getElementById('adSpinTitle');
-  const subtitle = document.getElementById('adSpinSubtitle');
-  const icon = document.getElementById('adSpinIcon');
-  const viewBtn = document.getElementById('adSpinViewBtn');
-  const status = document.getElementById('adSpinStatus');
-  const result = document.getElementById('adSpinResult');
-  const done = document.getElementById('adSpinDoneBtn');
-  const reel = document.getElementById('adSpinReelWrap');
-  const rewardsGrid = document.getElementById('adSpinRewardsGrid');
-
-  if (title) title.textContent = 'Watch & Unlock Free Spins!';
-  if (subtitle) subtitle.textContent = 'One quick ad stands between you and a free spin on the wheel. Watch now and see what you land on!';
-  if (icon) icon.textContent = '🎬';
-  if (viewBtn) { viewBtn.style.display = 'block'; viewBtn.textContent = '▶ View Ad'; }
-  if (status) status.textContent = '';
-  if (result) result.classList.remove('show');
-  if (done) done.classList.remove('show');
-  if (reel) { reel.classList.remove('show', 'landed'); reel.style.display = 'none'; }
-  if (rewardsGrid) rewardsGrid.style.display = 'grid';
-
-  buildAdSpinReel();
-  updateAdSpinCooldownUI();
-}
-
-function openAdSpinModal() {
-  const modal = document.getElementById('adSpinModal');
-  if (!modal) return;
-  resetAdSpinModal();
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeAdSpinModal() {
-  if (adSpinInProgress) return;
-  const modal = document.getElementById('adSpinModal');
-  if (modal) modal.classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-async function startAdSpinSession() {
-  const response = await fetch('/api/monetag/start', {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ context: 'game_free_spin' })
-  });
-
-  let data = {};
-  try { data = await response.json(); } catch (e) {}
-
-  if (!response.ok || !data.success) {
-    const err = new Error(data.message || 'Unable to start the rewarded ad.');
-    err.nextAllowedAt = data.nextAllowedAt || 0;
-    throw err;
-  }
-
-  adSpinSessionId = data.sessionId || null;
-  adSpinStartedAt = Number(data.createdAt || Date.now());
-  return data;
-}
-
-async function waitForAdSpinPostback(timeoutMs = 15000, intervalMs = 1200) {
-  if (!adSpinSessionId) return null;
-  const started = Date.now();
-
-  while (Date.now() - started < timeoutMs) {
-    try {
-      const response = await fetch(
-        `/api/monetag/status?sessionId=${encodeURIComponent(adSpinSessionId)}&startedAt=${encodeURIComponent(adSpinStartedAt)}`,
-        { method: 'GET', credentials: 'include' }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.success && data.confirmed && data.reward) return data;
-      }
-    } catch (error) {
-      console.warn('Waiting for ad-spin reward confirmation:', error);
-    }
-    await new Promise(resolve => setTimeout(resolve, intervalMs));
-  }
-  return null;
-}
-
-function runAdSpinReel(spins) {
-  return new Promise(resolve => {
-    const wrap = document.getElementById('adSpinReelWrap');
-    const track = document.getElementById('adSpinReelTrack');
-    const caption = document.getElementById('adSpinReelCaption');
-    const resultIndex = adSpinRewardIndex(spins);
-
-    if (!wrap || !track) { resolve(); return; }
-
-    const itemWidth = 84;
-    const gap = 10;
-    const step = itemWidth + gap;
-    const trackPadding = 20;
-    const windowEl = wrap.querySelector('.ad-spin-reel-window');
-    const centerOffset = (windowEl?.clientWidth || 280) / 2;
-
-    // AD_SPIN_REEL_ITEMS repeats every N items — land on a multiple of N
-    // away from resultIndex so the pointer always matches the real reward.
-    const cycleLen = AD_SPIN_REEL_ITEMS.length;
-    const targetIndex = (cycleLen * 3) + resultIndex;
-    const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2) - trackPadding;
-
-    wrap.style.display = 'block';
-    wrap.classList.add('show');
-    wrap.classList.remove('landed');
-    if (caption) caption.textContent = 'REVEALING YOUR REWARD…';
-
-    track.style.transition = 'none';
-    track.style.transform = 'translate3d(0,0,0)';
-    void track.offsetWidth;
-
-    track.style.transition = 'transform 2.4s cubic-bezier(.12,.72,.1,1)';
-    track.style.transform = `translate3d(${targetOffset}px,0,0)`;
-
-    setTimeout(() => {
-      wrap.classList.add('landed');
-      if (caption) caption.textContent = 'REWARD LOCKED IN ✓';
-      resolve();
-    }, 2500);
-  });
-}
-
-function showAdSpinResult(spins) {
-  const title = document.getElementById('adSpinTitle');
-  const subtitle = document.getElementById('adSpinSubtitle');
-  const icon = document.getElementById('adSpinIcon');
-  const viewBtn = document.getElementById('adSpinViewBtn');
-  const status = document.getElementById('adSpinStatus');
-  const resultBox = document.getElementById('adSpinResult');
-  const resultIcon = document.getElementById('adSpinResultIcon');
-  const resultLabel = document.getElementById('adSpinResultLabel');
-  const resultCopy = document.getElementById('adSpinResultCopy');
-  const done = document.getElementById('adSpinDoneBtn');
-  const rewardsGrid = document.getElementById('adSpinRewardsGrid');
-
-  if (title) title.textContent = '🎉 You won!';
-  if (subtitle) subtitle.textContent = 'Nice! Come back soon for another shot at even bigger free spins.';
-  if (icon) icon.textContent = '🎉';
-  if (viewBtn) viewBtn.style.display = 'none';
-  if (status) status.textContent = '';
-  if (rewardsGrid) rewardsGrid.style.display = 'none';
-
-  if (resultIcon) resultIcon.textContent = spins > 0 ? '🎟️' : '🔄';
-  if (resultLabel) resultLabel.textContent = spins > 0 ? `${spins} Free Spin` : 'Try Again';
-  if (resultCopy) {
-    resultCopy.textContent = spins > 0
-      ? `${spins} free spin has been added to your account. Keep watching to grow your streak!`
-      : 'Almost! Watch another ad for another shot at free spins.';
-  }
-
-  if (resultBox) resultBox.classList.add('show');
-  if (done) done.classList.add('show');
-  startAdSpinCooldown();
-  fetchGameState();
-}
-
-async function watchAdForFreeSpin() {
-  if (adSpinInProgress) return;
-
-  const btn = document.getElementById('adSpinViewBtn');
-  const status = document.getElementById('adSpinStatus');
-
-  adSpinInProgress = true;
-  if (btn) { btn.disabled = true; btn.textContent = 'Preparing ad…'; }
-  if (status) status.textContent = 'Preparing your secure reward session…';
-
-  try {
-    await startAdSpinSession();
-
-    if (typeof window.show_11688228 !== 'function') {
-      throw new Error('Ad is not ready yet. Please wait a moment and try again.');
-    }
-
-    if (btn) btn.textContent = 'Opening ad…';
-    if (status) status.textContent = 'Stick with it — your free spin reward unlocks right after!';
-
-    await window.show_11688228({
-      type: 'end',
-      ymid: adSpinSessionId,
-      requestVar: 'game_watch_ad_spin'
-    });
-
-    if (btn) btn.textContent = 'Confirming reward…';
-    if (status) status.textContent = 'Ad completed. Waiting for confirmation…';
-
-    const postbackData = await waitForAdSpinPostback();
-
-    if (!postbackData) {
-      if (status) status.textContent = 'Ad completed, but the reward has not been confirmed yet. Please check again shortly.';
-      if (btn) { btn.disabled = false; btn.textContent = '▶ View Ad'; }
-      return;
-    }
-
-    const spins = Number(postbackData.reward?.spins || 0);
-    if (btn) btn.style.display = 'none';
-    await runAdSpinReel(spins);
-    showAdSpinResult(spins);
-
-  } catch (error) {
-    console.error('Watch ad for free spin error:', error);
-    const message = error?.message || 'Unable to show the ad.';
-    if (status) status.textContent = message;
-    if (error?.nextAllowedAt) {
-      localStorage.setItem(AD_SPIN_COOLDOWN_KEY, String(error.nextAllowedAt));
-      updateAdSpinCooldownUI();
-    }
-    if (btn) { btn.disabled = false; btn.textContent = '▶ View Ad'; }
-  } finally {
-    adSpinInProgress = false;
-  }
-}
-
-updateAdSpinCooldownUI();
 
 
 /* =========================================
@@ -4870,7 +4014,7 @@ async function startSpin() {
   /*
     Check balance before request.
 
-    Free spins do not require ₦50.
+    Free spins do not require 💎 50.
   */
 
   if (
@@ -5283,13 +4427,13 @@ function finishSpin(data) {
     if (prize > 0) {
 
       showToast(
-        `You won ₦${prize.toLocaleString()}`
+        `You won 💎 ${prize.toLocaleString()}`
       );
 
     } else {
 
       showToast(
-        'Spin completed — ₦0'
+        'Spin completed — 💎 0'
       );
 
     }
@@ -5451,7 +4595,7 @@ function showResultModal(prize) {
       'Congratulations!';
 
     desc.innerText =
-      `You won ₦${Number(
+      `You won 💎 ${Number(
         prize
       ).toLocaleString()}`;
 
@@ -5464,7 +4608,7 @@ function showResultModal(prize) {
       'Better luck next time!';
 
     desc.innerText =
-      'You got ₦0';
+      'You got 💎 0';
 
   }
 
@@ -5649,106 +4793,5 @@ updateLuckTicketMini();
 fetchGameState();
 
 </script>
-
-<script>
-/* =========================================================
-   MONETAG IN-APP INTERSTITIAL
-   =========================================================
-   Non-rewarded Monetag ads are controlled entirely by Monetag.
-   This does NOT touch the rewarded-ad/postback system above.
-
-   - frequency: 2 ads
-   - capping: 0.1 hours = 6 minutes
-   - interval: 30 seconds between ads
-   - timeout: 5 seconds before the first ad
-   - everyPage: true = the Monetag session resets on every page
-     transition, so the frequency/capping counter starts over each
-     time this page is (re)entered, instead of being shared
-     across the whole app session.
-
-   Monetag still decides whether an ad is actually available/shown.
-   ========================================================= */
-const MONETAG_INAPP_SETTINGS = Object.freeze({
-    type: "inApp",
-    inAppSettings: {
-        frequency: 2,
-        capping: 0.1,
-        interval: 30,
-        timeout: 5,
-        everyPage: true
-    }
-});
-
-let monetagInAppStarted = false;
-let monetagInAppRetryTimer = null;
-
-/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
-   multiple times in a row can reset the SDK's internal logic and
-   interrupt the ad flow. So this must only ever be called ONCE per
-   page load. everyPage:true (below) is what makes Monetag itself
-   reset the frequency/capping session on every navigation/entry —
-   we do NOT need to (and must not) re-call show_11688228 manually
-   when the user returns to the tab. */
-function startMonetagInAppInterstitial(){
-    if(monetagInAppStarted) return;
-    monetagInAppStarted = true;
-
-    const launch = () => {
-        if(typeof window.show_11688228 !== "function"){
-            // The SDK script may still be loading. Retry a few times
-            // without creating an aggressive polling loop.
-            monetagInAppStarted = false;
-            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
-            return;
-        }
-
-        /*
-         * Do not attach rewarded-ad ymid/requestVar values here.
-         * In-App Interstitial is non-rewarded and must remain
-         * separate from the reward flow.
-         *
-         * catchIfNoFeed:true + .catch() below exist purely for
-         * debugging — by default Monetag silently resolves with no
-         * ad shown when there's nothing to serve (empty feed, zone
-         * still in moderation, domain not approved, etc.), so
-         * without this you'd never see *why* nothing appeared.
-         */
-        try{
-            const result = window.show_11688228({
-                ...MONETAG_INAPP_SETTINGS,
-                catchIfNoFeed: true
-            });
-            if(result && typeof result.catch === "function"){
-                result.catch(error=>{
-                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
-                });
-            }
-        }catch(error){
-            console.warn("Monetag In-App Interstitial could not start:", error);
-            monetagInAppStarted = false;
-        }
-    };
-
-    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
-    setTimeout(launch, 5000);
-}
-
-/* Start once this page has first loaded — and only once. Monetag
-   handles the configured frequency/capping/interval from there, and
-   everyPage:true resets that session on every fresh page load. */
-if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
-}else{
-    startMonetagInAppInterstitial();
-}
-</script>
-
-</body>
-</html>
-
-
-
-
-
 
 

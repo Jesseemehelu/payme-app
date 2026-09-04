@@ -2,854 +2,430 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#050811">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-(function initTelegramFullscreenFix(){
-  var tg = window.Telegram && window.Telegram.WebApp;
-  var root = document.documentElement;
-  function setSafeAreaVars(){
-    var safeTop = 0, safeBottom = 0, safeLeft = 0, safeRight = 0;
-    if(tg){
-      var s = tg.safeAreaInset || {};
-      var c = tg.contentSafeAreaInset || {};
-      safeTop = (Number(s.top) || 0) + (Number(c.top) || 0);
-      safeBottom = (Number(s.bottom) || 0) + (Number(c.bottom) || 0);
-      safeLeft = (Number(s.left) || 0) + (Number(c.left) || 0);
-      safeRight = (Number(s.right) || 0) + (Number(c.right) || 0);
-    }
-    root.style.setProperty("--safe-top", safeTop + "px");
-    root.style.setProperty("--safe-bottom", safeBottom + "px");
-    root.style.setProperty("--safe-left", safeLeft + "px");
-    root.style.setProperty("--safe-right", safeRight + "px");
-  }
-  root.style.setProperty("--safe-top", "env(safe-area-inset-top, 0px)");
-  root.style.setProperty("--safe-bottom", "env(safe-area-inset-bottom, 0px)");
-  root.style.setProperty("--safe-left", "env(safe-area-inset-left, 0px)");
-  root.style.setProperty("--safe-right", "env(safe-area-inset-right, 0px)");
-  if(!tg) return;
-  try{ tg.ready(); }catch(e){}
-  try{ tg.expand(); }catch(e){}
-  try{ if(typeof tg.disableVerticalSwipes === "function") tg.disableVerticalSwipes(); }catch(e){}
-  setSafeAreaVars();
-  try{
-    if(typeof tg.onEvent === "function"){
-      tg.onEvent("safeAreaChanged", setSafeAreaVars);
-      tg.onEvent("contentSafeAreaChanged", setSafeAreaVars);
-      tg.onEvent("viewportChanged", setSafeAreaVars);
-      tg.onEvent("fullscreenChanged", setSafeAreaVars);
-    }
-  }catch(e){}
-})();
-  </script>
-  <title>PAYME — Withdraw Earnings</title>
+  <title>PAYME — USDT Withdrawal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <style>
-    :root {
-      --bg: #f4f7fb;
-      --card: rgba(255,255,255,.96);
-      --ink: #0f172a;
-      --muted: #64748b;
-      --line: #e5eaf2;
-      --blue: #2563eb;
-      --blue-dark: #1d4ed8;
-      --green: #10b981;
-      --danger: #ef4444;
-      --shadow: 0 18px 50px rgba(15, 23, 42, .08);
-      --radius: 24px;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-left: env(safe-area-inset-left, 0px);
-      --safe-right: env(safe-area-inset-right, 0px);
+    :root{
+      --bg:#050811;--panel:#0b1220;--panel2:#0e1728;--line:rgba(255,255,255,.09);
+      --text:#f8fbff;--muted:#91a0b6;--blue:#5b8cff;--cyan:#35d7ff;
+      --green:#42e0a7;--yellow:#ffd166;--red:#ff6f82;
+      --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-tap-highlight-color:transparent}
+    body{
+      min-height:100vh;color:var(--text);background:
+      radial-gradient(circle at 85% -5%,rgba(59,130,246,.25),transparent 30%),
+      radial-gradient(circle at -10% 35%,rgba(34,211,238,.10),transparent 28%),
+      #050811;
+      padding:calc(13px + var(--safe-top)) 14px calc(34px + var(--safe-bottom));
+      overflow-x:hidden
     }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background:
-        radial-gradient(circle at 90% 0%, rgba(37,99,235,.10), transparent 32%),
-        var(--bg);
-      color: var(--ink);
-      min-height: 100vh;
-      /* Keeps the back button clear of the status bar / notch / Telegram's
-         own fullscreen-mode controls, and clear of the home indicator. */
-      padding: calc(18px + var(--safe-top, 0px)) calc(15px + var(--safe-right, 0px)) calc(32px + var(--safe-bottom, 0px)) calc(15px + var(--safe-left, 0px));
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.018) 50%,transparent 70%);animation:sweep 8s linear infinite}
+    .wrap{width:min(520px,100%);margin:auto}
+    .top{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 17px}
+    .back{color:#b8c5d8;text-decoration:none;font-size:.78rem;font-weight:800;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
+    .logo{font-size:1rem;font-weight:900;letter-spacing:-.04em}.logo span{color:var(--cyan)}
+    .hero{
+      position:relative;overflow:hidden;border-radius:30px;padding:22px;margin-bottom:13px;
+      background:linear-gradient(145deg,#111d33 0%,#0a1120 60%,#08101c 100%);
+      border:1px solid rgba(108,157,255,.18);box-shadow:0 25px 70px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.08)
     }
-
-    button, input {
-      font: inherit;
+    .hero:after{content:"";position:absolute;width:190px;height:190px;right:-80px;top:-100px;border-radius:50%;background:rgba(53,215,255,.12);filter:blur(8px);animation:float 5s ease-in-out infinite}
+    .eyebrow{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(53,215,255,.08);border:1px solid rgba(53,215,255,.18);color:#91edff;font-size:.59rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em}
+    .eyebrow:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 1.5s infinite}
+    .hero h1{position:relative;z-index:1;font-size:1.72rem;letter-spacing:-.055em;line-height:1.08;margin-top:13px}
+    .hero p{position:relative;z-index:1;color:var(--muted);font-size:.71rem;line-height:1.65;margin-top:8px;max-width:410px}
+    .balance{
+      position:relative;z-index:1;margin-top:17px;padding:15px 16px;border-radius:19px;
+      background:rgba(2,8,18,.48);border:1px solid rgba(255,255,255,.07);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.035)
     }
-
-    .withdraw-container {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-      animation: fadeUp .45s ease both;
+    .balance small{display:block;color:#687990;font-size:.58rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
+    .balance strong{display:block;color:#a5f2ff;font-size:1.42rem;letter-spacing:-.04em;margin-top:3px;text-shadow:0 0 20px rgba(53,215,255,.18)}
+    .balance .usd{color:#b8c5d8;font-size:.68rem;margin-top:3px}
+    .card{
+      background:rgba(11,18,32,.94);border:1px solid var(--line);border-radius:25px;padding:18px;margin-bottom:13px;
+      box-shadow:0 18px 50px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.035)
     }
-
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: .88rem;
-      font-weight: 800;
-      margin: 3px 0 17px;
-      padding: 8px 2px;
-      transition: .2s ease;
+    .section-head{display:flex;align-items:center;gap:10px}
+    .usdt-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;font-weight:900;color:#6ff0ca;background:rgba(66,224,167,.09);border:1px solid rgba(66,224,167,.18);box-shadow:0 0 24px rgba(66,224,167,.08)}
+    .title{font-size:.96rem;font-weight:900;letter-spacing:-.02em}.sub{font-size:.67rem;color:var(--muted);line-height:1.55;margin-top:4px}
+    .label{display:block;color:#77879f;font-size:.59rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em;margin:16px 0 7px}
+    .input{
+      width:100%;height:54px;border:1px solid rgba(255,255,255,.09);border-radius:15px;
+      background:#070e1a;color:#fff;padding:0 14px;outline:none;font-size:.95rem;font-weight:800;
+      transition:border-color .2s,box-shadow .2s,transform .2s
     }
-
-    .back-btn:active {
-      transform: translateX(-3px);
+    .input:focus{border-color:rgba(91,140,255,.72);box-shadow:0 0 0 4px rgba(91,140,255,.10),0 0 26px rgba(91,140,255,.08);transform:translateY(-1px)}
+    .usd-preview{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:9px 11px;border-radius:12px;background:rgba(53,215,255,.045);border:1px solid rgba(53,215,255,.08);color:#8eeaff;font-size:.67rem;font-weight:900}
+    .asset{
+      width:100%;height:52px;border-radius:15px;border:1px solid rgba(66,224,167,.30);
+      background:linear-gradient(135deg,rgba(66,224,167,.10),rgba(20,120,100,.06));
+      color:#8df2d0;display:flex;align-items:center;gap:10px;padding:0 13px;font-weight:900
     }
-
-    .hero-card {
-      position: relative;
-      overflow: hidden;
-      border-radius: 27px;
-      padding: 24px;
-      color: white;
-      background:
-        radial-gradient(circle at 90% 0%, rgba(56,189,248,.28), transparent 32%),
-        linear-gradient(135deg, #071126 0%, #172554 100%);
-      box-shadow: 0 20px 45px rgba(15,23,42,.20);
-      margin-bottom: 14px;
+    .asset .coin{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:rgba(66,224,167,.12);font-size:1rem}
+    .asset .right{margin-left:auto;font-size:.58rem;color:#6d7e95}
+    .btn{
+      width:100%;height:55px;border:0;border-radius:16px;margin-top:16px;color:#fff;font-weight:900;font-size:.78rem;
+      background:linear-gradient(135deg,#4f7cff,#32d5ff);box-shadow:0 13px 32px rgba(62,128,255,.22),0 0 30px rgba(53,215,255,.08);
+      transition:transform .2s,filter .2s,box-shadow .2s
     }
-
-    .hero-card::after {
-      content: '';
-      position: absolute;
-      width: 130px;
-      height: 130px;
-      right: -48px;
-      bottom: -55px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 0 0 22px rgba(255,255,255,.025), 0 0 0 44px rgba(255,255,255,.018);
-    }
-
-    .hero-label {
-      color: #a5b4fc;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .balance {
-      margin-top: 5px;
-      font-size: 2.15rem;
-      line-height: 1.15;
-      font-weight: 800;
-      letter-spacing: -.04em;
-      color: #67e8f9;
-    }
-
-    .balance-sub {
-      margin-top: 7px;
-      color: #cbd5e1;
-      font-size: .78rem;
-    }
-
-    .cooldown-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 15px;
-      border: 1px solid #bfdbfe;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #eff6ff, #f8fbff);
-      margin-bottom: 14px;
-    }
-
-    .cooldown-icon {
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: #dbeafe;
-      color: var(--blue);
-    }
-
-    .cooldown-content {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .cooldown-title {
-      font-size: .78rem;
-      font-weight: 800;
-      color: #1e3a8a;
-    }
-
-    .cooldown-text {
-      margin-top: 2px;
-      font-size: .72rem;
-      line-height: 1.45;
-      color: #475569;
-    }
-
-    .cooldown-time {
-      margin-top: 3px;
-      font-size: .96rem;
-      font-weight: 800;
-      color: var(--blue);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .form-card {
-      background: var(--card);
-      border: 1px solid rgba(226,232,240,.9);
-      border-radius: var(--radius);
-      padding: 23px 19px 20px;
-      box-shadow: var(--shadow);
-    }
-
-    .form-title {
-      font-size: 1.18rem;
-      font-weight: 800;
-      letter-spacing: -.025em;
-    }
-
-    .form-sub {
-      color: var(--muted);
-      font-size: .77rem;
-      line-height: 1.5;
-      margin-top: 5px;
-      margin-bottom: 17px;
-    }
-
-    .notice-box {
-      display: flex;
-      gap: 10px;
-      padding: 12px 13px;
-      margin-bottom: 18px;
-      border: 1px solid #dbeafe;
-      border-radius: 15px;
-      background: #f8fbff;
-      color: #334155;
-      font-size: .72rem;
-      line-height: 1.55;
-    }
-
-    .notice-icon {
-      flex: 0 0 auto;
-      color: var(--blue);
-      font-weight: 800;
-    }
-
-    .input-group {
-      margin-bottom: 14px;
-    }
-
-    .input-group label {
-      display: block;
-      margin-bottom: 6px;
-      color: #334155;
-      font-size: .72rem;
-      font-weight: 800;
-    }
-
-    .input-group input {
-      width: 100%;
-      height: 50px;
-      border: 1.5px solid var(--line);
-      border-radius: 14px;
-      padding: 0 14px;
-      outline: none;
-      background: #f8fafc;
-      color: var(--ink);
-      font-size: .86rem;
-      font-weight: 600;
-      transition: .2s ease;
-    }
-
-    .input-group input:focus {
-      background: #fff;
-      border-color: #60a5fa;
-      box-shadow: 0 0 0 4px rgba(37,99,235,.09);
-    }
-
-    .btn-submit {
-      position: relative;
-      width: 100%;
-      height: 53px;
-      margin-top: 5px;
-      border: 0;
-      border-radius: 15px;
-      background: linear-gradient(135deg, var(--blue), #3b82f6);
-      color: white;
-      font-size: .88rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(37,99,235,.24);
-      transition: transform .15s ease, opacity .2s ease;
-    }
-
-    .btn-submit:active:not(:disabled) {
-      transform: scale(.985);
-    }
-
-    .btn-submit:disabled {
-      cursor: not-allowed;
-      opacity: .55;
-      box-shadow: none;
-    }
-
-    .button-loader {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    .button-loader span {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-      animation: dotPulse 1s infinite ease-in-out;
-    }
-
-    .button-loader span:nth-child(2) { animation-delay: .14s; }
-    .button-loader span:nth-child(3) { animation-delay: .28s; }
-
-    /* Full-screen processing animation shown before the success popup. */
-    .processing-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(7, 17, 38, .78);
-      backdrop-filter: blur(9px);
-    }
-
-    .processing-overlay.show {
-      display: flex;
-    }
-
-    .processing-card {
-      width: min(330px, 100%);
-      padding: 30px 24px 26px;
-      text-align: center;
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 26px;
-      background: rgba(255,255,255,.98);
-      box-shadow: 0 25px 70px rgba(0,0,0,.30);
-      animation: popIn .28s ease both;
-    }
-
-    .loader-ring {
-      width: 62px;
-      height: 62px;
-      margin: 0 auto 17px;
-      border: 5px solid #dbeafe;
-      border-top-color: var(--blue);
-      border-right-color: #38bdf8;
-      border-radius: 50%;
-      animation: spin  .8s linear infinite;
-    }
-
-    .processing-card h3 {
-      font-size: 1.05rem;
-      font-weight: 800;
-    }
-
-    .processing-card p {
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: .76rem;
-      line-height: 1.5;
-    }
-
-    /* Success popup */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 11000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(7,17,38,.80);
-      backdrop-filter: blur(9px);
-    }
-
-    .modal-overlay.show {
-      display: flex;
-    }
-
-    .success-card {
-      width: min(380px, 100%);
-      padding: 28px 22px 21px;
-      text-align: center;
-      border-radius: 27px;
-      background: #fff;
-      box-shadow: 0 28px 80px rgba(0,0,0,.30);
-      animation: popIn .34s cubic-bezier(.175,.885,.32,1.275) both;
-    }
-
-    .success-icon {
-      position: relative;
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 16px;
-      display: grid;
-      place-items: center;
-      border-radius: 22px;
-      background: #dcfce7;
-      color: var(--green);
-    }
-
-    .success-icon::after {
-      content: '';
-      position: absolute;
-      inset: -7px;
-      border: 2px solid #bbf7d0;
-      border-radius: 27px;
-      animation: ringIn .55s ease both;
-    }
-
-    .success-card h3 {
-      font-size: 1.25rem;
-      font-weight: 800;
-    }
-
-    .success-card p {
-      margin: 8px 0 18px;
-      color: var(--muted);
-      font-size: .78rem;
-      line-height: 1.55;
-    }
-
-    .success-next {
-      margin-bottom: 14px;
-      padding: 12px;
-      border-radius: 14px;
-      background: #f8fafc;
-      color: #475569;
-      font-size: .72rem;
-      line-height: 1.45;
-    }
-
-    .success-next strong {
-      display: block;
-      margin-top: 3px;
-      color: var(--blue);
-      font-size: .9rem;
-      font-variant-numeric: tabular-nums;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(.88); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes dotPulse {
-      0%, 60%, 100% { transform: translateY(0); opacity: .45; }
-      30% { transform: translateY(-4px); opacity: 1; }
-    }
-
-    @keyframes ringIn {
-      from { opacity: 0; transform: scale(.75); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @media (max-width: 380px) {
-      body { padding-left: 12px; padding-right: 12px; }
-      .hero-card { padding: 21px; }
-      .balance { font-size: 1.95rem; }
-      .form-card { padding: 21px 16px 18px; }
-    }
+    .btn:not(:disabled):active{transform:scale(.975)}.btn:not(:disabled):hover{filter:brightness(1.06);box-shadow:0 16px 35px rgba(62,128,255,.28),0 0 35px rgba(53,215,255,.13)}
+    .btn:disabled{opacity:.42;box-shadow:none}
+    .notice{display:flex;gap:10px;margin-top:13px;padding:13px;border-radius:16px;background:rgba(255,209,102,.055);border:1px solid rgba(255,209,102,.13);color:#d5dbe5;font-size:.64rem;line-height:1.55}
+    .notice b{color:#ffe39a}
+    .status-card{display:none;animation:slide .35s cubic-bezier(.16,1,.3,1)}.status-card.show{display:block}
+    .status-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .status-pill{padding:7px 10px;border-radius:999px;font-size:.57rem;font-weight:900;letter-spacing:.05em;background:rgba(255,209,102,.09);color:#ffe39a;border:1px solid rgba(255,209,102,.18)}
+    .status-pill.approved{background:rgba(66,224,167,.09);color:#86efc6;border-color:rgba(66,224,167,.18)}
+    .status-pill.rejected{background:rgba(255,111,130,.09);color:#ff9aaa;border-color:rgba(255,111,130,.18)}
+    .status-line{height:1px;background:rgba(255,255,255,.06);margin:15px 0}
+    .row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:.65rem}.row span:first-child{color:#718099}.row span:last-child{font-weight:800;text-align:right;max-width:65%;overflow:hidden;text-overflow:ellipsis}
+    .pending-message{margin-top:12px;padding:11px 12px;border-radius:13px;background:rgba(91,140,255,.06);border:1px solid rgba(91,140,255,.12);color:#c6d2e3;font-size:.63rem;line-height:1.55}
+    .pending-message b{color:#9bb8ff}
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:99;background:rgba(2,6,23,.82);backdrop-filter:blur(13px);align-items:center;justify-content:center;padding:18px}
+    .modal-overlay.show{display:flex}.modal{width:min(400px,100%);background:#0e182a;border:1px solid rgba(255,255,255,.10);border-radius:27px;padding:24px 20px;text-align:center;box-shadow:0 35px 100px rgba(0,0,0,.60);animation:pop .35s cubic-bezier(.16,1,.3,1)}
+    .modal-icon{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;margin:0 auto 14px;background:rgba(66,224,167,.10);border:1px solid rgba(66,224,167,.18);color:#7ff0c0;font-size:1.7rem;box-shadow:0 0 30px rgba(66,224,167,.10)}
+    .modal h3{font-size:1.08rem}.modal p{color:var(--muted);font-size:.69rem;line-height:1.6;margin-top:7px}.modal .value{margin-top:13px;padding:12px;border-radius:13px;background:#070e1a;color:#9deeff;font-size:.67rem;font-weight:900;line-height:1.5}
+    .close{width:100%;height:48px;border:0;border-radius:14px;background:#2563eb;color:#fff;font-weight:900;margin-top:14px}
+    .loading-dot{display:inline-block;animation:blink 1s infinite}.loading-dot:nth-child(2){animation-delay:.15s}.loading-dot:nth-child(3){animation-delay:.3s}
+    @keyframes pop{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes slide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(-18px,14px)}}
+    @keyframes pulse{0%,100%{opacity:.55;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+    @keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+    @keyframes blink{50%{opacity:.25}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
   </style>
 </head>
-
 <body>
-  <div class="withdraw-container">
-    <a href="/dashboard.html" class="back-btn" aria-label="Back to Dashboard">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 12H5"></path>
-        <path d="M12 19l-7-7 7-7"></path>
-      </svg>
-      Back to Dashboard
-    </a>
-
-    <section class="hero-card">
-      <div class="hero-label">Withdrawable Earnings</div>
-      <div class="balance" id="earningsBalanceText">₦0.00</div>
-      <div class="balance-sub">Only earned funds are available for withdrawal.</div>
-    </section>
-
-    <section class="cooldown-card" id="cooldownCard">
-      <div class="cooldown-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M12 7v5l3 2"></path>
-        </svg>
-      </div>
-      <div class="cooldown-content">
-        <div class="cooldown-title" id="cooldownTitle">Checking withdrawal availability…</div>
-        <div class="cooldown-text" id="cooldownText">Your withdrawal limit is one request every 24 hours.</div>
-        <div class="cooldown-time" id="cooldownTime">Please wait…</div>
-      </div>
-    </section>
-
-    <section class="form-card">
-      <h1 class="form-title">Request Withdrawal</h1>
-      <p class="form-sub">Enter the bank details you want your earned funds sent to.</p>
-
-      <div class="notice-box">
-        <span class="notice-icon">ⓘ</span>
-        <span><strong>Important:</strong> Deposited funds are for in-app services and cannot be withdrawn. Only earned funds such as referrals, bonuses and rewards are withdrawable.</span>
-      </div>
-
-      <form id="withdrawForm" novalidate>
-        <div class="input-group">
-          <label for="accountName">Account Name</label>
-          <input type="text" id="accountName" placeholder="e.g. John Doe" autocomplete="name" required>
-        </div>
-
-        <div class="input-group">
-          <label for="bankName">Bank Name</label>
-          <input type="text" id="bankName" placeholder="e.g. Kuda, OPay, GTBank" autocomplete="organization" required>
-        </div>
-
-        <div class="input-group">
-          <label for="accountNumber">Account Number</label>
-          <input type="tel" id="accountNumber" inputmode="numeric" maxlength="10" placeholder="10-digit account number" autocomplete="off" required>
-        </div>
-
-        <div class="input-group">
-          <label for="amount">Amount (₦)</label>
-          <input type="number" id="amount" placeholder="Minimum ₦200" min="200" step="0.01" required>
-        </div>
-
-        <button type="submit" class="btn-submit" id="submitBtn" disabled>
-          <span id="submitText">Checking availability…</span>
-        </button>
-      </form>
-    </section>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="/dashboard.html">← Back</a>
+    <div class="logo">PAYME<span>.</span></div>
   </div>
 
-  <!-- Processing animation appears immediately after Confirm Withdrawal is clicked. -->
-  <div class="processing-overlay" id="processingOverlay" aria-hidden="true">
-    <div class="processing-card">
-      <div class="loader-ring"></div>
-      <h3>Processing Withdrawal</h3>
-      <p>We're securely submitting your withdrawal request. Please don't close this page.</p>
+  <section class="hero">
+    <span class="eyebrow">Manual USDT Payouts</span>
+    <h1>Withdraw your Gems</h1>
+    <p>Your withdrawal is reviewed manually. Enter the amount and your USDT wallet address, then submit your request for approval.</p>
+    <div class="balance">
+      <small>Withdrawable earnings</small>
+      <strong id="gemsBalance">💎 0</strong>
+      <div id="usdBalance" class="usd">$0.00 USD value</div>
     </div>
-  </div>
+  </section>
 
-  <!-- Success popup appears only after the server confirms the withdrawal. -->
-  <div class="modal-overlay" id="successModal" aria-hidden="true">
-    <div class="success-card">
-      <div class="success-icon">
-        <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
+  <section id="statusCard" class="card status-card">
+    <div class="status-top">
+      <div>
+        <div class="title">Latest withdrawal</div>
+        <div class="sub">Your most recent payout request</div>
       </div>
-      <h3>Withdrawal Submitted</h3>
-      <p>Your withdrawal request has been received and is now being processed.</p>
-
-      <div class="success-next">
-        You can make your next withdrawal after
-        <strong id="successCountdown">24:00:00</strong>
-      </div>
-
-      <button type="button" class="btn-submit" style="margin-top:0" onclick="window.location.href='/dashboard.html'">
-        Back to Dashboard
-      </button>
+      <div id="statusPill" class="status-pill">PENDING</div>
     </div>
+    <div class="status-line"></div>
+    <div class="row"><span>Amount</span><span id="statusAmount">—</span></div>
+    <div class="row"><span>USDT</span><span id="statusUsd">—</span></div>
+    <div class="row"><span>Address</span><span id="statusAddress">—</span></div>
+    <div class="row"><span>Requested</span><span id="statusDate">—</span></div>
+    <div id="pendingMessage" class="pending-message">
+      ⏳ <b>Pending manual review.</b> Once approved, the USDT payout will be sent manually. Manual withdrawals can take up to <b>24 hours</b> to arrive.
+    </div>
+  </section>
+
+  <section id="withdrawCard" class="card">
+    <div class="section-head">
+      <div class="usdt-icon">₮</div>
+      <div>
+        <div class="title">USDT withdrawal</div>
+        <div class="sub">Only USDT withdrawals are accepted.</div>
+      </div>
+    </div>
+
+    <label class="label" for="gemsInput">Withdrawal amount</label>
+    <input id="gemsInput" class="input" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter Gems to withdraw">
+    <div class="usd-preview"><span>Estimated payout</span><span id="usdPreview">$0.00 USDT</span></div>
+
+    <label class="label" for="addressInput">USDT wallet address</label>
+    <input id="addressInput" class="input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Paste your USDT address">
+
+    <div class="asset" style="margin-top:13px">
+      <span class="coin">₮</span>
+      <span>USDT</span>
+      <span class="right">Manual transfer</span>
+    </div>
+
+    <button id="withdrawBtn" class="btn" disabled>Request USDT Withdrawal</button>
+
+    <div class="notice">
+      <div>⏱️</div>
+      <div><b>Important:</b> PAYME withdrawals are reviewed and sent manually. Please double-check your USDT address and network. Manual withdrawals may take <b>up to 24 hours</b> to arrive after approval.</div>
+    </div>
+  </section>
+</div>
+
+<div id="modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-icon">✓</div>
+    <h3>Withdrawal request submitted</h3>
+    <p>Your request is now <b>pending manual approval</b>. Your Gems have been reserved while the request is reviewed.</p>
+    <div id="sentValue" class="value"></div>
+    <button class="close" onclick="location.href='/dashboard.html'">Back to Wallet</button>
   </div>
+</div>
 
-  <script>
-    let withdrawableBalance = 0;
-    let nextAllowedAt = 0;
-    let cooldownTimer = null;
-    let withdrawalAvailable = false;
-    let loadingWithdrawal = false;
+<script>
+(function(){
+  const tg = window.Telegram?.WebApp;
+  if(tg){
+    try{tg.ready();tg.expand();if(tg.disableVerticalSwipes)tg.disableVerticalSwipes()}catch(e){}
+  }
 
-    const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+  const $ = id => document.getElementById(id);
+  let cfg = null;
+  let balance = 0;
+  let nextAllowedAt = 0;
+  let loading = false;
+  let statusTimer = null;
 
-    const $ = (id) => document.getElementById(id);
+  const money = n => '$' + Number(n || 0).toLocaleString('en-US',{
+    minimumFractionDigits:2,maximumFractionDigits:2
+  });
 
-    function formatNaira(amount) {
-      return '₦' + Number(amount || 0).toLocaleString('en-NG', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+  const countdown = ms => {
+    let s = Math.max(0,Math.ceil(ms/1000));
+    const h = Math.floor(s/3600); s %= 3600;
+    const m = Math.floor(s/60); s %= 60;
+    return [h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
+  };
+
+  function renderForm(){
+    if(!cfg) return;
+    const gems = Number($('gemsInput').value || 0);
+    $('gemsBalance').textContent = '💎 ' + balance.toLocaleString();
+    $('usdBalance').textContent = money(balance * cfg.gemUsdRate) + ' USD value';
+    $('usdPreview').textContent = money(gems * cfg.gemUsdRate) + ' USDT';
+
+    const address = $('addressInput').value.trim();
+    const validAddress = address.length >= 20 && address.length <= 128 && !/\s/.test(address);
+    const ok =
+      Number.isInteger(gems) &&
+      gems >= cfg.minGems &&
+      gems <= balance &&
+      validAddress &&
+      nextAllowedAt <= Date.now() &&
+      !loading;
+
+    $('withdrawBtn').disabled = !ok;
+
+    if(nextAllowedAt > Date.now()){
+      $('withdrawBtn').textContent = 'Available in ' + countdown(nextAllowedAt - Date.now());
+    }else{
+      $('withdrawBtn').textContent = loading ? 'Submitting request…' : 'Request USDT Withdrawal';
+    }
+  }
+
+  function renderLatest(wd){
+    const item = wd?.latestWithdrawal;
+    if(!item){
+      $('statusCard').classList.remove('show');
+      return;
+    }
+
+    $('statusCard').classList.add('show');
+    $('statusAmount').textContent = '💎 ' + Number(item.amount || 0).toLocaleString();
+    $('statusUsd').textContent = money(item.usd) + ' USDT';
+
+    const addr = String(item.address || '');
+    $('statusAddress').textContent =
+      addr.length > 26 ? addr.slice(0,12) + '…' + addr.slice(-10) : (addr || '—');
+
+    $('statusDate').textContent = item.createdAt
+      ? new Date(item.createdAt).toLocaleString()
+      : '—';
+
+    const status = String(item.status || 'Pending');
+    const pill = $('statusPill');
+    pill.textContent = status.toUpperCase();
+    pill.className = 'status-pill ' + (
+      status === 'Approved' ? 'approved' :
+      status === 'Rejected' ? 'rejected' : ''
+    );
+
+    if(status === 'Approved'){
+      $('pendingMessage').innerHTML =
+        '✅ <b>Approved for payout.</b> Your USDT request has been approved for manual processing. Manual withdrawals can take up to <b>24 hours</b> to arrive.';
+    }else if(status === 'Rejected'){
+      $('pendingMessage').innerHTML =
+        '❌ <b>Withdrawal rejected.</b> The reserved Gems have been returned to your withdrawable balance.';
+    }else{
+      $('pendingMessage').innerHTML =
+        '⏳ <b>Pending manual review.</b> Once approved, the USDT payout will be sent manually. Manual withdrawals can take up to <b>24 hours</b> to arrive.';
+    }
+
+    // A pending request should not allow a second request even if the
+    // cooldown timestamp is not yet available on a newly opened page.
+    if(status === 'Pending'){
+      $('withdrawBtn').disabled = true;
+      $('withdrawBtn').textContent = 'Withdrawal Pending…';
+    }
+  }
+
+  async function load(){
+    const [c,u,w] = await Promise.all([
+      fetch('/api/crypto/config',{credentials:'include',cache:'no-store'}),
+      fetch('/api/user/dashboard',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials:'include',
+        body:JSON.stringify({
+          initData:tg?.initData||'',
+          telegramId:tg?.initDataUnsafe?.user?.id,
+          username:tg?.initDataUnsafe?.user?.username,
+          firstName:tg?.initDataUnsafe?.user?.first_name,
+          lastName:tg?.initDataUnsafe?.user?.last_name
+        })
+      }),
+      fetch('/api/withdraw/status',{credentials:'include',cache:'no-store'})
+    ]);
+
+    const cd = await c.json();
+    const ud = await u.json();
+    const wd = await w.json();
+
+    if(!cd.success || !ud.success || !wd.success){
+      throw new Error(cd.message || ud.message || wd.message || 'Unable to load withdrawal settings.');
+    }
+
+    cfg = {
+      gemUsdRate:Number(cd.gemUsdRate || 0),
+      minUsd:Number(cd.minUsd || 0.50),
+      minGems:Number(cd.minGems || 1),
+      assets:['USDT']
+    };
+
+    balance = Number(ud.user?.withdrawableBalance ?? 0);
+    nextAllowedAt = Number(wd.nextAllowedAt || 0);
+
+    renderLatest(wd);
+    renderForm();
+
+    clearInterval(statusTimer);
+    statusTimer = setInterval(refreshStatus,5000);
+    setInterval(renderForm,1000);
+  }
+
+  async function refreshStatus(){
+    try{
+      const r = await fetch('/api/withdraw/status',{credentials:'include',cache:'no-store'});
+      const d = await r.json();
+      if(!d.success) return;
+
+      nextAllowedAt = Number(d.nextAllowedAt || 0);
+      renderLatest(d);
+
+      // Keep the displayed balance fresh after an admin rejection/refund.
+      const u = await fetch('/api/user/dashboard',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials:'include',
+        body:JSON.stringify({
+          initData:tg?.initData||'',
+          telegramId:tg?.initDataUnsafe?.user?.id,
+          username:tg?.initDataUnsafe?.user?.username,
+          firstName:tg?.initDataUnsafe?.user?.first_name,
+          lastName:tg?.initDataUnsafe?.user?.last_name
+        })
       });
+      const ud = await u.json();
+      if(ud.success) balance = Number(ud.user?.withdrawableBalance ?? balance);
+
+      renderForm();
+    }catch(e){}
+  }
+
+  async function withdraw(){
+    if(loading) return;
+
+    const gems = Number($('gemsInput').value || 0);
+    const address = $('addressInput').value.trim();
+    const usd = gems * cfg.gemUsdRate;
+
+    if(nextAllowedAt > Date.now()){
+      alert('Your withdrawal is temporarily locked.');
+      return;
     }
 
-    function formatCountdown(ms) {
-      const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-
-      return [
-        String(hours).padStart(2, '0'),
-        String(minutes).padStart(2, '0'),
-        String(seconds).padStart(2, '0')
-      ].join(':');
+    if(!Number.isInteger(gems) || gems < cfg.minGems){
+      alert(`Minimum withdrawal is ${cfg.minGems.toLocaleString()} Gems (${money(cfg.minUsd)}).`);
+      return;
     }
 
-    function setSubmitState(enabled, text) {
-      const btn = $('submitBtn');
-      btn.disabled = !enabled || loadingWithdrawal;
-      $('submitText').textContent = text;
+    if(gems > balance){
+      alert('You cannot withdraw more than your earned Gems.');
+      return;
     }
 
-    function renderCooldown() {
-      if (!nextAllowedAt) {
-        withdrawalAvailable = true;
-        $('cooldownTitle').textContent = 'Withdrawal available';
-        $('cooldownText').textContent = 'You can submit one withdrawal now. After submitting, another withdrawal is locked for 24 hours.';
-        $('cooldownTime').textContent = 'Ready to withdraw';
-        if (!loadingWithdrawal) setSubmitState(true, 'Confirm Withdrawal');
-        return;
-      }
-
-      const remaining = Math.max(0, nextAllowedAt - Date.now());
-
-      if (remaining <= 0) {
-        nextAllowedAt = 0;
-        withdrawalAvailable = true;
-        $('cooldownTitle').textContent = 'Withdrawal available';
-        $('cooldownText').textContent = 'Your 24-hour withdrawal cooldown has ended.';
-        $('cooldownTime').textContent = 'Ready to withdraw';
-        if (!loadingWithdrawal) setSubmitState(true, 'Confirm Withdrawal');
-        if (cooldownTimer) {
-          clearInterval(cooldownTimer);
-          cooldownTimer = null;
-        }
-        return;
-      }
-
-      withdrawalAvailable = false;
-      $('cooldownTitle').textContent = 'Withdrawal temporarily locked';
-      $('cooldownText').textContent = 'You have already withdrawn once. You can withdraw again when this countdown reaches zero.';
-      $('cooldownTime').textContent = formatCountdown(remaining);
-      if (!loadingWithdrawal) setSubmitState(false, 'Available after ' + formatCountdown(remaining));
+    if(address.length < 20 || address.length > 128 || /\s/.test(address)){
+      alert('Please enter a valid USDT wallet address.');
+      return;
     }
 
-    function startCooldownTimer() {
-      if (cooldownTimer) clearInterval(cooldownTimer);
-      renderCooldown();
-      if (nextAllowedAt > Date.now()) {
-        cooldownTimer = setInterval(renderCooldown, 1000);
-      }
-    }
+    loading = true;
+    renderForm();
 
-    function showProcessing() {
-      loadingWithdrawal = true;
-      $('processingOverlay').classList.add('show');
-      $('processingOverlay').setAttribute('aria-hidden', 'false');
-      setSubmitState(false, 'Processing…');
-    }
-
-    function hideProcessing() {
-      $('processingOverlay').classList.remove('show');
-      $('processingOverlay').setAttribute('aria-hidden', 'true');
-    }
-
-    function showSuccess() {
-      $('successModal').classList.add('show');
-      $('successModal').setAttribute('aria-hidden', 'false');
-      $('successCountdown').textContent = formatCountdown(Math.max(0, nextAllowedAt - Date.now()));
-    }
-
-    function showMessage(message) {
-      // Keep the existing page lightweight: use the native dialog instead of
-      // another UI library or external request.
-      window.alert(message);
-    }
-
-    async function fetchDashboardData() {
-      const tg = window.Telegram?.WebApp;
-      const initData = tg?.initData || '';
-      const tgUser = tg?.initDataUnsafe?.user;
-
-      const response = await fetch('/api/user/dashboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          initData,
-          telegramId: tgUser?.id,
-          username: tgUser?.username,
-          firstName: tgUser?.first_name,
-          lastName: tgUser?.last_name
+    try{
+      const r = await fetch('/api/withdraw',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials:'include',
+        body:JSON.stringify({
+          gems,
+          asset:'USDT',
+          address
         })
       });
 
-      const data = await response.json();
+      const d = await r.json();
 
-      if (!data.success) {
-        throw new Error(data.message || 'Unable to load your account.');
+      if(!r.ok || !d.success){
+        if(Number(d.nextAllowedAt) > Date.now()) nextAllowedAt = Number(d.nextAllowedAt);
+        throw new Error(d.message || 'Withdrawal request failed.');
       }
 
-      const user = data.user || {};
+      balance = Number(d.withdrawableBalance ?? balance - gems);
+      nextAllowedAt = Number(d.nextAllowedAt || Date.now() + 86400000);
 
-      withdrawableBalance = Number(
-        user.withdrawableBalance ?? user.referralEarnings ?? 0
-      );
+      $('sentValue').textContent =
+        `💎 ${gems.toLocaleString()} Gems → ${money(d.usd)} USDT\n` +
+        `Status: PENDING MANUAL APPROVAL`;
 
-      $('earningsBalanceText').textContent = formatNaira(withdrawableBalance);
+      $('modal').classList.add('show');
+      $('gemsInput').value = '';
+      $('addressInput').value = '';
+
+      await refreshStatus();
+    }catch(e){
+      alert(e.message || 'Unable to submit withdrawal request.');
+    }finally{
+      loading = false;
+      renderForm();
     }
+  }
 
-    async function fetchWithdrawalStatus() {
-      const response = await fetch('/api/withdraw/status', {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-store'
-      });
+  $('gemsInput').addEventListener('input',renderForm);
+  $('addressInput').addEventListener('input',renderForm);
+  $('withdrawBtn').addEventListener('click',withdraw);
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Unable to check withdrawal availability.');
-      }
-
-      nextAllowedAt = Number(data.nextAllowedAt || 0);
-      startCooldownTimer();
-    }
-
-    async function loadPage() {
-      try {
-        // Only two small authenticated requests are made on this page:
-        // one for the existing balance and one for one persistent timestamp.
-        await Promise.all([
-          fetchDashboardData(),
-          fetchWithdrawalStatus()
-        ]);
-      } catch (error) {
-        console.error('Withdrawal page load error:', error);
-        $('cooldownTitle').textContent = 'Unable to verify availability';
-        $('cooldownText').textContent = 'Please refresh the page and try again.';
-        $('cooldownTime').textContent = 'Unavailable';
-        setSubmitState(false, 'Try Again');
-      }
-    }
-
-    $('withdrawForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (loadingWithdrawal) return;
-
-      // Client-side check improves the UI, while the server remains
-      // authoritative and checks the same cooldown against Supabase.
-      if (!withdrawalAvailable || (nextAllowedAt && nextAllowedAt > Date.now())) {
-        renderCooldown();
-        showMessage('You can only make one withdrawal every 24 hours.');
-        return;
-      }
-
-      const accountName = $('accountName').value.trim();
-      const bankName = $('bankName').value.trim();
-      const accountNumber = $('accountNumber').value.trim();
-      const amount = Number.parseFloat($('amount').value);
-
-      if (!accountName || !bankName || !accountNumber) {
-        showMessage('Please provide complete bank details.');
-        return;
-      }
-
-      if (!/^\d{10}$/.test(accountNumber)) {
-        showMessage('Please enter a valid 10-digit account number.');
-        return;
-      }
-
-      if (!Number.isFinite(amount) || amount < 200) {
-        showMessage('Minimum withdrawal amount is ₦200.');
-        return;
-      }
-
-      if (amount > withdrawableBalance) {
-        showMessage('You cannot withdraw more than your earned balance. Deposited funds are non-withdrawable.');
-        return;
-      }
-
-      showProcessing();
-
-      try {
-        const response = await fetch('/api/withdraw', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            accountName,
-            bankName,
-            accountNumber,
-            amount
-          })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          if (Number(result.nextAllowedAt) > Date.now()) {
-            nextAllowedAt = Number(result.nextAllowedAt);
-            startCooldownTimer();
-          }
-
-          hideProcessing();
-          loadingWithdrawal = false;
-          renderCooldown();
-          showMessage(result.message || 'Withdrawal failed. Please try again.');
-          return;
-        }
-
-        // Use the server timestamp rather than browser local storage.
-        // This keeps the countdown correct across reloads and Render redeploys.
-        nextAllowedAt = Number(
-          result.nextAllowedAt ||
-          (Date.now() + COOLDOWN_MS)
-        );
-
-        startCooldownTimer();
-        $('successCountdown').textContent =
-          formatCountdown(Math.max(0, nextAllowedAt - Date.now()));
-
-        hideProcessing();
-        showSuccess();
-
-      } catch (error) {
-        console.error('Withdrawal error:', error);
-        hideProcessing();
-        loadingWithdrawal = false;
-        renderCooldown();
-        showMessage('An error occurred. Please check your network and try again.');
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', loadPage);
-  </script>
+  load().catch(e=>alert(e.message || 'Unable to load withdrawal page.'));
+})();
+</script>
 </body>
 </html>
-
-
 

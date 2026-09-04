@@ -44,13 +44,14 @@
   }catch(e){}
 })();
 </script>
-<script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
-   ROOT — new candy / 3D palette (no glass, solid color blocks)
+   ROOT — arcade-glass palette: solid 3D color blocks with
+   real bevels (dark base + light base per hue) instead of
+   flat translucent glassmorphism.
 ========================================================= */
 :root{
   --bg:#0a0716;
@@ -58,14 +59,14 @@
   --text:#ffffff;
   --muted:rgba(255,255,255,.72);
 
-  --blue:#3b82f6;
-  --cyan:#22e0ff;
-  --purple:#8b5cf6;
-  --pink:#ff4fb8;
-  --green:#2fe89a;
-  --gold:#ffcc33;
-  --orange:#ff8a3d;
-  --red:#ff4d6d;
+  --blue:#3b82f6;    --blue-dk:#1d4ed8;
+  --cyan:#22e0ff;    --cyan-dk:#0a8fa8;
+  --purple:#8b5cf6;  --purple-dk:#5b21b6;
+  --pink:#ff4fb8;    --pink-dk:#c81e7a;
+  --green:#2fe89a;   --green-dk:#0fae6c;
+  --gold:#ffcc33;    --gold-dk:#c97f00;
+  --orange:#ff8a3d;  --orange-dk:#c45c14;
+  --red:#ff4d6d;     --red-dk:#c81f3d;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -92,6 +93,13 @@ body{
     linear-gradient(165deg,#0d0820,#070310 55%,#0b0618);
 }
 
+/* subtle noise/grain overlay adds material depth without any texture asset */
+body:before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(255,255,255,.9) .6px,transparent .6px);
+  background-size:3px 3px;
+}
+
 .bg-orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.32;pointer-events:none;z-index:0;animation:orbMove 9s ease-in-out infinite alternate}
 .orb-a{width:240px;height:240px;top:-70px;left:-80px;background:var(--pink)}
 .orb-b{width:230px;height:230px;top:38%;right:-90px;background:var(--cyan);animation-delay:-3s}
@@ -99,59 +107,97 @@ body{
 @keyframes orbMove{to{transform:translate(20px,-22px) scale(1.12)}}
 
 @keyframes pageEnter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-5px) rotate(-3deg)}}
+@keyframes coinSpin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+@keyframes sheenSweep{0%{transform:translateX(-130%) skewX(-14deg)}100%{transform:translateX(230%) skewX(-14deg)}}
+
+/* =========================================================
+   3D BUTTON PRIMITIVE — a reusable "candy button" bevel:
+   a crisp offset base (the slab) + a soft ambient shadow +
+   an inner top highlight, with true depth on press. Every
+   tappable block in this page inherits from this idea.
+========================================================= */
+.bevel-3d{
+  position:relative;
+  transition:transform .12s cubic-bezier(.2,.8,.3,1), box-shadow .12s cubic-bezier(.2,.8,.3,1);
+  will-change:transform;
+}
+.bevel-3d:active{transform:translateY(4px) scale(.99)}
 
 /* =========================================================
    HEADER
 ========================================================= */
 header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d0820,rgba(13,8,32,.92));border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:none}
 .nav-container{max-width:900px;margin:auto;padding:calc(12px + var(--safe-top)) calc(16px + var(--safe-right)) 12px calc(16px + var(--safe-left));display:flex;align-items:center;justify-content:space-between}
-.brand-logo{font-size:1.3rem;font-weight:900;letter-spacing:-.05em;color:#fff}
+.brand-logo{display:flex;align-items:center;gap:8px;font-size:1.22rem;font-weight:900;letter-spacing:-.05em;color:#fff}
+.brand-mark{
+  width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:none;
+  background:linear-gradient(155deg,#7ee8ff,#8b5cf6 60%,#ff4fb8);
+  box-shadow:0 3px 0 rgba(0,0,0,.4),0 7px 14px rgba(139,92,246,.4),inset 0 1px 0 rgba(255,255,255,.5);
+  font-size:.85rem;transform:rotate(-6deg);
+}
 .brand-logo span{color:var(--cyan);text-shadow:0 0 16px rgba(34,224,255,.8)}
-.icon-btn{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;color:#fff;background:linear-gradient(155deg,#1b2748,#0f1730);border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 0 rgba(0,0,0,.4),0 8px 18px rgba(0,0,0,.35);transition:.15s}
-.icon-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.icon-btn{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;color:#fff;background:linear-gradient(155deg,#1b2748,#0f1730);border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 0 rgba(0,0,0,.4),0 8px 18px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
+.icon-btn:active{transform:translateY(4px);box-shadow:0 0 0 rgba(0,0,0,.4)}
 
 /* =========================================================
    MAIN / LAYOUT
 ========================================================= */
-.earn-container{width:100%;max-width:900px;margin:auto;padding:20px 15px 35px;position:relative;z-index:1;animation:pageEnter .5s ease both}
+.earn-container{width:100%;max-width:900px;margin:auto;padding:20px 15px 35px;position:relative;z-index:1;animation:pageEnter .5s ease both;perspective:1200px}
 
 .back-link{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem;font-weight:800;margin-bottom:16px}
 .back-link:active{color:#fff;transform:translateX(-3px)}
 
 /* =========================================================
-   HERO — bold, colorful, 3D panel (not a flat translucent card)
+   HERO — layered 3D slab with real bevel edge, glossy sheen
+   sweep (single orchestrated moment on load) and a floating
+   coin token that gives the panel actual depth of field.
 ========================================================= */
 .earn-header-section{
   position:relative;
   overflow:hidden;
-  margin-bottom:22px;
-  padding:26px 20px 22px;
-  border-radius:26px;
+  margin-bottom:24px;
+  padding:28px 22px 24px;
+  border-radius:28px;
   background:linear-gradient(145deg,#3a1264 0%,#161c66 48%,#023a52 100%);
   border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 4px 0 rgba(0,0,0,.4),0 26px 55px rgba(60,20,110,.4),inset 0 1px 0 rgba(255,255,255,.14);
+  box-shadow:
+    0 6px 0 #1b0736,
+    0 30px 60px rgba(60,20,110,.45),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -30px 50px rgba(0,0,0,.25);
+  transform-style:preserve-3d;
 }
 .earn-header-section:before{content:"";position:absolute;width:220px;height:220px;right:-90px;top:-100px;border-radius:50%;background:var(--pink);opacity:.30;filter:blur(45px)}
 .earn-header-section:after{content:"";position:absolute;width:150px;height:150px;left:-60px;bottom:-70px;border-radius:50%;background:var(--cyan);opacity:.22;filter:blur(40px)}
 
-.earn-eyebrow{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;margin-bottom:12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#ffe9ff;font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.hero-sheen{position:absolute;top:0;bottom:0;width:55%;z-index:1;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);animation:sheenSweep 2.6s ease-in-out .4s 1}
+
+.hero-coin{
+  position:absolute;top:20px;right:22px;z-index:2;width:58px;height:58px;border-radius:50%;
+  display:grid;place-items:center;font-size:1.5rem;
+  background:linear-gradient(155deg,#ffe58a,var(--gold-dk));
+  box-shadow:0 5px 0 #8a5a00,0 14px 26px rgba(255,204,51,.4),inset 0 2px 0 rgba(255,255,255,.5);
+  animation:floaty 4.5s ease-in-out infinite;
+}
+
+.earn-eyebrow{position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;margin-bottom:12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 8px rgba(0,0,0,.2);color:#ffe9ff;font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
 .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:dotPulse 1.5s infinite}
 @keyframes dotPulse{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.25);opacity:1}}
 
-.earn-title{position:relative;z-index:1;font-size:clamp(1.9rem,8vw,2.6rem);line-height:1.05;font-weight:900;letter-spacing:-.05em;color:#fff}
+.earn-title{position:relative;z-index:1;font-size:clamp(1.95rem,8vw,2.7rem);line-height:1.05;font-weight:900;letter-spacing:-.05em;color:#fff;max-width:82%}
 .earn-title em{font-style:normal;background:linear-gradient(100deg,#ffe27a,#ff8ad4 60%,#7ee8ff);-webkit-background-clip:text;background-clip:text;color:transparent}
 
 .earn-sub{position:relative;z-index:1;margin-top:10px;max-width:520px;color:#e7e2ff;font-size:.86rem;line-height:1.55}
 
 .hero-tags{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.hero-tag{padding:8px 12px;border-radius:13px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);font-size:.68rem;font-weight:800;display:flex;align-items:center;gap:6px}
+.hero-tag{padding:8px 12px;border-radius:13px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.18);font-size:.68rem;font-weight:800;display:flex;align-items:center;gap:6px}
 
 /* =========================================================
    SECTION LABELS
 ========================================================= */
-.section-label{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 10px}
-.section-label h2{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:900}
+.section-label{display:flex;align-items:center;justify-content:space-between;margin:28px 2px 10px}
+.section-label h2{font-family:'Sora',sans-serif;font-size:.98rem;letter-spacing:-.02em;color:#fff;font-weight:800}
 .section-label span{font-size:.66rem;color:var(--muted);font-weight:700}
 
 /* =========================================================
@@ -160,141 +206,92 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 .arcade-panel{
   position:relative;
   overflow:hidden;
-  border-radius:26px;
+  border-radius:28px;
   padding:18px;
   background:linear-gradient(150deg,#241143 0%,#0e1a3d 55%,#04222e 100%);
   border:1px solid rgba(139,92,246,.4);
-  box-shadow:0 4px 0 rgba(0,0,0,.4),0 22px 50px rgba(60,20,110,.35),inset 0 1px 0 rgba(255,255,255,.1);
+  box-shadow:0 6px 0 #150a2c,0 24px 52px rgba(60,20,110,.38),inset 0 1px 0 rgba(255,255,255,.1);
 }
 .arcade-panel:before{content:"";position:absolute;width:200px;height:200px;right:-80px;top:-90px;border-radius:50%;background:var(--purple);opacity:.3;filter:blur(40px)}
 .arcade-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .arcade-head-left{display:flex;align-items:center;gap:12px}
-.arcade-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:1.4rem;background:linear-gradient(155deg,#ffd35e,#d98a00);box-shadow:0 4px 0 rgba(0,0,0,.3),0 10px 20px rgba(255,211,94,.3);animation:floaty 4s ease-in-out infinite}
-.arcade-head h3{font-size:1.05rem;font-weight:900;letter-spacing:-.02em}
+.arcade-icon{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:1.45rem;background:linear-gradient(155deg,#ffd35e,var(--gold-dk));box-shadow:0 5px 0 #8a5a00,0 12px 22px rgba(255,211,94,.32),inset 0 2px 0 rgba(255,255,255,.5);animation:floaty 4s ease-in-out infinite;transform-style:preserve-3d}
+.arcade-head h3{font-family:'Sora',sans-serif;font-size:1.08rem;font-weight:700;letter-spacing:-.02em}
 .arcade-head p{font-size:.72rem;color:var(--muted);margin-top:2px}
-.arcade-max-badge{position:relative;z-index:1;text-align:right;flex:none}
-.arcade-max-badge b{display:block;font-size:.95rem;color:var(--gold);text-shadow:0 2px 10px rgba(255,204,51,.4)}
+.arcade-max-badge{position:relative;z-index:1;text-align:right;flex:none;padding:8px 12px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+.arcade-max-badge b{display:block;font-size:.98rem;color:var(--gold);text-shadow:0 2px 10px rgba(255,204,51,.5)}
 .arcade-max-badge span{font-size:.56rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 
-.game-list{position:relative;z-index:1;display:grid;gap:10px}
+.game-list{position:relative;z-index:1;display:grid;gap:11px}
 .game-item{
   display:flex;align-items:center;gap:13px;
   padding:14px;
-  border-radius:18px;
-  transition:transform .15s ease,box-shadow .15s ease;
+  border-radius:19px;
+  transition:transform .14s cubic-bezier(.2,.8,.3,1),box-shadow .14s cubic-bezier(.2,.8,.3,1);
 }
-.game-item:active{transform:translateY(3px) scale(.99)}
+.game-item:active{transform:translateY(4px) scale(.99)}
 
-.game-tap{background:linear-gradient(120deg,rgba(255,79,184,.22),rgba(255,79,184,.06));border:1px solid rgba(255,79,184,.4);box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.game-spin{background:linear-gradient(120deg,rgba(255,204,51,.22),rgba(255,204,51,.06));border:1px solid rgba(255,204,51,.4);box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.game-lucky{background:linear-gradient(120deg,rgba(34,224,255,.22),rgba(34,224,255,.06));border:1px solid rgba(34,224,255,.4);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.game-tap{background:linear-gradient(120deg,rgba(255,79,184,.24),rgba(255,79,184,.07));border:1px solid rgba(255,79,184,.4);box-shadow:0 4px 0 rgba(200,30,122,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+.game-spin{background:linear-gradient(120deg,rgba(255,204,51,.24),rgba(255,204,51,.07));border:1px solid rgba(255,204,51,.4);box-shadow:0 4px 0 rgba(201,127,0,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+.game-lucky{background:linear-gradient(120deg,rgba(34,224,255,.24),rgba(34,224,255,.07));border:1px solid rgba(34,224,255,.4);box-shadow:0 4px 0 rgba(10,143,168,.35),inset 0 1px 0 rgba(255,255,255,.08)}
 
-.game-icon{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 6px 14px rgba(0,0,0,.25)}
+.game-icon{width:48px;height:48px;flex:none;border-radius:15px;display:grid;place-items:center;font-size:1.35rem;box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 7px 16px rgba(0,0,0,.3);transform:rotate(-4deg)}
 .game-tap .game-icon{background:linear-gradient(155deg,#ff7fce,#c81e7a)}
 .game-spin .game-icon{background:linear-gradient(155deg,#ffe58a,#c97f00)}
 .game-lucky .game-icon{background:linear-gradient(155deg,#7ee8ff,#0a8fa8)}
 
 .game-details{flex:1;min-width:0}
-.game-details h4{font-size:.92rem;font-weight:900;color:#fff}
+.game-details h4{font-family:'Sora',sans-serif;font-size:.94rem;font-weight:700;color:#fff}
 .game-details p{font-size:.68rem;color:var(--muted);margin-top:2px;line-height:1.4}
-.game-reward{display:inline-block;margin-top:6px;font-size:.62rem;font-weight:900;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff}
+.game-reward{display:inline-block;margin-top:7px;font-size:.62rem;font-weight:900;padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14);color:#fff}
 
-.game-arrow{width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);font-weight:900}
+.game-arrow{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);font-weight:900}
 
 /* =========================================================
-   EARN CARDS GRID — solid 3D color blocks (glassmorphism removed)
+   EARN CARDS GRID — solid 3D color blocks with true bevel
 ========================================================= */
-.earn-cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.earn-cards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
 
 .earn-card-item{
   position:relative;
   overflow:hidden;
-  min-height:190px;
+  min-height:192px;
   display:flex;flex-direction:column;justify-content:space-between;
-  padding:16px;
-  border-radius:22px;
+  padding:17px;
+  border-radius:23px;
   color:#fff;
   border:1px solid rgba(255,255,255,.16);
-  transition:transform .15s ease,box-shadow .15s ease;
+  transition:transform .14s cubic-bezier(.2,.8,.3,1),box-shadow .14s cubic-bezier(.2,.8,.3,1);
 }
-.earn-card-item:active{transform:translateY(4px) scale(.98)}
+.earn-card-item:active{transform:translateY(5px) scale(.98)}
 
-.watch-ads-card{background:linear-gradient(150deg,#0891b2 0%,#075985 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(8,145,178,.35),inset 0 1px 0 rgba(255,255,255,.2)}
-.referral-card{background:linear-gradient(150deg,#ff5fc4 0%,#a21caf 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 18px 34px rgba(217,70,239,.32),inset 0 1px 0 rgba(255,255,255,.2)}
-.disabled-option{background:linear-gradient(150deg,#3a4256 0%,#1c2334 100%);box-shadow:0 5px 0 rgba(0,0,0,.35),0 16px 30px rgba(0,0,0,.3);opacity:.85}
+.referral-card{background:linear-gradient(150deg,#ff5fc4 0%,#a21caf 100%);box-shadow:0 6px 0 #6b1477,0 20px 38px rgba(217,70,239,.35),inset 0 1px 0 rgba(255,255,255,.22)}
+.disabled-option{background:linear-gradient(150deg,#3a4256 0%,#1c2334 100%);box-shadow:0 6px 0 #0e1220,0 18px 32px rgba(0,0,0,.32);opacity:.85}
 .disabled-option:active{transform:none}
 
-.watch-ads-card.on-cooldown{opacity:.55;filter:grayscale(.4)}
-.watch-ads-card.on-cooldown:active{transform:none}
-
 .card-top-row{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
-.icon-wrapper{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;font-size:1.3rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);animation:floaty 4s ease-in-out infinite}
+.icon-wrapper{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;font-size:1.35rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 4px 10px rgba(0,0,0,.15);animation:floaty 4s ease-in-out infinite}
 
 .status-badge{display:inline-flex;align-items:center;white-space:nowrap;padding:5px 9px;border-radius:999px;font-size:.58rem;font-weight:900;letter-spacing:.03em;text-transform:uppercase;background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25)}
 .badge-coming{background:rgba(255,255,255,.1);color:#c7cbe0}
 
 .card-body{position:relative;z-index:2}
-.card-body h3{font-size:1rem;font-weight:900;margin-bottom:5px;letter-spacing:-.02em}
+.card-body h3{font-family:'Sora',sans-serif;font-size:1.02rem;font-weight:700;margin-bottom:5px;letter-spacing:-.02em}
 .card-body p{color:rgba(255,255,255,.85);font-size:.72rem;line-height:1.45}
 .ref-amount-highlight{color:#fff173}
 
 .card-action-row{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:.74rem;font-weight:900}
-.arrow-btn{width:32px;height:32px;display:grid;place-items:center;border-radius:11px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.2)}
+.arrow-btn{width:34px;height:34px;display:grid;place-items:center;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
 
 .notification-dot{position:absolute;top:12px;left:12px;width:11px;height:11px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(255,77,109,.28),0 0 10px rgba(255,77,109,.6);z-index:3;animation:dotPulse 1.4s infinite}
 
 /* =========================================================
-   HOW IT WORKS — quick 3-step explainer for clarity
+   HOW IT WORKS — quick 3-step explainer, raised token markers
 ========================================================= */
-.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.how-card{padding:14px 10px;border-radius:17px;text-align:center;background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.14);box-shadow:0 3px 0 rgba(0,0,0,.25)}
-.how-num{width:30px;height:30px;margin:0 auto 8px;display:grid;place-items:center;border-radius:10px;font-weight:900;font-size:.85rem;background:linear-gradient(150deg,var(--cyan),var(--purple));box-shadow:0 3px 8px rgba(139,92,246,.35)}
-.how-card p{font-size:.66rem;color:var(--muted);line-height:1.4}
-
-/* =========================================================
-   WATCH ADS & EARN MODAL — solid 3D card, no blur glass
-========================================================= */
-.watchads-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,2,10,.86);opacity:0;visibility:hidden;pointer-events:none;transition:.25s}
-.watchads-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
-.watchads-card-modal{position:relative;width:min(100%,420px);padding:26px 18px 20px;border-radius:28px;background:linear-gradient(155deg,#123354 0%,#071a2c 100%);border:1px solid rgba(34,224,255,.35);box-shadow:0 30px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.12);text-align:center;transform:translateY(18px) scale(.95);transition:.28s cubic-bezier(.2,.8,.2,1)}
-.watchads-overlay.show .watchads-card-modal{transform:none}
-.watchads-card-modal:before{content:"";display:block;width:60px;height:5px;margin:-12px auto 16px;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--gold),var(--pink))}
-.watchads-close{position:absolute;right:13px;top:13px;width:36px;height:36px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(255,255,255,.1);color:#fff;font-size:22px}
-.watchads-icon{width:64px;height:64px;margin:2px auto 10px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(155deg,#22e0ff,#0a8fa8);font-size:28px;box-shadow:0 4px 0 rgba(0,0,0,.3),0 14px 28px rgba(6,182,212,.3)}
-.watchads-kicker{color:#7ee8ff;font-size:.58rem;font-weight:900;letter-spacing:.14em}
-.watchads-card-modal h2{margin-top:6px;color:#fff;font-size:1.3rem;font-weight:900;letter-spacing:-.04em}
-.watchads-subtitle{margin:8px auto 14px;max-width:330px;color:var(--muted);font-size:.7rem;line-height:1.5}
-.watchads-prizes{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:14px}
-.watchads-prizes span{padding:6px 9px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);color:#dceeff;font-size:.56rem;font-weight:800}
-.watchads-prizes span.watchads-top-prize{background:linear-gradient(135deg,var(--gold),var(--orange));border-color:#fff3;color:#241300;box-shadow:0 4px 12px rgba(245,158,11,.35)}
-.watchads-reel{display:none;margin:10px 0 14px}
-.watchads-reel.show{display:block}
-.watchads-reel-window{height:94px;position:relative;overflow:hidden;border-radius:18px;background:#020a14;border:1px solid rgba(34,224,255,.22);box-shadow:inset 0 0 30px rgba(6,182,212,.1)}
-.watchads-reel-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:10px;padding:0 20px;will-change:transform}
-.watchads-reel-item{width:112px;min-width:112px;text-align:center;padding:11px 6px;border-radius:14px;background:linear-gradient(155deg,#1b3a5c,#0a1a2c);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:.65rem;font-weight:900}
-.watchads-reel-center{position:absolute;left:50%;top:4px;bottom:4px;width:2px;transform:translateX(-50%);background:var(--cyan);box-shadow:0 0 15px var(--cyan);pointer-events:none}
-.watchads-reel-caption{margin-top:7px;color:var(--cyan);font-size:.54rem;font-weight:900;letter-spacing:.12em}
-.watchads-reel.landed .watchads-reel-window{box-shadow:0 0 0 2px rgba(34,224,255,.25),0 0 35px rgba(6,182,212,.3),inset 0 0 25px rgba(6,182,212,.1)}
-.watchads-start,.watchads-done{width:100%;min-height:50px;border-radius:16px;color:#052033;font-weight:900;font-size:.78rem;background:linear-gradient(135deg,#22e0ff,#7ee8ff);box-shadow:0 5px 0 rgba(0,0,0,.3),0 14px 26px rgba(6,182,212,.28)}
-.watchads-start:active,.watchads-done:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
-.watchads-start:disabled{opacity:.6}
-.watchads-done{display:none;margin-top:10px;background:linear-gradient(135deg,var(--green),#059669);color:#04241a}
-.watchads-status{min-height:20px;margin-top:8px;color:var(--muted);font-size:.63rem;line-height:1.4}
-.watchads-result{display:none;margin-top:10px;padding:16px;border-radius:18px;background:linear-gradient(150deg,rgba(47,232,154,.18),rgba(47,232,154,.05));border:1px solid rgba(47,232,154,.3)}
-.watchads-result.show{display:block}
-.watchads-result-icon{font-size:28px}
-.watchads-result-title{margin-top:4px;color:#fff;font-size:1.05rem;font-weight:900}
-.watchads-result-copy{margin-top:3px;color:#b9f4dd;font-size:.64rem;line-height:1.45}
-.spin-fill-wrap{display:none;margin-top:12px;padding:12px 14px;border-radius:16px;background:linear-gradient(150deg,rgba(139,92,246,.2),rgba(34,224,255,.1));border:1px solid rgba(139,92,246,.35)}
-.spin-fill-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.spin-fill-header span:first-child{color:#d4c5ff;font-size:.58rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-.spin-fill-header span:last-child{color:#fff;font-size:.76rem;font-weight:900}
-.spin-fill-laps{display:flex;gap:5px;justify-content:center;margin-bottom:8px}
-.spin-fill-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.14)}
-.spin-fill-dot.filled{background:linear-gradient(135deg,var(--purple),var(--cyan));border-color:transparent;box-shadow:0 0 10px rgba(139,92,246,.7)}
-.spin-fill-dot.partial{background:linear-gradient(135deg,rgba(139,92,246,.6),rgba(34,224,255,.6));border-color:transparent}
-.spin-fill-track{position:relative;height:14px;border-radius:999px;background:#0b1526;border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.4)}
-.spin-fill-bar{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 14px rgba(34,224,255,.55)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.how-card{padding:16px 11px;border-radius:18px;text-align:center;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.14);box-shadow:0 4px 0 rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08)}
+.how-num{width:32px;height:32px;margin:0 auto 9px;display:grid;place-items:center;border-radius:11px;font-weight:900;font-size:.88rem;background:linear-gradient(150deg,var(--cyan),var(--purple));box-shadow:0 4px 0 rgba(60,20,110,.5),0 6px 12px rgba(139,92,246,.35);transform:rotate(-4deg)}
+.how-card p{font-size:.67rem;color:var(--muted);line-height:1.42}
 
 /* =========================================================
    PAGE LOADER
@@ -311,13 +308,14 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
    RESPONSIVE
 ========================================================= */
 @media (max-width:420px){
-  .earn-title{font-size:1.9rem}
-  .earn-card-item{min-height:172px;padding:14px}
-  .how-grid{gap:8px}
+  .earn-title{font-size:1.95rem;max-width:100%}
+  .hero-coin{width:48px;height:48px;font-size:1.25rem;top:16px;right:16px}
+  .earn-card-item{min-height:174px;padding:15px}
+  .how-grid{gap:9px}
 }
 @media (max-width:350px){
-  .earn-cards-grid{gap:9px}
-  .game-details h4{font-size:.85rem}
+  .earn-cards-grid{gap:10px}
+  .game-details h4{font-size:.86rem}
 }
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
@@ -332,8 +330,8 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 <header>
   <div class="nav-container">
-    <a href="/dashboard.html" class="brand-logo">PAYME<span>.</span></a>
-    <a href="https://wa.me/+2348034399095" target="_blank" class="icon-btn" aria-label="Contact Support">
+    <a href="/dashboard.html" class="brand-logo"><span class="brand-mark">P</span>PAYME<span>.</span></a>
+    <a href="https://wa.me/+2348034399095" target="_blank" class="icon-btn bevel-3d" aria-label="Contact Support">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
       </svg>
@@ -347,13 +345,15 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
   <!-- HERO -->
   <section class="earn-header-section">
+    <div class="hero-sheen"></div>
+    <div class="hero-coin">🪙</div>
     <div class="earn-eyebrow"><span class="eyebrow-dot"></span>PAYME REWARDS</div>
     <h1 class="earn-title">Turn your activity<br>into <em>real rewards.</em></h1>
     <p class="earn-sub">Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.</p>
     <div class="hero-tags">
       <div class="hero-tag">🎮 3 games to play</div>
-      <div class="hero-tag">📺 Instant ad rewards</div>
-      <div class="hero-tag">🔗 ₦15 per referral</div>
+      <div class="hero-tag">✨ Instant rewards</div>
+      <div class="hero-tag">🔗 💎15 per referral</div>
     </div>
   </section>
 
@@ -371,7 +371,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
           <p>Tap, spin and match for PAYME rewards.</p>
         </div>
       </div>
-      <div class="arcade-max-badge"><b>₦25,000</b><span>Max Payout</span></div>
+      <div class="arcade-max-badge"><b>💎25,000</b><span>Max Payout</span></div>
     </div>
 
     <div class="game-list">
@@ -380,7 +380,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
         <div class="game-icon">🗝️</div>
         <div class="game-details">
           <h4>Luck Vault</h4>
-          <p>Watch rewarded ads to charge the treasure chests and unlock Luck Tickets.</p>
+          <p>Open the treasure chests to unlock Luck Tickets and rewards.</p>
           <span class="game-reward">🪙 20–70 Luck Tickets per chest</span>
         </div>
         <div class="game-arrow">→</div>
@@ -391,7 +391,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
         <div class="game-details">
           <h4>PAYME Spin</h4>
           <p>Spin the wheel and try your luck for instant cash prizes.</p>
-          <span class="game-reward">🎯 Up to ₦50 prize opportunity</span>
+          <span class="game-reward">🎯 Up to 💎50 prize opportunity</span>
         </div>
         <div class="game-arrow">→</div>
       </a>
@@ -401,7 +401,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
         <div class="game-details">
           <h4>Lucky3</h4>
           <p>Pick 3 numbers and stake your Luck Tickets for cash or free spins.</p>
-          <span class="game-reward">🍀 Win up to ₦15,000</span>
+          <span class="game-reward">🍀 Win up to 💎15,000</span>
         </div>
         <div class="game-arrow">→</div>
       </a>
@@ -415,21 +415,11 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   <div class="section-label"><h2>More Ways To Earn</h2><span>Pick any option below</span></div>
 
   <div class="earn-cards-grid">
-
-    <!-- WATCH ADS & EARN -->
-    <div class="earn-card-item watch-ads-card" id="openWatchAdsModal" role="button" tabindex="0" aria-label="Watch ads and earn">
-      <div>
-        <div class="card-top-row"><div class="icon-wrapper">📺</div><span class="status-badge" id="watchAdsCardBadge">REWARD AD</span></div>
-        <div class="card-body"><h3>Watch Ads &amp; Earn</h3><p>Watch a sponsored advert, then reveal a surprise free spin.</p></div>
-      </div>
-      <div class="card-action-row"><span id="watchAdsCardActionText">Watch &amp; Earn</span><div class="arrow-btn">→</div></div>
-    </div>
-
-    <!-- REFERRAL -->
+<!-- REFERRAL -->
     <a href="/dashboard.html#referrals" class="earn-card-item referral-card">
       <div>
-        <div class="card-top-row"><div class="icon-wrapper">🔗</div><span class="status-badge">Earn ₦15</span></div>
-        <div class="card-body"><h3>Invite Friends</h3><p>Invite friends and earn <strong class="ref-amount-highlight">₦15</strong> for every active referral.</p></div>
+        <div class="card-top-row"><div class="icon-wrapper">🔗</div><span class="status-badge">Earn 💎15</span></div>
+        <div class="card-body"><h3>Invite Friends</h3><p>Invite friends and earn <strong class="ref-amount-highlight">💎15</strong> for every active referral.</p></div>
       </div>
       <div class="card-action-row"><span>Invite &amp; Earn</span><div class="arrow-btn">→</div></div>
     </a>
@@ -450,28 +440,12 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   ======================================================= -->
   <div class="section-label"><h2>How Earning Works</h2><span>Simple &amp; fair</span></div>
   <div class="how-grid">
-    <div class="how-card"><div class="how-num">1</div><p>Pick any option above — a game, an ad, or a task.</p></div>
+    <div class="how-card"><div class="how-num">1</div><p>Pick any option above — a game, referral, or task.</p></div>
     <div class="how-card"><div class="how-num">2</div><p>Complete it — your progress saves automatically.</p></div>
     <div class="how-card"><div class="how-num">3</div><p>Get your reward instantly, straight to your PAYME account.</p></div>
   </div>
 
 </main>
-
-<!-- WATCH ADS & EARN POPUP -->
-<div class="watchads-overlay" id="watchAdsModal" aria-hidden="true">
-  <div class="watchads-card-modal" role="dialog" aria-modal="true" aria-labelledby="watchAdsTitle">
-    <button class="watchads-close" id="closeWatchAdsModal" type="button" aria-label="Close">×</button>
-    <div class="watchads-icon">📺</div><div class="watchads-kicker">REWARD AD</div>
-    <h2 id="watchAdsTitle">Watch. Reveal. Earn.</h2>
-    <p class="watchads-subtitle">Complete the sponsored advert and reveal your server-selected reward.</p>
-    <div class="watchads-prizes"><span>0.02</span><span>0.05</span><span>0.1</span><span>0.2</span><span>0.5</span><span>1 Spin</span><span class="watchads-top-prize">2 Spins</span></div>
-    <div class="watchads-reel" id="watchAdsReel"><div class="watchads-reel-window"><div class="watchads-reel-track" id="watchAdsReelTrack"></div><div class="watchads-reel-center"></div></div><div class="watchads-reel-caption" id="watchAdsReelCaption">YOUR REWARD IS WAITING</div></div>
-    <button class="watchads-start" id="watchAdsStartBtn" type="button">▶ Watch Ad</button>
-    <div class="watchads-status" id="watchAdsStatus"></div>
-    <div class="watchads-result" id="watchAdsResult"><div class="watchads-result-icon" id="watchAdsResultIcon">🎁</div><div class="watchads-result-title" id="watchAdsResultTitle">Reward</div><div class="watchads-result-copy" id="watchAdsResultCopy"></div><div class="spin-fill-wrap" id="spinFillWrap"><div class="spin-fill-header"><span>Free Spin Meter</span><span id="spinFillLabel">0</span></div><div class="spin-fill-laps" id="spinFillLaps"></div><div class="spin-fill-track"><div class="spin-fill-bar" id="spinFillBar"></div></div></div></div>
-    <button class="watchads-done" id="watchAdsDoneBtn" type="button">Done</button>
-  </div>
-</div>
 
 <div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
 
@@ -536,183 +510,6 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
-<script>
-(function(){const modal=document.getElementById('watchAdsModal'),open=document.getElementById('openWatchAdsModal'),close=document.getElementById('closeWatchAdsModal'),start=document.getElementById('watchAdsStartBtn'),done=document.getElementById('watchAdsDoneBtn'),status=document.getElementById('watchAdsStatus'),reel=document.getElementById('watchAdsReel'),track=document.getElementById('watchAdsReelTrack'),caption=document.getElementById('watchAdsReelCaption'),result=document.getElementById('watchAdsResult'),resultIcon=document.getElementById('watchAdsResultIcon'),resultTitle=document.getElementById('watchAdsResultTitle'),resultCopy=document.getElementById('watchAdsResultCopy'),spinFillWrap=document.getElementById('spinFillWrap'),spinFillBar=document.getElementById('spinFillBar'),spinFillLabel=document.getElementById('spinFillLabel'),spinFillLaps=document.getElementById('spinFillLaps'),cardBadge=document.getElementById('watchAdsCardBadge'),cardActionText=document.getElementById('watchAdsCardActionText');let sessionId=null,startedAt=0,busy=false;
-
-/* Grey out the "Watch Ads & Earn" card for a short cooldown once a reward
-   has been revealed, so the user can't immediately re-open the ad flow. */
-const WATCH_ADS_CARD_COOLDOWN_MS=10*1000;
-const WATCH_ADS_CARD_COOLDOWN_KEY='paymeWatchAdsCardCooldownUntil';
-let watchAdsCardCooldownTimer=null;
-
-function updateWatchAdsCardCooldownUI(){
-  if(!open) return;
-  const until=Number(localStorage.getItem(WATCH_ADS_CARD_COOLDOWN_KEY)||0);
-  const remaining=Math.max(0,until-Date.now());
-
-  if(remaining>0){
-    open.classList.add('on-cooldown');
-    open.setAttribute('aria-disabled','true');
-    if(cardBadge) cardBadge.textContent=`${Math.ceil(remaining/1000)}s`;
-    if(cardActionText) cardActionText.textContent='Come back soon';
-    if(watchAdsCardCooldownTimer) clearTimeout(watchAdsCardCooldownTimer);
-    watchAdsCardCooldownTimer=setTimeout(updateWatchAdsCardCooldownUI,250);
-  }else{
-    localStorage.removeItem(WATCH_ADS_CARD_COOLDOWN_KEY);
-    if(watchAdsCardCooldownTimer){clearTimeout(watchAdsCardCooldownTimer);watchAdsCardCooldownTimer=null}
-    open.classList.remove('on-cooldown');
-    open.removeAttribute('aria-disabled');
-    if(cardBadge) cardBadge.textContent='REWARD AD';
-    if(cardActionText) cardActionText.textContent='Watch & Earn';
-  }
-}
-
-function startWatchAdsCardCooldown(){
-  localStorage.setItem(WATCH_ADS_CARD_COOLDOWN_KEY,String(Date.now()+WATCH_ADS_CARD_COOLDOWN_MS));
-  updateWatchAdsCardCooldownUI();
-}
-
-/* Animated "free spin" meter: fills fully once per whole spin (e.g. 2 spins = 2 full fills),
-   and for a fractional spin (e.g. 0.2) it only fills that fraction of the way (won't reach the middle). */
-function animateSpinFill(spins){
-  if(!spinFillWrap||!spinFillBar||!spinFillLabel||!spinFillLaps) return;
-  spins=Number(spins||0);
-  if(spins<=0){ spinFillWrap.style.display='none'; spinFillBar.style.transition='none'; spinFillBar.style.width='0%'; spinFillLaps.innerHTML=''; return; }
-
-  const whole=Math.floor(spins+1e-9);
-  const remainder=Math.max(0,+(spins-whole).toFixed(2));
-  const totalLaps=whole+(remainder>0?1:0);
-
-  spinFillLabel.textContent=`${spins} Free Spin${spins===1?'':'s'}`;
-  spinFillLaps.innerHTML='';
-  const dots=[];
-  for(let i=0;i<totalLaps;i++){const d=document.createElement('div');d.className='spin-fill-dot';spinFillLaps.appendChild(d);dots.push(d)}
-
-  spinFillWrap.style.display='block';
-  spinFillBar.style.transition='none';
-  spinFillBar.style.width='0%';
-  void spinFillBar.offsetWidth;
-
-  let i=0;
-  function step(){
-    if(i<whole){
-      spinFillBar.style.transition='width .6s cubic-bezier(.22,.9,.3,1)';
-      spinFillBar.style.width='100%';
-      setTimeout(()=>{
-        dots[i].classList.add('filled');
-        i++;
-        if(i<whole||remainder>0){
-          spinFillBar.style.transition='none';
-          spinFillBar.style.width='0%';
-          void spinFillBar.offsetWidth;
-          setTimeout(step,140);
-        }
-      },600);
-    }else if(remainder>0){
-      spinFillBar.style.transition='width .6s cubic-bezier(.22,.9,.3,1)';
-      spinFillBar.style.width=(remainder*100)+'%';
-      setTimeout(()=>{dots[dots.length-1].classList.add(remainder>=.5?'filled':'partial')},600);
-    }
-  }
-  step();
-}
-const items=[{icon:'🎟️',label:'0.02'},{icon:'🎟️',label:'0.05'},{icon:'🎟️',label:'0.1'},{icon:'🎟️',label:'0.2'},{icon:'🎖️',label:'0.5'},{icon:'🏆',label:'1 SPIN'},{icon:'💎',label:'2 SPINS'}];function build(){track.innerHTML=Array.from({length:40},(_,i)=>{const x=items[i%items.length];return `<div class="watchads-reel-item"><div>${x.icon}</div><div>${x.label}</div></div>`}).join('');track.style.transition='none';track.style.transform='translate3d(0,0,0)';}function reset(){sessionId=null;startedAt=0;start.disabled=false;start.style.display='block';start.textContent='▶ Watch Ad';status.textContent='';reel.classList.remove('show','landed');reel.style.display='none';result.classList.remove('show');done.style.display='none';animateSpinFill(0);build()}function show(){reset();modal.classList.add('show');modal.setAttribute('aria-hidden','false')}function hide(){if(busy)return;modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}async function startSession(){const r=await fetch('/api/monetag/start',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({context:'earn_watch_ad'})});const d=await r.json().catch(()=>({}));if(!r.ok||!d.success)throw new Error(d.message||'Unable to start the rewarded ad.');sessionId=d.sessionId;startedAt=Number(d.createdAt||Date.now())}async function waitStatus(){const t=Date.now();while(Date.now()-t<15000){try{const r=await fetch(`/api/monetag/status?sessionId=${encodeURIComponent(sessionId)}&startedAt=${encodeURIComponent(startedAt)}`,{credentials:'include'});const d=await r.json().catch(()=>({}));if(r.ok&&d.success&&d.confirmed&&d.reward)return d}catch(e){}await new Promise(x=>setTimeout(x,1200))}return null}function idx(r){const s=Number(r.spins||0);if(s>=2)return 6;if(s>=1)return 5;if(s>=0.5)return 4;if(s>=0.2)return 3;if(s>=0.1)return 2;if(s>=0.05)return 1;return 0}function reveal(r){return new Promise(resolve=>{const step=122,trackPadding=20,center=(reel.querySelector('.watchads-reel-window')?.clientWidth||300)/2,target=28+idx(r),off=i=>-(i*step)+center-56-trackPadding;reel.style.display='block';reel.classList.add('show');reel.classList.remove('landed');caption.textContent='REVEALING YOUR REWARD…';track.style.transition='none';track.style.transform='translate3d(0,0,0)';void track.offsetWidth;track.style.transition='transform 2.6s cubic-bezier(.12,.72,.1,1)';track.style.transform=`translate3d(${off(target)}px,0,0)`;setTimeout(()=>{reel.classList.add('landed');caption.textContent='REWARD LOCKED IN ✓';resolve()},2700)})}function showResult(r){const spins=Number(r.spins||0),won=spins>0;resultIcon.textContent=won?'🎟️':'😕';resultTitle.textContent=won?`${spins} Free Spin${spins===1?'':'s'}`:'Try Again';resultCopy.textContent=won?`${spins} free spin${spins===1?'':'s'} has been added to your account. Keep watching to grow your streak!`:"Almost! Watch another ad for another shot at free spins.";result.classList.add('show');done.style.display='block';animateSpinFill(won?spins:0);startWatchAdsCardCooldown()}async function watch(){if(busy)return;busy=true;start.disabled=true;status.textContent='Preparing your secure reward session…';try{await startSession();if(typeof window.show_11688228!=='function')throw new Error('Rewarded ad is not ready yet. Please wait a moment and try again.');start.textContent='Opening ad…';status.textContent='Please complete the sponsored advert.';await window.show_11688228({type:'end',ymid:sessionId,requestVar:'earn_watch_ad'});start.textContent='Confirming reward…';status.textContent='Ad completed. Confirming your reward…';const d=await waitStatus();if(!d){status.textContent='Ad completed, but confirmation is still pending. Please try again shortly.';return}const r=d.reward||{};status.textContent='';await reveal(r);showResult(r);start.style.display='none'}catch(e){status.textContent=e?.message||'Unable to show the rewarded ad.';start.disabled=false;start.textContent='▶ Watch Ad'}finally{busy=false}}if(open)open.addEventListener('click',e=>{if(open.classList.contains('on-cooldown')){e.preventDefault();e.stopPropagation();return}show()});if(close)close.addEventListener('click',hide);if(done)done.addEventListener('click',hide);if(start)start.addEventListener('click',watch);if(modal)modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('show'))hide()});if(open)open.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){if(open.classList.contains('on-cooldown')){e.preventDefault();return}show()}});updateWatchAdsCardCooldownUI()})();
-</script>
-
-<script>
-/* =========================================================
-   MONETAG IN-APP INTERSTITIAL
-   =========================================================
-   Non-rewarded Monetag ads are controlled entirely by Monetag.
-   This does NOT touch the rewarded-ad/postback system above.
-
-   - frequency: 2 ads
-   - capping: 0.1 hours = 6 minutes
-   - interval: 30 seconds between ads
-   - timeout: 5 seconds before the first ad
-   - everyPage: true = the Monetag session resets on every page
-     transition, so the frequency/capping counter starts over each
-     time this page is (re)entered, instead of being shared
-     across the whole app session.
-
-   Monetag still decides whether an ad is actually available/shown.
-   ========================================================= */
-const MONETAG_INAPP_SETTINGS = Object.freeze({
-    type: "inApp",
-    inAppSettings: {
-        frequency: 2,
-        capping: 0.1,
-        interval: 30,
-        timeout: 5,
-        everyPage: true
-    }
-});
-
-let monetagInAppStarted = false;
-let monetagInAppRetryTimer = null;
-
-/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
-   multiple times in a row can reset the SDK's internal logic and
-   interrupt the ad flow. So this must only ever be called ONCE per
-   page load. everyPage:true (below) is what makes Monetag itself
-   reset the frequency/capping session on every navigation/entry —
-   we do NOT need to (and must not) re-call show_11688228 manually
-   when the user returns to the tab. */
-function startMonetagInAppInterstitial(){
-    if(monetagInAppStarted) return;
-    monetagInAppStarted = true;
-
-    const launch = () => {
-        if(typeof window.show_11688228 !== "function"){
-            // The SDK script may still be loading. Retry a few times
-            // without creating an aggressive polling loop.
-            monetagInAppStarted = false;
-            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
-            return;
-        }
-
-        /*
-         * Do not attach rewarded-ad ymid/requestVar values here.
-         * In-App Interstitial is non-rewarded and must remain
-         * separate from the reward flow.
-         *
-         * catchIfNoFeed:true + .catch() below exist purely for
-         * debugging — by default Monetag silently resolves with no
-         * ad shown when there's nothing to serve (empty feed, zone
-         * still in moderation, domain not approved, etc.), so
-         * without this you'd never see *why* nothing appeared.
-         */
-        try{
-            const result = window.show_11688228({
-                ...MONETAG_INAPP_SETTINGS,
-                catchIfNoFeed: true
-            });
-            if(result && typeof result.catch === "function"){
-                result.catch(error=>{
-                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
-                });
-            }
-        }catch(error){
-            console.warn("Monetag In-App Interstitial could not start:", error);
-            monetagInAppStarted = false;
-        }
-    };
-
-    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
-    setTimeout(launch, 5000);
-}
-
-/* Start once this page has first loaded — and only once. Monetag
-   handles the configured frequency/capping/interval from there, and
-   everyPage:true resets that session on every fresh page load. */
-if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
-}else{
-    startMonetagInAppInterstitial();
-}
-</script>
 </body>
 </html>
-
-
 

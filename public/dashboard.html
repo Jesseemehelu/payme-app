@@ -73,7 +73,6 @@ user-scalable=no, viewport-fit=cover">
   }catch(e){}
 })();
 </script>
-<script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
 <title>PAYME Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -337,6 +336,16 @@ color:#94a3b8;
 font-size:.67rem;
 margin-top:7px;
 }
+.balance-usd-equivalent{
+position:relative;
+z-index:3;
+margin-top:5px;
+color:#86efac;
+font-size:.72rem;
+font-weight:800;
+letter-spacing:-.01em;
+text-shadow:0 2px 12px rgba(16,185,129,.22);
+}
 .balance-amount-row{
 position:relative;
 z-index:3;
@@ -454,6 +463,66 @@ letter-spacing:.04em;
 .balance-box-value{ font-size:1.03rem; font-weight:800; }
 .earnings-value{ color:#67e8f9; }
 .deposit-value{ color:#86efac; }
+
+/* GEM CURRENCY BADGE — icon separated from the number with proper spacing */
+.balance-currency{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+font-size:1.55rem;
+line-height:1;
+margin-right:8px;
+vertical-align:middle;
+filter:drop-shadow(0 2px 8px rgba(6,182,212,.45));
+transition:.2s;
+}
+.balance-box-value .balance-currency{
+font-size:1.05rem;
+margin-right:5px;
+filter:drop-shadow(0 2px 6px rgba(6,182,212,.35));
+}
+.iv-reward-amt, #refEarningsText, .payout-gems + span, .tap-tx-amount{
+letter-spacing:-.01em;
+}
+
+/* BALANCE TOP-RIGHT ACTIONS — hide-balance eye + USD switch, next to Verified badge */
+.balance-top-right{
+position:relative;
+z-index:3;
+display:flex;
+align-items:center;
+gap:6px;
+}
+.balance-icon-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:4px;
+height:26px;
+min-width:26px;
+padding:0 8px;
+border-radius:20px;
+border:1px solid rgba(255,255,255,.14);
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(10px);
+color:#e2e8f0;
+cursor:pointer;
+font-size:.62rem;
+font-weight:800;
+letter-spacing:.02em;
+transition:.18s;
+}
+.balance-icon-btn:hover{ background:rgba(255,255,255,.16); }
+.balance-icon-btn:active{ transform:scale(.92); }
+.balance-icon-btn svg{ width:14px; height:14px; }
+.balance-icon-btn.currency-active{
+background:linear-gradient(135deg,#2563eb,#06b6d4);
+border-color:transparent;
+color:#fff;
+}
+.balance-masked{
+letter-spacing:2px;
+}
 .balance-actions{
 position:relative;
 z-index:4;
@@ -524,11 +593,47 @@ box-shadow: 0 10px 25px rgba(37,99,235,.3), inset 0 1px 0 rgba(255,255,255,.2);
 
 
 .withdraw-btn{
+position:relative;
+overflow:hidden;
 color:#fff;
-background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.055));
-
-border:1px solid rgba(255,255,255,.14);
-backdrop-filter:blur(8px);
+background:linear-gradient(135deg,#22c55e 0%,#16a34a 55%,#059669 100%);
+border:1px solid rgba(110,231,183,.55);
+box-shadow:
+    0 0 12px rgba(34,197,94,.45),
+    0 10px 28px rgba(16,185,129,.32),
+    inset 0 1px 0 rgba(255,255,255,.32),
+    inset 0 -3px 7px rgba(0,0,0,.12);
+animation:withdrawGlow 2.2s ease-in-out infinite;
+}
+.withdraw-btn::before{
+content:"";
+position:absolute;
+top:-80%;
+left:-45%;
+width:45%;
+height:260%;
+transform:rotate(22deg);
+background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);
+animation:withdrawShine 2.8s ease-in-out infinite;
+pointer-events:none;
+}
+.withdraw-btn:hover{
+box-shadow:
+    0 0 20px rgba(34,197,94,.68),
+    0 14px 34px rgba(16,185,129,.4),
+    inset 0 1px 0 rgba(255,255,255,.38),
+    inset 0 -3px 7px rgba(0,0,0,.12);
+transform:translateY(-1px);
+}
+@keyframes withdrawGlow{
+0%,100%{filter:brightness(1);box-shadow:0 0 12px rgba(34,197,94,.42),0 10px 28px rgba(16,185,129,.3),inset 0 1px 0 rgba(255,255,255,.32),inset 0 -3px 7px rgba(0,0,0,.12);}
+50%{filter:brightness(1.08);box-shadow:0 0 25px rgba(34,197,94,.72),0 14px 34px rgba(16,185,129,.42),inset 0 1px 0 rgba(255,255,255,.38),inset 0 -3px 7px rgba(0,0,0,.12);}
+}
+@keyframes withdrawShine{
+0%{left:-55%;opacity:0}
+18%{opacity:1}
+48%{left:120%;opacity:0}
+100%{left:120%;opacity:0}
 }
 .transactions-btn{
 grid-column:span 2;
@@ -866,7 +971,7 @@ font-weight:800;
 letter-spacing:-.03em;
 text-shadow:0 0 18px rgba(16,185,129,.45);
 }
-.payout-naira{ font-size:1.15rem; color:#34d399; }
+.payout-gems{ font-size:1.15rem; color:#34d399; }
 .payout-plus{
 color:#34d399;
 font-size:1.15rem;
@@ -1194,40 +1299,114 @@ from{ opacity:0; transform:scale(.75); }
 to{ opacity:1; transform:scale(1); }
 }
 
-/* MOBILE NAV */
+/* SHARED 3D NAVIGATION
+   server.js injects this same navigation into every HTML page. */
 .mobile-nav{
 position:fixed;
-left: calc(10px + var(--safe-left, 0px));
-right: calc(10px + var(--safe-right, 0px));
-bottom:calc(10px + var(--safe-bottom, 0px));
-height:68px;
-z-index:2000;
+left:calc(9px + var(--safe-left,0px));
+right:calc(9px + var(--safe-right,0px));
+bottom:calc(9px + var(--safe-bottom,0px));
+height:72px;
+z-index:20000;
 display:flex;
 align-items:center;
 justify-content:space-around;
-background: rgba(255,255,255,.88);
-backdrop-filter:blur(25px);
--webkit-backdrop-filter:blur(25px);
-border:1px solid rgba(226,232,240,.9);
-border-radius:23px;
-
-box-shadow: 0 18px 40px rgba(15,23,42,.13);
+padding:7px;
+overflow:visible;
+background:
+linear-gradient(145deg,rgba(20,29,48,.98),rgba(5,10,20,.98));
+border:1px solid rgba(148,163,184,.18);
+border-top-color:rgba(255,255,255,.12);
+border-radius:24px;
+box-shadow:
+0 24px 55px rgba(0,0,0,.42),
+0 7px 18px rgba(0,0,0,.30),
+inset 0 1px 0 rgba(255,255,255,.13),
+inset 0 -5px 12px rgba(0,0,0,.34);
+backdrop-filter:blur(22px);
+-webkit-backdrop-filter:blur(22px);
+transform:translateZ(0);
+animation:navRise .55s cubic-bezier(.16,1,.3,1) both;
+}
+.mobile-nav::before{
+content:"";
+position:absolute;
+left:18%;
+right:18%;
+top:0;
+height:1px;
+background:linear-gradient(90deg,transparent,rgba(96,165,250,.8),rgba(168,85,247,.8),transparent);
+filter:blur(.3px);
+pointer-events:none;
 }
 .mobile-nav a{
 position:relative;
 width:25%;
+height:58px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:2px;
 text-align:center;
 text-decoration:none;
-color:var(--muted);
-font-size: .58rem;
-font-weight:800;
-transition:.2s;
+color:#94a3b8;
+font-size:.57rem;
+font-weight:900;
+letter-spacing:.01em;
+border-radius:17px;
+transition:transform .22s ease,color .22s ease,background .22s ease,box-shadow .22s ease;
 }
-.mobile-nav a.active{ color:var(--blue); }
-.nav-icon{ display:block; font-size:1.15rem; margin-bottom:2px; filter:grayscale(.15); }
-.nav-icon.nav-icon-naira{ font-weight:800; font-size:1.05rem; color:var(--blue2); filter:none; }
-.mobile-nav a.active .nav-icon{ transform:translateY(-1px); }
-
+.mobile-nav a::after{
+content:"";
+position:absolute;
+left:50%;
+bottom:3px;
+width:0;
+height:3px;
+border-radius:99px;
+background:linear-gradient(90deg,#60a5fa,#a78bfa);
+box-shadow:0 0 12px rgba(96,165,250,.65);
+transform:translateX(-50%);
+transition:width .25s ease;
+}
+.mobile-nav a.active{
+color:#fff;
+background:linear-gradient(145deg,rgba(59,130,246,.25),rgba(124,58,237,.14));
+box-shadow:
+inset 0 1px 0 rgba(255,255,255,.11),
+0 7px 16px rgba(0,0,0,.22);
+transform:translateY(-3px);
+}
+.mobile-nav a.active::after{width:22px}
+.nav-icon{
+display:block;
+font-size:1.18rem;
+line-height:1;
+filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));
+transition:transform .22s ease,filter .22s ease;
+}
+.nav-icon.nav-icon-gems{
+font-weight:800;
+font-size:1.08rem;
+color:#60a5fa;
+filter:drop-shadow(0 0 7px rgba(96,165,250,.45));
+}
+.mobile-nav a.active .nav-icon{
+transform:translateY(-1px) scale(1.08);
+filter:drop-shadow(0 0 9px rgba(96,165,250,.55));
+}
+.mobile-nav a:active{transform:translateY(0) scale(.94)}
+@keyframes navRise{
+from{opacity:0;transform:translateY(22px) scale(.97)}
+to{opacity:1;transform:translateY(0) scale(1)}
+}
+@media(min-width:900px){
+.mobile-nav{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+.mobile-nav{animation:none}
+}
 /* 3D GIFT OVERLAY */
 .gift-overlay{
 position:fixed;
@@ -1917,6 +2096,57 @@ cursor: pointer;
 padding: 6px 12px;
 }
 
+.streak-ticket-reward{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+margin:4px 0 14px;
+padding:13px 16px;
+border-radius:18px;
+background:linear-gradient(145deg,#111827,#1e293b);
+border:1px solid rgba(167,139,250,.35);
+box-shadow:
+0 12px 28px rgba(15,23,42,.24),
+inset 0 1px 0 rgba(255,255,255,.10),
+inset 0 -4px 9px rgba(0,0,0,.25);
+}
+.streak-ticket-icon{
+width:42px;
+height:42px;
+display:grid;
+place-items:center;
+border-radius:13px;
+font-size:1.35rem;
+background:linear-gradient(145deg,#8b5cf6,#ec4899);
+box-shadow:
+0 8px 18px rgba(124,58,237,.38),
+inset 0 1px 0 rgba(255,255,255,.35),
+inset 0 -3px 6px rgba(0,0,0,.18);
+animation:ticketFloat 2.2s ease-in-out infinite;
+}
+.streak-ticket-label{
+color:#94a3b8;
+font-size:.52rem;
+font-weight:900;
+letter-spacing:.08em;
+text-align:left;
+}
+.streak-ticket-amount{
+margin-top:1px;
+color:#fff;
+font-size:1.45rem;
+line-height:1;
+font-weight:900;
+letter-spacing:-.04em;
+text-shadow:0 0 16px rgba(167,139,250,.35);
+}
+.streak-ticket-note{margin-bottom:18px}
+@keyframes ticketFloat{
+0%,100%{transform:translateY(0) rotate(0deg)}
+50%{transform:translateY(-3px) rotate(-2deg)}
+}
+
 /* RESPONSIVE */
 @media(max-width:480px){
 .dashboard-container{ padding-left: 13px; padding-right: 13px; }
@@ -2209,255 +2439,107 @@ transition-duration: 0.01ms !important;
 .referral-payout-divider{height:1px;margin:18px 2px 14px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent)}.referral-payout-label{position:relative;z-index:3;display:flex;align-items:center;gap:7px;margin:0 2px 4px;color:#a5b4d4;font-size:.53rem;font-weight:900;letter-spacing:.11em}.referral-payout-dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 10px rgba(52,211,153,.8);animation:payoutDotBlink 1.6s ease-in-out infinite}
 .referral-payout-blend{min-height:0;margin:0;padding:8px 0 0;border-radius:0;background:none;box-shadow:none;overflow:visible}.referral-payout-blend .payout-phone-glow{width:190px;height:190px;top:-10px}.referral-payout-blend .payout-phone-stage{padding:0;margin-top:2px}.referral-payout-blend .payout-phone{width:148px;height:292px}.referral-payout-blend .payout-phone-caption{margin-top:12px;font-size:.60rem;color:rgba(255,255,255,.58)}.referral-payout-blend .payout-phone-screen{border-radius:24px}.referral-payout-blend .payout-screen-label{font-size:.54rem}.referral-payout-blend .payout-screen-amount{font-size:1.30rem}.referral-payout-blend .payout-screen-sub{font-size:.55rem}
 .desktop-nav{gap:8px;align-items:center}.desktop-nav a{position:relative;display:flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border-radius:14px;color:#475569;font-size:.76rem;font-weight:900;letter-spacing:-.01em}.desktop-nav a::after{content:"";position:absolute;left:14px;right:14px;bottom:6px;height:3px;border-radius:99px;background:linear-gradient(90deg,#2563eb,#7c3aed);transform:scaleX(0);transition:.22s}.desktop-nav a:hover{background:#f1f5ff;color:#2563eb;transform:translateY(-1px)}.desktop-nav a.active{color:#1d4ed8;background:linear-gradient(135deg,#eff6ff,#f5f3ff);box-shadow:0 8px 18px rgba(37,99,235,.10)}.desktop-nav a.active::after{transform:scaleX(1)}
-.mobile-nav{height:76px;left:calc(9px + var(--safe-left,0px));right:calc(9px + var(--safe-right,0px));bottom:calc(9px + var(--safe-bottom,0px));padding:7px 6px;border-radius:25px;background:rgba(255,255,255,.96);border:1px solid #dce4f0;box-shadow:0 20px 45px rgba(15,23,42,.18),0 4px 12px rgba(37,99,235,.07)}.mobile-nav a{height:62px;width:25%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:19px;color:#64748b;font-size:.60rem;font-weight:900;letter-spacing:.01em}.mobile-nav a.active{color:#1d4ed8;background:linear-gradient(145deg,#eef5ff,#f5f3ff);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(37,99,235,.12)}.mobile-nav a:active{transform:scale(.94)}.nav-icon{font-size:1.32rem;line-height:1;margin-bottom:2px;filter:none;transition:.2s}.nav-icon.nav-icon-naira{font-size:1.23rem}.mobile-nav a.active .nav-icon{transform:translateY(-2px) scale(1.06);filter:drop-shadow(0 4px 7px rgba(37,99,235,.18))}
+.mobile-nav{height:76px;left:calc(9px + var(--safe-left,0px));right:calc(9px + var(--safe-right,0px));bottom:calc(9px + var(--safe-bottom,0px));padding:7px 6px;border-radius:25px;background:rgba(255,255,255,.96);border:1px solid #dce4f0;box-shadow:0 20px 45px rgba(15,23,42,.18),0 4px 12px rgba(37,99,235,.07)}.mobile-nav a{height:62px;width:25%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:19px;color:#64748b;font-size:.60rem;font-weight:900;letter-spacing:.01em}.mobile-nav a.active{color:#1d4ed8;background:linear-gradient(145deg,#eef5ff,#f5f3ff);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(37,99,235,.12)}.mobile-nav a:active{transform:scale(.94)}.nav-icon{font-size:1.32rem;line-height:1;margin-bottom:2px;filter:none;transition:.2s}.nav-icon.nav-icon-gems{font-size:1.23rem}.mobile-nav a.active .nav-icon{transform:translateY(-2px) scale(1.06);filter:drop-shadow(0 4px 7px rgba(37,99,235,.18))}
 .telegram-preview-overlay{position:fixed;inset:0;z-index:12000;display:none;align-items:flex-end;justify-content:center;padding:18px;background:rgba(3,7,18,.68);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.telegram-preview-overlay.show{display:flex;animation:telegramPreviewFade .22s ease both}.telegram-preview-card{width:100%;max-width:430px;overflow:hidden;border-radius:28px;background:#fff;box-shadow:0 35px 90px rgba(0,0,0,.42);animation:telegramPreviewUp .34s cubic-bezier(.16,1,.3,1) both}.telegram-preview-head{display:flex;align-items:center;justify-content:space-between;padding:16px 17px 13px;border-bottom:1px solid #edf1f6}.telegram-preview-brand{display:flex;align-items:center;gap:10px}.telegram-preview-brand strong{display:block;font-size:.88rem;color:#0f172a}.telegram-preview-brand span{display:block;margin-top:2px;font-size:.56rem;font-weight:700;color:#94a3b8}.telegram-preview-logo{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#38bdf8,#0088cc);color:#fff;font-size:1rem;transform:rotate(-8deg);box-shadow:0 7px 16px rgba(0,136,204,.25)}.telegram-preview-close{border:0;width:34px;height:34px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:1.3rem;cursor:pointer}.telegram-preview-chat{padding:22px 16px;background:linear-gradient(180deg,#eaf3f9,#dfeaf1)}.telegram-preview-message{position:relative;max-width:330px;margin-left:auto;padding:11px 12px 8px;border-radius:16px 16px 5px 16px;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.08)}.telegram-preview-sender{font-size:.60rem;font-weight:900;color:#168acd;margin-bottom:5px}.telegram-preview-text{font-size:.76rem;line-height:1.45;color:#1e293b;font-weight:600}.telegram-preview-link-card{margin-top:10px;border-left:3px solid #159bd7;padding:8px 9px;background:#f5f8fa;border-radius:8px}.telegram-preview-link-title{font-size:.72rem;font-weight:900;color:#168acd}.telegram-preview-link-desc{margin-top:2px;font-size:.58rem;line-height:1.4;color:#64748b}.telegram-preview-link-url{margin-top:5px;font-size:.55rem;color:#168acd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.telegram-preview-time{margin-top:5px;text-align:right;color:#9aa8b5;font-size:.49rem;font-weight:700}.telegram-preview-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:9px;padding:13px 15px 15px}.telegram-preview-cancel,.telegram-preview-open{border:0;border-radius:14px;padding:13px;font-family:inherit;font-size:.72rem;font-weight:900;cursor:pointer}.telegram-preview-cancel{background:#f1f5f9;color:#64748b}.telegram-preview-open{background:linear-gradient(135deg,#38bdf8,#0088cc);color:#fff;box-shadow:0 10px 22px rgba(0,136,204,.25)}@keyframes telegramPreviewFade{from{opacity:0}to{opacity:1}}@keyframes telegramPreviewUp{from{opacity:0;transform:translateY(35px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(min-width:900px){.referral-card{padding:24px}.referral-payout-blend .payout-phone{width:160px;height:316px}.mobile-nav{display:none}}@media(max-width:480px){.referral-card{padding:19px 16px}.iv-link-row{min-height:62px}.iv-link-copy{min-height:40px;padding:0 11px}.telegram-preview-overlay{padding:10px}.telegram-preview-card{border-radius:25px}}
-</style>
-
-<style>
-/* =========================================================
-   MONETAG WATCH-AD REWARD UI
-   ========================================================= */
-.monetag-watch-card{
-  position:relative;
-  overflow:hidden;
-  padding:16px;
-  border-radius:22px;
-  background:
-    radial-gradient(circle at 100% 0%,rgba(124,58,237,.18),transparent 35%),
-    radial-gradient(circle at 0% 100%,rgba(6,182,212,.12),transparent 34%),
-    linear-gradient(145deg,#0b1020,#18244a 58%,#25134f);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:0 20px 45px rgba(15,23,42,.18), inset 0 1px 0 rgba(255,255,255,.08);
-  color:#fff;
-}
-.monetag-watch-card:before{
-  content:"";
-  position:absolute;
-  width:160px;
-  height:160px;
-  right:-85px;
-  top:-85px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.08);
-  box-shadow:0 0 0 25px rgba(255,255,255,.025),0 0 0 50px rgba(255,255,255,.018);
-}
-.monetag-watch-inner{position:relative;z-index:2;display:flex;align-items:center;gap:12px}
-.monetag-watch-icon{
-  width:48px;height:48px;flex:0 0 48px;border-radius:16px;display:grid;place-items:center;
-  background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:1.35rem;
-  box-shadow:0 12px 25px rgba(124,58,237,.30),inset 0 1px 0 rgba(255,255,255,.25);
-  animation:monetagIconFloat 2.8s ease-in-out infinite;
-}
-.monetag-watch-copy{min-width:0;flex:1}
-.monetag-watch-title{font-size:.88rem;font-weight:900;letter-spacing:-.02em}
-.monetag-watch-sub{margin-top:3px;color:#cbd5e1;font-size:.62rem;line-height:1.45}
-.monetag-watch-button{
-  width:100%;margin-top:12px;min-height:47px;border:0;border-radius:15px;cursor:pointer;
-  color:#fff;font-family:inherit;font-size:.76rem;font-weight:900;
-  background:linear-gradient(135deg,#8b5cf6,#ec4899);
-  box-shadow:0 12px 25px rgba(124,58,237,.30),inset 0 1px 0 rgba(255,255,255,.20);
-  transition:transform .18s ease,filter .18s ease,opacity .18s ease;
-}
-.monetag-watch-button:active{transform:scale(.97)}
-.monetag-watch-button:disabled{opacity:.65;cursor:not-allowed}
-.monetag-watch-note{margin-top:8px;text-align:center;color:#94a3b8;font-size:.54rem;font-weight:700}
-@keyframes monetagIconFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
-
-/* Reward reveal modal */
-.monetag-overlay{
-  position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;padding:18px;
-  background:rgba(2,6,23,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-}
-.monetag-overlay.show{display:flex;animation:monetagFadeIn .28s ease both}
-.monetag-card{
-  position:relative;width:100%;max-width:380px;overflow:hidden;border-radius:30px;padding:24px 20px 20px;
-  text-align:center;background:linear-gradient(160deg,#fff 0%,#f8fbff 58%,#f5f3ff 100%);
-  border:1px solid rgba(255,255,255,.9);box-shadow:0 40px 100px rgba(0,0,0,.42),0 0 60px rgba(124,58,237,.16);
-  animation:monetagCardIn .48s cubic-bezier(.16,1,.3,1) both;
-}
-.monetag-card:before{content:"";position:absolute;width:230px;height:230px;left:50%;top:-175px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.18),transparent 68%);pointer-events:none}
-.monetag-close{position:absolute;right:13px;top:13px;width:34px;height:34px;border:0;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:1.15rem;cursor:pointer;z-index:3}
-.monetag-badge{position:relative;display:inline-flex;padding:7px 11px;border-radius:999px;background:#f3e8ff;color:#7c3aed;border:1px solid #e9d5ff;font-size:.58rem;font-weight:900;letter-spacing:.05em}
-.monetag-orb{position:relative;width:92px;height:92px;margin:18px auto 13px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-size:2.25rem;box-shadow:0 18px 40px rgba(124,58,237,.28);animation:monetagOrbPulse 1.8s ease-in-out infinite}
-.monetag-title{position:relative;font-size:1.18rem;font-weight:900;color:#0f172a;letter-spacing:-.04em}
-.monetag-subtitle{position:relative;margin-top:6px;color:#64748b;font-size:.70rem;line-height:1.5}
-.monetag-prize-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:18px 0 14px}
-.monetag-prize{padding:12px 5px 10px;border-radius:14px;background:#fff;border:1px solid #e2e8f0;color:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .15s ease}
-.monetag-prize-icon{font-size:1.15rem;line-height:1}
-.monetag-prize strong{font-size:.63rem;font-weight:900;color:#334155;letter-spacing:-.01em;white-space:nowrap}
-.monetag-prize.top-prize{position:relative;background:linear-gradient(155deg,#fffbeb,#fff7ed);border-color:#fde68a;box-shadow:0 8px 18px rgba(245,158,11,.16)}
-.monetag-prize.top-prize:after{content:"TOP";position:absolute;top:-7px;right:-4px;padding:3px 6px;border-radius:8px;background:#f59e0b;color:#fff;font-size:.42rem;font-weight:900;letter-spacing:.06em;box-shadow:0 4px 10px rgba(245,158,11,.35)}
-.monetag-reveal-button{position:relative;width:100%;min-height:48px;border:0;border-radius:15px;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-family:inherit;font-size:.76rem;font-weight:900;cursor:pointer;box-shadow:0 12px 25px rgba(124,58,237,.25)}
-.monetag-reveal-button:disabled{opacity:.65;cursor:not-allowed}
-.monetag-status{min-height:18px;margin-top:9px;color:#64748b;font-size:.58rem;font-weight:800}
-.monetag-result{display:none;position:relative;margin:13px 0 3px;padding:17px 12px;border-radius:19px;background:linear-gradient(135deg,#eff6ff,#faf5ff);border:1px solid #ddd6fe}
-.monetag-result.show{display:block;animation:monetagResultIn .45s cubic-bezier(.16,1,.3,1) both}
-.monetag-result-icon{font-size:2rem}
-.monetag-result-label{margin-top:4px;font-size:1.25rem;font-weight:900;background:linear-gradient(90deg,#2563eb,#7c3aed,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
-.monetag-result-copy{margin-top:4px;color:#64748b;font-size:.62rem;font-weight:700}
-.monetag-done-button{display:none;width:100%;margin-top:11px;min-height:45px;border:0;border-radius:14px;background:#0f172a;color:#fff;font-family:inherit;font-size:.74rem;font-weight:900;cursor:pointer}
-.monetag-done-button.show{display:block}
-@keyframes monetagFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes monetagCardIn{from{opacity:0;transform:translateY(25px) scale(.90)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes monetagOrbPulse{0%,100%{transform:scale(1);box-shadow:0 18px 40px rgba(124,58,237,.28)}50%{transform:scale(1.045);box-shadow:0 22px 52px rgba(236,72,153,.34)}}
-@keyframes monetagResultIn{from{opacity:0;transform:scale(.82) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-</style>
-
-
-<style>
-/* =========================================================
-   COMPACT MONETAG HEADER BUTTON
-   ========================================================= */
-.monetag-header-wrap{
-  position:absolute;
-  right:48px;
-  top:50%;
-  transform:translateY(-50%);
-  width:66px;
-  height:82px;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  padding-top:10px;
-  z-index:20;
-  pointer-events:none;
-}
-.monetag-header-wrap > *{ pointer-events:auto; }
-.monetag-header-button{
-  position:relative;
-  width:60px;
-  height:60px;
-  border:0;
-  border-radius:19px;
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  color:#fff;
-  background:linear-gradient(145deg,#8b5cf6 0%,#7c3aed 48%,#ec4899 100%);
-  box-shadow:0 14px 28px rgba(124,58,237,.32),inset 0 2px 0 rgba(255,255,255,.30),inset 0 -4px 8px rgba(37,16,82,.20);
-  transform:translateZ(0);
-  animation:monetagHeaderFloat 2.1s ease-in-out infinite,monetagHeaderGlow 2.4s ease-in-out infinite;
-  overflow:visible;
-}
-.monetag-header-button:before{
-  content:"";
-  position:absolute;
-  inset:5px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.25);
-  pointer-events:none;
-}
-.monetag-header-button:after{
-  content:"";
-  position:absolute;
-  width:13px;height:13px;
-  top:4px;right:6px;
-  border-radius:50%;
-  background:#fff;
-  opacity:.75;
-  filter:blur(.2px);
-}
-.monetag-header-gift{
-  font-size:1.75rem;
-  filter:drop-shadow(0 3px 5px rgba(0,0,0,.22));
-  transform:translateY(-1px);
-}
-.monetag-header-play{
-  position:absolute;
-  right:4px;
-  bottom:4px;
-  width:22px;height:22px;
-  border-radius:9px;
-  display:grid;place-items:center;
-  background:#fff;
-  color:#7c3aed;
-  font-size:.7rem;
-  box-shadow:0 4px 9px rgba(0,0,0,.18);
-}
-.monetag-click-hint{
-  position:absolute;
-  top:49px;
+/* MOBILE NAV — white 3D dashboard navigation */
+.mobile-nav{
+  position:fixed;
   left:50%;
+  bottom:18px;
   transform:translateX(-50%);
-  white-space:nowrap;
-  padding:3px 7px;
-  border-radius:8px;
-  color:#7c3aed;
-  background:#fff;
-  border:1px solid #e9d5ff;
-  box-shadow:0 5px 13px rgba(124,58,237,.15);
-  font-size:.48rem;
-  font-weight:900;
-  letter-spacing:.02em;
-  animation:monetagHintDrop 1.45s ease-in-out infinite;
+  z-index:9999;
+  width:min(92vw,430px);
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  gap:6px;
+  padding:8px 10px;
+  border-radius:24px;
+  background:linear-gradient(145deg,#ffffff 0%,#f7f9fc 45%,#e8edf4 100%);
+  border:1px solid rgba(255,255,255,.98);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.28),
+    0 7px 15px rgba(0,0,0,.16),
+    inset 0 2px 0 rgba(255,255,255,1),
+    inset 0 -3px 8px rgba(80,95,120,.16);
+  animation:navFloatIn .55s cubic-bezier(.2,.8,.2,1);
+  overflow:hidden;
 }
-.monetag-click-hint:before{
+.mobile-nav::before{
   content:"";
   position:absolute;
-  left:50%;top:-5px;
-  width:7px;height:7px;
-  background:#fff;
-  border-left:1px solid #e9d5ff;
-  border-top:1px solid #e9d5ff;
-  transform:translateX(-50%) rotate(45deg);
+  inset:1px;
+  border-radius:23px;
+  background:linear-gradient(110deg,rgba(255,255,255,.95),rgba(255,255,255,.35),rgba(210,218,230,.28));
+  pointer-events:none;
 }
-@keyframes monetagHeaderFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-3px) rotate(1deg)}}
-@keyframes monetagHeaderGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(236,72,153,0))}50%{filter:drop-shadow(0 0 8px rgba(236,72,153,.35))}}
-@keyframes monetagHintDrop{0%,100%{opacity:.65;transform:translate(-50%,0)}50%{opacity:1;transform:translate(-50%,5px)}}
-.monetag-header-button:disabled{
-  animation:none;
-  filter:grayscale(1);
-  background:linear-gradient(145deg,#94a3b8,#64748b);
-  box-shadow:0 6px 13px rgba(15,23,42,.13);
+.mobile-nav .nav-item{
+  position:relative;
+  z-index:1;
+  flex:1;
+  min-width:0;
+  height:54px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  border-radius:17px;
+  color:#4b5563;
+  text-decoration:none;
+  font-weight:800;
+  font-size:11px;
+  letter-spacing:.2px;
+  transition:transform .28s ease, color .28s ease, background .28s ease, box-shadow .28s ease;
 }
-.monetag-header-button:disabled + .monetag-click-hint{
-  animation:none;
-  opacity:.45;
-  color:#64748b;
-  border-color:#e2e8f0;
+.mobile-nav .nav-item::after{
+  content:"";
+  position:absolute;
+  left:12%;
+  right:12%;
+  bottom:3px;
+  height:3px;
+  border-radius:99px;
+  background:linear-gradient(90deg,#8b5cf6,#3b82f6);
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
 }
-.monetag-header-button:disabled + .monetag-click-hint:before{border-color:#e2e8f0}
+.mobile-nav .nav-item:hover{
+  transform:translateY(-3px);
+  color:#1f2937;
+}
+.mobile-nav .nav-item:active{
+  transform:translateY(1px) scale(.96);
+}
+.mobile-nav .nav-item.active{
+  color:#111827;
+  background:linear-gradient(145deg,#ffffff,#e9eef6);
+  box-shadow:
+    5px 5px 10px rgba(80,92,110,.18),
+    -4px -4px 9px rgba(255,255,255,.98),
+    inset 0 1px 2px rgba(255,255,255,.9);
+}
+.mobile-nav .nav-item.active::after{
+  transform:scaleX(1);
+}
+.mobile-nav .nav-icon{
+  font-size:21px;
+  line-height:20px;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));
+}
+@keyframes navFloatIn{
+  from{opacity:0;transform:translate(-50%,18px) scale(.94)}
+  to{opacity:1;transform:translate(-50%,0) scale(1)}
+}
+@media (min-width:900px){
+  .mobile-nav{display:none}
+}
+</style>
 
-/* =========================================================
-   MONETAG REWARD REEL
-   ========================================================= */
-.monetag-reel-wrap{display:none;position:relative;margin:17px 0 12px;padding:5px 0 0}
-.monetag-reel-wrap.show{display:block;animation:reelIn .35s ease both}
-.monetag-reel-glow{position:absolute;inset:4px 18px 14px;border-radius:22px;background:radial-gradient(circle at 50% 50%,rgba(124,58,237,.17),transparent 62%);filter:blur(10px)}
-.monetag-reel-window{
-  position:relative;height:86px;overflow:hidden;border-radius:19px;
-  background:linear-gradient(145deg,#0b1020,#1e1b4b 55%,#31134e);
-  border:1px solid rgba(255,255,255,.13);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 15px 30px rgba(15,23,42,.20);
-}
-.monetag-reel-window:before,.monetag-reel-window:after{
-  content:"";position:absolute;top:0;bottom:0;width:62px;z-index:3;pointer-events:none;
-}
-.monetag-reel-window:before{left:0;background:linear-gradient(90deg,#0b1020,transparent)}
-.monetag-reel-window:after{right:0;background:linear-gradient(270deg,#31134e,transparent)}
-.monetag-reel-track{position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;gap:10px;will-change:transform;padding:0 20px}
-.monetag-reel-item{
-  flex:0 0 112px;height:62px;border-radius:15px;display:grid;place-items:center;
-  padding:5px;text-align:center;color:#fff;
-  background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.045));
-  border:1px solid rgba(255,255,255,.13);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
-  font-size:.66rem;font-weight:900;
-}
-.monetag-reel-item small{display:block;color:#cbd5e1;font-size:.48rem;margin-top:2px}
-.monetag-reel-center{
-  position:absolute;left:50%;top:-1px;bottom:-1px;width:2px;z-index:5;
-  background:#fff;box-shadow:0 0 13px rgba(255,255,255,.9);transform:translateX(-50%);
-}
-.monetag-reel-caption{margin-top:8px;color:#7c3aed;font-size:.52rem;font-weight:900;letter-spacing:.12em;animation:reelCaptionPulse .8s ease-in-out infinite alternate}
-.monetag-reel-wrap.landed .monetag-reel-window{box-shadow:0 0 0 2px rgba(124,58,237,.18),0 0 35px rgba(124,58,237,.25),inset 0 1px 0 rgba(255,255,255,.15)}
-@keyframes reelIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
-@keyframes reelCaptionPulse{from{opacity:.5}to{opacity:1}}
-.monetag-result.show{animation:monetagResultIn .65s cubic-bezier(.16,1.3,.3,1) both}
-.monetag-result-icon{animation:resultIconBounce .9s cubic-bezier(.16,1.3,.3,1) both}
-@keyframes resultIconBounce{0%{transform:scale(.1) rotate(-25deg)}70%{transform:scale(1.15) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
-
+<style>
 /* =========================================================
    DASHBOARD FIRST-USE TUTORIAL
    ========================================================= */
@@ -2488,14 +2570,7 @@ transition-duration: 0.01ms !important;
 .tutorial-skip:active,.tutorial-next:active{transform:scale(.96)}
 @keyframes tutorialDimIn{from{opacity:0}to{opacity:1}}
 @keyframes tutorialCardIn{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
-@media(max-width:480px){
-  .monetag-header-wrap{width:60px}
-  .monetag-header-button{width:54px;height:54px;border-radius:17px}
-  .monetag-header-gift{font-size:1.55rem}
-  .monetag-click-hint{top:58px;font-size:.45rem}
-}
 @media(prefers-reduced-motion:reduce){
-  .monetag-header-button,.monetag-click-hint,.monetag-reel-caption{animation:none!important}
   .tutorial-spotlight{transition:none}
 }
 </style>
@@ -2514,13 +2589,6 @@ transition-duration: 0.01ms !important;
 <li><a href="/leaderboard.html">Leaderboard</a></li>
 </ul>
 <div class="header-actions">
-<div class="monetag-header-wrap" id="monetagHeaderWrap">
-  <button id="monetagWatchBtn" class="monetag-header-button" onclick="openMonetagReward()" aria-label="Watch ad and get a reward">
-    <span class="monetag-header-gift">🎁</span>
-    <span class="monetag-header-play">▶</span>
-  </button>
-  <div class="monetag-click-hint" aria-hidden="true">Click here</div>
-</div>
 <a href="https://wa.me/+2348034399095" target="_blank" class="support-btn"
 title="Support">
 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2559,18 +2627,29 @@ class="user-name loading-skeleton name-loading" aria-label="Loading user name"><
     Current Earning Balance
 </div>
 
+<div class="balance-top-right">
+<button type="button"
+        id="hideBalanceBtn"
+        class="balance-icon-btn"
+        onclick="toggleBalanceVisibility()"
+        aria-label="Hide balance"
+        title="Hide balance">
+    <svg id="eyeIconOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+    <svg id="eyeIconClosed" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.6 20.6 0 0 1 5.06-6.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a20.7 20.7 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+    </svg>
+</button>
 <div class="verified">Verified</div>
 </div>
+</div>
 <div class="balance-amount-row">
-<div class="total-balance"><span class="balance-currency" id="balanceCurrency">₦</span><span id="balanceText" class="loading-skeleton balance-loading" aria-label="Loading balance"></span></div>
+<div class="total-balance"><span class="balance-currency" id="balanceCurrency">💎</span><span id="balanceText" class="loading-skeleton balance-loading" aria-label="Loading balance"></span></div>
+<div id="balanceUsdEquivalent" class="balance-usd-equivalent">≈ $0.000 USD</div>
 
-<a id="freeSpinsUseBtn" href="/game.html" class="spin-chip" aria-label="Use free spins">
-<span class="spin-chip-icon" aria-hidden="true">🎰</span>
-<span class="spin-chip-text">
-<span class="spin-chip-value"><span id="freeSpinsText" class="loading-skeleton balance-loading" aria-label="Loading free spins">0.0</span></span>
-<span class="spin-chip-label">Free Spins</span>
-</span>
-</a>
 </div>
 <div class="balance-caption">Available earnings for withdrawal</div>
 
@@ -2581,7 +2660,7 @@ class="user-name loading-skeleton name-loading" aria-label="Loading user name"><
 <span class="balance-box-icon earnings-icon">★</span>
 <span class="balance-box-label">TOTAL EARNINGS</span>
 </div>
-<div class="balance-box-value earnings-value"><span class="balance-currency" id="earningsCurrency">₦</span><span
+<div class="balance-box-value earnings-value"><span class="balance-currency" id="earningsCurrency">💎</span><span
 id="earningsBalanceText" class="loading-skeleton balance-loading" aria-label="Loading total earnings"></span></div>
 </div>
 <div class="balance-box">
@@ -2589,7 +2668,7 @@ id="earningsBalanceText" class="loading-skeleton balance-loading" aria-label="Lo
 <span class="balance-box-icon deposit-icon">+</span>
 <span class="balance-box-label">DEPOSIT BALANCE</span>
 </div>
-<div class="balance-box-value deposit-value"><span class="balance-currency" id="depositCurrency">₦</span><span
+<div class="balance-box-value deposit-value"><span class="balance-currency" id="depositCurrency">💎</span><span
 id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loading deposit balance"></span></div>
 </div>
 </div>
@@ -2660,7 +2739,7 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
 <div class="iv-desc">Share your link, get paid per friend</div>
 </div>
 <div class="iv-reward">
-<span class="iv-reward-amt">₦15</span>
+<span class="iv-reward-amt">💎 15</span>
 <span class="iv-reward-lbl">Per Invite</span>
 </div>
 </div>
@@ -2724,7 +2803,7 @@ WhatsApp
 </div>
 <div class="iv-stat-sep"></div>
 <div class="iv-stat">
-<span class="iv-stat-val iv-stat-earn" id="refEarningsText">₦0</span>
+<span class="iv-stat-val iv-stat-earn" id="refEarningsText">💎 0</span>
 <span class="iv-stat-lbl">Ref Earned</span>
 </div>
 </div>
@@ -2737,11 +2816,11 @@ WhatsApp
 <section class="payout-phone-section referral-payout-blend" aria-label="Total payouts this week">
 <div class="payout-phone-glow"></div>
 <div class="payout-phone-particles">
-<span class="payout-coin c1">₦</span>
-<span class="payout-coin c2">₦</span>
-<span class="payout-coin c3">₦</span>
-<span class="payout-coin c4">₦</span>
-<span class="payout-coin c5">₦</span>
+<span class="payout-coin c1">💎</span>
+<span class="payout-coin c2">💎</span>
+<span class="payout-coin c3">💎</span>
+<span class="payout-coin c4">💎</span>
+<span class="payout-coin c5">💎</span>
 </div>
 <div class="payout-phone-stage">
 <div class="payout-phone">
@@ -2759,7 +2838,7 @@ WhatsApp
 </div>
 <div class="payout-screen-label">Total Paid Out</div>
 <div class="payout-screen-amount">
-<span class="payout-naira">₦</span><span id="payoutCounterValue">0</span><span class="payout-plus" id="payoutCounterPlus">+</span>
+<span class="payout-gems">💎</span><span id="payoutCounterValue">0</span><span class="payout-plus" id="payoutCounterPlus">+</span>
 </div>
 <div class="payout-screen-sub">to PAYME users this week</div>
 <div class="payout-screen-bars">
@@ -2790,11 +2869,11 @@ Live payouts updating in real time
     var progress = Math.min(elapsed / duration, 1);
     var eased = easeOutCubic(progress);
     var value = Math.floor(eased * target);
-    el.textContent = value.toLocaleString("en-NG");
+    el.textContent = value.toLocaleString("en-US");
     if(progress < 1){
       window.requestAnimationFrame(step);
     }else{
-      el.textContent = target.toLocaleString("en-NG");
+      el.textContent = target.toLocaleString("en-US");
       if(plusEl) plusEl.style.opacity = "1";
     }
   }
@@ -2890,13 +2969,24 @@ Next reward available in:
 <h2 class="streak-title">WEEK COMPLETE!</h2>
 
 <p class="streak-desc">
-Amazing! You've completed your 7-day streak and earned
-<strong>1 FREE SPIN</strong>.
+Amazing! You've completed your 7-day streak.
+</p>
+
+<div class="streak-ticket-reward">
+<div class="streak-ticket-icon">🎟️</div>
+<div>
+<div class="streak-ticket-label">LUCK TICKETS WON</div>
+<div class="streak-ticket-amount">+200</div>
+</div>
+</div>
+
+<p class="streak-desc streak-ticket-note">
+200 Luck Tickets have been added to your Luck Ticket balance.
 </p>
 
 <button class="streak-play-btn"
-onclick="window.location.href='/game.html'">
-PLAY NOW →
+onclick="window.location.href='/lucky.html'">
+USE NOW →
 </button>
 
 <button class="streak-later-btn"
@@ -2923,7 +3013,7 @@ aria-hidden="true">
 
 <div class="success-amount"
 id="claimSuccessAmount">
-+ ₦10
++ 💎 10
 </div>
 
 <div class="success-title"
@@ -2945,51 +3035,6 @@ Awesome ✨
 </div>
 </div>
 
-<!-- MONETAG REWARD MODAL -->
-<div class="monetag-overlay" id="monetagRewardModal" onclick="if(event.target===this) closeMonetagReward()">
-  <div class="monetag-card">
-    <button class="monetag-close" onclick="closeMonetagReward()" aria-label="Close">×</button>
-
-    <div class="monetag-badge">MONETAG REWARDED AD</div>
-    <div class="monetag-orb" id="monetagOrb">▶</div>
-    <div class="monetag-title" id="monetagModalTitle">Ready for your surprise?</div>
-    <div class="monetag-subtitle" id="monetagModalSubtitle">Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event. The reel is only the suspense reveal.</div>
-
-    <div class="monetag-prize-grid" id="monetagPrizeGrid">
-      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.02 Spin</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.05 Spin</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.1 Spin</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">🎟️</span><strong>0.2 Spin</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">🎖️</span><strong>0.5 Spin</strong></div>
-      <div class="monetag-prize"><span class="monetag-prize-icon">🏆</span><strong>1 Spin</strong></div>
-      <div class="monetag-prize top-prize"><span class="monetag-prize-icon">💎</span><strong>2 Spins</strong></div>
-    </div>
-
-    <div class="monetag-reel-wrap" id="monetagReelWrap">
-      <div class="monetag-reel-glow"></div>
-      <div class="monetag-reel-window">
-        <div class="monetag-reel-track" id="monetagReelTrack"></div>
-        <div class="monetag-reel-center"></div>
-      </div>
-      <div class="monetag-reel-caption" id="monetagReelCaption">REVEALING YOUR REWARD</div>
-    </div>
-
-    <button id="monetagRevealBtn" class="monetag-reveal-button" onclick="watchMonetagAd()">
-      ▶ Watch Ad to Reveal
-    </button>
-
-    <div class="monetag-status" id="monetagStatus"></div>
-
-    <div class="monetag-result" id="monetagResult">
-      <div class="monetag-result-icon" id="monetagResultIcon">🎁</div>
-      <div class="monetag-result-label" id="monetagResultLabel">Reward</div>
-      <div class="monetag-result-copy" id="monetagResultCopy">Your reward has been added.</div>
-    </div>
-
-    <button id="monetagDoneBtn" class="monetag-done-button" onclick="claimMonetagRewardAndClose()">Claim Reward</button>
-  </div>
-</div>
-
 <!-- FIRST-USE DASHBOARD TUTORIAL -->
 <div class="dashboard-tutorial" id="dashboardTutorial" aria-hidden="true">
   <div class="tutorial-dim"></div>
@@ -3007,23 +3052,19 @@ Awesome ✨
   </div>
 </div>
 
-<!-- MOBILE NAV -->
-<nav class="mobile-nav">
-<a href="/dashboard.html" class="active">
-<span class="nav-icon">🏠</span>Home
-</a>
-
-<a href="/earn">
-<span class="nav-icon nav-icon-naira">₦</span>Earn
-</a>
-
-<a href="#referrals">
-<span class="nav-icon">👥</span>Refer
-</a>
-
-<a href="/leaderboard.html">
-<span class="nav-icon">🏆</span>Ranking
-</a>
+<nav class="mobile-nav" aria-label="Main navigation">
+  <a href="/dashboard.html" class="nav-item active">
+    <span class="nav-icon">⌂</span><span>Home</span>
+  </a>
+  <a href="/earn" class="nav-item">
+    <span class="nav-icon">◉</span><span>Earn</span>
+  </a>
+  <a href="/dashboard.html#referrals" class="nav-item">
+    <span class="nav-icon">↗</span><span>Refer</span>
+  </a>
+  <a href="/leaderboard.html" class="nav-item">
+    <span class="nav-icon">♛</span><span>Ranking</span>
+  </a>
 </nav>
 
 <!-- TELEGRAM SHARE PREVIEW -->
@@ -3057,57 +3098,19 @@ Loading...
 </div>
 </div>
 
-<!-- WITHDRAW ALERT -->
-<div class="alert-overlay" id="minWithdrawAlert">
-
-<div class="alert-card">
-
-<div class="alert-icon-wrapper">
-<svg width="24"
-height="24"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2.5"
-stroke-linecap="round"
-stroke-linejoin="round">
-
-<circle cx="12" cy="12" r="10"></circle>
-<line x1="12" y1="8" x2="12" y2="12"></line>
-<line x1="12" y1="16" x2="12.01" y2="16"></line>
-
-</svg>
-</div>
-
-<div class="alert-title">Minimum Withdrawal</div>
-
-<p class="alert-text">
-The minimum withdrawal amount is
-<strong>₦200</strong>.
-You need a higher earnings balance to proceed.
-</p>
-
-<button class="alert-btn"
-onclick="closeAlertModal()">
-Got It
-</button>
-
-</div>
-</div>
-
 <!-- WELCOME BONUS -->
 <div class="bonus-overlay" id="bonusModal">
 
 <div class="bonus-card">
 
-<div class="bonus-amount">+ ₦10</div>
+<div class="bonus-amount">+ 💎 10</div>
 
 <div class="bonus-title">
 Welcome Bonus Credited!
 </div>
 
 <p class="bonus-text">
-We've added a ₦10 welcome reward directly to your wallet to get you started.
+We've added a 💎 10 welcome reward directly to your wallet to get you started.
 </p>
 
 <button class="claim-btn"
@@ -3268,464 +3271,6 @@ function waitForButtonLoader(ms=360){
 }
 
 /* =========================================================
-   MONETAG IN-APP INTERSTITIAL
-   =========================================================
-   Non-rewarded Monetag ads are controlled entirely by Monetag.
-   This does NOT touch the rewarded-ad/postback system above.
-
-   - frequency: 2 ads
-   - capping: 0.1 hours = 6 minutes
-   - interval: 30 seconds between ads
-   - timeout: 5 seconds before the first ad
-   - everyPage: true = the Monetag session resets on every page
-     transition, so the frequency/capping counter starts over each
-     time the dashboard is (re)entered, instead of being shared
-     across the whole app session.
-
-   Monetag still decides whether an ad is actually available/shown.
-   ========================================================= */
-const MONETAG_INAPP_SETTINGS = Object.freeze({
-    type: "inApp",
-    inAppSettings: {
-        frequency: 2,
-        capping: 0.1,
-        interval: 30,
-        timeout: 5,
-        everyPage: true
-    }
-});
-
-let monetagInAppStarted = false;
-let monetagInAppRetryTimer = null;
-
-/* IMPORTANT (per Monetag's own docs): calling show_XXX({type:'inApp'})
-   multiple times in a row can reset the SDK's internal logic and
-   interrupt the ad flow. So this must only ever be called ONCE per
-   page load. everyPage:true (below) is what makes Monetag itself
-   reset the frequency/capping session on every navigation/entry —
-   we do NOT need to (and must not) re-call show_11688228 manually
-   when the user returns to the tab. That re-call was removed from
-   the "came back to this tab" handler for that reason. */
-function startMonetagInAppInterstitial(){
-    if(monetagInAppStarted) return;
-    monetagInAppStarted = true;
-
-    const launch = () => {
-        if(typeof window.show_11688228 !== "function"){
-            // The SDK script may still be loading. Retry a few times
-            // without creating an aggressive polling loop.
-            monetagInAppStarted = false;
-            monetagInAppRetryTimer = setTimeout(startMonetagInAppInterstitial, 1200);
-            return;
-        }
-
-        /*
-         * Do not attach rewarded-ad ymid/requestVar values here.
-         * In-App Interstitial is non-rewarded and must remain
-         * separate from the reward flow.
-         *
-         * catchIfNoFeed:true + .catch() below exist purely for
-         * debugging — by default Monetag silently resolves with no
-         * ad shown when there's nothing to serve (empty feed, zone
-         * still in moderation, domain not approved, etc.), so
-         * without this you'd never see *why* nothing appeared.
-         */
-        try{
-            const result = window.show_11688228({
-                ...MONETAG_INAPP_SETTINGS,
-                catchIfNoFeed: true
-            });
-            if(result && typeof result.catch === "function"){
-                result.catch(error=>{
-                    console.warn("Monetag In-App Interstitial: no ad shown —", error);
-                });
-            }
-        }catch(error){
-            console.warn("Monetag In-App Interstitial could not start:", error);
-            monetagInAppStarted = false;
-        }
-    };
-
-    // Give the Telegram WebView + Monetag SDK a moment to finish loading.
-    setTimeout(launch, 5000);
-}
-
-/* Start once the dashboard has first loaded — and only once. Monetag
-   handles the configured frequency/capping/interval from there, and
-   everyPage:true resets that session on every fresh page load. */
-if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", startMonetagInAppInterstitial, {once:true});
-}else{
-    startMonetagInAppInterstitial();
-}
-
-/* =========================================================
-   MONETAG REWARDED INTERSTITIAL
-   ========================================================= */
-let monetagAdSessionId = null;
-let monetagAdStartedAt = 0;
-let monetagRewardModalOpen = false;
-let monetagAdInProgress = false;
-let monetagCooldownTimer = null;
-const MONETAG_CLIENT_COOLDOWN_MS = 10 * 1000;
-const MONETAG_COOLDOWN_KEY = "paymeMonetagCooldownUntil";
-
-const MONETAG_REEL_ITEMS = [
-    {icon:"🎟️",label:"0.02"},
-    {icon:"🎟️",label:"0.05"},
-    {icon:"🎟️",label:"0.1"},
-    {icon:"🎟️",label:"0.2"},
-    {icon:"🎖️",label:"0.5"},
-    {icon:"🏆",label:"1 SPIN"},
-    {icon:"💎",label:"2 SPINS"}
-];
-
-function monetagSetStatus(text, isError=false){
-    const el = document.getElementById("monetagStatus");
-    if(!el) return;
-    el.textContent = text || "";
-    el.style.color = isError ? "#ef4444" : "#64748b";
-}
-
-function getMonetagHeaderButton(){
-    return document.getElementById("monetagWatchBtn");
-}
-
-function updateMonetagCooldownUI(){
-    const button = getMonetagHeaderButton();
-    const hint = document.querySelector(".monetag-click-hint");
-    if(!button) return;
-
-    const until = Number(localStorage.getItem(MONETAG_COOLDOWN_KEY) || 0);
-    const remaining = Math.max(0, until - Date.now());
-
-    if(remaining > 0){
-        button.disabled = true;
-        button.title = `Available in ${Math.ceil(remaining / 1000)} seconds`;
-        if(hint) hint.textContent = `${Math.ceil(remaining / 1000)}s`;
-        if(monetagCooldownTimer) clearTimeout(monetagCooldownTimer);
-        monetagCooldownTimer = setTimeout(updateMonetagCooldownUI, 250);
-    }else{
-        localStorage.removeItem(MONETAG_COOLDOWN_KEY);
-        if(monetagCooldownTimer){ clearTimeout(monetagCooldownTimer); monetagCooldownTimer = null; }
-        // Explicitly clear the disabled state (and its grey styling, which
-        // is driven off :disabled in CSS) rather than relying only on the
-        // fact that remaining hit 0 — this is what actually restores the
-        // icon's color once the 10s cooldown is over.
-        button.disabled = false;
-        button.title = "Watch ad and get a reward";
-        if(hint) hint.textContent = "Click here";
-    }
-}
-
-function startMonetagCooldown(){
-    const until = Date.now() + MONETAG_CLIENT_COOLDOWN_MS;
-    localStorage.setItem(MONETAG_COOLDOWN_KEY, String(until));
-    updateMonetagCooldownUI();
-}
-
-function monetagPrizeHtml(item){
-    return `<div class="monetag-reel-item"><div>${item.icon}</div><div>${item.label}</div></div>`;
-}
-
-function buildMonetagReel(){
-    const track = document.getElementById("monetagReelTrack");
-    if(!track) return;
-
-    // A longer reel makes the reveal feel like a real prize wheel.
-    const sequence = [];
-    for(let i=0;i<40;i++){
-        sequence.push(MONETAG_REEL_ITEMS[i % MONETAG_REEL_ITEMS.length]);
-    }
-
-    track.innerHTML = sequence.map(monetagPrizeHtml).join("");
-    track.style.transition = "none";
-    track.style.transform = "translate3d(0,0,0)";
-}
-
-function monetagResetModal(){
-    const title = document.getElementById("monetagModalTitle");
-    const subtitle = document.getElementById("monetagModalSubtitle");
-    const grid = document.getElementById("monetagPrizeGrid");
-    const reveal = document.getElementById("monetagRevealBtn");
-    const status = document.getElementById("monetagStatus");
-    const result = document.getElementById("monetagResult");
-    const done = document.getElementById("monetagDoneBtn");
-    const orb = document.getElementById("monetagOrb");
-    const reel = document.getElementById("monetagReelWrap");
-
-    if(title) title.textContent = "Ready for your surprise?";
-    if(subtitle) subtitle.textContent = "Watch the sponsored advert. Your reward is selected securely by the server after Monetag confirms the rewarded event. The reel is only the suspense reveal.";
-    if(grid) grid.style.display = "grid";
-    if(reveal){ reveal.style.display = "block"; reveal.disabled = false; reveal.textContent = "▶ Watch Ad to Reveal"; }
-    if(status) status.textContent = "";
-    if(result) result.classList.remove("show");
-    if(done) done.classList.remove("show");
-    if(orb) orb.textContent = "▶";
-    if(reel){ reel.classList.remove("show","landed"); reel.style.display = "none"; }
-    buildMonetagReel();
-}
-
-function closeMonetagReward(){
-    if(monetagAdInProgress) return;
-    const modal = document.getElementById("monetagRewardModal");
-    if(modal) modal.classList.remove("show");
-    monetagRewardModalOpen = false;
-}
-
-async function openMonetagReward(){
-    const button = getMonetagHeaderButton();
-    if(!button || button.disabled || monetagAdInProgress) return;
-
-    const modal = document.getElementById("monetagRewardModal");
-    if(!modal) return;
-
-    monetagResetModal();
-    modal.classList.add("show");
-    monetagRewardModalOpen = true;
-}
-
-async function startMonetagAdSession(){
-    const response = await fetch("/api/monetag/start", {
-        method:"POST",
-        credentials:"include",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({})
-    });
-
-    let data = {};
-    try{ data = await response.json(); }catch(e){}
-
-    if(!response.ok || !data.success){
-        const err = new Error(data.message || "Unable to start the rewarded ad.");
-        err.nextAllowedAt = data.nextAllowedAt || 0;
-        throw err;
-    }
-
-    monetagAdSessionId = data.sessionId || null;
-    monetagAdStartedAt = Number(data.createdAt || Date.now());
-    return data;
-}
-
-async function waitForMonetagPostback(timeoutMs=15000, intervalMs=1200){
-    if(!monetagAdSessionId) return null;
-    const started = Date.now();
-
-    while(Date.now() - started < timeoutMs){
-        try{
-            const response = await fetch(
-                `/api/monetag/status?sessionId=${encodeURIComponent(monetagAdSessionId)}&startedAt=${encodeURIComponent(monetagAdStartedAt)}`,
-                {method:"GET",credentials:"include"}
-            );
-
-            if(response.ok){
-                const data = await response.json();
-                if(data && data.success && data.confirmed && data.reward) return data;
-            }
-        }catch(error){
-            console.warn("Waiting for Monetag reward confirmation:",error);
-        }
-        await new Promise(resolve=>setTimeout(resolve,intervalMs));
-    }
-    return null;
-}
-
-function getMonetagRewardIndex(result){
-    const spins = Number(result?.spins || 0);
-    if(spins >= 2) return 6;
-    if(spins >= 1) return 5;
-    if(spins >= 0.5) return 4;
-    if(spins >= 0.2) return 3;
-    if(spins >= 0.1) return 2;
-    if(spins >= 0.05) return 1;
-    return 0;
-}
-
-function runMonetagRewardReel(result){
-    return new Promise(resolve=>{
-        const wrap = document.getElementById("monetagReelWrap");
-        const track = document.getElementById("monetagReelTrack");
-        const caption = document.getElementById("monetagReelCaption");
-        const resultIndex = getMonetagRewardIndex(result);
-
-        if(!wrap || !track){ resolve(); return; }
-
-        const itemWidth = 112;
-        const gap = 10;
-        const step = itemWidth + gap;
-        const trackPadding = 20; // matches .monetag-reel-track's "padding:0 20px"
-        const windowEl = wrap.querySelector(".monetag-reel-window");
-        const centerOffset = (windowEl?.clientWidth || 300) / 2;
-
-        // The track repeats MONETAG_REEL_ITEMS (7 items) in cycles, so the
-        // reel only lands on the correct reward if the stopping index is a
-        // multiple of 7 away from resultIndex. 28 is the highest such
-        // multiple that still leaves every stop within the 40-item track.
-        const targetIndex = 28 + resultIndex;
-        // Items are offset by the track's own left padding, so that has to
-        // be subtracted too or the reel stops ~20px short and the pointer
-        // lands on the wrong item relative to the actual server reward.
-        const targetOffset = -(targetIndex * step) + centerOffset - (itemWidth / 2) - trackPadding;
-
-        wrap.style.display = "block";
-        wrap.classList.add("show");
-        wrap.classList.remove("landed");
-        if(caption) caption.textContent = "REVEALING YOUR REWARD…";
-
-        track.style.transition = "none";
-        track.style.transform = "translate3d(0,0,0)";
-        void track.offsetWidth;
-
-        // One continuous, smoothly-decelerating spin straight to the
-        // server-selected reward — no fake slow-down/speed-up detour.
-        track.style.transition = "transform 2.6s cubic-bezier(.12,.72,.1,1)";
-        track.style.transform = `translate3d(${targetOffset}px,0,0)`;
-
-        setTimeout(()=>{
-            wrap.classList.add("landed");
-            if(caption) caption.textContent = "REWARD LOCKED IN ✓";
-            resolve();
-        },2700);
-    });
-}
-
-function showMonetagResult(result){
-    const title = document.getElementById("monetagModalTitle");
-    const subtitle = document.getElementById("monetagModalSubtitle");
-    const grid = document.getElementById("monetagPrizeGrid");
-    const reveal = document.getElementById("monetagRevealBtn");
-    const status = document.getElementById("monetagStatus");
-    const resultBox = document.getElementById("monetagResult");
-    const icon = document.getElementById("monetagResultIcon");
-    const label = document.getElementById("monetagResultLabel");
-    const copy = document.getElementById("monetagResultCopy");
-    const done = document.getElementById("monetagDoneBtn");
-    const orb = document.getElementById("monetagOrb");
-
-    const spins = Number(result.spins || 0);
-    const won = spins > 0;
-
-    if(title) title.textContent = won ? "🎉 You won!" : "Oops!";
-    if(subtitle) subtitle.textContent = won
-        ? "Nice! Come back soon for another shot at even bigger free spins."
-        : "Almost! Watch another ad for another shot at free spins.";
-    if(grid) grid.style.display = "none";
-    if(reveal) reveal.style.display = "none";
-    if(status) status.textContent = "";
-    if(orb) orb.textContent = won ? "🎉" : "😕";
-
-    /* Reward is credited and shown instantly — no fill/loading animation. */
-    if(icon) icon.textContent = won ? "🎟️" : "😕";
-    if(label) label.textContent = won ? `${spins} Free Spin${spins===1?"":"s"}` : "Try Again";
-    if(copy){
-        if(won) copy.textContent = `${spins} free spin${spins===1?"":"s"} has been added to your account. Keep watching to grow your streak!`;
-        else copy.textContent = "You didn't get anything this time.";
-    }
-    if(resultBox) resultBox.classList.add("show");
-    if(done) done.classList.add("show");
-    // The server has already credited the reward at this point, so the
-    // 10-second cooldown begins as soon as the reward is revealed.
-    startMonetagCooldown();
-}
-
-function refreshVisibleBalances(user){
-    if(!user) return;
-    const balanceEl = document.getElementById("balanceText");
-    const earningsEl = document.getElementById("earningsBalanceText");
-    const depositEl = document.getElementById("depositBalanceText");
-    const freeSpinsEl = document.getElementById("freeSpinsText");
-    if(balanceEl && user.balance != null) balanceEl.textContent = Number(user.balance).toLocaleString();
-    if(earningsEl && user.withdrawableBalance != null) earningsEl.textContent = Number(user.withdrawableBalance).toLocaleString();
-    if(depositEl && user.depositBalance != null) depositEl.textContent = Number(user.depositBalance).toLocaleString();
-    if(freeSpinsEl && user.freeSpins != null) freeSpinsEl.textContent = Number(user.freeSpins).toFixed(1);
-}
-
-function claimMonetagRewardAndClose(){
-    closeMonetagReward();
-}
-
-async function watchMonetagAd(){
-    if(monetagAdInProgress) return;
-
-    const button = document.getElementById("monetagRevealBtn");
-    const status = document.getElementById("monetagStatus");
-    const note = document.getElementById("monetagWatchNote");
-
-    monetagAdInProgress = true;
-    if(button){ button.disabled = true; button.textContent = "Preparing ad…"; }
-    if(status) status.textContent = "Preparing your secure reward session…";
-
-    try{
-        await startMonetagAdSession();
-
-        if(typeof window.show_11688228 !== "function"){
-            throw new Error("Monetag SDK is not ready yet. Please wait a moment and try again.");
-        }
-
-        if(button) button.textContent = "Opening ad…";
-        if(status) status.textContent = "Please complete the rewarded ad. The server will decide your reward.";
-
-        await window.show_11688228({
-            type:"end",
-            ymid:monetagAdSessionId,
-            requestVar:"dashboard_watch_ad"
-        });
-
-        if(button) button.textContent = "Confirming reward…";
-        if(status) status.textContent = "Ad completed. Waiting for Monetag's server confirmation…";
-
-        const postbackData = await waitForMonetagPostback();
-
-        if(!postbackData){
-            if(status) status.textContent = "Ad completed, but Monetag has not confirmed the reward yet. Please check again shortly.";
-            return;
-        }
-
-        const reward = postbackData.reward || {};
-        const cash = Number(reward.cash || 0);
-        const spins = Number(reward.spins || 0);
-
-        try{
-            const refreshResponse = await fetch("/api/user/dashboard", {
-                method:"POST",
-                credentials:"include",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({})
-            });
-            const refreshed = refreshResponse.ok ? await refreshResponse.json() : null;
-            refreshVisibleBalances(refreshed?.user);
-        }catch(refreshError){
-            console.warn("Dashboard refresh after Monetag reward failed:",refreshError);
-        }
-
-        /* Server has already selected/credited the reward. The reel is only
-           a visual reveal and can never change the actual reward. */
-        const result = {label:reward.label || "Try Again",cash,spins};
-        const reelWrap = document.getElementById("monetagReelWrap");
-        const revealButton = document.getElementById("monetagRevealBtn");
-        if(revealButton) revealButton.style.display = "none";
-        await runMonetagRewardReel(result);
-        if(reelWrap) reelWrap.style.display = "none";
-        showMonetagResult(result);
-
-    }catch(error){
-        console.error("Monetag rewarded ad error:",error);
-        const message = error?.message || "Unable to show the rewarded ad.";
-        monetagSetStatus(message,true);
-        if(error?.nextAllowedAt){
-            const remaining = Math.max(0, Number(error.nextAllowedAt) - Date.now());
-            localStorage.setItem(MONETAG_COOLDOWN_KEY, String(error.nextAllowedAt));
-            updateMonetagCooldownUI();
-            if(status) status.textContent = `Try again in about ${Math.ceil(remaining / 1000)} seconds.`;
-        }
-        if(button){ button.disabled = false; button.textContent = "▶ Watch Ad to Reveal"; }
-    }finally{
-        monetagAdInProgress = false;
-    }
-}
-
-updateMonetagCooldownUI();
-
 /* Internal page links get the same small loading feedback. */
 document.addEventListener("click", function(e){
     const link = e.target.closest("a[href]");
@@ -3754,7 +3299,7 @@ const luckyMessages = [
     "Try your <strong>Luck</strong>",
     "Users are <strong>winning</strong>",
     "Play <strong>now</strong>",
-    "Win <strong>₦15,000</strong>",
+    "Win <strong>💎 15,000</strong>",
     "Feeling <strong>lucky?</strong>",
     "Pick a number. <strong>Take a chance.</strong>"
 ];
@@ -3963,6 +3508,141 @@ window.location.href =
 */
 let dashboardEntryLoading = false;
 
+/* ============================================================
+   GEM BALANCE DISPLAY
+   The wallet is always displayed in Gems. The server supplies the
+   current USD value of one Gem, based on the live NGN/USD rate.
+   The hide-balance preference remains available.
+============================================================ */
+const GEM_ICON = "💎";
+
+let dashboardRaw = {
+    balance:0,
+    earnings:0,
+    deposit:0,
+    freeSpins:0,
+    gemUsdRate:0
+};
+
+let displayState = {
+    hidden: localStorage.getItem("paymeBalanceHidden") === "1"
+};
+
+function formatGemAmount(value){
+    return Number(value || 0).toLocaleString("en-US",{
+        minimumFractionDigits:3,
+        maximumFractionDigits:3
+    });
+}
+
+function formatUsdAmount(value){
+    return Number(value || 0).toLocaleString("en-US",{
+        style:"currency",
+        currency:"USD",
+        minimumFractionDigits:3,
+        maximumFractionDigits:3
+    });
+}
+
+function renderBalanceField(elId, currencyElId, rawValue){
+    const el = document.getElementById(elId);
+    if(!el) return;
+
+    const currencyEl = currencyElId
+        ? document.getElementById(currencyElId)
+        : null;
+
+    if(displayState.hidden){
+        el.innerText = "••••••";
+        el.classList.add("balance-masked");
+        if(currencyEl) currencyEl.innerText = GEM_ICON;
+        return;
+    }
+
+    el.classList.remove("balance-masked");
+
+    if(currencyEl) currencyEl.innerText = GEM_ICON;
+    el.innerText = formatGemAmount(rawValue);
+}
+
+function renderDashboardBalances(){
+    renderBalanceField(
+        "balanceText",
+        "balanceCurrency",
+        dashboardRaw.balance
+    );
+
+    renderBalanceField(
+        "earningsBalanceText",
+        "earningsCurrency",
+        dashboardRaw.earnings
+    );
+
+    renderBalanceField(
+        "depositBalanceText",
+        "depositCurrency",
+        dashboardRaw.deposit
+    );
+
+    const usdEl = document.getElementById("balanceUsdEquivalent");
+    if(usdEl){
+        if(displayState.hidden){
+            usdEl.innerText = "≈ •••••• USD";
+        }else{
+            const usdValue =
+                Number(dashboardRaw.balance || 0) *
+                Number(dashboardRaw.gemUsdRate || 0);
+
+            usdEl.innerText =
+                "≈ " + formatUsdAmount(usdValue) + " USD";
+        }
+    }
+
+    updateHideBalanceButtonUI();
+}
+
+function toggleBalanceVisibility(){
+    displayState.hidden = !displayState.hidden;
+    localStorage.setItem(
+        "paymeBalanceHidden",
+        displayState.hidden ? "1" : "0"
+    );
+    renderDashboardBalances();
+}
+
+function updateHideBalanceButtonUI(){
+    const openIcon = document.getElementById("eyeIconOpen");
+    const closedIcon = document.getElementById("eyeIconClosed");
+
+    if(openIcon && closedIcon){
+        openIcon.style.display =
+            displayState.hidden ? "none" : "block";
+
+        closedIcon.style.display =
+            displayState.hidden ? "block" : "none";
+    }
+
+    const btn =
+        document.getElementById("hideBalanceBtn");
+
+    if(btn){
+        btn.setAttribute(
+            "aria-label",
+            displayState.hidden
+                ? "Show balance"
+                : "Hide balance"
+        );
+
+        btn.title =
+            displayState.hidden
+                ? "Show balance"
+                : "Hide balance";
+    }
+}
+
+updateHideBalanceButtonUI();
+
+
 function isDashboardPageRefresh(){
     try{
         const navigation =
@@ -3991,25 +3671,17 @@ function restoreCachedDashboard(){
         if(!data) return false;
 
         const nameEl = document.getElementById("userNameText");
-        const balanceEl = document.getElementById("balanceText");
-        const earningsEl = document.getElementById("earningsBalanceText");
-        const depositEl = document.getElementById("depositBalanceText");
-        const freeSpinsEl = document.getElementById("freeSpinsText");
 
         if(nameEl && data.name != null)
             nameEl.innerText = data.name;
 
-        if(balanceEl && data.balance != null)
-            balanceEl.innerText = data.balance;
+        if(data.balance != null) dashboardRaw.balance = Number(data.balance) || 0;
+        if(data.earnings != null) dashboardRaw.earnings = Number(data.earnings) || 0;
+        if(data.deposit != null) dashboardRaw.deposit = Number(data.deposit) || 0;
+        if(data.freeSpins != null) dashboardRaw.freeSpins = Number(data.freeSpins) || 0;
+        if(data.gemUsdRate != null) dashboardRaw.gemUsdRate = Number(data.gemUsdRate) || 0;
 
-        if(earningsEl && data.earnings != null)
-            earningsEl.innerText = data.earnings;
-
-        if(depositEl && data.deposit != null)
-            depositEl.innerText = data.deposit;
-
-        if(freeSpinsEl && data.freeSpins != null)
-            freeSpinsEl.innerText = data.freeSpins;
+        renderDashboardBalances();
 
         return true;
     }catch(error){
@@ -4018,7 +3690,7 @@ function restoreCachedDashboard(){
     }
 }
 
-function cacheDashboardData(name, balance, earnings, deposit, freeSpins){
+function cacheDashboardData(name, balance, earnings, deposit, freeSpins, gemUsdRate){
     try{
         localStorage.setItem(
             "paymeDashboardCache",
@@ -4027,7 +3699,8 @@ function cacheDashboardData(name, balance, earnings, deposit, freeSpins){
                 balance:balance,
                 earnings:earnings,
                 deposit:deposit,
-                freeSpins:freeSpins
+                freeSpins:freeSpins,
+                gemUsdRate:Number(gemUsdRate || 0)
             })
         );
     }catch(error){
@@ -4042,7 +3715,6 @@ function setDashboardLoading(isLoading){
         document.getElementById("balanceText"),
         document.getElementById("earningsBalanceText"),
         document.getElementById("depositBalanceText"),
-        document.getElementById("freeSpinsText")
     ];
 
     const currencyEls = [
@@ -4167,35 +3839,23 @@ Number(
 user.balance ?? 0
 );
 
-document.getElementById(
-"balanceText"
-).innerText =
-availableBalance.toFixed(2);
-
-document.getElementById(
-"earningsBalanceText"
-).innerText =
-withdrawableBalance.toFixed(2);
-
 const depositBalance =
 Number(
 user.depositBalance ?? 0
 );
-
-document.getElementById(
-"depositBalanceText"
-).innerText =
-depositBalance.toFixed(2);
 
 const freeSpinsBalance =
 Number(
 user.freeSpins ?? 0
 );
 
-document.getElementById(
-"freeSpinsText"
-).innerText =
-freeSpinsBalance.toFixed(1);
+dashboardRaw.balance = availableBalance;
+dashboardRaw.earnings = withdrawableBalance;
+dashboardRaw.deposit = depositBalance;
+dashboardRaw.freeSpins = freeSpinsBalance;
+dashboardRaw.gemUsdRate = Number(user.gemUsdRate || data.gemUsdRate || 0);
+
+renderDashboardBalances();
 
 document.getElementById(
 "referralCodeText"
@@ -4206,10 +3866,11 @@ user.referralCode || "---";
    immediately without displaying the shimmer. */
 cacheDashboardData(
     resolvedName,
-    availableBalance.toFixed(2),
-    withdrawableBalance.toFixed(2),
-    depositBalance.toFixed(2),
-    freeSpinsBalance.toFixed(1)
+    availableBalance.toFixed(3),
+    withdrawableBalance.toFixed(3),
+    depositBalance.toFixed(3),
+    freeSpinsBalance.toFixed(1),
+    Number(user.gemUsdRate || data.gemUsdRate || 0)
 );
 
 /* DATA IS READY: reveal the real name and balances only when
@@ -4233,10 +3894,13 @@ user.successfulReferrals || 0;
 document.getElementById(
 "refEarningsText"
 ).innerText =
-"₦ " +
+"💎 " +
 Number(
 user.referralEarnings || 0
-).toLocaleString();
+).toLocaleString("en-US", {
+    minimumFractionDigits:3,
+    maximumFractionDigits:3
+});
 
 /* UPDATE DAILY REWARD STATE FROM BACKEND */
 if(data.dailyReward){
@@ -4615,7 +4279,7 @@ DAY 7 • SPECIAL BONUS
 </div>
 
 <div class="day-val">
-🎁 1 FREE SPIN
+🎟️ 200 LUCK TICKETS
 </div>
 
 </div>
@@ -4642,7 +4306,7 @@ DAY ${day}
 </div>
 
 <div class="day-val">
-₦10
+💎 10
 </div>
 
 <button class="day-status daily-claim-button"
@@ -4734,6 +4398,15 @@ if(day === 7){
 
 closeDailyModal();
 
+const streakAmount =
+document.querySelector(".streak-ticket-amount");
+
+if(streakAmount){
+    streakAmount.innerText =
+        "+" +
+        Number(result.ticketReward || 200).toLocaleString("en-US");
+}
+
 document.getElementById(
 "streakCongratsModal"
 ).classList.add("show");
@@ -4741,9 +4414,9 @@ document.getElementById(
 }else{
 
 showClaimSuccess(
-"+ ₦10",
+"+ 💎 10",
 "Daily reward claimed!",
-"Your ₦10 reward has been added to your balance. Keep your streak alive and come back tomorrow!"
+"Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!"
 );
 
 }
@@ -4894,30 +4567,7 @@ await waitForButtonLoader(360);
 restoreButton(btn);
 }
 
-if(currentEarnings < 200){
-
-document.getElementById(
-"minWithdrawAlert"
-).classList.add(
-"show"
-);
-
-}else{
-
-window.location.href =
-"/withdraw.html";
-
-}
-
-}
-
-function closeAlertModal(){
-
-document.getElementById(
-"minWithdrawAlert"
-).classList.remove(
-"show"
-);
+window.location.href = "/withdraw.html";
 
 }
 
@@ -5380,14 +5030,14 @@ function txIsTapRush(tx){
    transactions modal. */
 function txIsNonCashAdSpinReward(tx){
   const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""}`.toLowerCase();
-  const looksLikeAdSpin = /(monetag|rewarded[\s_-]*ad|watch[\s_-]*ad|ads?[\s_-]*spin|sponsored[\s_-]*ad)/.test(text);
+  const looksLikeLegacySpinReward = /(monetag|rewarded[\s_-]*ad|watch[\s_-]*ad|ads?[\s_-]*spin|sponsored[\s_-]*ad)/.test(text);
   const looksLikeTryAgain = /try[\s_-]*again/.test(text);
   const looksLikeFreeSpin = /free[\s_-]*spins?/.test(text);
   const amount = Number(tx.amount ?? tx.value ?? tx.total ?? tx.cash ?? 0);
 
   if(looksLikeTryAgain && amount === 0) return true;
-  if(looksLikeAdSpin && amount === 0) return true;
-  if(looksLikeAdSpin && looksLikeFreeSpin && amount === 0) return true;
+  if(looksLikeLegacySpinReward && amount === 0) return true;
+  if(looksLikeLegacySpinReward && looksLikeFreeSpin && amount === 0) return true;
   return false;
 }
 
@@ -5508,7 +5158,7 @@ function renderTransactionRows(serverRows){
           <div class="tap-tx-title">${escapeHtmlDashboard(title)}${badge}</div>
           <div class="tap-tx-sub">${escapeHtmlDashboard([bank,date,status].filter(Boolean).join(" • "))}</div>
         </div>
-        <div class="tap-tx-amount ${credit ? "credit" : "debit"}">${sign}₦${amount.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2})}</div>
+        <div class="tap-tx-amount ${credit ? "credit" : "debit"}">${sign}💎 ${amount.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2})}</div>
       </div>
     `;
   }).join("");
@@ -5633,19 +5283,12 @@ function refreshDashboardOnReturn(){
     // timers while backgrounded; without this, the 10s ad-icon cooldown
     // could still be counted down in the background but the button would
     // stay visually grey until something else happened to re-render it.
-    updateMonetagCooldownUI();
 
     const now = Date.now();
     if(now - lastDashboardRefresh < DASHBOARD_REFRESH_COOLDOWN_MS) return;
     lastDashboardRefresh = now;
     fetchDashboardData();
 
-    // NOTE: we deliberately do NOT re-call startMonetagInAppInterstitial()
-    // here. Monetag's docs warn that calling show_XXX({type:'inApp'})
-    // more than once per page can reset its internal logic and break
-    // the ad flow. everyPage:true (see MONETAG_INAPP_SETTINGS above)
-    // is what makes a full page reload/navigation count as a fresh
-    // entry — a same-page tab switch does not need a manual re-call.
 }
 
 document.addEventListener("visibilitychange", ()=>{
@@ -5664,6 +5307,8 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 
 </body>
 </html>
+
+
 
 
 

@@ -3,11 +3,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const compression = require('compression');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('trust proxy', 1);
 
@@ -29,7 +32,12 @@ app.use(cors({
 }));
 
 app.use(express.json({
-  limit: '15mb'
+  limit: '15mb',
+  verify: (req, res, buf) => {
+    // Crypto Pay webhook signatures are calculated over the exact raw body.
+    // Keep a copy before express parses JSON so the webhook can be verified.
+    req.rawBody = Buffer.from(buf);
+  }
 }));
 
 app.use(express.urlencoded({
@@ -42,6 +50,123 @@ app.use(express.urlencoded({
 // them fresh on every page load. HTML files are excluded from that cache
 // window (they're revalidated every time) so page updates still show up
 // immediately after a deploy.
+// ======================================================
+// DASHBOARD-ONLY 3D NAVIGATION INJECTION
+// ======================================================
+// The bottom navigation is injected on the dashboard page ONLY.
+// Every other page (earn, withdraw, lucky, leaderboard, tap, game,
+// etc.) is served without it, so those pages have no bottom nav bar.
+const SHARED_NAV_CSS = `
+<style id="payme-shared-nav-style">
+.payme-shared-nav{
+position:fixed;left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px));
+bottom:calc(20px + env(safe-area-inset-bottom,0px));height:74px;z-index:20000;display:flex;align-items:center;
+justify-content:space-around;padding:7px;overflow:visible;
+background:linear-gradient(145deg,rgba(35,55,88,.99),rgba(10,22,42,.99) 55%,rgba(22,32,58,.99));
+border:1px solid rgba(148,190,255,.38);border-top-color:rgba(255,255,255,.28);border-radius:24px;
+box-shadow:0 25px 55px rgba(0,0,0,.50),0 9px 22px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.24),inset 0 -6px 14px rgba(0,0,0,.28);
+backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);transform:translateZ(0);animation:paymeNavRise .55s cubic-bezier(.16,1,.3,1) both;
+}
+.payme-shared-nav:before{content:"";position:absolute;left:12%;right:12%;top:0;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,#60a5fa,#a78bfa,#60a5fa,transparent);box-shadow:0 0 14px rgba(96,165,250,.55);pointer-events:none}
+.payme-shared-nav a{position:relative;width:25%;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;text-decoration:none;color:#c7d7ee;font-size:.58rem;font-weight:900;border-radius:17px;transition:transform .24s ease,color .24s ease,background .24s ease,box-shadow .24s ease}
+.payme-shared-nav a:before{content:"";position:absolute;inset:3px;border-radius:15px;background:linear-gradient(135deg,rgba(96,165,250,.20),rgba(167,139,250,.16));opacity:0;transform:translateX(-18px);pointer-events:none}
+.payme-shared-nav a.active{color:#fff;background:linear-gradient(135deg,rgba(59,130,246,.38),rgba(124,58,237,.30));box-shadow:inset 0 1px 0 rgba(255,255,255,.20),0 8px 20px rgba(37,99,235,.28);transform:translateY(-3px)}
+.payme-shared-nav a.active:before{opacity:1;animation:paymeNavSwitch .38s cubic-bezier(.16,1,.3,1) both}
+.payme-shared-nav a:after{content:"";position:absolute;left:50%;bottom:3px;width:0;height:3px;border-radius:99px;background:linear-gradient(90deg,#60a5fa,#c4b5fd);box-shadow:0 0 14px rgba(96,165,250,.75);transform:translateX(-50%);transition:width .25s ease}
+.payme-shared-nav a.active:after{width:28px}
+.payme-shared-nav .payme-nav-icon{position:relative;z-index:1;display:block;font-size:1.2rem;line-height:1;filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));transition:transform .24s ease,filter .24s ease}
+.payme-shared-nav a span:last-child{position:relative;z-index:1}
+.payme-shared-nav a.active .payme-nav-icon{transform:translateY(-1px) scale(1.10);filter:drop-shadow(0 0 10px rgba(96,165,250,.75))}
+.payme-shared-nav a:active{transform:translateY(0) scale(.94)}
+@keyframes paymeNavSwitch{from{opacity:0;transform:translateX(-18px) scale(.96)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes paymeNavRise{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:899px){.payme-shared-nav{display:flex}}
+@media(min-width:900px){.payme-shared-nav{display:none}}
+@media(prefers-reduced-motion:reduce){.payme-shared-nav{animation:none}.payme-shared-nav a.active:before{animation:none}}
+</style>`;
+
+function sharedNavMarkup(requestPath) {
+  const cleanPath = String(requestPath || '').split('?')[0].split('#')[0];
+  const isEarn = cleanPath === '/earn' || cleanPath === '/earn.html';
+  const isLeaderboard = cleanPath === '/leaderboard.html' || cleanPath === '/leaderboard';
+  const isDashboard = cleanPath === '/' || cleanPath === '/dashboard.html';
+  return `
+<nav class="payme-shared-nav" aria-label="PAYME navigation">
+  <a href="/dashboard.html" class="${isDashboard ? 'active' : ''}">
+    <span class="payme-nav-icon">🏠</span><span>Home</span>
+  </a>
+  <a href="/earn" class="${isEarn ? 'active' : ''}">
+    <span class="payme-nav-icon">💎</span><span>Earn</span>
+  </a>
+  <a href="/dashboard.html#referrals">
+    <span class="payme-nav-icon">👥</span><span>Refer</span>
+  </a>
+  <a href="/leaderboard.html" class="${isLeaderboard ? 'active' : ''}">
+    <span class="payme-nav-icon">🏆</span><span>Ranking</span>
+  </a>
+</nav>`;
+}
+
+app.use(async (req, res, next) => {
+  // Only intercept HTML document requests and known HTML aliases. Static assets continue through
+  // express.static unchanged, preserving the existing caching/egress setup.
+  const pathname = String(req.path || '');
+  const wantsHtml = pathname.endsWith('.html') || pathname === '/' || req.accepts('html');
+  if (!wantsHtml) return next();
+
+  let filePath;
+  const htmlAliases = {
+    '/': 'index.html',
+    '/earn': 'earn.html',
+    '/withdraw': 'withdraw.html',
+    '/lucky': 'lucky.html',
+    '/leaderboard': 'leaderboard.html',
+    '/tap': 'tap.html',
+    '/game': 'game.html'
+  };
+
+  if (htmlAliases[pathname]) {
+    filePath = path.join(__dirname, 'public', htmlAliases[pathname]);
+  } else {
+    const relative = pathname.replace(/^\/+/, '');
+    if (!relative || relative.includes('..') || !relative.endsWith('.html')) return next();
+    filePath = path.join(__dirname, 'public', relative);
+  }
+
+  try {
+    const stat = await fs.promises.stat(filePath);
+    if (!stat.isFile()) return next();
+
+    let html = await fs.promises.readFile(filePath, 'utf8');
+
+    // The bottom nav is now dashboard-only — every other page (earn,
+    // withdraw, lucky, leaderboard, tap, game, etc.) is served as-is,
+    // with no nav injected at all.
+    const cleanPath = pathname.split('?')[0].split('#')[0];
+    const isDashboard = cleanPath === '/' || cleanPath === '/dashboard.html';
+
+    if (isDashboard) {
+      // Dashboard already contains its own nav. Remove only its old bottom
+      // mobile nav so the server-provided version is the single one shown.
+      html = html.replace(/<!-- MOBILE NAV -->[\s\S]*?<\/nav>/i, '');
+
+      const injection = SHARED_NAV_CSS + sharedNavMarkup(pathname);
+      if (/<\/body>/i.test(html)) {
+        html = html.replace(/<\/body>/i, injection + '</body>');
+      } else {
+        html += injection;
+      }
+    }
+
+    res.setHeader('Cache-Control', 'no-cache');
+    res.type('html').send(html);
+  } catch (err) {
+    if (err && err.code === 'ENOENT') return next();
+    console.error('HTML navigation injection error:', err);
+    return next();
+  }
+});
+
 app.use(express.static(
   path.join(__dirname, 'public'),
   {
@@ -152,6 +277,29 @@ const SESSION_MAX_AGE =
   60 *
   1000;
 
+// ======================================================
+// CRYPTOBOT / GLOBAL GEMS PAYMENTS
+// ======================================================
+// CryptoBot uses USD-priced fiat invoices, so the user can pay with a
+// supported cryptocurrency while the platform keeps its internal currency
+// as Gems. 1 Gem represents the USD value of 1 NGN at the configured rate;
+// it is NOT equal to $1.
+const CRYPTOBOT_TOKEN = String(process.env.CRYPTOBOT_TOKEN || '').trim();
+const CRYPTOBOT_API_BASE = String(
+  process.env.CRYPTOBOT_API_BASE || 'https://pay.crypt.bot/api'
+).replace(/\/+$/, '');
+
+let NGN_PER_USD = Math.max(1, number(process.env.NGN_PER_USD) || 1500);
+let GEM_USD_RATE = Math.max(
+  0.00000001,
+  number(process.env.GEM_USD_RATE) || (1 / NGN_PER_USD)
+);
+let liveGemRateUpdatedAt = 0;
+const LIVE_GEM_RATE_TTL_MS = 60 * 1000;
+
+const MIN_CRYPTO_USD = 0.50;
+const CRYPTO_ASSETS = ['USDT', 'TON', 'BTC', 'ETH', 'LTC', 'BNB', 'TRX', 'USDC'];
+
 const isProduction =
   process.env.NODE_ENV === 'production';
 
@@ -163,13 +311,13 @@ const WELCOME_BONUS = 10;
 
 const REFERRAL_REWARD = 15;
 
-const MIN_WITHDRAWAL_LIMIT = 200;
+let MIN_WITHDRAWAL_LIMIT = Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE);
 
 // One withdrawal per rolling 24-hour period. The timestamp is persisted
 // in the Supabase transactions table, so it survives Render redeploys.
 const WITHDRAWAL_COOLDOWN = 24 * 60 * 60 * 1000;
 
-const MIN_DEPOSIT_AMOUNT = 200;
+let MIN_DEPOSIT_AMOUNT = Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE);
 
 const SPIN_COST = 50;
 
@@ -264,37 +412,38 @@ const LUCKY3_GAME_TYPES = new Set([
 // Luck Tickets live inside the existing daily_reward JSON column so this
 // feature does not require a new Supabase column. The state is server-owned
 // and therefore survives page exits and Render redeploys.
+// Single chest: 2 rewarded ads to open. A 60-second gap is enforced
+// between the first and second ad, and a 24-hour cooldown starts once
+// the chest is opened and the ticket reward is granted. Reward is
+// weighted heavily toward the low end of the 20-50 range — anything
+// above 30 is intentionally rare.
 const LUCK_CHEST_CONFIG = {
-  chest20: {
-    ads: 20,
-    min: 10,
+  chest: {
+    ads: 2,
+    adGapMs: 60 * 1000,
+    cooldownMs: 24 * 60 * 60 * 1000,
+    min: 20,
     max: 50,
     rewards: [
-      { max: 45, tickets: 10 },
-      { max: 70, tickets: 12 },
-      { max: 85, tickets: 15 },
-      { max: 93, tickets: 18 },
-      { max: 97, tickets: 20 },
-      { max: 99, tickets: 30 },
-      { max: 99.7, tickets: 40 },
+      { max: 55, tickets: 20 },
+      { max: 78, tickets: 22 },
+      { max: 90, tickets: 25 },
+      { max: 96, tickets: 28 },
+      { max: 98.5, tickets: 30 },
+      { max: 99.4, tickets: 35 },
+      { max: 99.8, tickets: 40 },
       { max: 100, tickets: 50 }
     ]
-  },
-  chest30: {
-    ads: 30,
-    min: 20,
-    max: 70,
-    rewards: [
-      { max: 45, tickets: 20 },
-      { max: 70, tickets: 25 },
-      { max: 85, tickets: 30 },
-      { max: 93, tickets: 35 },
-      { max: 97, tickets: 40 },
-      { max: 99, tickets: 50 },
-      { max: 99.7, tickets: 60 },
-      { max: 100, tickets: 70 }
-    ]
   }
+};
+
+// Double Your Gems — weighted coin flip.
+// The server alone decides the outcome: 20% win / 80% loss.
+// The result is independent of stake size and the user's selected side.
+const COIN_FLIP_CONFIG = {
+  min: 10,
+  max: 1000,
+  winChance: 0.20
 };
 
 const CLAIM_COOLDOWN =
@@ -427,6 +576,74 @@ function number(value) {
 }
 
 // ======================================================
+// LIVE GEM/USD RATE
+// ======================================================
+// 1 Gem is pegged to the USD value of 1 NGN.
+// Since USDT tracks USD closely, the live USD value of one Gem is
+// calculated as 1 / the current NGN-per-USD rate.
+// The FX result is cached for 60 seconds to avoid unnecessary
+// external traffic on dashboard loads.
+async function refreshLiveGemRate(force = false) {
+  const now = Date.now();
+
+  if (
+    !force &&
+    liveGemRateUpdatedAt &&
+    now - liveGemRateUpdatedAt < LIVE_GEM_RATE_TTL_MS
+  ) {
+    return {
+      ngnPerUsd: NGN_PER_USD,
+      gemUsdRate: GEM_USD_RATE
+    };
+  }
+
+  try {
+    const response = await fetch(
+      'https://open.er-api.com/v6/latest/USD'
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Live FX service returned HTTP ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    const liveNgnPerUsd = Number(data?.rates?.NGN);
+
+    if (
+      !Number.isFinite(liveNgnPerUsd) ||
+      liveNgnPerUsd <= 0
+    ) {
+      throw new Error('Live NGN/USD rate was invalid.');
+    }
+
+    NGN_PER_USD = liveNgnPerUsd;
+    GEM_USD_RATE = 1 / liveNgnPerUsd;
+
+    MIN_WITHDRAWAL_LIMIT =
+      Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE);
+
+    MIN_DEPOSIT_AMOUNT =
+      Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE);
+
+    liveGemRateUpdatedAt = now;
+  } catch (err) {
+    // Keep the last known/env-configured rate if the FX service is
+    // temporarily unavailable. The dashboard will still function.
+    console.warn(
+      'Live NGN/USD rate refresh failed; using last known rate:',
+      err.message
+    );
+  }
+
+  return {
+    ngnPerUsd: NGN_PER_USD,
+    gemUsdRate: GEM_USD_RATE
+  };
+}
+
+// ======================================================
 // USER MAPPING
 // ======================================================
 
@@ -518,13 +735,10 @@ function mapUser(row) {
       number(daily.luckTickets),
 
     luckChests: {
-      chest20: {
-        progress: Math.max(0, Math.min(20, number(daily.luckChests?.chest20?.progress))),
-        claimed: !!daily.luckChests?.chest20?.claimed
-      },
-      chest30: {
-        progress: Math.max(0, Math.min(30, number(daily.luckChests?.chest30?.progress))),
-        claimed: !!daily.luckChests?.chest30?.claimed
+      chest: {
+        progress: Math.max(0, Math.min(2, number(daily.luckChests?.chest?.progress))),
+        firstAdAt: Number(daily.luckChests?.chest?.firstAdAt) || 0,
+        cooldownUntil: Number(daily.luckChests?.chest?.cooldownUntil) || 0
       }
     },
 
@@ -883,7 +1097,7 @@ async function addTransaction(
 
     currency:
       tx.currency ||
-      'NGN',
+      'GEMS',
 
     status:
       tx.status ||
@@ -1648,6 +1862,217 @@ async function authenticateRequest(
 
 }
 
+
+// ======================================================
+// CRYPTOBOT API HELPERS
+// ======================================================
+async function cryptoBotRequest(method, params = {}) {
+  if (!CRYPTOBOT_TOKEN) {
+    throw new Error('CRYPTOBOT_TOKEN is not configured.');
+  }
+
+  const options = {
+    method,
+    headers: {
+      'Crypto-Pay-API-Token': CRYPTOBOT_TOKEN
+    }
+  };
+
+  let url = `${CRYPTOBOT_API_BASE}/${params._method || ''}`.replace(/\/+$/, '');
+  delete params._method;
+
+  if (method === 'GET') {
+    const qs = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) qs.set(key, String(value));
+    });
+    const query = qs.toString();
+    if (query) url += `?${query}`;
+  } else {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(params);
+  }
+
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || !data.ok) {
+    const message = data?.error?.name || data?.error || `CryptoBot API HTTP ${response.status}`;
+    throw new Error(String(message));
+  }
+
+  return data.result;
+}
+
+async function cryptoBotCreateInvoice({ gems, usd, reference }) {
+  return cryptoBotRequest('POST', {
+    _method: 'createInvoice',
+    currency_type: 'fiat',
+    fiat: 'USD',
+    amount: usd.toFixed(2),
+    accepted_assets: CRYPTO_ASSETS.join(','),
+    description: `PAYME wallet funding — ${gems.toLocaleString()} Gems`,
+    hidden_message: `PAYME deposit ${reference}`,
+    payload: reference,
+    allow_comments: false,
+    allow_anonymous: false,
+    expires_in: 3600
+  });
+}
+
+async function cryptoBotGetRates() {
+  return cryptoBotRequest('GET', { _method: 'getExchangeRates' });
+}
+
+async function cryptoBotGetCurrencies() {
+  return cryptoBotRequest('GET', { _method: 'getCurrencies' });
+}
+
+async function cryptoBotGetBalance() {
+  return cryptoBotRequest('GET', { _method: 'getBalance' });
+}
+
+async function cryptoBotTransfer({ telegramId, asset, amount, spendId, comment }) {
+  return cryptoBotRequest('POST', {
+    _method: 'transfer',
+    user_id: Number(telegramId),
+    asset,
+    amount,
+    spend_id: spendId,
+    comment,
+    disable_send_notification: false
+  });
+}
+
+function verifyCryptoBotWebhook(req) {
+  const signature = String(
+    req.headers['crypto-pay-api-signature'] ||
+    req.headers['tgcryptopay-api-signature'] ||
+    ''
+  ).trim();
+  if (!signature || !req.rawBody || !CRYPTOBOT_TOKEN) return false;
+
+  const secret = crypto.createHash('sha256').update(CRYPTOBOT_TOKEN).digest();
+  const expected = crypto.createHmac('sha256', secret).update(req.rawBody).digest('hex');
+
+  if (signature.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
+
+function gemUsd(gems) {
+  return Number(gems) * GEM_USD_RATE;
+}
+
+function usdToGems(usd) {
+  return Number(usd) / GEM_USD_RATE;
+}
+
+function cryptoAmountFromUsd(usd, asset, rates, currencies) {
+  const rate = (rates || []).find(r =>
+    String(r.source).toUpperCase() === asset &&
+    String(r.target).toUpperCase() === 'USD' &&
+    r.is_valid !== false
+  );
+  if (!rate) throw new Error(`No current USD rate is available for ${asset}.`);
+
+  const numericRate = Number(rate.rate);
+  if (!Number.isFinite(numericRate) || numericRate <= 0) {
+    throw new Error(`Invalid USD rate for ${asset}.`);
+  }
+
+  const currency = (currencies || []).find(c => String(c.code).toUpperCase() === asset);
+  const decimals = Number.isInteger(Number(currency?.decimals))
+    ? Number(currency.decimals)
+    : 8;
+  const raw = Number(usd) / numericRate;
+  const factor = 10 ** Math.min(decimals, 18);
+  return {
+    rate: numericRate,
+    decimals,
+    amount: Math.floor(raw * factor) / factor
+  };
+}
+
+// ======================================================
+// CRYPTOBOT WEBHOOK — DEPOSIT CONFIRMATION
+// ======================================================
+app.post('/api/crypto/webhook', async (req, res) => {
+  try {
+    if (!verifyCryptoBotWebhook(req)) {
+      return res.status(401).send('invalid signature');
+    }
+
+    const update = req.body || {};
+    if (update.update_type !== 'invoice_paid') {
+      return res.status(200).send('ignored');
+    }
+
+    const invoice = update.payload || {};
+    const reference = String(invoice.payload || '').trim();
+    if (!reference) return res.status(200).send('missing payload');
+
+    const deposit = await getDeposit(reference);
+    if (!deposit) return res.status(404).send('deposit not found');
+
+    // Webhooks may be delivered more than once. Only Pending Verification
+    // deposits are allowed to credit Gems.
+    if (deposit.status !== 'Pending Verification') {
+      return res.status(200).send('already processed');
+    }
+
+    const gems = number(deposit.amount);
+    const usd = gemUsd(gems);
+    const paidUsd = number(invoice.paid_usd_rate) > 0
+      ? number(invoice.paid_amount) * number(invoice.paid_usd_rate)
+      : usd;
+
+    // A fiat invoice is the source of truth for the USD price. Do not credit
+    // a payment that is materially below the invoice value.
+    if (paidUsd + 0.000001 < usd) {
+      await supabase
+        .from('deposits')
+        .update({
+          status: 'Rejected',
+          reason: `CryptoBot payment was below the required $${usd.toFixed(2)}.`
+        })
+        .eq('reference', reference);
+      return res.status(200).send('underpaid');
+    }
+
+    const user = await getUserById(deposit.user_id);
+    if (!user) return res.status(404).send('user not found');
+
+    user.depositBalance = getDepositBalance(user) + gems;
+    await updateUser(user);
+
+    const { error } = await supabase
+      .from('deposits')
+      .update({
+        status: 'Approved',
+        reason: `CryptoBot paid — ${invoice.paid_amount || ''} ${invoice.paid_asset || ''} — $${usd.toFixed(2)}`
+      })
+      .eq('reference', reference)
+      .eq('status', 'Pending Verification');
+
+    if (error) throw error;
+
+    await addTransaction(user.id, {
+      id: generateTransactionId('tx_crypto_deposit'),
+      type: 'Deposit Approved',
+      description: `CryptoBot Deposit ${reference} — $${usd.toFixed(2)}`,
+      amount: gems,
+      currency: 'GEMS',
+      status: 'completed',
+      bank: `CryptoBot ${invoice.paid_asset || ''}`.trim()
+    });
+
+    return res.status(200).send('ok');
+  } catch (err) {
+    console.error('CryptoBot webhook error:', err);
+    return res.status(500).send('server error');
+  }
+});
+
 app.use(
   authenticateRequest
 );
@@ -1738,13 +2163,24 @@ app.post('/api/monetag/start', requireLogin, async (req, res) => {
     }
 
     const rawContext = String(req.body?.context || 'dashboard').trim();
-    const context = ['luck_chest_20', 'luck_chest_30'].includes(rawContext)
-      ? rawContext
+    const context = rawContext === 'luck_chest'
+      ? 'luck_chest'
       : rawContext === 'game_free_spin'
       ? 'game_free_spin'
       : rawContext === 'earn_watch_ad'
       ? 'earn_watch_ad'
       : 'dashboard';
+
+    if (context === 'luck_chest') {
+      const readiness = checkLuckChestReady(user);
+      if (!readiness.ready) {
+        return res.status(429).json({
+          success: false,
+          message: readiness.message,
+          nextAllowedAt: readiness.nextAllowedAt
+        });
+      }
+    }
 
     const sessionId = `monetag_${Date.now().toString(36)}_${crypto.randomBytes(12).toString('hex')}`;
     const now = Date.now();
@@ -1815,7 +2251,7 @@ app.get('/api/monetag/status', requireLogin, async (req, res) => {
 
     if (Array.isArray(data) && data.length) {
       const tx = data[0];
-      if (/^Luck Chest (chest20|chest30) Ad$/i.test(String(tx.description || ''))) {
+      if (/^Luck Chest Ad$/i.test(String(tx.description || ''))) {
         const freshUser = await getUserById(req.user.id);
         const luck = freshUser ? getLuckChestSnapshot(freshUser) : null;
         return res.json({
@@ -1950,8 +2386,8 @@ app.all('/api/monetag/postback', async (req, res) => {
     // is won. The context (dashboard cash reel vs. game free-spin reel)
     // comes from the pending session created when the ad was requested.
     const pendingContext = pending && pending.session && pending.session.context;
-    const adContext = ['luck_chest_20', 'luck_chest_30'].includes(pendingContext)
-      ? pendingContext
+    const adContext = pendingContext === 'luck_chest'
+      ? 'luck_chest'
       : pendingContext === 'game_free_spin'
       ? 'game_free_spin'
       : pendingContext === 'earn_watch_ad'
@@ -1959,23 +2395,22 @@ app.all('/api/monetag/postback', async (req, res) => {
       : 'dashboard';
 
     // Chest ads are progress events, not cash/free-spin rewards.
-    if (adContext === 'luck_chest_20' || adContext === 'luck_chest_30') {
-      const chestId = adContext === 'luck_chest_20' ? 'chest20' : 'chest30';
-      const rewardResult = { key: chestId, label: 'Luck Chest Ad', cash: 0, spins: 0 };
+    if (adContext === 'luck_chest') {
+      const rewardResult = { key: 'chest', label: 'Luck Chest Ad', cash: 0, spins: 0 };
 
       // Use the Monetag transaction ID as the idempotency lock before changing
       // progress. A duplicate postback therefore cannot count twice.
       await addTransaction(user.id, {
         id: transactionId,
         type: 'monetag_reward',
-        description: `Luck Chest ${chestId} Ad`,
+        description: `Luck Chest Ad`,
         amount: 0,
         currency: 'LUCK_TICKETS',
         status: 'completed',
         bank: `Monetag ${MONETAG_ZONE_ID}`
       });
 
-      const result = applyLuckChestCompletion(user, chestId);
+      const result = applyLuckChestCompletion(user);
       syncUserBalance(user);
       await updateUser(user);
 
@@ -1983,7 +2418,7 @@ app.all('/api/monetag/postback', async (req, res) => {
         await addTransaction(user.id, {
           id: generateTransactionId('tx_luck_chest_reward'),
           type: 'luck_ticket_reward',
-          description: `Luck Chest ${chestId} opened — ${result.tickets} Luck Tickets`,
+          description: `Luck Chest opened — ${result.tickets} Luck Tickets`,
           amount: result.tickets,
           currency: 'LUCK_TICKETS',
           status: 'completed',
@@ -2017,7 +2452,7 @@ app.all('/api/monetag/postback', async (req, res) => {
         ? `Earn Watch Ad Reward — ${rewardResult.label}`
         : `Monetag Reward — ${rewardResult.label}`,
       amount: rewardResult.cash,
-      currency: 'NGN',
+      currency: 'GEMS',
       status: 'completed',
       bank: `Monetag ${MONETAG_ZONE_ID}`
     });
@@ -2230,6 +2665,192 @@ async function sendTelegramNotification(
 
   }
 
+}
+
+
+// ======================================================
+// MANUAL USDT WITHDRAWAL TELEGRAM HELPERS
+// ======================================================
+
+async function sendManualWithdrawalTelegram({
+  withdrawalId,
+  user,
+  gems,
+  usd,
+  address,
+  balance
+}) {
+  if (!TELEGRAM_DEPOSIT_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    throw new Error('TELEGRAM_DEPOSIT_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.');
+  }
+
+  const username = user.username ? `@${user.username}` : 'No username';
+  const safeName = String(user.fullName || username).replace(/[<>&]/g, '');
+  const safeUsername = String(username).replace(/[<>&]/g, '');
+  const safeAddress = String(address).replace(/[<>&]/g, '');
+
+  const text =
+    `🟡 <b>NEW USDT WITHDRAWAL</b>\n\n` +
+    `👤 <b>Name:</b> ${safeName}\n` +
+    `🆔 <b>Username:</b> ${safeUsername}\n` +
+    `🆔 <b>Telegram ID:</b> ${String(user.telegramId || '')}\n\n` +
+    `💎 <b>Gems:</b> ${Number(gems).toLocaleString()}\n` +
+    `💵 <b>USDT Amount:</b> ${Number(usd).toFixed(2)} USDT\n` +
+    `📍 <b>USDT Address:</b>\n<code>${safeAddress}</code>\n\n` +
+    `💰 <b>Balance After Request:</b> ${Number(balance).toLocaleString()} Gems\n` +
+    `🔖 <b>Withdrawal ID:</b> <code>${withdrawalId}</code>\n\n` +
+    `⏳ <b>Status:</b> PENDING\n` +
+    `⚠️ <b>Manual payout:</b> Review the address carefully before approving.`;
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/sendMessage`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '✅ APPROVE',
+                callback_data: `approve_withdrawal:${user.id}:${withdrawalId}`
+              },
+              {
+                text: '❌ REJECT',
+                callback_data: `reject_withdrawal:${user.id}:${withdrawalId}`
+              }
+            ]
+          ]
+        }
+      })
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    throw new Error(data?.description || `Telegram API HTTP ${response.status}`);
+  }
+
+  return data.result;
+}
+
+async function editTelegramTextMessage(chatId, messageId, text) {
+  if (!TELEGRAM_DEPOSIT_BOT_TOKEN) return;
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/editMessageText`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        message_id: messageId,
+        text,
+        parse_mode: 'HTML',
+        reply_markup: { inline_keyboard: [] }
+      })
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    console.error('Telegram withdrawal message edit error:', data);
+  }
+}
+
+async function getWithdrawalById(withdrawalId, userId = null) {
+  let query = supabase
+    .from('transactions')
+    .select('id,user_id,type,description,amount,currency,status,bank,account_name,account_number,created_at')
+    .eq('id', withdrawalId)
+    .eq('type', 'Withdrawal');
+
+  if (userId) query = query.eq('user_id', userId);
+
+  const { data, error } = await query.maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+async function processManualWithdrawalDecision(
+  userId,
+  withdrawalId,
+  action
+) {
+  const withdrawal = await getWithdrawalById(withdrawalId, userId);
+
+  if (!withdrawal) {
+    throw Object.assign(new Error('Withdrawal not found.'), { status: 404 });
+  }
+
+  if (withdrawal.status !== 'Pending') {
+    throw Object.assign(
+      new Error(`This withdrawal has already been ${String(withdrawal.status).toLowerCase()}.`),
+      { status: 400 }
+    );
+  }
+
+  const targetUser = await getUserById(userId);
+  if (!targetUser) {
+    throw Object.assign(new Error('User not found.'), { status: 404 });
+  }
+
+  const gems = number(withdrawal.amount);
+  const usd = gemUsd(gems);
+
+  if (action === 'reject') {
+    // Refund exactly the amount reserved when the request was created.
+    targetUser.withdrawableBalance =
+      getWithdrawableBalance(targetUser) + gems;
+    syncUserBalance(targetUser);
+    await updateUser(targetUser);
+
+    const { error } = await supabase
+      .from('transactions')
+      .update({
+        status: 'Rejected',
+        description:
+          `${withdrawal.description || 'USDT Withdrawal'} — Rejected`,
+      })
+      .eq('id', withdrawalId)
+      .eq('status', 'Pending');
+
+    if (error) throw error;
+
+    return {
+      user: await getUserById(userId),
+      withdrawal: await getWithdrawalById(withdrawalId, userId),
+      usd
+    };
+  }
+
+  if (action === 'approve') {
+    const { error } = await supabase
+      .from('transactions')
+      .update({
+        status: 'Approved',
+        description:
+          `${withdrawal.description || 'USDT Withdrawal'} — Approved`,
+      })
+      .eq('id', withdrawalId)
+      .eq('status', 'Pending');
+
+    if (error) throw error;
+
+    return {
+      user: await getUserById(userId),
+      withdrawal: await getWithdrawalById(withdrawalId, userId),
+      usd
+    };
+  }
+
+  throw Object.assign(
+    new Error('Invalid withdrawal action.'),
+    { status: 400 }
+  );
 }
 
 // ======================================================
@@ -2486,7 +3107,7 @@ async function ensureWelcomeBonus(
         WELCOME_BONUS,
 
       currency:
-        'NGN',
+        'GEMS',
 
       status:
         'completed'
@@ -2563,8 +3184,7 @@ function sanitizeUser(
 
     luckChests:
       user.luckChests || {
-        chest20: { progress: 0, claimed: false },
-        chest30: { progress: 0, claimed: false }
+        chest: { progress: 0, firstAdAt: 0, cooldownUntil: 0 }
       },
 
     hasClaimedGiftBox:
@@ -2782,7 +3402,11 @@ app.post('/api/auth/localtest-signup', async (req, res) => {
         dailyReward: {
           currentDay: 1,
           lastClaimTimestamp: 0,
-          claimedDays: []
+          claimedDays: [],
+          luckTickets: 0,
+          luckChests: {
+            chest: { progress: 0, firstAdAt: 0, cooldownUntil: 0 }
+          }
         }
       };
 
@@ -2875,7 +3499,7 @@ async function processReferral(
         REFERRAL_REWARD,
 
       currency:
-        'NGN',
+        'GEMS',
 
       status:
         'completed',
@@ -3225,7 +3849,18 @@ app.post(
               0,
 
             claimedDays:
-              []
+              [],
+
+            luckTickets:
+              0,
+
+            luckChests: {
+              chest: {
+                progress: 0,
+                firstAdAt: 0,
+                cooldownUntil: 0
+              }
+            }
 
           }
 
@@ -3312,7 +3947,7 @@ app.post(
 
             `<b>Telegram ID:</b> ${user.telegramId}\n` +
 
-            `<b>Welcome Bonus:</b> ₦${WELCOME_BONUS}\n` +
+            `<b>Welcome Bonus:</b> Gems💎${WELCOME_BONUS}\n` +
 
             `<b>Referral Code:</b> ${user.referralCode}\n` +
 
@@ -3320,9 +3955,9 @@ app.post(
               user.referredBy || 'None'
             }\n` +
 
-            `<b>Balance:</b> ₦${number(
+            `<b>Balance:</b> Gems💎${number(
               user.balance
-            ).toFixed(2)}`
+            ).toFixed(3)}`
 
           );
 
@@ -3838,6 +4473,7 @@ async function getLastWithdrawalCreatedAt(userId) {
     .select('created_at')
     .eq('user_id', userId)
     .eq('type', 'Withdrawal')
+    .neq('status', 'Rejected')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -3897,10 +4533,35 @@ app.get(
           req.user.id
         );
 
+      const { data: latestWithdrawal, error: latestWithdrawalError } =
+        await supabase
+          .from('transactions')
+          .select(
+            'id,type,description,amount,currency,status,bank,account_name,account_number,created_at'
+          )
+          .eq('user_id', req.user.id)
+          .eq('type', 'Withdrawal')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+      if (latestWithdrawalError) throw latestWithdrawalError;
+
       return res.json({
         success: true,
         cooldownMs: WITHDRAWAL_COOLDOWN,
-        ...status
+        ...status,
+        latestWithdrawal: latestWithdrawal
+          ? {
+              id: latestWithdrawal.id,
+              amount: number(latestWithdrawal.amount),
+              usd: gemUsd(number(latestWithdrawal.amount)),
+              asset: 'USDT',
+              status: latestWithdrawal.status,
+              address: latestWithdrawal.account_number,
+              createdAt: latestWithdrawal.created_at
+            }
+          : null
       });
 
     } catch (err) {
@@ -3921,246 +4582,203 @@ app.get(
 );
 
 // ======================================================
-// WITHDRAW
+// MANUAL USDT WITHDRAWAL
 // ======================================================
+//
+// Withdrawals are NOT sent automatically by CryptoBot.
+// The user's Gems are reserved immediately and a Pending
+// withdrawal is sent to the PAYME deposit/admin Telegram bot.
+// Only an administrator in TELEGRAM_CHAT_ID can approve/reject it.
+// Approval marks the request Approved; the actual USDT transfer is
+// performed manually outside this application.
+// ======================================================
+app.post('/api/withdraw', requireLogin, async (req, res) => {
+  try {
+    await refreshLiveGemRate();
 
-app.post(
-  '/api/withdraw',
-  requireLogin,
-  async (req, res) => {
+    const user = req.user;
+    const gems = number(req.body?.gems);
+    const asset = String(req.body?.asset || '').trim().toUpperCase();
+    const address = String(req.body?.address || '').trim();
+    const usd = gemUsd(gems);
 
-    try {
-
-      const {
-        accountName,
-        bankName,
-        accountNumber,
-        amount
-      } = req.body;
-
-      const user =
-        req.user;
-
-      // Server-side enforcement is authoritative. Because the timestamp
-      // comes from Supabase, browser storage or a Render restart cannot
-      // reset the 24-hour withdrawal restriction.
-      const withdrawalStatus =
-        await getWithdrawalCooldownStatus(
-          user.id
-        );
-
-      if (!withdrawalStatus.canWithdraw) {
-
-        const remainingHours =
-          Math.floor(
-            withdrawalStatus.remainingMs /
-            (60 * 60 * 1000)
-          );
-
-        const remainingMinutes =
-          Math.ceil(
-            (
-              withdrawalStatus.remainingMs %
-              (60 * 60 * 1000)
-            ) /
-            (60 * 1000)
-          );
-
-        return res.status(429).json({
-          success: false,
-          message:
-            `You can withdraw again in ${remainingHours}h ${remainingMinutes}m.`,
-          lastWithdrawalAt:
-            withdrawalStatus.lastWithdrawalAt,
-          nextAllowedAt:
-            withdrawalStatus.nextAllowedAt,
-          remainingMs:
-            withdrawalStatus.remainingMs
-        });
-      }
-
-      const withdrawnAmount =
-        number(amount);
-
-      const withdrawable =
-        getWithdrawableBalance(
-          user
-        );
-
-      if (
-        !Number.isFinite(
-          withdrawnAmount
-        ) ||
-        withdrawnAmount <
-        MIN_WITHDRAWAL_LIMIT
-      ) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          message:
-            `Minimum withdrawal amount is ₦${MIN_WITHDRAWAL_LIMIT}.`
-
-        });
-
-      }
-
-      if (
-        withdrawnAmount >
-        withdrawable
-      ) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          message:
-            `Insufficient withdrawable earnings. Deposited funds cannot be withdrawn directly (Deposit Balance: ₦${getDepositBalance(user).toLocaleString()}).`
-
-        });
-
-      }
-
-      if (
-        !accountName ||
-        !bankName ||
-        !accountNumber
-      ) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          message:
-            'Please provide complete bank details.'
-
-        });
-
-      }
-
-      const oldBalance =
-        number(
-          user.balance
-        );
-
-      const withdrawalCreatedAt =
-        new Date().toISOString();
-
-      user.withdrawableBalance =
-        withdrawable -
-        withdrawnAmount;
-
-      await updateUser(
-        user
+    const withdrawalStatus = await getWithdrawalCooldownStatus(user.id);
+    if (!withdrawalStatus.canWithdraw) {
+      const remainingHours = Math.floor(withdrawalStatus.remainingMs / 3600000);
+      const remainingMinutes = Math.ceil(
+        (withdrawalStatus.remainingMs % 3600000) / 60000
       );
 
-      await addTransaction(
-        user.id,
-        {
-
-          id:
-            generateTransactionId(
-              'tx_withdraw'
-            ),
-
-          type:
-            'Withdrawal',
-
-          amount:
-            withdrawnAmount,
-
-          bank:
-            bankName,
-
-          accountName:
-            accountName,
-
-          accountNumber:
-            accountNumber,
-
-          status:
-            'Pending',
-
-          description:
-            'Withdrawal request',
-
-          createdAt:
-            withdrawalCreatedAt
-
-        }
-      );
-
-      await sendTelegramNotification(
-
-        `<b>NEW WITHDRAWAL REQUEST</b>\n\n` +
-
-        `<b>User:</b> @${user.username || 'User'}\n` +
-
-        `<b>Amount:</b> ₦${withdrawnAmount.toLocaleString()}\n` +
-
-        `<b>Old Balance:</b> ₦${oldBalance.toLocaleString()}\n` +
-
-        `<b>New Balance:</b> ₦${number(user.balance).toLocaleString()}\n` +
-
-        `<b>Account Name:</b> ${accountName}\n` +
-
-        `<b>Bank:</b> ${bankName}\n` +
-
-        `<b>Account No:</b> ${accountNumber}`
-
-      );
-
-      return res.json({
-
-        success:
-          true,
-
-        message:
-          'Withdrawal request submitted successfully.',
-
-        balance:
-          user.balance,
-
-        withdrawableBalance:
-          user.withdrawableBalance,
-
-        depositBalance:
-          user.depositBalance,
-
-        lastWithdrawalAt:
-          withdrawalCreatedAt,
-
-        nextAllowedAt:
-          new Date(withdrawalCreatedAt).getTime() +
-          WITHDRAWAL_COOLDOWN
-
+      return res.status(429).json({
+        success: false,
+        message: `You can withdraw again in ${remainingHours}h ${remainingMinutes}m.`,
+        nextAllowedAt: withdrawalStatus.nextAllowedAt,
+        remainingMs: withdrawalStatus.remainingMs
       });
-
-    } catch (err) {
-
-      console.error(
-        'Withdrawal error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        message:
-          'Server error during withdrawal.'
-
-      });
-
     }
 
+    // This endpoint accepts USDT only.
+    if (asset !== 'USDT') {
+      return res.status(400).json({
+        success: false,
+        message: 'Only USDT withdrawals are accepted.'
+      });
+    }
+
+    if (!Number.isFinite(gems) || gems <= 0 || usd < MIN_CRYPTO_USD) {
+      return res.status(400).json({
+        success: false,
+        message:
+          `Minimum withdrawal is $${MIN_CRYPTO_USD.toFixed(2)} ` +
+          `(${Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE).toLocaleString()} Gems).`
+      });
+    }
+
+    if (!Number.isInteger(gems)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Withdrawal Gems must be a whole number.'
+      });
+    }
+
+    // Basic address sanity check. The administrator still verifies the
+    // network/address before sending the manual USDT payout.
+    if (
+      address.length < 20 ||
+      address.length > 128 ||
+      /\s/.test(address)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enter a valid USDT wallet address.'
+      });
+    }
+
+    const withdrawable = getWithdrawableBalance(user);
+    if (gems > withdrawable) {
+      return res.status(400).json({
+        success: false,
+        message:
+          `Insufficient withdrawable earnings. ` +
+          `You have ${withdrawable.toLocaleString()} Gems available.`
+      });
+    }
+
+    // Reserve the user's earnings immediately. They remain reserved while
+    // the request is Pending. A rejection refunds them automatically.
+    const oldWithdrawable = withdrawable;
+    const oldBalance = number(user.balance);
+
+    user.withdrawableBalance = oldWithdrawable - gems;
+    syncUserBalance(user);
+    await updateUser(user);
+
+    const withdrawalCreatedAt = new Date().toISOString();
+    const withdrawalId = generateTransactionId('withdrawal_usdt');
+
+    try {
+      await addTransaction(user.id, {
+        id: withdrawalId,
+        type: 'Withdrawal',
+        description:
+          `Manual USDT Withdrawal — ${gems.toLocaleString()} Gems ($${usd.toFixed(2)})`,
+        amount: gems,
+        currency: 'GEMS',
+        status: 'Pending',
+        bank: 'USDT',
+        accountName: user.username
+          ? `@${user.username}`
+          : user.fullName || null,
+        accountNumber: address,
+        createdAt: withdrawalCreatedAt
+      });
+
+      let telegramMessage = null;
+
+      try {
+        telegramMessage = await sendManualWithdrawalTelegram({
+          withdrawalId,
+          user,
+          gems,
+          usd,
+          address,
+          balance: user.balance
+        });
+      } catch (telegramError) {
+        // If the admin request cannot be delivered, do not leave the user's
+        // Gems locked in a withdrawal nobody can review.
+        await supabase
+          .from('transactions')
+          .delete()
+          .eq('id', withdrawalId)
+          .eq('status', 'Pending');
+
+        user.withdrawableBalance = oldWithdrawable;
+        user.balance = oldBalance;
+        await updateUser(user);
+
+        throw telegramError;
+      }
+
+      return res.json({
+        success: true,
+        message:
+          'Withdrawal request submitted. It is now pending manual approval.',
+        gems,
+        usd,
+        asset: 'USDT',
+        cryptoAmount: usd,
+        address,
+        status: 'Pending',
+        withdrawalId,
+        telegramMessageId: telegramMessage?.message_id || null,
+        balance: user.balance,
+        withdrawableBalance: user.withdrawableBalance,
+        depositBalance: user.depositBalance,
+        lastWithdrawalAt: withdrawalCreatedAt,
+        nextAllowedAt:
+          Date.parse(withdrawalCreatedAt) + WITHDRAWAL_COOLDOWN
+      });
+    } catch (requestError) {
+      // If transaction insertion itself failed, restore the reservation.
+      const existing = await getWithdrawalById(withdrawalId, user.id).catch(() => null);
+
+      if (existing) {
+        await supabase
+          .from('transactions')
+          .delete()
+          .eq('id', withdrawalId)
+          .eq('status', 'Pending')
+          .catch(() => {});
+      }
+
+      const currentUser = await getUserById(user.id).catch(() => null);
+      if (
+        currentUser &&
+        number(currentUser.withdrawableBalance) === oldWithdrawable - gems
+      ) {
+        currentUser.withdrawableBalance = oldWithdrawable;
+        currentUser.balance = oldBalance;
+        await updateUser(currentUser).catch(() => {});
+      }
+
+      throw requestError;
+    }
+  } catch (err) {
+    console.error('Manual USDT withdrawal error:', err);
+
+    return res.status(
+      Number(err?.status) >= 400 && Number(err?.status) < 600
+        ? Number(err.status)
+        : 500
+    ).json({
+      success: false,
+      message:
+        err.message ||
+        'Unable to submit the withdrawal request.'
+    });
   }
-);
+});
 
 // ======================================================
 // TRANSACTIONS
@@ -4493,7 +5111,7 @@ app.post(
               false,
 
             error:
-              `Insufficient balance. You need at least ₦${SPIN_COST} or a free spin.`
+              `Insufficient balance. You need at least Gems💎${SPIN_COST} or a free spin.`
 
           });
 
@@ -4581,28 +5199,28 @@ app.post(
           amount: 10,
           ticketAmount: 0,
           weight: 2000,
-          label: '₦10'
+          label: 'Gems💎10'
         },
 
         {
           amount: 20,
           ticketAmount: 0,
           weight: 2000,
-          label: '₦20'
+          label: 'Gems💎20'
         },
 
         {
           amount: 50,
           ticketAmount: 0,
           weight: 1300,
-          label: '₦50'
+          label: 'Gems💎50'
         },
 
         {
           amount: 100,
           ticketAmount: 0,
           weight: 350,
-          label: '₦100'
+          label: 'Gems💎100'
         },
 
         {
@@ -4630,7 +5248,7 @@ app.post(
           amount: 2000,
           ticketAmount: 0,
           weight: 1,
-          label: '₦2000'
+          label: 'Gems💎2000'
         }
 
       ];
@@ -4746,7 +5364,7 @@ app.post(
           currency:
             selectedPrize.ticketAmount > 0
               ? 'LUCK_TICKETS'
-              : 'NGN',
+              : 'GEMS',
 
           description:
             selectedPrize.label
@@ -4827,9 +5445,8 @@ app.post(
 // LUCK TICKET TREASURE CHESTS
 // ======================================================
 
-function chooseLuckTicketReward(chestId) {
-  const cfg = LUCK_CHEST_CONFIG[chestId];
-  if (!cfg) throw new Error('Invalid Luck Chest.');
+function chooseLuckTicketReward() {
+  const cfg = LUCK_CHEST_CONFIG.chest;
   const roll = crypto.randomInt(0, 100000) / 1000; // 0.000 - 99.999
   for (const tier of cfg.rewards) {
     if (roll < tier.max) return tier.tickets;
@@ -4839,42 +5456,76 @@ function chooseLuckTicketReward(chestId) {
 
 function getLuckChestSnapshot(user) {
   const daily = normalizeDailyReward(user);
+  const cfg = LUCK_CHEST_CONFIG.chest;
+  const c = daily.luckChests.chest;
+  const now = Date.now();
+
+  const onCooldown = c.cooldownUntil > now;
+  const nextAdReadyAt =
+    c.progress >= 1 && c.firstAdAt
+      ? c.firstAdAt + cfg.adGapMs
+      : 0;
+
   return {
     luckTickets: number(daily.luckTickets),
-    chests: {
-      chest20: {
-        requiredAds: LUCK_CHEST_CONFIG.chest20.ads,
-        progress: number(daily.luckChests.chest20.progress),
-        claimed: !!daily.luckChests.chest20.claimed
-      },
-      chest30: {
-        requiredAds: LUCK_CHEST_CONFIG.chest30.ads,
-        progress: number(daily.luckChests.chest30.progress),
-        claimed: !!daily.luckChests.chest30.claimed
-      }
-    }
+    chest: {
+      requiredAds: cfg.ads,
+      progress: number(c.progress),
+      onCooldown,
+      cooldownUntil: onCooldown ? c.cooldownUntil : 0,
+      waitingForGap: nextAdReadyAt > now,
+      nextAdReadyAt: nextAdReadyAt > now ? nextAdReadyAt : 0
+    },
+    serverNow: now
   };
 }
 
-function applyLuckChestCompletion(user, chestId) {
-  const cfg = LUCK_CHEST_CONFIG[chestId];
-  const daily = normalizeDailyReward(user);
-  const chest = daily.luckChests[chestId];
+// Called before a chest ad is allowed to start. Enforces the 60-second
+// gap between ad 1 and ad 2, and the 24-hour cooldown after a claim.
+function checkLuckChestReady(user) {
+  const snapshot = getLuckChestSnapshot(user);
+  if (snapshot.chest.onCooldown) {
+    return {
+      ready: false,
+      message: 'The chest is already open. Come back after the cooldown.',
+      nextAllowedAt: snapshot.chest.cooldownUntil
+    };
+  }
+  if (snapshot.chest.waitingForGap) {
+    return {
+      ready: false,
+      message: 'Please wait before watching the next ad.',
+      nextAllowedAt: snapshot.chest.nextAdReadyAt
+    };
+  }
+  return { ready: true };
+}
 
-  if (chest.claimed || chest.progress >= cfg.ads) {
+function applyLuckChestCompletion(user) {
+  const cfg = LUCK_CHEST_CONFIG.chest;
+  const daily = normalizeDailyReward(user);
+  const chest = daily.luckChests.chest;
+  const now = Date.now();
+
+  if (chest.cooldownUntil > now || chest.progress >= cfg.ads) {
     return { granted: false, tickets: 0, state: getLuckChestSnapshot(user) };
   }
 
   chest.progress += 1;
+  if (chest.progress === 1) {
+    chest.firstAdAt = now;
+  }
+
   let granted = false;
   let tickets = 0;
 
   if (chest.progress >= cfg.ads) {
-    tickets = chooseLuckTicketReward(chestId);
+    tickets = chooseLuckTicketReward();
     daily.luckTickets = number(daily.luckTickets) + tickets;
-    // Chests are repeatable: after opening, the next cycle starts at 0/required.
+    // The chest re-locks for 24 hours after opening.
     chest.progress = 0;
-    chest.claimed = false;
+    chest.firstAdAt = 0;
+    chest.cooldownUntil = now + cfg.cooldownMs;
     granted = true;
   }
 
@@ -4890,6 +5541,121 @@ app.get('/api/luck/chests', requireLogin, async (req, res) => {
   } catch (err) {
     console.error('Luck chest state error:', err);
     return res.status(500).json({ success: false, message: 'Unable to load Luck Chest progress.' });
+  }
+});
+
+// ======================================================
+// DOUBLE YOUR GEMS — COIN FLIP
+// ======================================================
+// A weighted coin flip. The server alone decides the outcome using
+// cryptographically secure randomness: 20% win / 80% loss.
+ // It is never influenced by stake size or any client-supplied value.
+app.post('/api/games/coinflip/play', requireLogin, async (req, res) => {
+  try {
+    const user = req.user;
+    const choice = String(req.body?.choice || '').trim().toLowerCase();
+    const amount = Math.floor(Number(req.body?.amount));
+
+    if (!['heads', 'tails'].includes(choice)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Choose heads or tails.'
+      });
+    }
+
+    if (
+      !Number.isFinite(amount) ||
+      amount < COIN_FLIP_CONFIG.min ||
+      amount > COIN_FLIP_CONFIG.max
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Choose an amount between Gems💎${COIN_FLIP_CONFIG.min} and Gems💎${COIN_FLIP_CONFIG.max}.`
+      });
+    }
+
+    syncUserBalance(user);
+
+    if (number(user.balance) < amount) {
+      return res.status(400).json({
+        success: false,
+        code: 'INSUFFICIENT_BALANCE',
+        message: `Insufficient balance. You need Gems💎${amount} to play.`
+      });
+    }
+
+    // Deduct the stake up front — deposit balance first, then withdrawable
+    // balance, matching the spend order used by Tap Rush / Lucky 3.
+    let remaining = amount;
+    const deposit = getDepositBalance(user);
+    const earnings = getWithdrawableBalance(user);
+
+    if (deposit >= remaining) {
+      user.depositBalance = deposit - remaining;
+    } else {
+      remaining -= deposit;
+      user.depositBalance = 0;
+      user.withdrawableBalance = Math.max(0, earnings - remaining);
+    }
+
+    syncUserBalance(user);
+    await updateUser(user);
+
+    await addTransaction(user.id, {
+      id: generateTransactionId('tx_coinflip_stake'),
+      type: 'coinflip_stake',
+      description: `Double Your Gems — Gems💎${amount} wagered on ${choice}`,
+      amount,
+      currency: 'GEMS',
+      status: 'completed',
+      bank: 'PAYME Wallet'
+    });
+
+    // First decide whether this play is a win (20%) or a loss (80%).
+    // Only after that do we choose the displayed side. On a win the
+    // result matches the user's choice; on a loss it is the opposite.
+    // This preserves a natural coin-flip animation while enforcing the
+    // configured 20/80 outcome rate server-side.
+    const won = crypto.randomInt(0, 10000) < Math.round(COIN_FLIP_CONFIG.winChance * 10000);
+    const result = won
+      ? choice
+      : (choice === 'heads' ? 'tails' : 'heads');
+    let payout = 0;
+
+    if (won) {
+      payout = amount * 2;
+      user.withdrawableBalance = getWithdrawableBalance(user) + payout;
+      syncUserBalance(user);
+      await updateUser(user);
+
+      await addTransaction(user.id, {
+        id: generateTransactionId('tx_coinflip_win'),
+        type: 'coinflip_win',
+        description: `Double Your Gems — Won Gems💎${payout} (landed ${result})`,
+        amount: payout,
+        currency: 'GEMS',
+        status: 'completed',
+        bank: 'PAYME Wallet'
+      });
+    }
+
+    return res.json({
+      success: true,
+      result,
+      won,
+      amount,
+      payout,
+      balance: user.balance,
+      withdrawableBalance: user.withdrawableBalance,
+      depositBalance: user.depositBalance
+    });
+
+  } catch (err) {
+    console.error('Coin flip error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to play Double Your Gems right now.'
+    });
   }
 });
 
@@ -5107,10 +5873,10 @@ app.post(
           id: generateTransactionId('tx_lucky3_reward'),
           type: 'lucky3_reward',
           description: payout > 0
-            ? `Lucky 3 Reward — ${gameType} — ₦${payout}`
+            ? `Lucky 3 Reward — ${gameType} — Gems💎${payout}`
             : `Lucky 3 Reward — ${gameType} — ${freeSpinsAwarded} Free Spins`,
           amount: payout,
-          currency: payout > 0 ? 'NGN' : 'LUCK_TICKETS',
+          currency: payout > 0 ? 'GEMS' : 'LUCK_TICKETS',
           status: 'completed',
           bank: 'Lucky 3'
         });
@@ -5145,327 +5911,116 @@ app.post(
 );
 
 // ======================================================
+// CRYPTO DEPOSIT CONFIG
+// ======================================================
+app.get('/api/crypto/config', requireLogin, async (req, res) => {
+  try {
+    await refreshLiveGemRate();
+    return res.json({
+      success: true,
+      gemUsdRate: GEM_USD_RATE,
+      ngnPerUsd: NGN_PER_USD,
+      minUsd: MIN_CRYPTO_USD,
+      minGems: Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE),
+      assets: CRYPTO_ASSETS,
+      cryptobotConfigured: !!CRYPTOBOT_TOKEN
+    });
+  } catch (err) {
+    console.error('Crypto config error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to load crypto payment settings.' });
+  }
+});
+
+// ======================================================
 // GET DEPOSITS
 // ======================================================
-
-app.get(
-  '/api/deposits',
-  requireLogin,
-  async (req, res) => {
-
-    try {
-
-      return res.json({
-
-        success:
-          true,
-
-        deposits:
-          await getUserDeposits(
-            req.user.id,
-            Math.min(
-              Math.max(
-                Number(req.query.limit) || 25,
-                1
-              ),
-              50
-            )
-          )
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Get deposits error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        message:
-          'Failed to load deposits.'
-
-      });
-
-    }
-
+app.get('/api/deposits', requireLogin, async (req, res) => {
+  try {
+    return res.json({
+      success: true,
+      deposits: await getUserDeposits(
+        req.user.id,
+        Math.min(Math.max(Number(req.query.limit) || 25, 1), 50)
+      )
+    });
+  } catch (err) {
+    console.error('Get deposits error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to load deposits.' });
   }
-);
+});
 
 // ======================================================
-// SUBMIT DEPOSIT
+// CREATE CRYPTO DEPOSIT INVOICE
 // ======================================================
-
-app.post(
-  '/api/deposits',
-  requireLogin,
-  async (req, res) => {
-
-    try {
-
-      const amount =
-        number(
-          req.body?.amount
-        );
-
-      const screenshot =
-        req.body?.screenshot;
-
-      if (
-        !Number.isFinite(amount) ||
-        amount <
-        MIN_DEPOSIT_AMOUNT
-      ) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          error:
-            `Minimum deposit amount is ₦${MIN_DEPOSIT_AMOUNT}.`
-
-        });
-
-      }
-
-      if (!screenshot) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          error:
-            'Payment screenshot is required.'
-
-        });
-
-      }
-
-      const matches =
-        String(screenshot).match(
-          /^data:image\/([a-zA-Z0-9.+-]+);base64,(.+)$/
-        );
-
-      if (!matches) {
-
-        return res.status(400).json({
-
-          success:
-            false,
-
-          error:
-            'Invalid screenshot format.'
-
-        });
-
-      }
-
-      const reference =
-        generateDepositReference();
-
-      const {
-        error: depositError
-      } =
-        await supabase
-          .from('deposits')
-          .insert({
-
-            reference,
-
-            user_id:
-              req.user.id,
-
-            amount,
-
-            status:
-              'Pending Verification',
-
-            screenshot,
-
-            reason:
-              null
-
-          });
-
-      if (depositError) {
-        throw depositError;
-      }
-
-      const caption =
-
-        `<b>NEW DEPOSIT REQUEST</b>\n\n` +
-
-        `<b>Name:</b> ${req.user.fullName}\n` +
-
-        `<b>Username:</b> @${req.user.username}\n` +
-
-        `<b>Email:</b> ${req.user.email}\n` +
-
-        `<b>Amount:</b> ₦${amount.toLocaleString()}\n` +
-
-        `<b>Reference:</b> ${reference}\n` +
-
-        `<b>Status:</b> Pending Verification`;
-
-      if (
-        !TELEGRAM_DEPOSIT_BOT_TOKEN ||
-        !TELEGRAM_CHAT_ID
-      ) {
-
-        return res.status(500).json({
-
-          success:
-            false,
-
-          error:
-            'Deposit saved, but Telegram is not configured.'
-
-        });
-
-      }
-
-      const imageBuffer =
-        Buffer.from(
-          matches[2],
-          'base64'
-        );
-
-      const formData =
-        new FormData();
-
-      formData.append(
-        'chat_id',
-        TELEGRAM_CHAT_ID
-      );
-
-      formData.append(
-        'caption',
-        caption
-      );
-
-      formData.append(
-        'photo',
-        new Blob(
-          [imageBuffer],
-          {
-            type:
-              `image/${matches[1]}`
-          }
-        ),
-        `deposit-${reference}.${matches[1]}`
-      );
-
-      formData.append(
-        'reply_markup',
-        JSON.stringify({
-
-          inline_keyboard: [[
-
-            {
-
-              text:
-                'APPROVE',
-
-              callback_data:
-                `approve_deposit:${req.user.id}:${reference}`
-
-            },
-
-            {
-
-              text:
-                'REJECT',
-
-              callback_data:
-                `reject_deposit:${req.user.id}:${reference}`
-
-            }
-
-          ]]
-
-        })
-      );
-
-      const telegramResponse =
-        await fetch(
-
-          `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/sendPhoto`,
-
-          {
-
-            method:
-              'POST',
-
-            body:
-              formData
-
-          }
-
-        );
-
-      const telegramData =
-        await telegramResponse.json();
-
-      if (
-        !telegramData.ok
-      ) {
-
-        console.error(
-          'Telegram deposit error:',
-          telegramData
-        );
-
-        return res.status(500).json({
-
-          success:
-            false,
-
-          error:
-            'Deposit saved, but Telegram notification failed.'
-
-        });
-
-      }
-
-      return res.json({
-
-        success:
-          true,
-
-        reference,
-
-        message:
-          'Deposit submitted successfully.'
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        'Deposit error:',
-        err
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        error:
-          'Server error during deposit submission.'
-
-      });
-
+app.post('/api/crypto/deposit', requireLogin, async (req, res) => {
+  try {
+    await refreshLiveGemRate();
+    if (!CRYPTOBOT_TOKEN) {
+      return res.status(503).json({ success: false, message: 'Crypto payments are not configured yet.' });
     }
 
+    const gems = number(req.body?.gems);
+    const usd = gemUsd(gems);
+
+    if (!Number.isFinite(gems) || gems <= 0 || usd < MIN_CRYPTO_USD) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum deposit is $${MIN_CRYPTO_USD.toFixed(2)} (${Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE).toLocaleString()} Gems).`
+      });
+    }
+
+    const reference = generateDepositReference();
+    const invoice = await cryptoBotCreateInvoice({ gems, usd, reference });
+
+    const { error } = await supabase.from('deposits').insert({
+      reference,
+      user_id: req.user.id,
+      amount: gems,
+      status: 'Pending Verification',
+      screenshot: null,
+      reason: `CryptoBot invoice ${invoice.invoice_id} — $${usd.toFixed(2)}`
+    });
+    if (error) throw error;
+
+    return res.json({
+      success: true,
+      reference,
+      invoiceId: invoice.invoice_id,
+      gems,
+      usd,
+      invoiceUrl: invoice.web_app_invoice_url || invoice.bot_invoice_url || invoice.mini_app_invoice_url
+    });
+  } catch (err) {
+    console.error('Crypto deposit error:', err);
+    return res.status(500).json({ success: false, message: err.message || 'Unable to create crypto deposit invoice.' });
   }
-);
+});
+
+// ======================================================
+// CRYPTO DEPOSIT STATUS
+// ======================================================
+app.get('/api/crypto/deposit-status/:reference', requireLogin, async (req, res) => {
+  try {
+    const reference = String(req.params.reference || '').trim();
+    const deposit = await getDeposit(reference);
+
+    if (!deposit || String(deposit.user_id) !== String(req.user.id)) {
+      return res.status(404).json({ success: false, message: 'Deposit not found.' });
+    }
+
+    return res.json({
+      success: true,
+      reference,
+      status: deposit.status,
+      gems: number(deposit.amount),
+      usd: gemUsd(number(deposit.amount)),
+      reason: deposit.reason || null
+    });
+  } catch (err) {
+    console.error('Crypto deposit status error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to check deposit status.' });
+  }
+});
 
 // ======================================================
 // VERIFY DEPOSIT
@@ -5598,7 +6153,7 @@ async function verifyDeposit(
         amount,
 
         currency:
-          'NGN',
+          'GEMS',
 
         status:
           'completed',
@@ -5843,12 +6398,15 @@ function normalizeDailyReward(
     user.dailyReward.luckChests = {};
   }
 
-  for (const chestId of ['chest20', 'chest30']) {
-    const cfg = LUCK_CHEST_CONFIG[chestId];
-    const existing = user.dailyReward.luckChests[chestId] || {};
-    user.dailyReward.luckChests[chestId] = {
-      progress: Math.max(0, Math.min(cfg.ads, number(existing.progress))),
-      claimed: !!existing.claimed
+  {
+    const cfg = LUCK_CHEST_CONFIG.chest;
+    const existing = user.dailyReward.luckChests.chest || {};
+    user.dailyReward.luckChests = {
+      chest: {
+        progress: Math.max(0, Math.min(cfg.ads, number(existing.progress))),
+        firstAdAt: Number(existing.firstAdAt) || 0,
+        cooldownUntil: Number(existing.cooldownUntil) || 0
+      }
     };
   }
 
@@ -5865,6 +6423,8 @@ app.post(
   async (req, res) => {
 
     try {
+
+      await refreshLiveGemRate();
 
       let user =
         req.user;
@@ -6030,6 +6590,12 @@ app.post(
           minWithdrawalLimit:
             MIN_WITHDRAWAL_LIMIT,
 
+          gemUsdRate:
+            GEM_USD_RATE,
+
+          ngnPerUsd:
+            NGN_PER_USD,
+
           canWithdraw:
             number(
               user.withdrawableBalance
@@ -6037,6 +6603,12 @@ app.post(
             MIN_WITHDRAWAL_LIMIT
 
         },
+
+        gemUsdRate:
+          GEM_USD_RATE,
+
+        ngnPerUsd:
+          NGN_PER_USD,
 
         dailyReward: {
 
@@ -6056,6 +6628,11 @@ app.post(
 
           claimedDays:
             daily.claimedDays,
+
+          luckTickets:
+            number(
+              daily.luckTickets
+            ),
 
           lastClaimedDay:
             daily.claimedDays.length
@@ -6283,7 +6860,7 @@ app.post(
               10,
 
             currency:
-              'NGN',
+              'GEMS',
 
             status:
               'completed'
@@ -6292,15 +6869,22 @@ app.post(
         );
 
         rewardMessage =
-          '₦10 daily reward claimed.';
+          'Gems💎10 daily reward claimed.';
 
       } else {
 
-        user.freeSpins =
-          number(
-            user.freeSpins
-          ) +
-          1;
+        // Day 7 special bonus: 200 Luck Tickets.
+        // Luck Tickets live inside daily_reward so the existing wallet
+        // structure is preserved and the balance survives redeploys.
+        daily.luckTickets =
+          number(daily.luckTickets) +
+          200;
+
+        user.dailyReward =
+          daily;
+
+        user.luckTickets =
+          number(daily.luckTickets);
 
         await updateUser(
           user
@@ -6319,13 +6903,13 @@ app.post(
               'daily_reward',
 
             description:
-              'Daily Reward (Day 7) - Free Spin',
+              'Daily Reward (Day 7) - 200 Luck Tickets',
 
             amount:
-              0,
+              200,
 
             currency:
-              'NGN',
+              'LUCK_TICKETS',
 
             status:
               'completed'
@@ -6334,7 +6918,7 @@ app.post(
         );
 
         rewardMessage =
-          'You earned 1 FREE SPIN!';
+          'You earned 200 Luck Tickets!';
 
       }
 
@@ -6405,9 +6989,19 @@ app.post(
             user.depositBalance,
 
           freeSpins:
-            user.freeSpins
+            user.freeSpins,
+
+          luckTickets:
+            number(
+              user.dailyReward?.luckTickets
+            )
 
         },
+
+        ticketReward:
+          reqDay === 7
+            ? 200
+            : 0,
 
         dailyReward: {
 
@@ -7018,7 +7612,7 @@ async function finalizeWeeklyCompetition(
           prize.amount,
 
         currency:
-          'NGN',
+          'GEMS',
 
         status:
           'completed'
@@ -7436,142 +8030,158 @@ async function editTelegramMessage(
 async function handleTelegramCallback(
   callbackQuery
 ) {
-
   try {
-
     if (
-      String(
-        callbackQuery.message?.chat?.id
-      ) !==
-      String(
-        TELEGRAM_CHAT_ID
-      )
+      String(callbackQuery.message?.chat?.id) !==
+      String(TELEGRAM_CHAT_ID)
     ) {
-
       return;
-
     }
 
-    const data =
-      callbackQuery.data ||
-      '';
+    const data = String(callbackQuery.data || '');
 
+    // ------------------------------------------------------
+    // MANUAL USDT WITHDRAWAL APPROVE / REJECT
+    // ------------------------------------------------------
     if (
-      !data.startsWith(
-        'approve_deposit:'
-      ) &&
-      !data.startsWith(
-        'reject_deposit:'
-      )
+      data.startsWith('approve_withdrawal:') ||
+      data.startsWith('reject_withdrawal:')
     ) {
-
-      return;
-
-    }
-
-    const parts =
-      data.split(':');
-
-    const action =
-      parts[0];
-
-    const userId =
-      parts[1];
-
-    const reference =
-      parts[2];
-
-    const result =
-      await verifyDeposit(
-
-        userId,
-
-        reference,
-
-        action ===
-        'approve_deposit'
+      const parts = data.split(':');
+      const action =
+        parts[0] === 'approve_withdrawal'
           ? 'approve'
-          : 'reject',
+          : 'reject';
+      const userId = parts[1];
+      const withdrawalId = parts[2];
 
-        'Payment proof was rejected.'
+      if (!userId || !withdrawalId) {
+        await answerTelegramCallback(
+          callbackQuery.id,
+          'Invalid withdrawal request.'
+        );
+        return;
+      }
 
+      const result = await processManualWithdrawalDecision(
+        userId,
+        withdrawalId,
+        action
       );
 
-    const targetUser =
-      result.user;
-
-    const deposit =
-      result.deposit;
-
-    await answerTelegramCallback(
-
-      callbackQuery.id,
-
-      action ===
-      'approve_deposit'
-        ? 'Deposit approved!'
-        : 'Deposit rejected.'
-
-    );
-
-    const status =
-      deposit.status;
-
-    await editTelegramMessage(
-
-      callbackQuery.message.chat.id,
-
-      callbackQuery.message.message_id,
-
-      `${status === 'Approved' ? '✅' : '❌'} <b>DEPOSIT ${status.toUpperCase()}</b>\n\n` +
-
-      `👤 <b>Name:</b> ${targetUser.fullName}\n` +
-
-      `🆔 <b>Username:</b> @${targetUser.username}\n` +
-
-      `💰 <b>Amount:</b> ₦${number(
-        deposit.amount
-      ).toLocaleString()}\n` +
-
-      `🔖 <b>Reference:</b> ${deposit.reference}\n` +
-
-      `💳 <b>Balance:</b> ₦${number(
-        targetUser.balance
-      ).toLocaleString()}\n` +
-
-      `💵 <b>Earnings:</b> ₦${number(
-        targetUser.withdrawableBalance
-      ).toLocaleString()}\n` +
-
-      `💳 <b>Deposit Balance:</b> ₦${number(
-        targetUser.depositBalance
-      ).toLocaleString()}`
-
-    );
-
-  } catch (err) {
-
-    console.error(
-      'Telegram callback error:',
-      err
-    );
-
-    if (
-      callbackQuery?.id
-    ) {
+      const targetUser = result.user;
+      const withdrawal = result.withdrawal;
+      const status = String(withdrawal.status || '').toUpperCase();
+      const isApproved = withdrawal.status === 'Approved';
 
       await answerTelegramCallback(
-
         callbackQuery.id,
-
-        'Could not process this deposit.'
-
+        isApproved
+          ? 'Withdrawal approved.'
+          : 'Withdrawal rejected and Gems refunded.'
       );
 
+      const username = targetUser.username
+        ? `@${targetUser.username}`
+        : 'No username';
+
+      const address = String(
+        withdrawal.account_number || ''
+      ).replace(/[<>&]/g, '');
+
+      const text =
+        `${isApproved ? '✅' : '❌'} <b>USDT WITHDRAWAL ${status}</b>\n\n` +
+        `👤 <b>Name:</b> ${String(targetUser.fullName || 'User').replace(/[<>&]/g, '')}\n` +
+        `🆔 <b>Username:</b> ${String(username).replace(/[<>&]/g, '')}\n` +
+        `🆔 <b>Telegram ID:</b> ${String(targetUser.telegramId || '')}\n\n` +
+        `💎 <b>Gems:</b> ${number(withdrawal.amount).toLocaleString()}\n` +
+        `💵 <b>USDT Amount:</b> ${gemUsd(number(withdrawal.amount)).toFixed(2)} USDT\n` +
+        `📍 <b>USDT Address:</b>\n<code>${address}</code>\n\n` +
+        `💰 <b>Current Balance:</b> ${number(targetUser.balance).toLocaleString()} Gems\n` +
+        `🔖 <b>Withdrawal ID:</b> <code>${withdrawal.id}</code>\n\n` +
+        (
+          isApproved
+            ? `🚨 <b>Action:</b> Approved for manual payout.\n` +
+              `📤 <b>Next:</b> Send the USDT manually to the address above.`
+            : `↩️ <b>Action:</b> Request rejected.\n` +
+              `💎 <b>Refunded:</b> ${number(withdrawal.amount).toLocaleString()} Gems`
+        );
+
+      await editTelegramTextMessage(
+        callbackQuery.message.chat.id,
+        callbackQuery.message.message_id,
+        text
+      );
+
+      return;
     }
 
-  }
+    // ------------------------------------------------------
+    // EXISTING MANUAL DEPOSIT APPROVE / REJECT
+    // ------------------------------------------------------
+    if (
+      !data.startsWith('approve_deposit:') &&
+      !data.startsWith('reject_deposit:')
+    ) {
+      return;
+    }
 
+    const parts = data.split(':');
+    const action = parts[0];
+    const userId = parts[1];
+    const reference = parts[2];
+
+    const result = await verifyDeposit(
+      userId,
+      reference,
+      action === 'approve_deposit'
+        ? 'approve'
+        : 'reject',
+      'Payment proof was rejected.'
+    );
+
+    const targetUser = result.user;
+    const deposit = result.deposit;
+
+    await answerTelegramCallback(
+      callbackQuery.id,
+      action === 'approve_deposit'
+        ? 'Deposit approved!'
+        : 'Deposit rejected.'
+    );
+
+    const status = deposit.status;
+
+    await editTelegramMessage(
+      callbackQuery.message.chat.id,
+      callbackQuery.message.message_id,
+      `${status === 'Approved' ? '✅' : '❌'} <b>DEPOSIT ${status.toUpperCase()}</b>\n\n` +
+      `👤 <b>Name:</b> ${targetUser.fullName}\n` +
+      `🆔 <b>Username:</b> @${targetUser.username}\n` +
+      `💰 <b>Amount:</b> Gems💎${number(
+        deposit.amount
+      ).toLocaleString()}\n` +
+      `🔖 <b>Reference:</b> ${deposit.reference}\n` +
+      `💳 <b>Balance:</b> Gems💎${number(
+        targetUser.balance
+      ).toLocaleString()}\n` +
+      `💵 <b>Earnings:</b> Gems💎${number(
+        targetUser.withdrawableBalance
+      ).toLocaleString()}\n` +
+      `💳 <b>Deposit Balance:</b> Gems💎${number(
+        targetUser.depositBalance
+      ).toLocaleString()}`
+    );
+  } catch (err) {
+    console.error('Telegram callback error:', err);
+
+    if (callbackQuery?.id) {
+      await answerTelegramCallback(
+        callbackQuery.id,
+        err.message || 'Could not process this request.'
+      );
+    }
+  }
 }
 
 // ============================================================
@@ -7867,8 +8477,8 @@ pollTelegramUpdates();
 // ============================================================
 // TAP RUSH — STAKE-BASED REWARD GAME
 // ============================================================
-// Redesigned away from the old "pay ₦100, rank in a 2-day
-// challenge" format. Players now choose a stake (₦200/₦500/₦1000)
+// Redesigned away from the old "pay Gems💎100, rank in a 2-day
+// challenge" format. Players now choose a stake (Gems💎200/Gems💎500/Gems💎1000)
 // and are rewarded immediately based on the score they reach in
 // that single 20-second match:
 //   score 5000+  -> cash reward = stake x 2
@@ -7878,7 +8488,7 @@ pollTelegramUpdates();
 //
 // A lightweight weekly leaderboard (top 2 scorers of the week)
 // still exists purely for bragging rights + a small prize
-// (₦1000 / ₦500), paid out automatically when the week rolls
+// (Gems💎1000 / Gems💎500), paid out automatically when the week rolls
 // over. It reuses the same Monday-00:00-WAT week boundary as the
 // existing referral competition (getCurrentCompetition()).
 //
@@ -7966,7 +8576,7 @@ app.post(
             if (!TAP_RUSH_STAKES.includes(stake)) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Choose a valid stake: ₦200, ₦500, or ₦1000.'
+                    message: 'Choose a valid stake: Gems💎200, Gems💎500, or Gems💎1000.'
                 });
             }
 
@@ -7983,7 +8593,7 @@ app.post(
                 return res.status(400).json({
                     success: false,
                     code: 'INSUFFICIENT_BALANCE',
-                    message: `Insufficient balance. You need ₦${stake} to play.`
+                    message: `Insufficient balance. You need Gems💎${stake} to play.`
                 });
             }
 
@@ -8008,9 +8618,9 @@ app.post(
             await addTransaction(user.id, {
                 id: generateTransactionId('tx_tap_rush_entry'),
                 type: 'tap_rush_entry',
-                description: `Tap Rush Entry — ₦${stake} stake`,
+                description: `Tap Rush Entry — Gems💎${stake} stake`,
                 amount: stake,
-                currency: 'NGN',
+                currency: 'GEMS',
                 status: 'completed',
                 bank: 'PAYME Wallet'
             });
@@ -8468,9 +9078,9 @@ app.post(
                 await addTransaction(user.id, {
                     id: generateTransactionId('tx_tap_rush_reward'),
                     type: 'tap_rush_reward',
-                    description: `Tap Rush Reward — Score ${score} on a ₦${session.stake} play`,
+                    description: `Tap Rush Reward — Score ${score} on a Gems💎${session.stake} play`,
                     amount: reward.cashAmount,
-                    currency: 'NGN',
+                    currency: 'GEMS',
                     status: 'completed',
                     bank: 'PAYME Wallet'
                 });
@@ -8641,8 +9251,8 @@ app.get(
 // ============================================================
 // TAP RUSH — WEEKLY PRIZE PAYOUT
 // ============================================================
-// Pays the top 2 scorers of the week that just ended: ₦1000 for
-// 1st, ₦500 for 2nd. Idempotent via a deterministic transaction id
+// Pays the top 2 scorers of the week that just ended: Gems💎1000 for
+// 1st, Gems💎500 for 2nd. Idempotent via a deterministic transaction id
 // (same pattern as the existing weekly referral payout), so it is
 // safe to call this repeatedly.
 // ============================================================
@@ -8708,7 +9318,7 @@ async function finalizeTapRushWeek(competition) {
             type: 'tap_rush_weekly_prize',
             description: `Tap Rush Weekly Leaderboard — ${labels[i]} Place Prize`,
             amount: prize,
-            currency: 'NGN',
+            currency: 'GEMS',
             status: 'completed',
             bank: 'PAYME Wallet'
         });
@@ -8766,6 +9376,10 @@ app.listen(
   }
 
 );
+
+
+
+
 
 
 
