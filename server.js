@@ -2716,11 +2716,11 @@ async function sendManualWithdrawalTelegram({
             [
               {
                 text: '✅ APPROVE',
-                callback_data: `approve_withdrawal:${user.id}:${withdrawalId}`
+                callback_data: `approve_withdrawal:${withdrawalId}`
               },
               {
                 text: '❌ REJECT',
-                callback_data: `reject_withdrawal:${user.id}:${withdrawalId}`
+                callback_data: `reject_withdrawal:${withdrawalId}`
               }
             ]
           ]
@@ -8052,16 +8052,26 @@ async function handleTelegramCallback(
         parts[0] === 'approve_withdrawal'
           ? 'approve'
           : 'reject';
-      const userId = parts[1];
-      const withdrawalId = parts[2];
+      const withdrawalId = parts[1];
 
-      if (!userId || !withdrawalId) {
+      if (!withdrawalId) {
         await answerTelegramCallback(
           callbackQuery.id,
           'Invalid withdrawal request.'
         );
         return;
       }
+
+      const existingWithdrawal = await getWithdrawalById(withdrawalId);
+      if (!existingWithdrawal) {
+        await answerTelegramCallback(
+          callbackQuery.id,
+          'Withdrawal not found.'
+        );
+        return;
+      }
+
+      const userId = existingWithdrawal.user_id;
 
       const result = await processManualWithdrawalDecision(
         userId,
