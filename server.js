@@ -5988,7 +5988,7 @@ app.post('/api/crypto/deposit', requireLogin, async (req, res) => {
       invoiceId: invoice.invoice_id,
       gems,
       usd,
-      invoiceUrl: invoice.web_app_invoice_url || invoice.bot_invoice_url || invoice.mini_app_invoice_url
+      invoiceUrl: invoice.mini_app_invoice_url || invoice.bot_invoice_url || invoice.web_app_invoice_url
     });
   } catch (err) {
     console.error('Crypto deposit error:', err);
