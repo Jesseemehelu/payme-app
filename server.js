@@ -3550,12 +3550,8 @@ app.post(
           ? String(language)
           : '';
 
-      if (!selectedLanguage) {
-        return res.status(400).json({
-          success: false,
-          message: 'Please choose your language before continuing.'
-        });
-      }
+      // Returning users can authenticate without sending the selector again.
+      // New users are required to choose a language immediately before creation.
 
       // --------------------------------------------------
       // LOCAL TESTING BYPASS (Termux / Non-Production)
@@ -3605,11 +3601,16 @@ app.post(
           user = await getUserById(createdUser.id);
         }
 
-        // Keep the selected language in the existing account too.
+        // Preserve the account's saved language when no language is sent.
+        // If one is sent, update the account to the new selection.
         user.dailyReward = user.dailyReward && typeof user.dailyReward === 'object'
           ? user.dailyReward
           : {};
-        user.dailyReward.language = selectedLanguage;
+        const existingLanguage =
+          ['en','ru','es','hi'].includes(String(user.dailyReward.language || ''))
+            ? String(user.dailyReward.language)
+            : (selectedLanguage || 'en');
+        user.dailyReward.language = selectedLanguage || existingLanguage;
         await updateUser(user);
 
         // User is already loaded; no transaction history is needed for authentication.
@@ -3799,6 +3800,12 @@ app.post(
       // ==================================================
 
       if (!user) {
+        if (!selectedLanguage) {
+          return res.status(400).json({
+            success: false,
+            message: 'Please choose your language before continuing.'
+          });
+        }
 
         console.log(
           'Creating new Telegram user in Supabase...'
@@ -4014,13 +4021,22 @@ app.post(
 
         let shouldUpdate = false;
 
-        if (!['en','ru','es','hi'].includes(String(user.language || user.dailyReward?.language || ''))) {
-          user.dailyReward = user.dailyReward && typeof user.dailyReward === 'object' ? user.dailyReward : {};
+        user.dailyReward =
+          user.dailyReward && typeof user.dailyReward === 'object'
+            ? user.dailyReward
+            : {};
+
+        const storedLanguage =
+          ['en','ru','es','hi'].includes(String(user.language || user.dailyReward?.language || ''))
+            ? String(user.language || user.dailyReward?.language)
+            : '';
+
+        // Only change the saved language when the user explicitly selects one.
+        if (selectedLanguage && storedLanguage !== selectedLanguage) {
           user.dailyReward.language = selectedLanguage;
           shouldUpdate = true;
-        } else if (String(user.language || user.dailyReward?.language) !== selectedLanguage) {
-          user.dailyReward = user.dailyReward && typeof user.dailyReward === 'object' ? user.dailyReward : {};
-          user.dailyReward.language = selectedLanguage;
+        } else if (!storedLanguage) {
+          user.dailyReward.language = selectedLanguage || 'en';
           shouldUpdate = true;
         }
 

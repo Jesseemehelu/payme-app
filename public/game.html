@@ -4838,7 +4838,30 @@ fetchGameState();
   if(typeof window.showResultModal==='function'){const f=window.showResultModal;window.showResultModal=function(p){f.call(this,p);const t=document.getElementById('modalTitle'),d=document.getElementById('modalDesc'),b=document.querySelector('#resultModal .modal-btn');if(t)t.innerText=p>0?(dict()['Congratulations!']||'Congratulations!'):(dict()['Better luck next time!']||'Better luck next time!');if(d)d.innerText=p>0?(dict()['You won']||'You won')+' 💎 '+Number(p).toLocaleString():(dict()['You got 💎 0']||'You got 💎 0');if(b)b.innerText=dict()['Continue']||'Continue';};}
   if(typeof window.showLuckTicketWinModal==='function'){const f=window.showLuckTicketWinModal;window.showLuckTicketWinModal=function(p){f.call(this,p);const a=document.getElementById('luckTicketWinAmount');if(a)a.innerText=Number(p).toLocaleString()+' '+(dict()['Luck Tickets']||'Luck Tickets');const c=document.querySelector('#luckTicketWinModal .ticket-win-close'),b=document.querySelector('#luckTicketWinModal .ticket-win-btn');if(c)c.innerText=dict()['Keep Spinning']||'Keep Spinning';if(b)b.innerText=dict()['🪙 PLAY LUCKY 3']||'🪙 PLAY LUCKY 3';};}
   translate();
-  new MutationObserver(translate).observe(document.body,{subtree:true,childList:true,characterData:true});
+  /* IMPORTANT: Do NOT observe characterData and re-scan the whole document.
+     The game continuously changes innerText/classes while spinning and
+     updating balances. Observing characterData here creates a feedback loop
+     and can lock the Telegram WebApp main thread. We only translate newly
+     inserted DOM nodes. Dynamic game messages are translated by the wrappers
+     above. */
+  if (document.body) {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            let textNode;
+            while ((textNode = walker.nextNode())) nodes.push(textNode);
+            nodes.forEach(translateNode);
+          } else if (node.nodeType === Node.TEXT_NODE) {
+            translateNode(node);
+          }
+        });
+      });
+    });
+    observer.observe(document.body, {subtree:true, childList:true, characterData:false});
+  }
   window.addEventListener('storage',e=>{if(e.key==='paymeLanguage')translate();});
   window.applyGameLanguage=translate;
 })();
