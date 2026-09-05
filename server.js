@@ -3803,6 +3803,7 @@ app.post(
         if (!selectedLanguage) {
           return res.status(400).json({
             success: false,
+            needsLanguage: true,
             message: 'Please choose your language before continuing.'
           });
         }

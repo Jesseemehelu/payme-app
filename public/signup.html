@@ -2242,6 +2242,41 @@ if (!activeTg || !activeTg.initData) {
       !data.success
     ) {
 
+      if (data.needsLanguage) {
+
+        /*
+         * The stale "hasSignedUp" flag in localStorage pointed at an
+         * account that no longer exists server-side (e.g. the DB row
+         * was deleted). The server wants to create a fresh account and
+         * needs a language, which the login UI never asked for.
+         * Clear the flag and fall back to the full signup screen so
+         * the user can pick a language and try again.
+         */
+
+        localStorage.removeItem('hasSignedUp');
+
+        tgBtn.disabled = false;
+
+        renderSignupUI();
+
+        const langSection =
+          document.getElementById('languageSection');
+
+        if (langSection) {
+          langSection.classList.add('invalid');
+        }
+
+        errorBox.innerText =
+          data.message ||
+          'Please choose your language and try again.';
+
+        errorBox.style.display =
+          'block';
+
+        return;
+
+      }
+
       throw new Error(
         data.message ||
         data.error ||
