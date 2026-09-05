@@ -14,7 +14,7 @@
       --bg:#050811;--panel:#0b1220;--panel2:#0e1728;--line:rgba(255,255,255,.09);
       --text:#f8fbff;--muted:#91a0b6;--blue:#5b8cff;--cyan:#35d7ff;
       --green:#42e0a7;--yellow:#ffd166;--red:#ff6f82;
-      --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)
+      --safe-top:calc(env(safe-area-inset-top,0px) + var(--tg-content-safe-area-inset-top,56px));--safe-bottom:env(safe-area-inset-bottom,0px)
     }
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-tap-highlight-color:transparent}
     body{
@@ -63,6 +63,8 @@
     }
     .input:focus{border-color:rgba(91,140,255,.72);box-shadow:0 0 0 4px rgba(91,140,255,.10),0 0 26px rgba(91,140,255,.08);transform:translateY(-1px)}
     .usd-preview{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:9px 11px;border-radius:12px;background:rgba(53,215,255,.045);border:1px solid rgba(53,215,255,.08);color:#8eeaff;font-size:.67rem;font-weight:900}
+    .min-hint{display:none;margin-top:7px;padding:8px 11px;border-radius:12px;background:rgba(255,111,130,.07);border:1px solid rgba(255,111,130,.16);color:#ff9aaa;font-size:.65rem;font-weight:800;line-height:1.5}
+    .min-hint.show{display:block}
     .asset{
       width:100%;height:52px;border-radius:15px;border:1px solid rgba(66,224,167,.30);
       background:linear-gradient(135deg,rgba(66,224,167,.10),rgba(20,120,100,.06));
@@ -132,6 +134,7 @@
 
     <label class="label" for="gemsInput">Withdrawal amount</label>
     <input id="gemsInput" class="input" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter Gems to withdraw">
+    <div id="minHint" class="min-hint">Minimum withdrawal is 0.50 USDT.</div>
     <div class="usd-preview"><span>Estimated payout</span><span id="usdPreview">$0.00 USDT</span></div>
 
     <label class="label" for="addressInput">USDT wallet address</label>
@@ -181,10 +184,51 @@
 </div>
 
 <script>
+// PAYME global language layer
+(function(){
+  const dict = {"en": {"back": "← Back", "globalCrypto": "Global Crypto Wallet", "buyGems": "Buy Gems with crypto", "buyDesc": "Choose how many Gems you want. PAYME calculates the USD value and opens a secure CryptoBot checkout.", "oneGem": "1 Gem value", "howMany": "How many Gems?", "minPurchase": "Minimum purchase is $0.50. Gems are an in-app unit — 1 Gem is not $1.", "gemsAmount": "GEMS AMOUNT", "enterGems": "Enter Gems", "loadingMin": "Loading minimum…", "paymentMethod": "Payment method", "cryptoCheckout": "CryptoBot checkout", "continueCrypto": "Continue with CryptoBot", "secure": "🔒 Your crypto payment is handled by CryptoBot. PAYME credits Gems only after CryptoBot confirms the invoice as paid.", "depositHistory": "Deposit history", "depositSub": "Your latest crypto funding activity.", "loadingHistory": "Loading history…", "noDeposits": "No deposits yet.", "unableHistory": "Unable to load deposit history.", "paymentConfirmed": "Payment confirmed", "gemsAdded": "Your Gems have been added to your PAYME wallet.", "backWallet": "Back to Wallet", "minimum": "Minimum", "creating": "Creating secure invoice…", "opening": "Opening CryptoBot…", "couldNotInvoice": "Could not create invoice.", "noPaymentLink": "CryptoBot did not return a payment link.", "unablePayment": "Unable to start payment.", "depositConfirmed": "Deposit confirmed", "credited": "Gems have been credited to your deposit balance.", "reference": "Reference:", "cryptoUnavailable": "Crypto payments are unavailable.", "usdValue": "USD", "statusApproved": "Approved", "statusRejected": "Rejected", "statusPending": "Pending", "minimumDeposit": "Minimum deposit is", "unableLoadCrypto": "Unable to load crypto settings.", "address": "Address", "requested": "Requested", "withdrawable": "Withdrawable earnings", "withdrawTitle": "Withdraw your Gems", "withdrawDesc": "Your withdrawal is reviewed manually. Enter the amount and your USDT wallet address, then submit your request for approval.", "usdtWithdrawal": "USDT withdrawal", "onlyUsdt": "Only USDT withdrawals are accepted.", "withdrawAmount": "Withdrawal amount", "enterWithdrawGems": "Enter Gems to withdraw", "minWithdraw": "Minimum withdrawal is", "estimated": "Estimated payout", "walletAddress": "USDT wallet address", "pasteAddress": "Paste your USDT address", "manualTransfer": "Manual transfer", "requestWithdraw": "Request USDT Withdrawal", "important": "Important:", "manualNotice": "PAYME withdrawals are reviewed and sent manually. Please double-check your USDT address and network. Manual withdrawals may take up to 24 hours to arrive after approval.", "latestWithdrawal": "Latest withdrawal", "latestPayout": "Your most recent payout request", "amount": "Amount", "usdt": "USDT", "pendingReview": "Pending manual review.", "pendingDesc": "Once approved, the USDT payout will be sent manually. Manual withdrawals can take up to 24 hours to arrive.", "withdrawSubmitted": "Withdrawal request submitted", "pendingApproval": "pending manual approval", "reserved": "Your request is now pending manual approval. Your Gems have been reserved while the request is reviewed.", "temporarilyLocked": "Your withdrawal is temporarily locked.", "validAddress": "Please enter a valid USDT wallet address.", "moreGems": "Add", "submitting": "Submitting request…", "availableIn": "Available in", "withdrawPending": "Withdrawal Pending…", "requestFailed": "Withdrawal request failed.", "unableSubmit": "Unable to submit withdrawal request.", "cannotMore": "You cannot withdraw more than your earned Gems.", "approvedPayout": "Approved for payout.", "approvedManual": "Your USDT request has been approved for manual processing. Manual withdrawals can take up to 24 hours to arrive.", "rejectedWithdraw": "Withdrawal rejected.", "returned": "The reserved Gems have been returned to your withdrawable balance."}, "ru": {"back": "← Назад", "globalCrypto": "Глобальный криптокошелёк", "buyGems": "Покупайте Gems за криптовалюту", "buyDesc": "Выберите количество Gems. PAYME рассчитает стоимость в USD и откроет защищённую оплату через CryptoBot.", "oneGem": "Стоимость 1 Gem", "howMany": "Сколько Gems?", "minPurchase": "Минимальная покупка — $0.50. Gems — внутренняя единица приложения: 1 Gem не равен $1.", "gemsAmount": "КОЛИЧЕСТВО GEMS", "enterGems": "Введите количество Gems", "loadingMin": "Загрузка минимума…", "paymentMethod": "Способ оплаты", "cryptoCheckout": "Оплата через CryptoBot", "continueCrypto": "Продолжить через CryptoBot", "secure": "🔒 Криптоплатёж обрабатывается CryptoBot. PAYME начисляет Gems только после подтверждения оплаты CryptoBot.", "depositHistory": "История пополнений", "depositSub": "Ваши последние криптопополнения.", "loadingHistory": "Загрузка истории…", "noDeposits": "Пополнений пока нет.", "unableHistory": "Не удалось загрузить историю пополнений.", "paymentConfirmed": "Платёж подтверждён", "gemsAdded": "Gems добавлены в ваш кошелёк PAYME.", "backWallet": "Назад в кошелёк", "minimum": "Минимум", "creating": "Создание защищённого счёта…", "opening": "Открытие CryptoBot…", "couldNotInvoice": "Не удалось создать счёт на оплату.", "noPaymentLink": "CryptoBot не вернул ссылку на оплату.", "unablePayment": "Не удалось начать оплату.", "depositConfirmed": "Пополнение подтверждено", "credited": "Gems зачислены на ваш баланс пополнения.", "reference": "Номер:", "cryptoUnavailable": "Криптоплатежи недоступны.", "usdValue": "USD", "statusApproved": "Одобрено", "statusRejected": "Отклонено", "statusPending": "Ожидает", "minimumDeposit": "Минимальное пополнение —", "unableLoadCrypto": "Не удалось загрузить настройки криптоплатежей.", "address": "Адрес", "requested": "Запрошено", "withdrawable": "Доступно для вывода", "withdrawTitle": "Вывод Gems", "withdrawDesc": "Ваш вывод проверяется вручную. Укажите количество Gems и адрес USDT-кошелька, затем отправьте заявку на одобрение.", "usdtWithdrawal": "Вывод USDT", "onlyUsdt": "Принимаются только выводы в USDT.", "withdrawAmount": "Сумма вывода", "enterWithdrawGems": "Введите Gems для вывода", "minWithdraw": "Минимальный вывод —", "estimated": "Расчётная выплата", "walletAddress": "Адрес USDT-кошелька", "pasteAddress": "Вставьте адрес USDT", "manualTransfer": "Ручной перевод", "requestWithdraw": "Запросить вывод USDT", "important": "Важно:", "manualNotice": "Выводы PAYME проверяются и отправляются вручную. Проверьте адрес USDT и сеть. После одобрения ручной вывод может занять до 24 часов.", "latestWithdrawal": "Последний вывод", "latestPayout": "Ваша последняя заявка на выплату", "amount": "Сумма", "usdt": "USDT", "pendingReview": "Ожидает ручной проверки.", "pendingDesc": "После одобрения выплата USDT будет отправлена вручную. Ручной вывод может занять до 24 часов.", "withdrawSubmitted": "Заявка на вывод отправлена", "pendingApproval": "ожидает ручного одобрения", "reserved": "Ваша заявка ожидает ручного одобрения. Gems зарезервированы на время проверки.", "temporarilyLocked": "Вывод временно заблокирован.", "validAddress": "Введите действительный адрес USDT-кошелька.", "moreGems": "Добавьте", "submitting": "Отправка заявки…", "availableIn": "Доступно через", "withdrawPending": "Вывод ожидает…", "requestFailed": "Не удалось выполнить запрос на вывод.", "unableSubmit": "Не удалось отправить заявку на вывод.", "cannotMore": "Нельзя вывести больше заработанных Gems.", "approvedPayout": "Выплата одобрена.", "approvedManual": "Ваша заявка на USDT одобрена для ручной обработки. Ручной вывод может занять до 24 часов.", "rejectedWithdraw": "Вывод отклонён.", "returned": "Зарезервированные Gems возвращены на доступный баланс для вывода."}, "es": {"back": "← Atrás", "globalCrypto": "Billetera cripto global", "buyGems": "Compra Gems con criptomonedas", "buyDesc": "Elige cuántos Gems quieres. PAYME calcula el valor en USD y abre un pago seguro con CryptoBot.", "oneGem": "Valor de 1 Gem", "howMany": "¿Cuántos Gems?", "minPurchase": "La compra mínima es de $0.50. Gems es una unidad dentro de la app: 1 Gem no equivale a $1.", "gemsAmount": "CANTIDAD DE GEMS", "enterGems": "Introduce Gems", "loadingMin": "Cargando mínimo…", "paymentMethod": "Método de pago", "cryptoCheckout": "Pago con CryptoBot", "continueCrypto": "Continuar con CryptoBot", "secure": "🔒 CryptoBot gestiona tu pago. PAYME acredita los Gems solo después de que CryptoBot confirme el pago.", "depositHistory": "Historial de depósitos", "depositSub": "Tu actividad reciente de financiación cripto.", "loadingHistory": "Cargando historial…", "noDeposits": "Aún no hay depósitos.", "unableHistory": "No se pudo cargar el historial de depósitos.", "paymentConfirmed": "Pago confirmado", "gemsAdded": "Tus Gems se han añadido a tu billetera PAYME.", "backWallet": "Volver a la billetera", "minimum": "Mínimo", "creating": "Creando factura segura…", "opening": "Abriendo CryptoBot…", "couldNotInvoice": "No se pudo crear la factura.", "noPaymentLink": "CryptoBot no devolvió un enlace de pago.", "unablePayment": "No se pudo iniciar el pago.", "depositConfirmed": "Depósito confirmado", "credited": "Los Gems se han acreditado a tu saldo de depósito.", "reference": "Referencia:", "cryptoUnavailable": "Los pagos cripto no están disponibles.", "usdValue": "USD", "statusApproved": "Aprobado", "statusRejected": "Rechazado", "statusPending": "Pendiente", "minimumDeposit": "El depósito mínimo es", "unableLoadCrypto": "No se pudieron cargar los ajustes cripto.", "address": "Dirección", "requested": "Solicitado", "withdrawable": "Ganancias disponibles para retirar", "withdrawTitle": "Retira tus Gems", "withdrawDesc": "Tu retiro se revisa manualmente. Introduce la cantidad y tu dirección de billetera USDT y envía la solicitud para su aprobación.", "usdtWithdrawal": "Retiro de USDT", "onlyUsdt": "Solo se aceptan retiros en USDT.", "withdrawAmount": "Cantidad a retirar", "enterWithdrawGems": "Introduce Gems para retirar", "minWithdraw": "El retiro mínimo es", "estimated": "Pago estimado", "walletAddress": "Dirección de billetera USDT", "pasteAddress": "Pega tu dirección USDT", "manualTransfer": "Transferencia manual", "requestWithdraw": "Solicitar retiro de USDT", "important": "Importante:", "manualNotice": "Los retiros de PAYME se revisan y envían manualmente. Comprueba bien tu dirección USDT y la red. Tras la aprobación, un retiro manual puede tardar hasta 24 horas.", "latestWithdrawal": "Último retiro", "latestPayout": "Tu solicitud de pago más reciente", "amount": "Cantidad", "usdt": "USDT", "pendingReview": "Pendiente de revisión manual.", "pendingDesc": "Una vez aprobado, el pago en USDT se enviará manualmente. Los retiros manuales pueden tardar hasta 24 horas.", "withdrawSubmitted": "Solicitud de retiro enviada", "pendingApproval": "pendiente de aprobación manual", "reserved": "Tu solicitud está pendiente de aprobación manual. Tus Gems se han reservado mientras se revisa.", "temporarilyLocked": "Tu retiro está bloqueado temporalmente.", "validAddress": "Introduce una dirección válida de billetera USDT.", "moreGems": "Añade", "submitting": "Enviando solicitud…", "availableIn": "Disponible en", "withdrawPending": "Retiro pendiente…", "requestFailed": "La solicitud de retiro falló.", "unableSubmit": "No se pudo enviar la solicitud de retiro.", "cannotMore": "No puedes retirar más Gems de los que has ganado.", "approvedPayout": "Pago aprobado.", "approvedManual": "Tu solicitud de USDT ha sido aprobada para procesamiento manual. El retiro manual puede tardar hasta 24 horas.", "rejectedWithdraw": "Retiro rechazado.", "returned": "Los Gems reservados han sido devueltos a tu saldo disponible para retirar."}, "hi": {"back": "← वापस", "globalCrypto": "ग्लोबल क्रिप्टो वॉलेट", "buyGems": "क्रिप्टो से Gems खरीदें", "buyDesc": "चुनें कि आपको कितने Gems चाहिए। PAYME USD मूल्य की गणना करेगा और सुरक्षित CryptoBot भुगतान खोलेगा।", "oneGem": "1 Gem का मूल्य", "howMany": "कितने Gems?", "minPurchase": "न्यूनतम खरीद $0.50 है। Gems ऐप की आंतरिक इकाई है — 1 Gem, $1 नहीं है।", "gemsAmount": "GEMS की मात्रा", "enterGems": "Gems दर्ज करें", "loadingMin": "न्यूनतम लोड हो रहा है…", "paymentMethod": "भुगतान का तरीका", "cryptoCheckout": "CryptoBot चेकआउट", "continueCrypto": "CryptoBot के साथ जारी रखें", "secure": "🔒 आपका क्रिप्टो भुगतान CryptoBot द्वारा संभाला जाता है। CryptoBot द्वारा भुगतान की पुष्टि के बाद ही PAYME Gems जोड़ता है।", "depositHistory": "जमा इतिहास", "depositSub": "आपकी हाल की क्रिप्टो फंडिंग गतिविधि।", "loadingHistory": "इतिहास लोड हो रहा है…", "noDeposits": "अभी कोई जमा नहीं है।", "unableHistory": "जमा इतिहास लोड नहीं हो सका।", "paymentConfirmed": "भुगतान की पुष्टि हो गई", "gemsAdded": "आपके Gems PAYME वॉलेट में जोड़ दिए गए हैं।", "backWallet": "वॉलेट पर वापस जाएँ", "minimum": "न्यूनतम", "creating": "सुरक्षित इनवॉइस बनाया जा रहा है…", "opening": "CryptoBot खोला जा रहा है…", "couldNotInvoice": "इनवॉइस नहीं बनाया जा सका।", "noPaymentLink": "CryptoBot ने भुगतान लिंक नहीं दिया।", "unablePayment": "भुगतान शुरू नहीं हो सका।", "depositConfirmed": "जमा की पुष्टि हो गई", "credited": "Gems आपके जमा बैलेंस में जोड़ दिए गए हैं।", "reference": "रेफरेंस:", "cryptoUnavailable": "क्रिप्टो भुगतान उपलब्ध नहीं हैं।", "usdValue": "USD", "statusApproved": "स्वीकृत", "statusRejected": "अस्वीकृत", "statusPending": "लंबित", "minimumDeposit": "न्यूनतम जमा है", "unableLoadCrypto": "क्रिप्टो सेटिंग्स लोड नहीं हो सकीं।", "address": "पता", "requested": "अनुरोधित", "withdrawable": "निकासी के लिए उपलब्ध कमाई", "withdrawTitle": "अपने Gems निकालें", "withdrawDesc": "आपकी निकासी की मैन्युअल समीक्षा की जाती है। राशि और अपना USDT वॉलेट पता दर्ज करें, फिर स्वीकृति के लिए अनुरोध भेजें।", "usdtWithdrawal": "USDT निकासी", "onlyUsdt": "केवल USDT निकासी स्वीकार की जाती है।", "withdrawAmount": "निकासी की राशि", "enterWithdrawGems": "निकासी के लिए Gems दर्ज करें", "minWithdraw": "न्यूनतम निकासी है", "estimated": "अनुमानित भुगतान", "walletAddress": "USDT वॉलेट पता", "pasteAddress": "अपना USDT पता पेस्ट करें", "manualTransfer": "मैन्युअल ट्रांसफर", "requestWithdraw": "USDT निकासी का अनुरोध करें", "important": "महत्वपूर्ण:", "manualNotice": "PAYME निकासी की समीक्षा और भेजना मैन्युअल रूप से करता है। अपना USDT पता और नेटवर्क ध्यान से जाँचें। स्वीकृति के बाद मैन्युअल निकासी आने में 24 घंटे तक लग सकते हैं।", "latestWithdrawal": "नवीनतम निकासी", "latestPayout": "आपका सबसे हाल का भुगतान अनुरोध", "amount": "राशि", "usdt": "USDT", "pendingReview": "मैन्युअल समीक्षा लंबित है।", "pendingDesc": "स्वीकृति के बाद USDT भुगतान मैन्युअल रूप से भेजा जाएगा। मैन्युअल निकासी आने में 24 घंटे तक लग सकते हैं।", "withdrawSubmitted": "निकासी अनुरोध भेज दिया गया", "pendingApproval": "मैन्युअल स्वीकृति लंबित", "reserved": "आपका अनुरोध मैन्युअल स्वीकृति की प्रतीक्षा में है। समीक्षा के दौरान आपके Gems सुरक्षित रखे गए हैं।", "temporarilyLocked": "आपकी निकासी अस्थायी रूप से लॉक है।", "validAddress": "कृपया मान्य USDT वॉलेट पता दर्ज करें।", "moreGems": "और जोड़ें", "submitting": "अनुरोध भेजा जा रहा है…", "availableIn": "उपलब्ध होगा", "withdrawPending": "निकासी लंबित…", "requestFailed": "निकासी अनुरोध विफल हुआ।", "unableSubmit": "निकासी अनुरोध भेजा नहीं जा सका।", "cannotMore": "आप अपनी अर्जित Gems से अधिक नहीं निकाल सकते।", "approvedPayout": "भुगतान स्वीकृत है।", "approvedManual": "आपका USDT अनुरोध मैन्युअल प्रोसेसिंग के लिए स्वीकृत हो गया है। मैन्युअल निकासी में 24 घंटे तक लग सकते हैं।", "rejectedWithdraw": "निकासी अस्वीकृत है।", "returned": "आरक्षित Gems आपके निकासी योग्य बैलेंस में वापस कर दिए गए हैं।"}};
+  const staticMap = {"← Back": "back", "Manual USDT Payouts": "manualPayouts", "Withdraw your Gems": "withdrawTitle", "Your withdrawal is reviewed manually. Enter the amount and your USDT wallet address, then submit your request for approval.": "withdrawDesc", "Withdrawable earnings": "withdrawable", "USDT withdrawal": "usdtWithdrawal", "Only USDT withdrawals are accepted.": "onlyUsdt", "Withdrawal amount": "withdrawAmount", "Enter Gems to withdraw": "enterWithdrawGems", "Minimum withdrawal is 0.50 USDT.": "minWithdrawStatic", "Estimated payout": "estimated", "USDT wallet address": "walletAddress", "Paste your USDT address": "pasteAddress", "Manual transfer": "manualTransfer", "Request USDT Withdrawal": "requestWithdraw", "Important:": "important", "PAYME withdrawals are reviewed and sent manually. Please double-check your USDT address and network. Manual withdrawals may take up to 24 hours to arrive after approval.": "manualNotice", "Latest withdrawal": "latestWithdrawal", "Your most recent payout request": "latestPayout", "Amount": "amount", "USDT": "usdt", "Address": "address", "Requested": "requested", "Withdrawal request submitted": "withdrawSubmitted", "Your request is now pending manual approval. Your Gems have been reserved while the request is reviewed.": "reserved", "Back to Wallet": "backWallet"};
+  const lang = ['en','ru','es','hi'].includes(localStorage.getItem('paymeLanguage')) ? localStorage.getItem('paymeLanguage') : 'en';
+  window.paymeLanguage = lang;
+  dict.en.manualPayouts='Manual USDT Payouts'; dict.ru.manualPayouts='Ручные выплаты USDT'; dict.es.manualPayouts='Pagos manuales en USDT'; dict.hi.manualPayouts='मैन्युअल USDT भुगतान';
+  window.paymeT = function(key){ return (dict[window.paymeLanguage] && dict[window.paymeLanguage][key]) || dict.en[key] || key; };
+  document.documentElement.lang = lang;
+  function applyStatic(){
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    const nodes=[]; let n; while(n=walker.nextNode()) nodes.push(n);
+    nodes.forEach(node=>{ const raw=node.nodeValue.trim(); if(!raw)return; const key=staticMap[raw]; if(key){ node.nodeValue=node.nodeValue.replace(raw,window.paymeT(key)); } });
+    document.querySelectorAll('input[placeholder]').forEach(el=>{
+      const key=staticMap[el.getAttribute('placeholder')]; if(key) el.placeholder=window.paymeT(key);
+    });
+    // Targeted page labels ensure text split by <b> or other inline tags is translated too.
+    const set=(sel,key)=>{const el=document.querySelector(sel);if(el)el.textContent=window.paymeT(key);};
+    set('.back','back'); set('.eyebrow','manualPayouts'); set('.hero h1','withdrawTitle'); set('.hero p','withdrawDesc');
+    set('.balance small','withdrawable'); set('#withdrawCard .title','usdtWithdrawal'); set('#withdrawCard .sub','onlyUsdt');
+    set('label[for="gemsInput"]','withdrawAmount'); set('#gemsInput','enterWithdrawGems');
+    set('.usd-preview span:first-child','estimated'); set('label[for="addressInput"]','walletAddress'); set('#addressInput','pasteAddress');
+    set('.asset .right','manualTransfer'); set('#withdrawBtn','requestWithdraw');
+    const notice=document.querySelector('.notice'); if(notice)notice.innerHTML='<div>⏱️</div><div><b>'+window.paymeT('important')+'</b> '+window.paymeT('manualNotice')+'</div>';
+    set('#statusCard .title','latestWithdrawal'); set('#statusCard .sub','latestPayout');
+    const rows=document.querySelectorAll('#statusCard .row'); if(rows[0])rows[0].querySelector('span:first-child').textContent=window.paymeT('amount');if(rows[1])rows[1].querySelector('span:first-child').textContent=window.paymeT('usdt');if(rows[2])rows[2].querySelector('span:first-child').textContent=window.paymeT('address');if(rows[3])rows[3].querySelector('span:first-child').textContent=window.paymeT('requested');
+    const pm=document.querySelector('#pendingMessage'); if(pm)pm.innerHTML='⏳ <b>'+window.paymeT('pendingReview')+'</b> '+window.paymeT('pendingDesc');
+    const mh=document.querySelector('#minHint'); if(mh && !mh.classList.contains('show'))mh.textContent=window.paymeT('minWithdraw')+' 0.50 USDT.';
+    const modal=document.querySelector('#modal'); if(modal){const h=modal.querySelector('h3'),pp=modal.querySelector('p'),bt=modal.querySelector('.close');if(h)h.textContent=window.paymeT('withdrawSubmitted');if(pp)pp.innerHTML=window.paymeT('reserved');if(bt)bt.textContent=window.paymeT('backWallet');}
+
+  }
+  window.addEventListener('DOMContentLoaded',applyStatic);
+  if(document.readyState!=='loading') applyStatic();
+})();
 (function(){
   const tg = window.Telegram?.WebApp;
   if(tg){
-    try{tg.ready();tg.expand();if(tg.disableVerticalSwipes)tg.disableVerticalSwipes()}catch(e){}
+    try{
+      tg.ready();tg.expand();
+      if(tg.disableVerticalSwipes)tg.disableVerticalSwipes();
+      if(tg.BackButton){
+        tg.BackButton.show();
+        tg.BackButton.onClick(()=>{ window.location.href='/dashboard.html'; });
+      }
+    }catch(e){}
   }
 
   const $ = id => document.getElementById(id);
@@ -211,6 +255,14 @@
     $('usdBalance').textContent = money(balance * cfg.gemUsdRate) + ' USD value';
     $('usdPreview').textContent = money(gems * cfg.gemUsdRate) + ' USDT';
 
+    const hint = $('minHint');
+    if(gems > 0 && gems < cfg.minGems){
+      hint.textContent = `${window.paymeT('minWithdraw')} ${cfg.minGems.toLocaleString()} Gems (${money(cfg.minUsd)} USDT). ${window.paymeT('moreGems')} ${(cfg.minGems - gems).toLocaleString()} more Gems.`;
+      hint.classList.add('show');
+    }else{
+      hint.classList.remove('show');
+    }
+
     const address = $('addressInput').value.trim();
     const validAddress = address.length >= 20 && address.length <= 128 && !/\s/.test(address);
     const ok =
@@ -224,9 +276,9 @@
     $('withdrawBtn').disabled = !ok;
 
     if(nextAllowedAt > Date.now()){
-      $('withdrawBtn').textContent = 'Available in ' + countdown(nextAllowedAt - Date.now());
+      $('withdrawBtn').textContent = window.paymeT('availableIn')+' '+countdown(nextAllowedAt - Date.now());
     }else{
-      $('withdrawBtn').textContent = loading ? 'Submitting request…' : 'Request USDT Withdrawal';
+      $('withdrawBtn').textContent = loading ? window.paymeT('submitting') : window.paymeT('requestWithdraw');
     }
   }
 
@@ -259,20 +311,20 @@
 
     if(status === 'Approved'){
       $('pendingMessage').innerHTML =
-        '✅ <b>Approved for payout.</b> Your USDT request has been approved for manual processing. Manual withdrawals can take up to <b>24 hours</b> to arrive.';
+        '✅ <b>'+window.paymeT('approvedPayout')+'</b> '+window.paymeT('approvedManual');
     }else if(status === 'Rejected'){
       $('pendingMessage').innerHTML =
-        '❌ <b>Withdrawal rejected.</b> The reserved Gems have been returned to your withdrawable balance.';
+        '❌ <b>'+window.paymeT('rejectedWithdraw')+'</b> '+window.paymeT('returned');
     }else{
       $('pendingMessage').innerHTML =
-        '⏳ <b>Pending manual review.</b> Once approved, the USDT payout will be sent manually. Manual withdrawals can take up to <b>24 hours</b> to arrive.';
+        '⏳ <b>'+window.paymeT('pendingReview')+'</b> '+window.paymeT('pendingDesc');
     }
 
     // A pending request should not allow a second request even if the
     // cooldown timestamp is not yet available on a newly opened page.
     if(status === 'Pending'){
       $('withdrawBtn').disabled = true;
-      $('withdrawBtn').textContent = 'Withdrawal Pending…';
+      $('withdrawBtn').textContent = window.paymeT('withdrawPending');
     }
   }
 
@@ -363,22 +415,22 @@
     const usd = gems * cfg.gemUsdRate;
 
     if(nextAllowedAt > Date.now()){
-      alert('Your withdrawal is temporarily locked.');
+      alert(window.paymeT('temporarilyLocked'));
       return;
     }
 
     if(!Number.isInteger(gems) || gems < cfg.minGems){
-      alert(`Minimum withdrawal is ${cfg.minGems.toLocaleString()} Gems (${money(cfg.minUsd)}).`);
+      alert(`${window.paymeT('minWithdraw')} ${cfg.minGems.toLocaleString()} Gems (${money(cfg.minUsd)}).`);
       return;
     }
 
     if(gems > balance){
-      alert('You cannot withdraw more than your earned Gems.');
+      alert(window.paymeT('cannotMore'));
       return;
     }
 
     if(address.length < 20 || address.length > 128 || /\s/.test(address)){
-      alert('Please enter a valid USDT wallet address.');
+      alert(window.paymeT('validAddress'));
       return;
     }
 
@@ -401,7 +453,7 @@
 
       if(!r.ok || !d.success){
         if(Number(d.nextAllowedAt) > Date.now()) nextAllowedAt = Number(d.nextAllowedAt);
-        throw new Error(d.message || 'Withdrawal request failed.');
+        throw new Error(d.message || window.paymeT('requestFailed'));
       }
 
       balance = Number(d.withdrawableBalance ?? balance - gems);
@@ -409,7 +461,7 @@
 
       $('sentValue').textContent =
         `💎 ${gems.toLocaleString()} Gems → ${money(d.usd)} USDT\n` +
-        `Status: PENDING MANUAL APPROVAL`;
+        `Status: ${window.paymeT('pendingApproval').toUpperCase()}`;
 
       $('modal').classList.add('show');
       $('gemsInput').value = '';
@@ -417,7 +469,7 @@
 
       await refreshStatus();
     }catch(e){
-      alert(e.message || 'Unable to submit withdrawal request.');
+      alert(e.message || window.paymeT('unableSubmit'));
     }finally{
       loading = false;
       renderForm();
@@ -433,5 +485,7 @@
 </script>
 </body>
 </html>
+
+
 
 

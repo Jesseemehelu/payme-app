@@ -95,7 +95,7 @@ function sharedNavMarkup(requestPath) {
   <a href="/dashboard.html" class="${isDashboard ? 'active' : ''}">
     <span class="payme-nav-icon">🏠</span><span>Home</span>
   </a>
-  <a href="/earn" class="${isEarn ? 'active' : ''}">
+  <a href="/earn.html" class="${isEarn ? 'active' : ''}">
     <span class="payme-nav-icon">💎</span><span>Earn</span>
   </a>
   <a href="/dashboard.html#referrals">
@@ -682,6 +682,11 @@ function mapUser(row) {
 
     phone:
       row.phone || '',
+
+    language:
+      ['en','ru','es','hi'].includes(String(daily.language || ''))
+        ? String(daily.language)
+        : 'en',
 
     password:
       row.password || '',
@@ -3141,6 +3146,11 @@ function sanitizeUser(
     username:
       user.username,
 
+    language:
+      ['en','ru','es','hi'].includes(String(user.language || user.dailyReward?.language || ''))
+        ? String(user.language || user.dailyReward?.language)
+        : 'en',
+
     balance:
       number(
         user.balance
@@ -3531,8 +3541,21 @@ app.post(
 
       let {
         initData,
-        referralCode
+        referralCode,
+        language
       } = req.body || {};
+
+      const selectedLanguage =
+        ['en','ru','es','hi'].includes(String(language || ''))
+          ? String(language)
+          : '';
+
+      if (!selectedLanguage) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please choose your language before continuing.'
+        });
+      }
 
       // --------------------------------------------------
       // LOCAL TESTING BYPASS (Termux / Non-Production)
@@ -3572,7 +3595,8 @@ app.post(
             dailyReward: {
               currentDay: 1,
               lastClaimTimestamp: 0,
-              claimedDays: []
+              claimedDays: [],
+              language: selectedLanguage
             }
           };
 
@@ -3580,6 +3604,13 @@ app.post(
           await ensureWelcomeBonus(createdUser);
           user = await getUserById(createdUser.id);
         }
+
+        // Keep the selected language in the existing account too.
+        user.dailyReward = user.dailyReward && typeof user.dailyReward === 'object'
+          ? user.dailyReward
+          : {};
+        user.dailyReward.language = selectedLanguage;
+        await updateUser(user);
 
         // User is already loaded; no transaction history is needed for authentication.
         const sessionToken = createSessionToken(user);
@@ -3851,6 +3882,9 @@ app.post(
             claimedDays:
               [],
 
+            language:
+              selectedLanguage,
+
             luckTickets:
               0,
 
@@ -3979,6 +4013,16 @@ app.post(
       else {
 
         let shouldUpdate = false;
+
+        if (!['en','ru','es','hi'].includes(String(user.language || user.dailyReward?.language || ''))) {
+          user.dailyReward = user.dailyReward && typeof user.dailyReward === 'object' ? user.dailyReward : {};
+          user.dailyReward.language = selectedLanguage;
+          shouldUpdate = true;
+        } else if (String(user.language || user.dailyReward?.language) !== selectedLanguage) {
+          user.dailyReward = user.dailyReward && typeof user.dailyReward === 'object' ? user.dailyReward : {};
+          user.dailyReward.language = selectedLanguage;
+          shouldUpdate = true;
+        }
 
         if (
           String(
@@ -9386,6 +9430,7 @@ app.listen(
   }
 
 );
+
 
 
 

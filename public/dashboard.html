@@ -2584,7 +2584,7 @@ transition-duration: 0.01ms !important;
 
 <ul class="desktop-nav">
 <li><a href="/dashboard.html" class="active">Dashboard</a></li>
-<li><a href="/earn">Earn</a></li>
+<li><a href="/earn.html">Earn</a></li>
 <li><a href="#referrals">Referrals</a></li>
 <li><a href="/leaderboard.html">Leaderboard</a></li>
 </ul>
@@ -3056,7 +3056,7 @@ Awesome ✨
   <a href="/dashboard.html" class="nav-item active">
     <span class="nav-icon">⌂</span><span>Home</span>
   </a>
-  <a href="/earn" class="nav-item">
+  <a href="/earn.html" class="nav-item">
     <span class="nav-icon">◉</span><span>Earn</span>
   </a>
   <a href="/dashboard.html#referrals" class="nav-item">
@@ -3445,7 +3445,7 @@ let pendingTelegramShareUrl = "";
 
 function shareToTelegram(){
   const link = getReferralLink();
-  const message = 'Join me on PAYME and claim your bonus! 🎁 Use my link to get started:';
+  const message = dashboardT('Join me on PAYME and claim your bonus! 🎁 Use my link to get started:');
   pendingTelegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(message)}`;
   const textEl = document.getElementById("telegramPreviewText");
   const linkEl = document.getElementById("telegramPreviewLink");
@@ -3473,7 +3473,7 @@ function shareToWhatsApp(){
 const link = getReferralLink();
 
 const text = encodeURIComponent(
-`Join me on PAYME and claim your bonus! Click here: ${link}`
+`${dashboardT('Join me on PAYME and claim your bonus! Click here:')} ${link}`
 );
 
 const whatsappUrl =
@@ -3814,6 +3814,8 @@ if(!data.success) return;
 const user =
 data.user;
 
+applyDashboardLanguage(user.language || user.dailyReward?.language || localStorage.getItem("paymeLanguage") || "en");
+
 const resolvedName =
     user.fullName ||
     user.username ||
@@ -3953,7 +3955,7 @@ const dashboardTutorialSteps = [
         position:"bottom"
     },
     {
-        target:'a[href="/earn"]',
+        target:'a[href="/earn.html"]',
         icon:"💎",
         title:"Earn",
         text:"Tap Earn to discover available earning tasks and opportunities.",
@@ -4057,8 +4059,8 @@ function renderDashboardTutorialStep(){
 
     if(stepEl) stepEl.textContent = `${dashboardTutorialIndex+1} / ${total}`;
     if(iconEl) iconEl.textContent = step.icon;
-    if(titleEl) titleEl.textContent = step.title;
-    if(textEl) textEl.textContent = step.text;
+    if(titleEl) titleEl.textContent = dashboardT(step.title);
+    if(textEl) textEl.textContent = dashboardT(step.text);
     if(progressEl) progressEl.style.setProperty("--tutorial-progress",`${((dashboardTutorialIndex+1)/total)*100}%`);
     if(nextEl) nextEl.textContent = dashboardTutorialIndex === total-1 ? "Finish ✓" : "Next →";
 
@@ -4242,27 +4244,32 @@ for (let day = 1; day <= 7; day++) {
   const isDay7 = day === 7;
   const card = document.createElement("div");
   card.className = `reward-card ${isDay7 ? "day-7-card" : ""}`;
-  let statusText = "LOCKED";
+  let statusKey = "LOCKED";
+  let statusText = dashboardT(statusKey);
 
   /* 1. ALL PREVIOUS DAYS (COMPLETED) */
   if (day < currentDay) {
     card.classList.add("claimed");
-    statusText = "COMPLETED ✓";
+    statusKey = "COMPLETED ✓";
+    statusText = dashboardT(statusKey);
   } 
   /* 2. CURRENT DAY WHEN READY TO CLAIM */
   else if (day === currentDay && canClaim) {
     card.classList.add("claimable");
-    statusText = "CLAIM NOW";
+    statusKey = "CLAIM NOW";
+    statusText = dashboardT(statusKey);
   } 
   /* 3. CURRENT DAY WHEN ON 24-HOUR COOLDOWN */
   else if (day === currentDay && !canClaim) {
     card.classList.add("locked");
-    statusText = "NEXT UP";
+    statusKey = "NEXT UP";
+    statusText = dashboardT(statusKey);
   } 
   /* 4. ALL FUTURE DAYS */
   else {
     card.classList.add("locked");
-    statusText = "LOCKED";
+    statusKey = "LOCKED";
+    statusText = dashboardT(statusKey);
   }
 
 
@@ -4275,11 +4282,11 @@ card.innerHTML = `
 <div>
 
 <div class="day-num">
-DAY 7 • SPECIAL BONUS
+${dashboardT("DAY 7 • SPECIAL BONUS")}
 </div>
 
 <div class="day-val">
-🎟️ 200 LUCK TICKETS
+${dashboardT("🎟️ 200 LUCK TICKETS")}
 </div>
 
 </div>
@@ -4288,8 +4295,8 @@ DAY 7 • SPECIAL BONUS
 
 <button class="day-status daily-claim-button"
         type="button"
-        ${statusText !== "CLAIM NOW" ? "disabled" : ""}
-        ${statusText === "CLAIM NOW" ? `onclick="claimDailyReward(${day}, this)"` : ""}>
+        ${statusKey !== "CLAIM NOW" ? "disabled" : ""}
+        ${statusKey === "CLAIM NOW" ? `onclick="claimDailyReward(${day}, this)"` : ""}>
 ${statusText}
 </button>
 
@@ -4302,7 +4309,7 @@ ${statusText}
 card.innerHTML = `
 
 <div class="day-num">
-DAY ${day}
+${dashboardT(`DAY ${day}`)}
 </div>
 
 <div class="day-val">
@@ -4311,8 +4318,8 @@ DAY ${day}
 
 <button class="day-status daily-claim-button"
         type="button"
-        ${statusText !== "CLAIM NOW" ? "disabled" : ""}
-        ${statusText === "CLAIM NOW" ? `onclick="claimDailyReward(${day}, this)"` : ""}>
+        ${statusKey !== "CLAIM NOW" ? "disabled" : ""}
+        ${statusKey === "CLAIM NOW" ? `onclick="claimDailyReward(${day}, this)"` : ""}>
 ${statusText}
 </button>
 
@@ -4415,8 +4422,8 @@ document.getElementById(
 
 showClaimSuccess(
 "+ 💎 10",
-"Daily reward claimed!",
-"Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!"
+dashboardT("Daily reward claimed!"),
+dashboardT("Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!")
 );
 
 }
@@ -4425,7 +4432,7 @@ showClaimSuccess(
 
 alert(
 result.message ||
-"Unable to claim reward. Please try again."
+dashboardT("Unable to claim reward. Please try again.")
 );
 
 }
@@ -4438,7 +4445,7 @@ e
 );
 
 alert(
-"Network error. Could not claim reward."
+dashboardT("Network error. Could not claim reward.")
 );
 
 }finally{
@@ -4591,8 +4598,7 @@ button.classList.add(
 "copied"
 );
 
-button.innerText =
-"✓ Copied";
+button.innerText = dashboardT("✓ Copied");
 
 setTimeout(()=>{
 
@@ -4600,8 +4606,7 @@ button.classList.remove(
 "copied"
 );
 
-button.innerText =
-"Copy Link";
+button.innerText = dashboardT("Copy Link");
 
 },1800);
 
@@ -4671,7 +4676,7 @@ done();
 }catch(e){
 
 alert(
-"Unable to copy link."
+dashboardT("Unable to copy link.")
 );
 
 }
@@ -4766,8 +4771,7 @@ button.classList.add(
 "copied"
 );
 
-button.innerText =
-"✓ Copied!";
+button.innerText = dashboardT("✓ Copied!");
 
 setTimeout(()=>{
 
@@ -4775,8 +4779,7 @@ button.classList.remove(
 "copied"
 );
 
-button.innerText =
-"Copy Invite Code";
+button.innerText = dashboardT("Copy Invite Code");
 
 },2000);
 
@@ -4784,7 +4787,7 @@ button.innerText =
 .catch(
 () =>
 alert(
-"Unable to copy code."
+dashboardT("Unable to copy code.")
 )
 );
 
@@ -4798,8 +4801,7 @@ button.classList.add(
 "copied"
 );
 
-button.innerText =
-"✓ Copied!";
+button.innerText = dashboardT("✓ Copied!");
 
 setTimeout(()=>{
 
@@ -4807,8 +4809,7 @@ button.classList.remove(
 "copied"
 );
 
-button.innerText =
-"Copy Invite Code";
+button.innerText = dashboardT("Copy Invite Code");
 
 },2000);
 
@@ -4917,7 +4918,7 @@ await res.json();
 if(data.success){
 
 alert(
-"Free spin granted! Redirecting to the Spin Game..."
+dashboardT("Free spin granted! Redirecting to the Spin Game...")
 );
 
 document.getElementById(
@@ -4944,7 +4945,7 @@ data.message
 }catch(err){
 
 alert(
-"Verification failed. Please try again."
+dashboardT("Verification failed. Please try again.")
 );
 
 }
@@ -5088,7 +5089,7 @@ function txTitle(tx){
     return "Tap Rush";
   }
 
-  return raw;
+  return dashboardT(raw);
 }
 
 function txDate(tx){
@@ -5096,7 +5097,7 @@ function txDate(tx){
   if(!raw) return "";
   const d = new Date(raw);
   if(Number.isNaN(d.getTime())) return String(raw);
-  return d.toLocaleString(undefined,{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
+  return d.toLocaleString(dashboardLocale(),{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
 }
 
 function renderTransactionRows(serverRows){
@@ -5146,7 +5147,7 @@ function renderTransactionRows(serverRows){
     const title = txTitle(tx);
     const icon = credit ? "↗" : "↘";
     const bank = tx.bank || (txIsTapRush(tx) ? "Tap Rush" : "");
-    const status = tx.status ? String(tx.status) : "";
+    const status = tx.status ? dashboardT(String(tx.status)) : "";
     const date = txDate(tx);
     const sign = credit ? "+" : "-";
     const badge = txIsTapRush(tx) ? `<span class="tap-tx-badge">TAP RUSH</span>` : "";
@@ -5303,10 +5304,44 @@ window.addEventListener("pageshow", refreshDashboardOnReturn);
 }
 );
 
+
+/* PAYME GLOBAL LANGUAGE SYSTEM */
+const PAYME_DASH_I18N={"ru":{"Dashboard":"Панель","Earn":"Заработок","Referrals":"Рефералы","Leaderboard":"Лидерборд","WELCOME BACK":"С ВОЗВРАЩЕНИЕМ","Hello,":"Привет,","Manage your wallet, earnings, deposits and referrals.":"Управляйте кошельком, доходами, депозитами и рефералами.","BALANCE":"БАЛАНС","Current Earning Balance":"Текущий баланс доходов","Verified":"Проверено","Available earnings for withdrawal":"Доступно для вывода","TOTAL EARNINGS":"ОБЩИЙ ДОХОД","DEPOSIT BALANCE":"БАЛАНС ДЕПОЗИТА","Deposit":"Пополнить","Withdraw":"Вывести","View Transactions":"История операций","Invite & Earn":"Приглашай и зарабатывай","Share your link, get paid per friend":"Делитесь ссылкой и получайте за каждого друга","Per Invite":"За приглашение","Share link":"Поделиться ссылкой","Friend joins":"Друг присоединился","You earn":"Вы получаете","YOUR INVITE CODE":"ВАШ КОД ПРИГЛАШЕНИЯ","Copy Invite Code":"Копировать код","Copy Link":"Копировать ссылку","Active":"Активные","Ref Earned":"Доход с рефералов","COMMUNITY PAYOUTS":"ВЫПЛАТЫ СООБЩЕСТВУ","Total Paid Out":"Всего выплачено","to PAYME users this week":"пользователям PAYME на этой неделе","Live payouts updating in real time":"Выплаты обновляются в реальном времени","🔥 Weekly Challenge Live":"🔥 Еженедельный челлендж","Top Earners This Week":"Лидеры недели","View Leaderboard":"Открыть лидерборд","COMING SOON":"СКОРО","More ways to earn are coming.":"Скоро появится больше способов заработка.","Keep checking your dashboard for new earning opportunities, tasks and games.":"Проверяйте панель — скоро появятся новые задания и игры.","Try your":"Испытай","Luck":"удачу","Daily Rewards":"Ежедневные награды","Claim every day and unlock your 7-day bonus.":"Забирайте награду каждый день и открывайте 7-дневный бонус.","Next reward available in:":"Следующая награда через:","WEEK COMPLETE!":"НЕДЕЛЯ ЗАВЕРШЕНА!","LUCK TICKETS WON":"ПОЛУЧЕНЫ БИЛЕТЫ УДАЧИ","USE NOW →":"ИСПОЛЬЗОВАТЬ →","Maybe Later":"Позже","Reward claimed!":"Награда получена!","Awesome ✨":"Отлично ✨","Skip":"Пропустить","Next →":"Далее →","Finish ✓":"Готово ✓","Home":"Главная","Refer":"Пригласить","Ranking":"Рейтинг","Share preview":"Предпросмотр","Now":"Сейчас","Cancel":"Отмена","Open Telegram":"Открыть Telegram","Recent Transactions":"Последние операции","Loading...":"Загрузка...","WELCOME BONUS":"ПРИВЕТСТВЕННЫЙ БОНУС","Welcome Bonus Credited!":"Приветственный бонус зачислен!","SPECIAL WELCOME REWARD":"СПЕЦИАЛЬНАЯ НАГРАДА","FREE":"БЕСПЛАТНО","SPIN":"СПИН","COUPON":"КУПОН","Join Telegram Channel":"Открыть канал Telegram","I Have Joined, Claim Spin":"Я присоединился, получить спин","Add money to your deposit balance here when you want to fund your account.":"Пополняйте баланс депозита здесь, когда хотите внести средства.","Use Deposit whenever you want to add funds to your PAYME deposit balance.":"Используйте «Пополнить», чтобы добавить средства на депозитный баланс PAYME.","When your earnings reach the minimum withdrawal amount, use Withdraw to request your payout.":"Когда доход достигнет минимума, используйте «Вывести» для запроса выплаты.","Tap Earn to discover available earning tasks and opportunities.":"Откройте «Заработок», чтобы найти доступные задания.","Use Refer to invite friends and track your referral rewards.":"Используйте «Пригласить», чтобы приглашать друзей и отслеживать награды.","Ranking shows the leaderboard so you can see how you compare with other PAYME users.":"«Рейтинг» показывает ваше место среди пользователей PAYME.","See who's leading, find your own rank, and check what it takes to win this week's referral prizes.":"Смотрите лидеров, свой рейтинг и условия победы в еженедельном реферальном конкурсе.","Amazing! You've completed your 7-day streak.":"Отлично! Вы завершили 7-дневную серию.","200 Luck Tickets have been added to your Luck Ticket balance.":"200 билетов удачи добавлены на ваш баланс.","We've added a 💎 10 welcome reward directly to your wallet to get you started.":"Мы добавили 💎10 приветственной награды прямо в ваш кошелёк."},"es":{"Dashboard":"Panel","Earn":"Ganar","Referrals":"Referidos","Leaderboard":"Clasificación","WELCOME BACK":"BIENVENIDO DE NUEVO","Hello,":"Hola,","Manage your wallet, earnings, deposits and referrals.":"Gestiona tu billetera, ganancias, depósitos y referidos.","BALANCE":"SALDO","Current Earning Balance":"Saldo actual de ganancias","Verified":"Verificado","Available earnings for withdrawal":"Ganancias disponibles para retirar","TOTAL EARNINGS":"GANANCIAS TOTALES","DEPOSIT BALANCE":"SALDO DE DEPÓSITO","Deposit":"Depositar","Withdraw":"Retirar","View Transactions":"Ver transacciones","Invite & Earn":"Invita y gana","Share your link, get paid per friend":"Comparte tu enlace y cobra por cada amigo","Per Invite":"Por invitación","Share link":"Compartir enlace","Friend joins":"Se une un amigo","You earn":"Tú ganas","YOUR INVITE CODE":"TU CÓDIGO DE INVITACIÓN","Copy Invite Code":"Copiar código","Copy Link":"Copiar enlace","Active":"Activos","Ref Earned":"Ganado por referidos","COMMUNITY PAYOUTS":"PAGOS A LA COMUNIDAD","Total Paid Out":"Total pagado","to PAYME users this week":"a usuarios de PAYME esta semana","Live payouts updating in real time":"Pagos actualizados en tiempo real","🔥 Weekly Challenge Live":"🔥 Desafío semanal activo","Top Earners This Week":"Mayores ganancias de la semana","View Leaderboard":"Ver clasificación","COMING SOON":"PRÓXIMAMENTE","More ways to earn are coming.":"Llegan más formas de ganar.","Keep checking your dashboard for new earning opportunities, tasks and games.":"Revisa tu panel para nuevas oportunidades, tareas y juegos.","Try your":"Prueba tu","Luck":"suerte","Daily Rewards":"Recompensas diarias","Claim every day and unlock your 7-day bonus.":"Reclama cada día y desbloquea tu bono de 7 días.","Next reward available in:":"Próxima recompensa en:","WEEK COMPLETE!":"¡SEMANA COMPLETA!","LUCK TICKETS WON":"BOLETOS DE SUERTE GANADOS","USE NOW →":"USAR AHORA →","Maybe Later":"Quizás después","Reward claimed!":"¡Recompensa reclamada!","Awesome ✨":"¡Genial! ✨","Skip":"Omitir","Next →":"Siguiente →","Finish ✓":"Terminar ✓","Home":"Inicio","Refer":"Referir","Ranking":"Clasificación","Share preview":"Vista previa","Now":"Ahora","Cancel":"Cancelar","Open Telegram":"Abrir Telegram","Recent Transactions":"Transacciones recientes","Loading...":"Cargando...","WELCOME BONUS":"BONO DE BIENVENIDA","Welcome Bonus Credited!":"¡Bono de bienvenida acreditado!","SPECIAL WELCOME REWARD":"RECOMPENSA ESPECIAL","FREE":"GRATIS","SPIN":"GIRO","COUPON":"CUPÓN","Join Telegram Channel":"Unirse al canal de Telegram","I Have Joined, Claim Spin":"Ya me uní, reclamar giro","Add money to your deposit balance here when you want to fund your account.":"Añade dinero a tu saldo de depósito cuando quieras financiar tu cuenta.","Use Deposit whenever you want to add funds to your PAYME deposit balance.":"Usa «Depositar» para añadir fondos a tu saldo de depósito.","When your earnings reach the minimum withdrawal amount, use Withdraw to request your payout.":"Cuando alcances el mínimo, usa «Retirar» para solicitar tu pago.","Tap Earn to discover available earning tasks and opportunities.":"Entra en «Ganar» para descubrir tareas disponibles.","Use Refer to invite friends and track your referral rewards.":"Usa «Referir» para invitar amigos y seguir tus recompensas.","Ranking shows the leaderboard so you can see how you compare with other PAYME users.":"La «Clasificación» muestra tu posición frente a otros usuarios.","See who's leading, find your own rank, and check what it takes to win this week's referral prizes.":"Mira quién lidera, tu posición y cómo ganar los premios semanales.","Amazing! You've completed your 7-day streak.":"¡Increíble! Completaste tu racha de 7 días.","200 Luck Tickets have been added to your Luck Ticket balance.":"Se añadieron 200 boletos de suerte a tu saldo.","We've added a 💎 10 welcome reward directly to your wallet to get you started.":"Añadimos 💎10 de bienvenida directamente a tu billetera."},"hi":{"Dashboard":"डैशबोर्ड","Earn":"कमाएँ","Referrals":"रेफरल","Leaderboard":"लीडरबोर्ड","WELCOME BACK":"वापसी पर स्वागत है","Hello,":"नमस्ते,","Manage your wallet, earnings, deposits and referrals.":"अपने वॉलेट, कमाई, जमा और रेफरल प्रबंधित करें।","BALANCE":"बैलेंस","Current Earning Balance":"वर्तमान कमाई बैलेंस","Verified":"सत्यापित","Available earnings for withdrawal":"निकासी के लिए उपलब्ध कमाई","TOTAL EARNINGS":"कुल कमाई","DEPOSIT BALANCE":"डिपॉज़िट बैलेंस","Deposit":"जमा करें","Withdraw":"निकासी","View Transactions":"लेन-देन देखें","Invite & Earn":"आमंत्रित करें और कमाएँ","Share your link, get paid per friend":"लिंक साझा करें और हर दोस्त पर कमाएँ","Per Invite":"प्रति आमंत्रण","Share link":"लिंक साझा करें","Friend joins":"दोस्त जुड़ता है","You earn":"आप कमाते हैं","YOUR INVITE CODE":"आपका आमंत्रण कोड","Copy Invite Code":"कोड कॉपी करें","Copy Link":"लिंक कॉपी करें","Active":"सक्रिय","Ref Earned":"रेफरल कमाई","COMMUNITY PAYOUTS":"कम्युनिटी भुगतान","Total Paid Out":"कुल भुगतान","to PAYME users this week":"इस सप्ताह PAYME यूज़र्स को","Live payouts updating in real time":"भुगतान रियल टाइम में अपडेट हो रहे हैं","🔥 Weekly Challenge Live":"🔥 साप्ताहिक चैलेंज लाइव","Top Earners This Week":"इस सप्ताह के टॉप कमाने वाले","View Leaderboard":"लीडरबोर्ड देखें","COMING SOON":"जल्द आ रहा है","More ways to earn are coming.":"कमाई के और तरीके जल्द आ रहे हैं।","Keep checking your dashboard for new earning opportunities, tasks and games.":"नई कमाई, टास्क और गेम्स के लिए डैशबोर्ड देखते रहें।","Try your":"अपनी","Luck":"किस्मत आज़माएँ","Daily Rewards":"दैनिक रिवॉर्ड","Claim every day and unlock your 7-day bonus.":"हर दिन रिवॉर्ड लें और 7-दिन का बोनस अनलॉक करें।","Next reward available in:":"अगला रिवॉर्ड उपलब्ध होगा:","WEEK COMPLETE!":"सप्ताह पूरा!","LUCK TICKETS WON":"लक टिकट जीते","USE NOW →":"अभी उपयोग करें →","Maybe Later":"बाद में","Reward claimed!":"रिवॉर्ड मिल गया!","Awesome ✨":"शानदार ✨","Skip":"छोड़ें","Next →":"अगला →","Finish ✓":"समाप्त ✓","Home":"होम","Refer":"रेफर","Ranking":"रैंकिंग","Share preview":"प्रीव्यू","Now":"अभी","Cancel":"रद्द करें","Open Telegram":"Telegram खोलें","Recent Transactions":"हाल के लेन-देन","Loading...":"लोड हो रहा है...","WELCOME BONUS":"स्वागत बोनस","Welcome Bonus Credited!":"स्वागत बोनस जोड़ दिया गया!","SPECIAL WELCOME REWARD":"विशेष स्वागत रिवॉर्ड","FREE":"मुफ़्त","SPIN":"स्पिन","COUPON":"कूपन","Join Telegram Channel":"Telegram चैनल से जुड़ें","I Have Joined, Claim Spin":"मैं जुड़ चुका हूँ, स्पिन लें","Add money to your deposit balance here when you want to fund your account.":"अकाउंट में पैसे जमा करने के लिए अपना डिपॉज़िट बैलेंस यहाँ बढ़ाएँ।","Use Deposit whenever you want to add funds to your PAYME deposit balance.":"PAYME डिपॉज़िट बैलेंस में पैसे जोड़ने के लिए «जमा करें» चुनें।","When your earnings reach the minimum withdrawal amount, use Withdraw to request your payout.":"कमाई न्यूनतम राशि तक पहुँचने पर भुगतान माँगने के लिए «निकासी» चुनें।","Tap Earn to discover available earning tasks and opportunities.":"उपलब्ध कमाई के टास्क देखने के लिए «कमाएँ» चुनें।","Use Refer to invite friends and track your referral rewards.":"दोस्तों को आमंत्रित करने के लिए «रेफर» चुनें।","Ranking shows the leaderboard so you can see how you compare with other PAYME users.":"«रैंकिंग» अन्य PAYME यूज़र्स के मुकाबले आपका स्थान दिखाती है।","See who's leading, find your own rank, and check what it takes to win this week's referral prizes.":"लीडर्स, अपना रैंक और साप्ताहिक रेफरल पुरस्कार जीतने की जानकारी देखें।","Amazing! You've completed your 7-day streak.":"बहुत बढ़िया! आपने 7-दिन की स्ट्रीक पूरी कर ली।","200 Luck Tickets have been added to your Luck Ticket balance.":"आपके लक टिकट बैलेंस में 200 टिकट जोड़े गए हैं.","We've added a 💎 10 welcome reward directly to your wallet to get you started.":"शुरुआत के लिए 💎10 का स्वागत रिवॉर्ड सीधे आपके वॉलेट में जोड़ा गया है."}};
+const PAYME_DASH_EXTRA_I18N={"ru":{"Support":"Поддержка","Hide balance":"Скрыть баланс","Show balance":"Показать баланс","Loading user name":"Загрузка имени пользователя","Loading balance":"Загрузка баланса","Loading total earnings":"Загрузка общего дохода","Loading deposit balance":"Загрузка баланса депозита","Share referral link on Telegram":"Поделиться реферальной ссылкой в Telegram","Share referral link on WhatsApp":"Поделиться реферальной ссылкой в WhatsApp","Total payouts this week":"Общие выплаты за эту неделю","Play Lucky number game":"Играть в игру «Счастливое число»","Main navigation":"Основная навигация","Close":"Закрыть","DAY 7 • SPECIAL BONUS":"ДЕНЬ 7 • СПЕЦИАЛЬНЫЙ БОНУС","🎟️ 200 LUCK TICKETS":"🎟️ 200 БИЛЕТОВ УДАЧИ","LOCKED":"ЗАБЛОКИРОВАНО","COMPLETED ✓":"ВЫПОЛНЕНО ✓","CLAIM NOW":"ПОЛУЧИТЬ","NEXT UP":"СЛЕДУЮЩИЙ","No recent transactions found.":"Недавних операций нет.","Failed to load transactions. Please try again.":"Не удалось загрузить операции. Попробуйте ещё раз.","Unable to copy link.":"Не удалось скопировать ссылку.","Unable to copy code.":"Не удалось скопировать код.","✓ Copied":"✓ Скопировано","✓ Copied!":"✓ Скопировано!","Daily reward claimed!":"Ежедневная награда получена!","Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!":"Награда 💎10 добавлена на ваш баланс. Продолжайте серию и возвращайтесь завтра!","Unable to claim reward. Please try again.":"Не удалось получить награду. Попробуйте ещё раз.","Network error. Could not claim reward.":"Ошибка сети. Не удалось получить награду.","Free spin granted! Redirecting to the Spin Game...":"Бесплатный спин получен! Переходим к игре Spin...","Verification failed. Please try again.":"Проверка не удалась. Попробуйте ещё раз.","Telegram Join Reward":"Награда за вступление в Telegram","Telegram Advertising Refund":"Возврат за рекламу в Telegram","Telegram Advertising":"Реклама в Telegram","Weekly Referral — 1st Place":"Еженедельный реферальный приз — 1-е место","Weekly Referral — 2nd Place":"Еженедельный реферальный приз — 2-е место","Weekly Referral — 3rd Place":"Еженедельный реферальный приз — 3-е место","Weekly Referral Prize":"Еженедельный реферальный приз","Tap Rush — 1st Place Prize":"Tap Rush — приз за 1-е место","Tap Rush — 2nd Place Prize":"Tap Rush — приз за 2-е место","Tap Rush — 3rd Place Prize":"Tap Rush — приз за 3-е место","Tap Rush Contest Prize":"Приз конкурса Tap Rush","Tap Rush Entry Fee":"Входной взнос Tap Rush","Tap Rush Winnings":"Выигрыш Tap Rush","Tap Rush":"Tap Rush","Transaction":"Операция","completed":"выполнено","pending":"в ожидании","failed":"ошибка","Loading transactions…":"Загрузка операций…","Join me on PAYME and claim your bonus! 🎁 Use my link to get started:":"Присоединяйтесь ко мне в PAYME и получите бонус! 🎁 Используйте мою ссылку, чтобы начать:","Join me on PAYME and claim your bonus! Click here:":"Присоединяйтесь ко мне в PAYME и получите бонус! Нажмите здесь:","Earn rewards, invite friends and play games.":"Получайте награды, приглашайте друзей и играйте.","Tap the gift to reveal your surprise ✨":"Нажмите на подарок, чтобы открыть сюрприз ✨","You've unlocked a special reward. Join our Telegram channel to receive":"Вы разблокировали специальную награду. Вступите в наш Telegram-канал, чтобы получить","1 FREE SPIN":"1 БЕСПЛАТНЫЙ СПИН","Join the channel to claim your free spin":"Вступите в канал, чтобы получить бесплатный спин","Your free spin will be verified before you enter the game.":"Ваш бесплатный спин будет проверен перед входом в игру.","Your daily reward has been added to your balance.\nKeep your streak going tomorrow!":"Ежедневная награда добавлена на ваш баланс.\nПродолжайте серию завтра!","Awesome!":"Отлично!","Add money to your deposit balance here when you want to fund your account.":"Пополняйте баланс депозита здесь, когда хотите внести средства на счёт.","SPECIAL WELCOME REWARD":"СПЕЦИАЛЬНАЯ НАГРАДА","FREE":"БЕСПЛАТНО","SPIN":"СПИН","COUPON":"КУПОН","Join Telegram Channel":"Открыть Telegram-канал","I Have Joined, Claim Spin":"Я вступил, получить спин"},"es":{"Support":"Soporte","Hide balance":"Ocultar saldo","Show balance":"Mostrar saldo","Loading user name":"Cargando nombre de usuario","Loading balance":"Cargando saldo","Loading total earnings":"Cargando ganancias totales","Loading deposit balance":"Cargando saldo de depósito","Share referral link on Telegram":"Compartir enlace de referido en Telegram","Share referral link on WhatsApp":"Compartir enlace de referido en WhatsApp","Total payouts this week":"Pagos totales esta semana","Play Lucky number game":"Jugar al número de la suerte","Main navigation":"Navegación principal","Close":"Cerrar","DAY 7 • SPECIAL BONUS":"DÍA 7 • BONO ESPECIAL","🎟️ 200 LUCK TICKETS":"🎟️ 200 BOLETOS DE SUERTE","LOCKED":"BLOQUEADO","COMPLETED ✓":"COMPLETADO ✓","CLAIM NOW":"RECLAMAR AHORA","NEXT UP":"SIGUIENTE","No recent transactions found.":"No se encontraron transacciones recientes.","Failed to load transactions. Please try again.":"No se pudieron cargar las transacciones. Inténtalo de nuevo.","Unable to copy link.":"No se pudo copiar el enlace.","Unable to copy code.":"No se pudo copiar el código.","✓ Copied":"✓ Copiado","✓ Copied!":"✓ ¡Copiado!","Daily reward claimed!":"¡Recompensa diaria reclamada!","Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!":"Tu recompensa de 💎10 se añadió a tu saldo. ¡Mantén tu racha y vuelve mañana!","Unable to claim reward. Please try again.":"No se pudo reclamar la recompensa. Inténtalo de nuevo.","Network error. Could not claim reward.":"Error de red. No se pudo reclamar la recompensa.","Free spin granted! Redirecting to the Spin Game...":"¡Giro gratis concedido! Redirigiendo al juego Spin...","Verification failed. Please try again.":"La verificación falló. Inténtalo de nuevo.","Telegram Join Reward":"Recompensa por unirse a Telegram","Telegram Advertising Refund":"Reembolso de publicidad de Telegram","Telegram Advertising":"Publicidad de Telegram","Weekly Referral — 1st Place":"Premio semanal por referidos — 1.º lugar","Weekly Referral — 2nd Place":"Premio semanal por referidos — 2.º lugar","Weekly Referral — 3rd Place":"Premio semanal por referidos — 3.º lugar","Weekly Referral Prize":"Premio semanal por referidos","Tap Rush — 1st Place Prize":"Tap Rush — premio del 1.º lugar","Tap Rush — 2nd Place Prize":"Tap Rush — premio del 2.º lugar","Tap Rush — 3rd Place Prize":"Tap Rush — premio del 3.º lugar","Tap Rush Contest Prize":"Premio del concurso Tap Rush","Tap Rush Entry Fee":"Entrada de Tap Rush","Tap Rush Winnings":"Ganancias de Tap Rush","Tap Rush":"Tap Rush","Transaction":"Transacción","completed":"completada","pending":"pendiente","failed":"fallida","Loading transactions…":"Cargando transacciones…","Join me on PAYME and claim your bonus! 🎁 Use my link to get started:":"¡Únete a PAYME y reclama tu bono! 🎁 Usa mi enlace para empezar:","Join me on PAYME and claim your bonus! Click here:":"¡Únete a PAYME y reclama tu bono! Haz clic aquí:","Earn rewards, invite friends and play games.":"Gana recompensas, invita a tus amigos y juega.","Tap the gift to reveal your surprise ✨":"Toca el regalo para revelar tu sorpresa ✨","You've unlocked a special reward. Join our Telegram channel to receive":"Has desbloqueado una recompensa especial. Únete a nuestro canal de Telegram para recibir","1 FREE SPIN":"1 GIRO GRATIS","Join the channel to claim your free spin":"Únete al canal para reclamar tu giro gratis","Your free spin will be verified before you enter the game.":"Tu giro gratis se verificará antes de entrar al juego.","Your daily reward has been added to your balance.\nKeep your streak going tomorrow!":"Tu recompensa diaria se añadió a tu saldo.\n¡Continúa tu racha mañana!","Awesome!":"¡Genial!","Add money to your deposit balance here when you want to fund your account.":"Añade dinero a tu saldo de depósito cuando quieras financiar tu cuenta.","SPECIAL WELCOME REWARD":"RECOMPENSA ESPECIAL","FREE":"GRATIS","SPIN":"GIRO","COUPON":"CUPÓN","Join Telegram Channel":"Unirse al canal de Telegram","I Have Joined, Claim Spin":"Ya me uní, reclamar giro"},"hi":{"Support":"सहायता","Hide balance":"बैलेंस छिपाएँ","Show balance":"बैलेंस दिखाएँ","Loading user name":"यूज़र नाम लोड हो रहा है","Loading balance":"बैलेंस लोड हो रहा है","Loading total earnings":"कुल कमाई लोड हो रही है","Loading deposit balance":"डिपॉज़िट बैलेंस लोड हो रहा है","Share referral link on Telegram":"Telegram पर रेफरल लिंक साझा करें","Share referral link on WhatsApp":"WhatsApp पर रेफरल लिंक साझा करें","Total payouts this week":"इस सप्ताह कुल भुगतान","Play Lucky number game":"लकी नंबर गेम खेलें","Main navigation":"मुख्य नेविगेशन","Close":"बंद करें","DAY 7 • SPECIAL BONUS":"दिन 7 • विशेष बोनस","🎟️ 200 LUCK TICKETS":"🎟️ 200 लक टिकट","LOCKED":"लॉक है","COMPLETED ✓":"पूरा ✓","CLAIM NOW":"अभी लें","NEXT UP":"अगला","No recent transactions found.":"हाल के लेन-देन नहीं मिले।","Failed to load transactions. Please try again.":"लेन-देन लोड नहीं हो सके। फिर कोशिश करें।","Unable to copy link.":"लिंक कॉपी नहीं हो सका।","Unable to copy code.":"कोड कॉपी नहीं हो सका।","✓ Copied":"✓ कॉपी हो गया","✓ Copied!":"✓ कॉपी हो गया!","Daily reward claimed!":"दैनिक रिवॉर्ड मिल गया!","Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!":"आपका 💎10 रिवॉर्ड बैलेंस में जोड़ दिया गया है। अपनी स्ट्रीक जारी रखें और कल वापस आएँ!","Unable to claim reward. Please try again.":"रिवॉर्ड नहीं मिल सका। फिर कोशिश करें।","Network error. Could not claim reward.":"नेटवर्क त्रुटि। रिवॉर्ड नहीं मिल सका।","Free spin granted! Redirecting to the Spin Game...":"फ्री स्पिन मिल गया! Spin गेम पर भेजा जा रहा है...","Verification failed. Please try again.":"सत्यापन विफल हुआ। फिर कोशिश करें।","Telegram Join Reward":"Telegram जॉइन रिवॉर्ड","Telegram Advertising Refund":"Telegram विज्ञापन रिफंड","Telegram Advertising":"Telegram विज्ञापन","Weekly Referral — 1st Place":"साप्ताहिक रेफरल — पहला स्थान","Weekly Referral — 2nd Place":"साप्ताहिक रेफरल — दूसरा स्थान","Weekly Referral — 3rd Place":"साप्ताहिक रेफरल — तीसरा स्थान","Weekly Referral Prize":"साप्ताहिक रेफरल पुरस्कार","Tap Rush — 1st Place Prize":"Tap Rush — पहला स्थान पुरस्कार","Tap Rush — 2nd Place Prize":"Tap Rush — दूसरा स्थान पुरस्कार","Tap Rush — 3rd Place Prize":"Tap Rush — तीसरा स्थान पुरस्कार","Tap Rush Contest Prize":"Tap Rush प्रतियोगिता पुरस्कार","Tap Rush Entry Fee":"Tap Rush प्रवेश शुल्क","Tap Rush Winnings":"Tap Rush जीत","Tap Rush":"Tap Rush","Transaction":"लेन-देन","completed":"पूरा","pending":"लंबित","failed":"विफल","Loading transactions…":"लेन-देन लोड हो रहे हैं…","Join me on PAYME and claim your bonus! 🎁 Use my link to get started:":"PAYME से जुड़ें और अपना बोनस लें! 🎁 शुरू करने के लिए मेरी लिंक का उपयोग करें:","Join me on PAYME and claim your bonus! Click here:":"PAYME से जुड़ें और अपना बोनस लें! यहाँ क्लिक करें:","Earn rewards, invite friends and play games.":"रिवॉर्ड कमाएँ, दोस्तों को आमंत्रित करें और गेम खेलें।","Tap the gift to reveal your surprise ✨":"सरप्राइज़ देखने के लिए गिफ्ट पर टैप करें ✨","You've unlocked a special reward. Join our Telegram channel to receive":"आपने विशेष रिवॉर्ड अनलॉक किया है। इसे पाने के लिए हमारे Telegram चैनल से जुड़ें","1 FREE SPIN":"1 फ्री स्पिन","Join the channel to claim your free spin":"फ्री स्पिन पाने के लिए चैनल से जुड़ें","Your free spin will be verified before you enter the game.":"गेम में जाने से पहले आपके फ्री स्पिन का सत्यापन होगा।","Your daily reward has been added to your balance.\nKeep your streak going tomorrow!":"दैनिक रिवॉर्ड आपके बैलेंस में जोड़ दिया गया है।\nकल भी अपनी स्ट्रीक जारी रखें!","Awesome!":"शानदार!","Add money to your deposit balance here when you want to fund your account.":"जब अकाउंट में पैसे जमा करने हों, यहाँ अपना डिपॉज़िट बैलेंस बढ़ाएँ।","SPECIAL WELCOME REWARD":"विशेष स्वागत रिवॉर्ड","FREE":"मुफ़्त","SPIN":"स्पिन","COUPON":"कूपन","Join Telegram Channel":"Telegram चैनल से जुड़ें","I Have Joined, Claim Spin":"मैं जुड़ गया हूँ, स्पिन लें"}};Object.keys(PAYME_DASH_EXTRA_I18N).forEach(l=>Object.assign(PAYME_DASH_I18N[l]||{},PAYME_DASH_EXTRA_I18N[l]));
+let paymeDashboardLanguage='en';
+function dashboardLocale(){return {en:'en-US',ru:'ru-RU',es:'es-ES',hi:'hi-IN'}[paymeDashboardLanguage]||'en-US';}
+function dashboardT(k){
+  const key=String(k??'');
+  const dict=PAYME_DASH_I18N[paymeDashboardLanguage]||{};
+  if(dict[key]!==undefined)return dict[key];
+  const m=key.match(/^DAY (\d+)$/);
+  if(m)return paymeDashboardLanguage==='ru'?`ДЕНЬ ${m[1]}`:paymeDashboardLanguage==='es'?`DÍA ${m[1]}`:paymeDashboardLanguage==='hi'?`दिन ${m[1]}`:key;
+  return key;
+}
+function translateDashboardText(root=document.body){
+  if(!root)return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const a=[];let n;
+  while(n=w.nextNode())a.push(n);
+  a.forEach(x=>{const raw=x.nodeValue,trim=raw.trim();if(!trim||trim.length>300)return;const t=dashboardT(trim);if(t!==trim)x.nodeValue=raw.replace(trim,t);});
+  document.title=paymeDashboardLanguage==='en'?'PAYME Dashboard':'PAYME';
+}
+function applyDashboardLanguage(lang){
+  paymeDashboardLanguage=['en','ru','es','hi'].includes(String(lang||''))?String(lang):'en';
+  try{localStorage.setItem('paymeLanguage',paymeDashboardLanguage)}catch(e){}
+  translateDashboardText(document.body);
+  if(typeof renderDashboardTutorialStep==='function'&&typeof dashboardTutorialOpen!=='undefined'&&dashboardTutorialOpen)renderDashboardTutorialStep();
+  if(typeof renderDailyGrid==='function'&&document.getElementById('dailyGrid')?.children.length)renderDailyGrid();
+}
+const paymeLanguageObserver=new MutationObserver(ms=>{if(paymeDashboardLanguage==='en')return;ms.forEach(m=>{if(m.type==='characterData'||m.addedNodes?.length)translateDashboardText(m.target.nodeType===1?m.target:m.target.parentElement);});});
+paymeLanguageObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+try{const cached=localStorage.getItem('paymeLanguage');if(['en','ru','es','hi'].includes(cached))paymeDashboardLanguage=cached}catch(e){}
+setTimeout(()=>translateDashboardText(document.body),0);
+
 </script>
 
 </body>
 </html>
+
 
 
 

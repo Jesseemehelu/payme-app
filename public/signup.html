@@ -472,6 +472,8 @@ body::before {
 }
 
 
+.language-section{margin:0 0 20px;text-align:left}.language-label{display:flex;align-items:center;gap:7px;margin:0 0 9px;color:#f8fafc;font-size:.78rem;font-weight:900}.language-select-wrap{position:relative;display:flex;align-items:center;min-height:58px;border:1px solid rgba(96,165,250,.30);border-radius:18px;background:linear-gradient(145deg,rgba(30,41,59,.90),rgba(8,12,20,.94));box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px rgba(0,0,0,.18);overflow:hidden;transition:.2s}.language-select-wrap:focus-within{border-color:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.13),0 12px 28px rgba(0,0,0,.22)}.language-leading{width:42px;flex:0 0 42px;text-align:center;font-size:1.05rem;pointer-events:none}.language-select{appearance:none;-webkit-appearance:none;width:100%;min-height:58px;padding:0 42px 0 0;border:0;outline:0;background:transparent;color:#fff;font:800 .88rem 'Plus Jakarta Sans',sans-serif;cursor:pointer}.language-select option{background:#0b1220;color:#fff;font-weight:700}.language-chevron{position:absolute;right:16px;top:50%;transform:translateY(-55%);color:#67e8f9;font-size:1.2rem;font-weight:900;pointer-events:none}.language-hint{margin:7px 3px 0;color:#64748b;font-size:.65rem;line-height:1.4}.language-section.invalid .language-select-wrap{border-color:#f87171;box-shadow:0 0 0 4px rgba(239,68,68,.10)}
+
 /* =====================================================
    REFERRAL & TESTER SECTION
 ===================================================== */
@@ -1234,7 +1236,7 @@ body {
     class="bonus-banner"
     id="bonusBanner"
   >
-    🎁 INSTANT ₦10 WELCOME BONUS
+    🎁 INSTANT 💎10 WELCOME BONUS
   </div>
 
 
@@ -1264,7 +1266,7 @@ body {
       </div>
 
       <div class="benefit-sub">
-        ₦10 Free
+        💎10 Free
       </div>
 
     </div>
@@ -1290,7 +1292,7 @@ body {
       </div>
 
       <div class="benefit-sub">
-        ₦15/Ref
+        💎15/Ref
       </div>
 
     </div>
@@ -1309,6 +1311,22 @@ body {
     id="errorBox"
   ></div>
 
+
+  <div class="language-section" id="languageSection">
+    <label class="language-label" for="languageSelect">🌐 Choose your language</label>
+    <div class="language-select-wrap">
+      <span class="language-leading" aria-hidden="true">🗣️</span>
+      <select id="languageSelect" class="language-select" aria-required="true">
+        <option value="" selected disabled>Choose your language</option>
+        <option value="en">🇬🇧 English 🗣️</option>
+        <option value="ru">🇷🇺 Русский 🗣️</option>
+        <option value="es">🇪🇸 Español 🗣️</option>
+        <option value="hi">🇮🇳 हिन्दी 🗣️</option>
+      </select>
+      <span class="language-chevron" aria-hidden="true">⌄</span>
+    </div>
+    <div class="language-hint" id="languageHint">Select a language to continue. Your PAYME pages will use this language.</div>
+  </div>
 
   <button
     type="button"
@@ -1368,28 +1386,28 @@ body {
       <div class="proof-row">
         <div class="proof-avatar">O</div>
         <div class="proof-info">
-          <strong>Opay payout</strong>
+          <strong>Wallet payout</strong>
           <span>Wallet transfer • Recently paid</span>
         </div>
-        <div class="proof-amount">+₦500</div>
+        <div class="proof-amount">+💎500</div>
       </div>
 
       <div class="proof-row">
         <div class="proof-avatar">O</div>
         <div class="proof-info">
-          <strong>Opay payout</strong>
+          <strong>Wallet payout</strong>
           <span>Wallet transfer • Recently paid</span>
         </div>
-        <div class="proof-amount">+₦1,000</div>
+        <div class="proof-amount">+💎1,000</div>
       </div>
 
       <div class="proof-row">
         <div class="proof-avatar">O</div>
         <div class="proof-info">
-          <strong>Opay payout</strong>
+          <strong>Wallet payout</strong>
           <span>Wallet transfer • Recently paid</span>
         </div>
-        <div class="proof-amount">+₦250</div>
+        <div class="proof-amount">+💎250</div>
       </div>
     </div>
 
@@ -1479,7 +1497,7 @@ body {
     class="anim-badge"
     id="animBadge"
   >
-    + ₦10.00
+    + 💎10.00
   </div>
 
 
@@ -1978,6 +1996,9 @@ async function handleLocalTesterLogin() {
    TELEGRAM AUTHENTICATION
 ====================================================== */
 
+const SIGNUP_I18N={en:{bonus:'🎁 INSTANT 💎10 WELCOME BONUS',title:'Start Earning on',sub:'Join PAYME and earn Gems through rewards, referrals and games.',choose:'🌐 Choose your language',hint:'Select a language to continue. Your PAYME pages will use this language.',signup:'Sign Up with Telegram',login:'Login to Account',creating:'Creating account...',logging:'Logging in...',referral:'Referral Code (Optional)',referralPh:'e.g. REF123',proofs:'PAYMENT PROOFS',activity:'Real payout activity',verified:'VERIFIED PAYOUTS',payout:'Wallet payout',transfer:'Wallet transfer • Recently paid',note:'Payment examples shown for presentation. Actual earnings and withdrawals depend on account activity and available rewards.',terms:'By continuing, you agree to our',tos:'Terms of Service',privacy:'Privacy Policy',and:'and',welcomeTo:'Welcome to',congrats:'Congratulations!',welcomeText:"You've received your welcome bonus. Your PAYME journey starts now.",continue:'Continue to PAYME',errorChoose:'Please choose your language before continuing.'},ru:{bonus:'🎁 МГНОВЕННЫЙ БОНУС 💎10',title:'Начните зарабатывать в',sub:'Присоединяйтесь к PAYME и получайте Gems за награды, приглашения и игры.',choose:'🌐 Выберите язык',hint:'Выберите язык, чтобы продолжить. Все страницы PAYME будут использовать этот язык.',signup:'Регистрация через Telegram',login:'Войти в аккаунт',creating:'Создание аккаунта...',logging:'Вход...',referral:'Реферальный код (необязательно)',referralPh:'например REF123',proofs:'ВЫПЛАТЫ',activity:'Реальные выплаты',verified:'ВЫПЛАТЫ ПРОВЕРЕНЫ',payout:'Выплата на кошелёк',transfer:'Перевод на кошелёк • Выплачено недавно',note:'Примеры выплат показаны для демонстрации. Фактический доход и вывод зависят от активности аккаунта и доступных наград.',terms:'Продолжая, вы соглашаетесь с',tos:'Условиями использования',privacy:'Политикой конфиденциальности',and:'и',welcomeTo:'Добро пожаловать в',congrats:'Поздравляем!',welcomeText:'Вы получили приветственный бонус. Ваш путь в PAYME начинается сейчас.',continue:'Продолжить в PAYME',errorChoose:'Пожалуйста, выберите язык перед продолжением.'},es:{bonus:'🎁 BONO DE BIENVENIDA 💎10 INSTANTÁNEO',title:'Empieza a ganar en',sub:'Únete a PAYME y gana Gems mediante recompensas, referidos y juegos.',choose:'🌐 Elige tu idioma',hint:'Selecciona un idioma para continuar. Tus páginas de PAYME usarán este idioma.',signup:'Registrarse con Telegram',login:'Iniciar sesión',creating:'Creando cuenta...',logging:'Iniciando sesión...',referral:'Código de referido (opcional)',referralPh:'ej. REF123',proofs:'PRUEBAS DE PAGO',activity:'Actividad real de pagos',verified:'PAGOS VERIFICADOS',payout:'Pago a la billetera',transfer:'Transferencia a billetera • Pagado recientemente',note:'Los ejemplos de pago son solo ilustrativos. Las ganancias y retiros reales dependen de la actividad de la cuenta y las recompensas disponibles.',terms:'Al continuar, aceptas nuestros',tos:'Términos de servicio',privacy:'Política de privacidad',and:'y',welcomeTo:'Bienvenido a',congrats:'¡Felicidades!',welcomeText:'Has recibido tu bono de bienvenida. Tu aventura en PAYME comienza ahora.',continue:'Continuar a PAYME',errorChoose:'Elige tu idioma antes de continuar.'},hi:{bonus:'🎁 तुरंत 💎10 स्वागत बोनस',title:'PAYME पर कमाई शुरू करें',sub:'PAYME से जुड़ें और रिवॉर्ड, रेफरल और गेम्स से Gems कमाएँ।',choose:'🌐 अपनी भाषा चुनें',hint:'जारी रखने के लिए भाषा चुनें। आपके PAYME पेज इसी भाषा में दिखेंगे।',signup:'Telegram से साइन अप करें',login:'अकाउंट में लॉग इन करें',creating:'अकाउंट बनाया जा रहा है...',logging:'लॉग इन हो रहा है...',referral:'रेफरल कोड (वैकल्पिक)',referralPh:'जैसे REF123',proofs:'भुगतान प्रमाण',activity:'वास्तविक भुगतान गतिविधि',verified:'सत्यापित भुगतान',payout:'वॉलेट भुगतान',transfer:'वॉलेट ट्रांसफर • हाल ही में भुगतान',note:'भुगतान उदाहरण केवल प्रस्तुति के लिए हैं। वास्तविक कमाई और निकासी अकाउंट गतिविधि और उपलब्ध रिवॉर्ड पर निर्भर करती है।',terms:'जारी रखकर आप सहमत हैं',tos:'सेवा की शर्तों',privacy:'गोपनीयता नीति',and:'और',welcomeTo:'PAYME में आपका स्वागत है',congrats:'बधाई हो!',welcomeText:'आपको स्वागत बोनस मिल गया है। PAYME पर आपकी यात्रा अब शुरू होती है।',continue:'PAYME पर जारी रखें',errorChoose:'जारी रखने से पहले अपनी भाषा चुनें।'}};
+let paymeSignupLanguage='';function signupT(k){return SIGNUP_I18N[paymeSignupLanguage||'en']?.[k]||SIGNUP_I18N.en[k]||k;}function setSignupLanguage(lang){if(!SIGNUP_I18N[lang])return;paymeSignupLanguage=lang;localStorage.setItem('paymeLanguage',lang);const q=id=>document.getElementById(id),set=(id,k)=>{const e=q(id);if(e)e.textContent=signupT(k)};set('bonusBanner','bonus');set('mainSubtext','sub');set('telegramBtnText','signup');set('languageHint','hint');const t=q('mainTitle');if(t)t.innerHTML=signupT('title')+' <span>PAYME</span>';const l=document.querySelector('label[for="referralCode"]');if(l)l.textContent=signupT('referral');const r=q('referralCode');if(r)r.placeholder=signupT('referralPh');const cards=document.querySelectorAll('.benefit-card');if(cards[0]){cards[0].querySelector('.benefit-title').textContent=({en:'Welcome',ru:'Бонус',es:'Bienvenida',hi:'स्वागत'})[paymeSignupLanguage];cards[0].querySelector('.benefit-sub').textContent=signupT('welcomeFree')}if(cards[1]){cards[1].querySelector('.benefit-title').textContent=signupT('spin');cards[1].querySelector('.benefit-sub').textContent=signupT('daily')}if(cards[2]){cards[2].querySelector('.benefit-title').textContent=signupT('invite');cards[2].querySelector('.benefit-sub').textContent=signupT('ref')}const k=document.querySelector('.payment-proof .section-kicker');if(k)k.textContent=signupT('proofs');const h=document.querySelector('.payment-proof h2');if(h)h.textContent=signupT('activity');document.querySelectorAll('.verified-pill').forEach(e=>{const sp=e.querySelector('span');if(sp&&sp.nextSibling)sp.nextSibling.textContent=' '+signupT('verified')});document.querySelectorAll('.proof-info strong').forEach(e=>e.textContent=signupT('payout'));document.querySelectorAll('.proof-info span').forEach(e=>e.textContent=signupT('transfer'));const n=document.querySelector('.proof-note');if(n)n.textContent=signupT('note');const terms=document.querySelector('.terms-notice');if(terms){const a=terms.querySelectorAll('a');terms.childNodes.forEach(x=>{if(x.nodeType===3&&x.textContent.includes('By continuing'))x.textContent=signupT('terms')+' '});if(a[0])a[0].textContent=signupT('tos');if(a[1])a[1].textContent=signupT('privacy');if(a[0]?.nextSibling)a[0].nextSibling.textContent=' '+signupT('and')+' ';}}function getSelectedLanguage(){return document.getElementById('languageSelect')?.value||paymeSignupLanguage||'';}window.addEventListener('DOMContentLoaded',()=>{const s=document.getElementById('languageSelect');if(s)s.addEventListener('change',()=>{setSignupLanguage(s.value);s.closest('.language-section')?.classList.remove('invalid')})});
+
 async function handleTelegramAuth() {
 
   const errorBox =
@@ -1997,6 +2018,16 @@ async function handleTelegramAuth() {
       'telegramBtnText'
     );
 
+
+  const selectedLanguage = getSelectedLanguage();
+
+  if (!selectedLanguage) {
+    document.getElementById('languageSection')?.classList.add('invalid');
+    errorBox.innerText = signupT('errorChoose');
+    errorBox.style.display = 'block';
+    document.getElementById('languageSelect')?.focus();
+    return;
+  }
 
   const hasSignedUp =
     localStorage.getItem(
@@ -2028,8 +2059,10 @@ if (!activeTg || !activeTg.initData) {
     },
     credentials: 'include',
     body: JSON.stringify({
-      initData: 'local_test'
-    })
+  initData: 'local_test',
+  language: selectedLanguage,
+  referralCode: referralCode
+})
   });
 
   const data = await response.json();
@@ -2102,8 +2135,8 @@ if (!activeTg || !activeTg.initData) {
 
     tgBtnText.innerText =
       hasSignedUp
-        ? 'Logging in...'
-        : 'Creating account...';
+        ? signupT('logging')
+        : signupT('creating');
 
 
     const referralCode =
@@ -2127,7 +2160,10 @@ if (!activeTg || !activeTg.initData) {
         initData,
 
       referralCode:
-        referralCode
+        referralCode,
+
+      language:
+        selectedLanguage
 
     };
 
@@ -2240,8 +2276,8 @@ if (!activeTg || !activeTg.initData) {
 
     tgBtnText.innerText =
       hasSignedUp
-        ? 'Login to Account'
-        : 'Sign Up with Telegram';
+        ? signupT('login')
+        : signupT('signup');
 
 
     errorBox.innerText =
@@ -2297,12 +2333,10 @@ function triggerLoginAnimation() {
     'none';
 
 
-  animHeading.innerText =
-    'Logging In...';
+  animHeading.innerText = signupT('logging');
 
 
-  animSubtext.innerText =
-    'Authenticating your session and taking you to your dashboard.';
+  animSubtext.innerText = ({en:'Authenticating your session and taking you to your dashboard.',ru:'Проверяем вашу сессию и открываем панель управления.',es:'Estamos autenticando tu sesión y abriendo tu panel.',hi:'आपका सत्र सत्यापित करके डैशबोर्ड खोला जा रहा है।'})[paymeSignupLanguage||'en'];
 
 
   continueBtn.style.display =
@@ -2352,6 +2386,11 @@ function triggerLoginAnimation() {
 ====================================================== */
 
 function triggerOnboardingAnimation() {
+  const bt=document.querySelector('.brand-title'); if(bt)bt.innerHTML=signupT('welcomeTo')+' <span>PAYME</span>';
+  const ab=document.getElementById('animBadge'); if(ab)ab.textContent='💎 '+signupT('bonus').replace(/^🎁\s*/, '');
+  const ah=document.getElementById('animHeading'); if(ah)ah.textContent=signupT('congrats');
+  const as=document.getElementById('animSubtext'); if(as)as.textContent=signupT('welcomeText');
+  const cb=document.getElementById('continueBtn'); if(cb)cb.textContent=signupT('continue');
 
   const modal =
     document.getElementById(
@@ -2560,5 +2599,6 @@ function redirectDashboard() {
 
 </body>
 </html>
+
 
 

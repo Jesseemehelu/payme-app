@@ -226,7 +226,173 @@ if(!howtoHidden){ open('howtoModal'); }
 })();
 </script>
 
+
+<script>
+/* =========================================================
+   PAYME GLOBAL LANGUAGE — LUCKY 3
+   Uses the language saved during signup/dashboard.
+   Safe dynamic translation: no dataset on text nodes, no observer loop.
+========================================================= */
+(function(){
+  'use strict';
+  const LANGS = {
+    en: {
+      'Luck Vault':'Luck Vault','Luck Tickets':'Luck Tickets','LUCKY 3 • TICKET PLAY':'LUCKY 3 • TICKET PLAY',
+      'Choose your 3 lucky numbers':'Choose your 3 lucky numbers','Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.':'Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.',
+      'YOUR TICKET WALLET':'YOUR TICKET WALLET','WIN REWARDS IN':'WIN REWARDS IN','💎 GEMS':'💎 GEMS','Choose 3 numbers':'Choose 3 numbers','Tap any 3 numbers':'Tap any 3 numbers',
+      'Choose 3 different numbers • Tap again to remove':'Choose 3 different numbers • Tap again to remove','YOUR PICKS • 3 REQUIRED':'YOUR PICKS • 3 REQUIRED',
+      'Choose game':'Choose game','Instant result':'Instant result','Entry tickets':'Entry tickets','Not cash':'Not cash','Reveal My Lucky 3 ✨':'Reveal My Lucky 3 ✨',
+      'Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.':'Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.',
+      'NOT ENOUGH LUCK TICKETS':'NOT ENOUGH LUCK TICKETS','You need more tickets':'You need more tickets',
+      "You don't have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.":"You don't have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.",
+      'Your tickets':'Your tickets','Needed':'Needed','🎁 Earn More Luck Tickets':'🎁 Earn More Luck Tickets','Maybe Later':'Maybe Later',
+      'READY TO DRAW':'READY TO DRAW','Confirm your Lucky 3':'Confirm your Lucky 3','Your ticket entry will be deducted before the server performs the draw.':'Your ticket entry will be deducted before the server performs the draw.',
+      'Your numbers':'Your numbers','Game':'Game','Entry':'Entry','Possible reward':'Possible reward','Cancel':'Cancel','Draw Now':'Draw Now',
+      'SERVER DRAW':'SERVER DRAW','Revealing your numbers…':'Revealing your numbers…','Generating a secure draw.':'Generating a secure draw.','Play Again':'Play Again',
+      '✨ HOW TO PLAY':'✨ HOW TO PLAY','Lucky 3 — quick guide':'Lucky 3 — quick guide',"A simple pick-3 number game. Here's all you need to know:":"A simple pick-3 number game. Here's all you need to know:",
+      'Pick 3 numbers':'Pick 3 numbers','Tap any 3 numbers from 01–30. Tap a number again to remove it.':'Tap any 3 numbers from 01–30. Tap a number again to remove it.',
+      'Choose a game mode':'Choose a game mode','Choose your entry':'Choose your entry','Reveal your result':'Reveal your result',
+      "Tap \"Reveal My Lucky 3\". 3 numbers are drawn instantly — match them to your picks to win!":"Tap \"Reveal My Lucky 3\". 3 numbers are drawn instantly — match them to your picks to win!",
+      "Don't show this again":"Don't show this again", "Got it, let's play! ✨":"Got it, let's play! ✨",
+      'Match all 3 numbers':'Match all 3 numbers','Match at least 2 numbers':'Match at least 2 numbers','Match at least 1 number':'Match at least 1 number',
+      '3/3 JACKPOT':'3/3 JACKPOT','2/3 CASH WIN':'2/3 CASH WIN','1/3 FREE SPINS':'1/3 FREE SPINS','FREE SPINS':'FREE SPINS',
+      'Starter stake':'Starter stake','Popular pick':'Popular pick','High roller':'High roller','Win':'Win',
+      'Pick only 3 numbers.':'Pick only 3 numbers.','Pick 3 numbers first.':'Pick 3 numbers first.','Secure draw in progress.':'Secure draw in progress.',
+      '🎉 YOU HIT!':'🎉 YOU HIT!','DRAW COMPLETE':'DRAW COMPLETE','No win this time':'No win this time','No prize':'No prize','Unable to load Luck Tickets.':'Unable to load Luck Tickets.','Unable to load ticket wallet.':'Unable to load ticket wallet.',
+      'Lucky 3 could not be completed.':'Lucky 3 could not be completed.','Something went wrong.':'Something went wrong.','3/3 MATCHED • WINNER!':'3/3 MATCHED • WINNER!'
+    },
+    ru: {
+      'Luck Vault':'Хранилище удачи','Luck Tickets':'Билеты удачи','LUCKY 3 • TICKET PLAY':'LUCKY 3 • ИГРА ЗА БИЛЕТЫ',
+      'Choose your 3 lucky numbers':'Выберите 3 счастливых числа','Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.':'Используйте Билеты удачи для участия. Выберите 3 числа от 01 до 30, режим игры и узнайте результат.',
+      'YOUR TICKET WALLET':'ВАШ КОШЕЛЁК БИЛЕТОВ','WIN REWARDS IN':'НАГРАДЫ В','💎 GEMS':'💎 GEMS','Choose 3 numbers':'Выберите 3 числа','Tap any 3 numbers':'Нажмите любые 3 числа',
+      'Choose 3 different numbers • Tap again to remove':'Выберите 3 разных числа • Нажмите снова, чтобы убрать','YOUR PICKS • 3 REQUIRED':'ВАШИ ЧИСЛА • НУЖНО 3',
+      'Choose game':'Выберите игру','Instant result':'Мгновенный результат','Entry tickets':'Билеты для входа','Not cash':'Не деньги','Reveal My Lucky 3 ✨':'Показать мой Lucky 3 ✨',
+      'Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.':'Больше билетов открывает более крупные призы. Билеты списываются перед розыгрышем.',
+      'NOT ENOUGH LUCK TICKETS':'НЕДОСТАТОЧНО БИЛЕТОВ УДАЧИ','You need more tickets':'Вам нужно больше билетов',
+      "You don't have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.":'Недостаточно Билетов удачи для этой игры. Получите больше билетов в Хранилище удачи и возвращайтесь в Lucky 3.',
+      'Your tickets':'Ваши билеты','Needed':'Нужно','🎁 Earn More Luck Tickets':'🎁 Получить больше билетов удачи','Maybe Later':'Позже',
+      'READY TO DRAW':'ГОТОВЫ К РОЗЫГРЫШУ','Confirm your Lucky 3':'Подтвердите Lucky 3','Your ticket entry will be deducted before the server performs the draw.':'Входной билет будет списан до того, как сервер проведёт розыгрыш.',
+      'Your numbers':'Ваши числа','Game':'Игра','Entry':'Вход','Possible reward':'Возможная награда','Cancel':'Отмена','Draw Now':'Разыграть сейчас',
+      'SERVER DRAW':'РОЗЫГРЫШ СЕРВЕРОМ','Revealing your numbers…':'Открываем ваши числа…','Generating a secure draw.':'Создаём защищённый розыгрыш.','Play Again':'Играть снова',
+      '✨ HOW TO PLAY':'✨ КАК ИГРАТЬ','Lucky 3 — quick guide':'Lucky 3 — краткое руководство','A simple pick-3 number game. Here’s all you need to know:':'Простая игра с выбором 3 чисел. Вот всё, что нужно знать:',
+      "A simple pick-3 number game. Here's all you need to know:":'Простая игра с выбором 3 чисел. Вот всё, что нужно знать:',
+      'Pick 3 numbers':'Выберите 3 числа','Tap any 3 numbers from 01–30. Tap a number again to remove it.':'Нажмите любые 3 числа от 01 до 30. Нажмите снова, чтобы убрать число.',
+      'Choose a game mode':'Выберите режим игры','Choose your entry':'Выберите ставку','Reveal your result':'Откройте результат',
+      "Tap \"Reveal My Lucky 3\". 3 numbers are drawn instantly — match them to your picks to win!":'Нажмите «Показать мой Lucky 3». Сразу выпадут 3 числа — совпадите с вашими числами и выиграйте!',
+      "Don't show this again":'Больше не показывать',"Got it, let's play! ✨":'Понятно, давайте играть! ✨',
+      'Match all 3 numbers':'Совпадение всех 3 чисел','Match at least 2 numbers':'Совпадение минимум 2 чисел','Match at least 1 number':'Совпадение минимум 1 числа',
+      '3/3 JACKPOT':'ДЖЕКПОТ 3/3','2/3 CASH WIN':'ВЫИГРЫШ 2/3','1/3 FREE SPINS':'БЕСПЛАТНЫЕ СПИНЫ 1/3','FREE SPINS':'БЕСПЛАТНЫЕ СПИНЫ',
+      'Starter stake':'Стартовая ставка','Popular pick':'Популярный выбор','High roller':'Большая ставка','Win':'Выигрыш',
+      'Pick only 3 numbers.':'Выберите только 3 числа.','Pick 3 numbers first.':'Сначала выберите 3 числа.','Secure draw in progress.':'Идёт защищённый розыгрыш.',
+      '🎉 YOU HIT!':'🎉 ВЫ ВЫИГРАЛИ!','DRAW COMPLETE':'РОЗЫГРЫШ ЗАВЕРШЁН','No win this time':'В этот раз без выигрыша','No prize':'Без приза','Unable to load Luck Tickets.':'Не удалось загрузить Билеты удачи.','Unable to load ticket wallet.':'Не удалось загрузить кошелёк билетов.',
+      'Lucky 3 could not be completed.':'Не удалось завершить Lucky 3.','Something went wrong.':'Что-то пошло не так.','3/3 MATCHED • WINNER!':'3/3 СОВПАЛО • ПОБЕДА!'
+    },
+    es: {
+      'Luck Vault':'Bóveda de la suerte','Luck Tickets':'Boletos de suerte','LUCKY 3 • TICKET PLAY':'LUCKY 3 • JUEGO CON BOLETOS',
+      'Choose your 3 lucky numbers':'Elige tus 3 números de la suerte','Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.':'Usa Boletos de suerte para participar. Elige 3 números del 01 al 30, selecciona un juego y descubre tu resultado.',
+      'YOUR TICKET WALLET':'TU CARTERA DE BOLETOS','WIN REWARDS IN':'GANA RECOMPENSAS EN','💎 GEMS':'💎 GEMS','Choose 3 numbers':'Elige 3 números','Tap any 3 numbers':'Toca 3 números',
+      'Choose 3 different numbers • Tap again to remove':'Elige 3 números diferentes • Toca de nuevo para quitar','YOUR PICKS • 3 REQUIRED':'TUS ELECCIONES • 3 REQUERIDOS',
+      'Choose game':'Elige un juego','Instant result':'Resultado instantáneo','Entry tickets':'Boletos de entrada','Not cash':'No es efectivo','Reveal My Lucky 3 ✨':'Revelar mi Lucky 3 ✨',
+      'Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.':'Las entradas más altas desbloquean premios mayores. Los boletos se descuentan antes del sorteo.',
+      'NOT ENOUGH LUCK TICKETS':'NO HAY SUFICIENTES BOLETOS','You need more tickets':'Necesitas más boletos',
+      "You don't have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.":'No tienes suficientes Boletos de suerte para esta entrada. Gana más en la Bóveda de la suerte y vuelve a jugar Lucky 3.',
+      'Your tickets':'Tus boletos','Needed':'Necesarios','🎁 Earn More Luck Tickets':'🎁 Gana más Boletos de suerte','Maybe Later':'Quizás después',
+      'READY TO DRAW':'LISTO PARA EL SORTEO','Confirm your Lucky 3':'Confirma tu Lucky 3','Your ticket entry will be deducted before the server performs the draw.':'Tu boleto de entrada se descontará antes de que el servidor realice el sorteo.',
+      'Your numbers':'Tus números','Game':'Juego','Entry':'Entrada','Possible reward':'Recompensa posible','Cancel':'Cancelar','Draw Now':'Sortear ahora',
+      'SERVER DRAW':'SORTEO DEL SERVIDOR','Revealing your numbers…':'Revelando tus números…','Generating a secure draw.':'Generando un sorteo seguro.','Play Again':'Jugar de nuevo',
+      '✨ HOW TO PLAY':'✨ CÓMO JUGAR','Lucky 3 — quick guide':'Lucky 3 — guía rápida',"A simple pick-3 number game. Here's all you need to know:":'Un sencillo juego de elegir 3 números. Esto es todo lo que necesitas saber:',
+      'Pick 3 numbers':'Elige 3 números','Tap any 3 numbers from 01–30. Tap a number again to remove it.':'Toca 3 números del 01 al 30. Toca un número otra vez para quitarlo.',
+      'Choose a game mode':'Elige un modo de juego','Choose your entry':'Elige tu entrada','Reveal your result':'Revela tu resultado',
+      "Tap \"Reveal My Lucky 3\". 3 numbers are drawn instantly — match them to your picks to win!":'Toca «Revelar mi Lucky 3». Se sortean 3 números al instante: ¡hazlos coincidir para ganar!',
+      "Don't show this again":'No mostrar de nuevo',"Got it, let's play! ✨":'¡Entendido, vamos a jugar! ✨',
+      'Match all 3 numbers':'Coincide con los 3 números','Match at least 2 numbers':'Coincide con al menos 2 números','Match at least 1 number':'Coincide con al menos 1 número',
+      '3/3 JACKPOT':'JACKPOT 3/3','2/3 CASH WIN':'PREMIO 2/3','1/3 FREE SPINS':'GIROS GRATIS 1/3','FREE SPINS':'GIROS GRATIS',
+      'Starter stake':'Entrada inicial','Popular pick':'Opción popular','High roller':'Entrada alta','Win':'Gana',
+      'Pick only 3 numbers.':'Elige solo 3 números.','Pick 3 numbers first.':'Primero elige 3 números.','Secure draw in progress.':'Sorteo seguro en progreso.',
+      '🎉 YOU HIT!':'🎉 ¡GANASTE!','DRAW COMPLETE':'SORTEO COMPLETADO','No win this time':'Sin premio esta vez','No prize':'Sin premio','Unable to load Luck Tickets.':'No se pudieron cargar los Boletos de suerte.','Unable to load ticket wallet.':'No se pudo cargar la cartera de boletos.',
+      'Lucky 3 could not be completed.':'No se pudo completar Lucky 3.','Something went wrong.':'Algo salió mal.','3/3 MATCHED • WINNER!':'3/3 COINCIDEN • ¡GANADOR!'
+    },
+    hi: {
+      'Luck Vault':'लक वॉल्ट','Luck Tickets':'लक टिकट','LUCKY 3 • TICKET PLAY':'LUCKY 3 • टिकट गेम',
+      'Choose your 3 lucky numbers':'अपने 3 लकी नंबर चुनें','Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.':'लक टिकट से खेलें। 01–30 में से 3 नंबर चुनें, गेम चुनें और अपना परिणाम देखें।',
+      'YOUR TICKET WALLET':'आपका टिकट वॉलेट','WIN REWARDS IN':'रिवॉर्ड पाएं','💎 GEMS':'💎 GEMS','Choose 3 numbers':'3 नंबर चुनें','Tap any 3 numbers':'कोई भी 3 नंबर चुनें',
+      'Choose 3 different numbers • Tap again to remove':'3 अलग नंबर चुनें • हटाने के लिए फिर टैप करें','YOUR PICKS • 3 REQUIRED':'आपकी पसंद • 3 जरूरी',
+      'Choose game':'गेम चुनें','Instant result':'तुरंत परिणाम','Entry tickets':'एंट्री टिकट','Not cash':'कैश नहीं','Reveal My Lucky 3 ✨':'मेरा Lucky 3 दिखाएं ✨',
+      'Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.':'बड़े एंट्री टिकट से बड़े इनाम मिलते हैं। ड्रॉ से पहले टिकट काटे जाते हैं।',
+      'NOT ENOUGH LUCK TICKETS':'पर्याप्त लक टिकट नहीं हैं','You need more tickets':'आपको और टिकट चाहिए',
+      "You don't have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.":'इस एंट्री के लिए आपके पास पर्याप्त लक टिकट नहीं हैं। लक वॉल्ट से और टिकट पाएं और Lucky 3 खेलें।',
+      'Your tickets':'आपके टिकट','Needed':'चाहिए','🎁 Earn More Luck Tickets':'🎁 और लक टिकट पाएं','Maybe Later':'बाद में',
+      'READY TO DRAW':'ड्रॉ के लिए तैयार','Confirm your Lucky 3':'अपने Lucky 3 की पुष्टि करें','Your ticket entry will be deducted before the server performs the draw.':'सर्वर ड्रॉ करने से पहले आपकी एंट्री टिकट काट दी जाएगी।',
+      'Your numbers':'आपके नंबर','Game':'गेम','Entry':'एंट्री','Possible reward':'संभावित इनाम','Cancel':'रद्द करें','Draw Now':'अभी ड्रॉ करें',
+      'SERVER DRAW':'सर्वर ड्रॉ','Revealing your numbers…':'आपके नंबर दिखाए जा रहे हैं…','Generating a secure draw.':'सुरक्षित ड्रॉ तैयार हो रहा है।','Play Again':'फिर खेलें',
+      '✨ HOW TO PLAY':'✨ कैसे खेलें','Lucky 3 — quick guide':'Lucky 3 — त्वरित गाइड',"A simple pick-3 number game. Here's all you need to know:":'यह 3 नंबर चुनने वाला आसान गेम है। आपको बस इतना जानना है:',
+      'Pick 3 numbers':'3 नंबर चुनें','Tap any 3 numbers from 01–30. Tap a number again to remove it.':'01–30 में से 3 नंबर चुनें। हटाने के लिए नंबर पर फिर टैप करें।',
+      'Choose a game mode':'गेम मोड चुनें','Choose your entry':'अपनी एंट्री चुनें','Reveal your result':'अपना परिणाम देखें',
+      "Tap \"Reveal My Lucky 3\". 3 numbers are drawn instantly — match them to your picks to win!":'«मेरा Lucky 3 दिखाएं» पर टैप करें। 3 नंबर तुरंत ड्रॉ होंगे — अपने नंबरों से मिलाकर जीतें!',
+      "Don't show this again":'इसे फिर न दिखाएं',"Got it, let's play! ✨":'समझ गया, चलिए खेलते हैं! ✨',
+      'Match all 3 numbers':'सभी 3 नंबर मिलाएं','Match at least 2 numbers':'कम से कम 2 नंबर मिलाएं','Match at least 1 number':'कम से कम 1 नंबर मिलाएं',
+      '3/3 JACKPOT':'3/3 जैकपॉट','2/3 CASH WIN':'2/3 कैश विन','1/3 FREE SPINS':'1/3 फ्री स्पिन','FREE SPINS':'फ्री स्पिन',
+      'Starter stake':'शुरुआती एंट्री','Popular pick':'लोकप्रिय विकल्प','High roller':'बड़ी एंट्री','Win':'जीतें',
+      'Pick only 3 numbers.':'केवल 3 नंबर चुनें।','Pick 3 numbers first.':'पहले 3 नंबर चुनें।','Secure draw in progress.':'सुरक्षित ड्रॉ चल रहा है।',
+      '🎉 YOU HIT!':'🎉 आप जीत गए!','DRAW COMPLETE':'ड्रॉ पूरा हुआ','No win this time':'इस बार जीत नहीं हुई','No prize':'कोई इनाम नहीं','Unable to load Luck Tickets.':'लक टिकट लोड नहीं हो सके।','Unable to load ticket wallet.':'टिकट वॉलेट लोड नहीं हो सका।',
+      'Lucky 3 could not be completed.':'Lucky 3 पूरा नहीं हो सका।','Something went wrong.':'कुछ गलत हो गया।','3/3 MATCHED • WINNER!':'3/3 मैच • विजेता!'
+    }
+  };
+  const original = new WeakMap();
+  let observer = null;
+  let applying = false;
+  function lang(){const l=(localStorage.getItem('paymeLanguage')||'en').toLowerCase();return LANGS[l]?l:'en'}
+  function translateText(text,l){
+    const dict=LANGS[l]||LANGS.en;
+    let s=text;
+    const exact=dict[s.trim()];
+    if(exact!==undefined) return text.replace(s.trim(), exact);
+    const common=LANGS.en;
+    for(const [en,translated] of Object.entries(dict)){
+      if(en && s.includes(en)) s=s.split(en).join(translated);
+    }
+    return s;
+  }
+  function walk(root,l){
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    const nodes=[];let n;while(n=walker.nextNode()) nodes.push(n);
+    nodes.forEach(node=>{
+      if(!node.nodeValue.trim()) return;
+      const parent=node.parentElement;
+      if(!parent || ['SCRIPT','STYLE','NOSCRIPT'].includes(parent.tagName)) return;
+      if(!original.has(node)) original.set(node,node.nodeValue);
+      const base=original.get(node);
+      node.nodeValue=translateText(base,l);
+    });
+  }
+  function apply(l){
+    if(applying)return; applying=true;
+    if(observer)observer.disconnect();
+    document.documentElement.lang=l;
+    walk(document.body,l);
+    applying=false;
+    if(observer)observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  }
+  async function init(){
+    let l=lang();
+    try{
+      if(!localStorage.getItem('paymeLanguage')){
+        const r=await fetch('/api/user/dashboard',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'}});
+        const d=await r.json().catch(()=>null);
+        const serverLang=d&&d.success&&d.user&&d.user.language;
+        if(LANGS[serverLang]){l=serverLang;localStorage.setItem('paymeLanguage',l)}
+      }
+    }catch(e){}
+    apply(l);
+    observer=new MutationObserver(()=>apply(lang()));
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
 </body></html>
+
 
 
 

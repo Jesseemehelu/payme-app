@@ -859,7 +859,7 @@
 <body>
 <main class="app">
 <header class="top">
-  <a class="back" href="earn.html">‹ Back</a>
+  <a class="back" href="/earn.html">‹ Back</a>
   <div class="pill-row">
     <div class="tickets-pill gems"><div class="ticket-icon gem">💎</div><div><small>Gems</small><b id="gemsTop">0</b></div></div>
     <div class="tickets-pill"><div class="ticket-icon">🪙</div><div><small>Luck Tickets</small><b id="ticketsTop">0</b></div></div>
@@ -1347,7 +1347,207 @@ loadBalance();
 loadVault();
 })();
 </script>
+
+<script>
+/* =========================================================
+   PAYME GLOBAL LANGUAGE LAYER — TAP / LUCK VAULT
+   Uses the language saved during signup.
+   Supported: English, Russian, Spanish, Hindi.
+   This layer only translates known UI strings and safely
+   handles dynamically-created popup/toast text.
+   ========================================================= */
+(function(){
+  'use strict';
+
+  const LANGS = ['en','ru','es','hi'];
+  const lang = LANGS.includes(localStorage.getItem('paymeLanguage'))
+    ? localStorage.getItem('paymeLanguage')
+    : 'en';
+
+  const I18N = {
+    en: {
+      'Luck Vault':'Luck Vault','‹ Back':'‹ Back','Gems':'Gems','Luck Tickets':'Luck Tickets',
+      'TAP VAULT • PLAY & EARN':'TAP VAULT • PLAY & EARN','DOUBLE OR NOTHING':'DOUBLE OR NOTHING',
+      'Double Your Gems':'Double Your Gems',
+      'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.',
+      'Heads':'Heads','Tails':'Tails','Your stake':'Your stake','MAX':'MAX','Flip & Double':'Flip & Double',
+      'Balance:':'Balance:','LUCK VAULT':'LUCK VAULT','Treasure Chest':'Treasure Chest',
+      'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.',
+      'Watch Ad':'Watch Ad','Reward:':'Reward:','20-50 Luck Tickets 🪙':'20-50 Luck Tickets 🪙',
+      'Chest relocks for 24h after opening':'Chest relocks for 24h after opening','How it works':'How it works','Fast & simple':'Fast & simple',
+      'Flip for gems or watch ads for tickets.':'Flip for gems or watch ads for tickets.',
+      'Rewards land in your balance instantly.':'Rewards land in your balance instantly.',
+      'Spend Luck Tickets in Lucky 3.':'Spend Luck Tickets in Lucky 3.',
+      'You won!':'You won!','You lost':'You lost','Added to your balance.':'Added to your balance.',
+      'Your stake was doubled and added to your balance.':'Your stake was doubled and added to your balance.',
+      'Your stake was lost this round. Try again when you’re ready.':'Your stake was lost this round. Try again when you’re ready.',
+      'Continue':'Continue','Top up needed':'Top up needed',
+      "You don't have enough gems for this stake.":"You don't have enough gems for this stake.",
+      'Deposit Gems':'Deposit Gems','Not now':'Not now','Chest opened!':'Chest opened!',
+      'Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.':'Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.',
+      'Nice!':'Nice!','Loading ad':'Loading ad','Flipping':'Flipping','Unlocks in':'Unlocks in','Next ad in':'Next ad in',
+      'Watch Ad 1 of 2':'Watch Ad 1 of 2','Watch Ad 2 of 2':'Watch Ad 2 of 2',
+      'Choose an amount between Gems💎10 and Gems💎1,000.':'Choose an amount between Gems💎10 and Gems💎1,000.',
+      'Unable to play right now.':'Unable to play right now.','Network error. Please try again.':'Network error. Please try again.',
+      'Unable to load vault.':'Unable to load vault.','Unable to load Luck Vault.':'Unable to load Luck Vault.',
+      'Please wait before watching another ad.':'Please wait before watching another ad.',
+      'Rewarded ad is not available right now.':'Rewarded ad is not available right now.',
+      'Ad finished. Waiting for confirmation — please try again in a moment.':'Ad finished. Waiting for confirmation — please try again in a moment.',
+      'Ad counted! Watch one more to open the chest.':'Ad counted! Watch one more to open the chest.',
+      'Something went wrong.':'Something went wrong.','Animated treasure chest':'Animated treasure chest'
+    },
+    ru: {
+      'Luck Vault':'Хранилище удачи','‹ Back':'‹ Назад','Gems':'Gems','Luck Tickets':'Билеты удачи',
+      'TAP VAULT • PLAY & EARN':'ХРАНИЛИЩЕ • ИГРА И ЗАРАБОТОК','DOUBLE OR NOTHING':'УДВОЙ ИЛИ ПОТЕРЯЙ',
+      'Double Your Gems':'Удвой свои Gems',
+      'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'Выберите сторону, поставьте от Gems💎10 до 1 000 и подбросьте монету. При победе ставка мгновенно удваивается.',
+      'Heads':'Орёл','Tails':'Решка','Your stake':'Ваша ставка','MAX':'МАКС.','Flip & Double':'Подбросить и удвоить',
+      'Balance:':'Баланс:','LUCK VAULT':'ХРАНИЛИЩЕ УДАЧИ','Treasure Chest':'Сундук с сокровищами',
+      'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'Посмотрите 2 рекламных видео, чтобы открыть светящийся сундук. Награда — 20–50 билетов удачи.',
+      'Watch Ad':'Смотреть рекламу','Reward:':'Награда:','20-50 Luck Tickets 🪙':'20–50 билетов удачи 🪙',
+      'Chest relocks for 24h after opening':'После открытия сундук блокируется на 24 часа','How it works':'Как это работает','Fast & simple':'Быстро и просто',
+      'Flip for gems or watch ads for tickets.':'Подбрасывайте монету ради Gems или смотрите рекламу ради билетов.',
+      'Rewards land in your balance instantly.':'Награды мгновенно зачисляются на ваш баланс.',
+      'Spend Luck Tickets in Lucky 3.':'Используйте билеты удачи в Lucky 3.',
+      'You won!':'Вы выиграли!','You lost':'Вы проиграли','Added to your balance.':'Добавлено на ваш баланс.',
+      'Your stake was doubled and added to your balance.':'Ваша ставка удвоена и добавлена на баланс.',
+      'Your stake was lost this round. Try again when you’re ready.':'Ваша ставка потеряна в этом раунде. Попробуйте снова, когда будете готовы.',
+      'Continue':'Продолжить','Top up needed':'Нужно пополнить баланс',
+      "You don't have enough gems for this stake.":'Недостаточно Gems для этой ставки.',
+      'Deposit Gems':'Пополнить Gems','Not now':'Не сейчас','Chest opened!':'Сундук открыт!',
+      'Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.':'Билеты удачи добавлены на ваш баланс. Используйте их в Lucky 3. Хранилище блокируется на 24 часа.',
+      'Nice!':'Отлично!','Loading ad':'Загрузка рекламы','Flipping':'Подбрасываем','Unlocks in':'Откроется через','Next ad in':'Следующая реклама через',
+      'Watch Ad 1 of 2':'Смотреть рекламу 1 из 2','Watch Ad 2 of 2':'Смотреть рекламу 2 из 2',
+      'Choose an amount between Gems💎10 and Gems💎1,000.':'Выберите сумму от Gems💎10 до Gems💎1 000.',
+      'Unable to play right now.':'Сейчас играть невозможно.','Network error. Please try again.':'Ошибка сети. Попробуйте снова.',
+      'Unable to load vault.':'Не удалось загрузить хранилище.','Unable to load Luck Vault.':'Не удалось загрузить хранилище удачи.',
+      'Please wait before watching another ad.':'Подождите перед просмотром следующей рекламы.',
+      'Rewarded ad is not available right now.':'Реклама с наградой сейчас недоступна.',
+      'Ad finished. Waiting for confirmation — please try again in a moment.':'Реклама завершена. Ожидаем подтверждение — попробуйте снова через несколько секунд.',
+      'Ad counted! Watch one more to open the chest.':'Реклама засчитана! Посмотрите ещё одну, чтобы открыть сундук.',
+      'Something went wrong.':'Что-то пошло не так.','Animated treasure chest':'Анимированный сундук с сокровищами'
+    },
+    es: {
+      'Luck Vault':'Bóveda de la Suerte','‹ Back':'‹ Volver','Gems':'Gems','Luck Tickets':'Boletos de Suerte',
+      'TAP VAULT • PLAY & EARN':'BÓVEDA • JUEGA Y GANA','DOUBLE OR NOTHING':'TODO O NADA','Double Your Gems':'Duplica tus Gems',
+      'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'Elige un lado, apuesta entre Gems💎10 y 1.000 y lanza la moneda. Si ganas, tu apuesta se duplica al instante.',
+      'Heads':'Cara','Tails':'Cruz','Your stake':'Tu apuesta','MAX':'MÁX.','Flip & Double':'Lanzar y duplicar',
+      'Balance:':'Saldo:','LUCK VAULT':'BÓVEDA DE LA SUERTE','Treasure Chest':'Cofre del tesoro',
+      'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'Mira 2 anuncios con recompensa para abrir el cofre brillante. La recompensa es de 20–50 boletos de suerte.',
+      'Watch Ad':'Ver anuncio','Reward:':'Recompensa:','20-50 Luck Tickets 🪙':'20–50 boletos de suerte 🪙',
+      'Chest relocks for 24h after opening':'El cofre se bloquea durante 24 h después de abrirlo','How it works':'Cómo funciona','Fast & simple':'Rápido y sencillo',
+      'Flip for gems or watch ads for tickets.':'Lanza la moneda para ganar Gems o mira anuncios para conseguir boletos.',
+      'Rewards land in your balance instantly.':'Las recompensas llegan a tu saldo al instante.',
+      'Spend Luck Tickets in Lucky 3.':'Usa los boletos de suerte en Lucky 3.',
+      'You won!':'¡Ganaste!','You lost':'Perdiste','Added to your balance.':'Añadido a tu saldo.',
+      'Your stake was doubled and added to your balance.':'Tu apuesta se duplicó y se añadió a tu saldo.',
+      'Your stake was lost this round. Try again when you’re ready.':'Perdiste tu apuesta en esta ronda. Inténtalo de nuevo cuando estés listo.',
+      'Continue':'Continuar','Top up needed':'Necesitas saldo','You don\'t have enough gems for this stake.':'No tienes suficientes Gems para esta apuesta.',
+      'Deposit Gems':'Depositar Gems','Not now':'Ahora no','Chest opened!':'¡Cofre abierto!',
+      'Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.':'Los boletos de suerte se añadieron a tu saldo. Úsalos en Lucky 3. La bóveda se bloquea durante 24 horas.',
+      'Nice!':'¡Genial!','Loading ad':'Cargando anuncio','Flipping':'Lanzando','Unlocks in':'Se desbloquea en','Next ad in':'Siguiente anuncio en',
+      'Watch Ad 1 of 2':'Ver anuncio 1 de 2','Watch Ad 2 of 2':'Ver anuncio 2 de 2',
+      'Choose an amount between Gems💎10 and Gems💎1,000.':'Elige una cantidad entre Gems💎10 y Gems💎1.000.',
+      'Unable to play right now.':'No se puede jugar ahora.','Network error. Please try again.':'Error de red. Inténtalo de nuevo.',
+      'Unable to load vault.':'No se pudo cargar la bóveda.','Unable to load Luck Vault.':'No se pudo cargar la Bóveda de la Suerte.',
+      'Please wait before watching another ad.':'Espera antes de ver otro anuncio.',
+      'Rewarded ad is not available right now.':'El anuncio con recompensa no está disponible ahora.',
+      'Ad finished. Waiting for confirmation — please try again in a moment.':'Anuncio terminado. Esperando confirmación — inténtalo de nuevo en un momento.',
+      'Ad counted! Watch one more to open the chest.':'¡Anuncio contado! Mira uno más para abrir el cofre.',
+      'Something went wrong.':'Algo salió mal.','Animated treasure chest':'Cofre del tesoro animado'
+    },
+    hi: {
+      'Luck Vault':'लकी वॉल्ट','‹ Back':'‹ वापस','Gems':'Gems','Luck Tickets':'लकी टिकट',
+      'TAP VAULT • PLAY & EARN':'टैप वॉल्ट • खेलें और कमाएँ','DOUBLE OR NOTHING':'डबल या कुछ नहीं','Double Your Gems':'अपने Gems दोगुने करें',
+      'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'एक पक्ष चुनें, Gems💎10 से 1,000 तक दांव लगाएँ और सिक्का उछालें। जीतने पर आपका दांव तुरंत दोगुना हो जाएगा।',
+      'Heads':'हेड्स','Tails':'टेल्स','Your stake':'आपका दांव','MAX':'अधिकतम','Flip & Double':'उछालें और दोगुना करें',
+      'Balance:':'बैलेंस:','LUCK VAULT':'लकी वॉल्ट','Treasure Chest':'खजाने का संदूक',
+      'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'चमकते संदूक को खोलने के लिए 2 रिवॉर्ड विज्ञापन देखें। इनाम 20–50 लकी टिकट है।',
+      'Watch Ad':'विज्ञापन देखें','Reward:':'इनाम:','20-50 Luck Tickets 🪙':'20–50 लकी टिकट 🪙',
+      'Chest relocks for 24h after opening':'खोलने के बाद संदूक 24 घंटे के लिए लॉक हो जाता है','How it works':'यह कैसे काम करता है','Fast & simple':'तेज़ और आसान',
+      'Flip for gems or watch ads for tickets.':'Gems के लिए सिक्का उछालें या टिकट पाने के लिए विज्ञापन देखें।',
+      'Rewards land in your balance instantly.':'इनाम तुरंत आपके बैलेंस में जुड़ जाता है।','Spend Luck Tickets in Lucky 3.':'लकी 3 में लकी टिकट खर्च करें।',
+      'You won!':'आप जीत गए!','You lost':'आप हार गए','Added to your balance.':'आपके बैलेंस में जोड़ दिया गया।',
+      'Your stake was doubled and added to your balance.':'आपका दांव दोगुना करके बैलेंस में जोड़ दिया गया।',
+      'Your stake was lost this round. Try again when you’re ready.':'इस राउंड में आपका दांव हार गया। तैयार होने पर फिर कोशिश करें।',
+      'Continue':'जारी रखें','Top up needed':'बैलेंस बढ़ाएँ',"You don't have enough gems for this stake.":'इस दांव के लिए आपके पास पर्याप्त Gems नहीं हैं।',
+      'Deposit Gems':'Gems जमा करें','Not now':'अभी नहीं','Chest opened!':'संदूक खुल गया!',
+      'Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.':'लकी टिकट आपके बैलेंस में जोड़ दिए गए हैं। उन्हें लकी 3 में इस्तेमाल करें। वॉल्ट 24 घंटे के लिए फिर लॉक हो जाएगा।',
+      'Nice!':'बहुत बढ़िया!','Loading ad':'विज्ञापन लोड हो रहा है','Flipping':'सिक्का उछाला जा रहा है','Unlocks in':'अनलॉक होगा','Next ad in':'अगला विज्ञापन',
+      'Watch Ad 1 of 2':'विज्ञापन 1 में से 1 देखें','Watch Ad 2 of 2':'विज्ञापन 2 में से 2 देखें',
+      'Choose an amount between Gems💎10 and Gems💎1,000.':'Gems💎10 और Gems💎1,000 के बीच राशि चुनें।',
+      'Unable to play right now.':'अभी खेलना संभव नहीं है।','Network error. Please try again.':'नेटवर्क त्रुटि। फिर से कोशिश करें।',
+      'Unable to load vault.':'वॉल्ट लोड नहीं हो सका।','Unable to load Luck Vault.':'लकी वॉल्ट लोड नहीं हो सका।',
+      'Please wait before watching another ad.':'दूसरा विज्ञापन देखने से पहले प्रतीक्षा करें।',
+      'Rewarded ad is not available right now.':'रिवॉर्ड विज्ञापन अभी उपलब्ध नहीं है।',
+      'Ad finished. Waiting for confirmation — please try again in a moment.':'विज्ञापन पूरा हुआ। पुष्टि की प्रतीक्षा है — थोड़ी देर बाद फिर कोशिश करें।',
+      'Ad counted! Watch one more to open the chest.':'विज्ञापन गिना गया! संदूक खोलने के लिए एक और देखें।',
+      'Something went wrong.':'कुछ गलत हो गया।','Animated treasure chest':'एनिमेटेड खजाने का संदूक'
+    }
+  };
+
+  const dict = I18N[lang] || I18N.en;
+  const textNodes = new WeakMap();
+  const normalize = s => s.replace(/\s+/g,' ').trim();
+
+  function translateNode(node){
+    if(!node || node.nodeType!==3) return;
+    const raw = textNodes.has(node) ? textNodes.get(node) : node.nodeValue;
+    if(!textNodes.has(node)) textNodes.set(node, raw);
+    const key = normalize(raw);
+    if(!key) return;
+    let translated = dict[key];
+    if(!translated){
+      const unlock = key.match(/^Unlocks in\s+(.+)$/);
+      const nextAd = key.match(/^Next ad in\s+(.+)$/);
+      if(unlock) translated = (dict['Unlocks in'] || 'Unlocks in') + ' ' + unlock[1];
+      else if(nextAd) translated = (dict['Next ad in'] || 'Next ad in') + ' ' + nextAd[1];
+    }
+    if(translated && raw.trim()===key){
+      const lead = raw.match(/^\s*/)?.[0] || '';
+      const trail = raw.match(/\s*$/)?.[0] || '';
+      node.nodeValue = lead + translated + trail;
+    }
+  }
+
+  function walk(root){
+    if(!root) return;
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    const nodes=[];
+    let n;
+    while(n=walker.nextNode()) nodes.push(n);
+    nodes.forEach(translateNode);
+  }
+
+  function translateAttrs(){
+    document.querySelectorAll('[aria-label]').forEach(el=>{
+      const v=el.getAttribute('aria-label');
+      if(dict[v]) el.setAttribute('aria-label',dict[v]);
+    });
+    document.title = dict['Luck Vault'] + ' — PAYME';
+  }
+
+  walk(document.body);
+  translateAttrs();
+
+  const observer=new MutationObserver(mutations=>{
+    for(const m of mutations){
+      if(m.type==='characterData') translateNode(m.target);
+      else if(m.type==='childList') m.addedNodes.forEach(n=>{
+        if(n.nodeType===3) translateNode(n);
+        else if(n.nodeType===1) walk(n);
+      });
+    }
+  });
+  observer.observe(document.body,{subtree:true,childList:true});
+
+  window.PAYME_TAP_T = key => dict[key] || I18N.en[key] || key;
+  window.PAYME_TAP_LANG = lang;
+})();
+</script>
+
 </body>
 </html>
+
 
 

@@ -510,6 +510,154 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
+
+<script>
+(function PAYMEEarnLanguage(){
+  const I18N = {
+    en: {
+      "Back to Dashboard":"Back to Dashboard","PAYME REWARDS":"PAYME REWARDS",
+      "Turn your activity":"Turn your activity","real rewards.":"real rewards.",
+      "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.":"Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.",
+      "3 games to play":"3 games to play","Instant rewards":"Instant rewards","15 per referral":"15 per referral",
+      "Arcade Games":"Arcade Games","Tap a game to play":"Tap a game to play",
+      "3 Games Active":"3 Games Active","Tap, spin and match for PAYME rewards.":"Tap, spin and match for PAYME rewards.",
+      "Max Payout":"Max Payout","Luck Vault":"Luck Vault",
+      "Open the treasure chests to unlock Luck Tickets and rewards.":"Open the treasure chests to unlock Luck Tickets and rewards.",
+      "20–70 Luck Tickets per chest":"20–70 Luck Tickets per chest",
+      "PAYME Spin":"PAYME Spin","Spin the wheel and try your luck for instant cash prizes.":"Spin the wheel and try your luck for instant cash prizes.",
+      "Up to 50 prize opportunity":"Up to 50 prize opportunity","Lucky3":"Lucky3",
+      "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Pick 3 numbers and stake your Luck Tickets for cash or free spins.",
+      "Win up to 15,000":"Win up to 15,000",
+      "More Ways To Earn":"More Ways To Earn","Pick any option below":"Pick any option below",
+      "Earn 15":"Earn 15","Invite Friends":"Invite Friends",
+      "Invite friends and earn 15 for every active referral.":"Invite friends and earn 15 for every active referral.",
+      "Invite & Earn":"Invite & Earn","Soon":"Soon","Community Giveaways":"Community Giveaways",
+      "Join future community reward pools and special PAYME cash drops.":"Join future community reward pools and special PAYME cash drops.",
+      "Coming Soon":"Coming Soon","How Earning Works":"How Earning Works","Simple & fair":"Simple & fair",
+      "Pick any option above — a game, referral, or task.":"Pick any option above — a game, referral, or task.",
+      "Complete it — your progress saves automatically.":"Complete it — your progress saves automatically.",
+      "Get your reward instantly, straight to your PAYME account.":"Get your reward instantly, straight to your PAYME account."
+    },
+    ru: {
+      "Back to Dashboard":"Назад на панель","PAYME REWARDS":"НАГРАДЫ PAYME",
+      "Turn your activity":"Превращай активность в","real rewards.":"реальные награды.",
+      "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.":"Играйте, приглашайте друзей, развивайте сообщества и зарабатывайте в PAYME — всё доступно прямо на этой странице.",
+      "3 games to play":"3 игры","Instant rewards":"Мгновенные награды","15 per referral":"15 за приглашение",
+      "Arcade Games":"Аркадные игры","Tap a game to play":"Нажмите на игру",
+      "3 Games Active":"3 активные игры","Tap, spin and match for PAYME rewards.":"Нажимайте, крутите и играйте ради наград PAYME.",
+      "Max Payout":"Макс. выплата","Luck Vault":"Хранилище удачи",
+      "Open the treasure chests to unlock Luck Tickets and rewards.":"Открывайте сундуки, чтобы получать билеты удачи и награды.",
+      "20–70 Luck Tickets per chest":"20–70 билетов удачи за сундук",
+      "PAYME Spin":"PAYME Spin","Spin the wheel and try your luck for instant cash prizes.":"Крутите колесо и испытайте удачу ради мгновенных денежных призов.",
+      "Up to 50 prize opportunity":"Шанс получить до 50","Lucky3":"Lucky3",
+      "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Выберите 3 числа и поставьте билеты удачи на деньги или бесплатные вращения.",
+      "Win up to 15,000":"Выигрыш до 15 000",
+      "More Ways To Earn":"Больше способов заработать","Pick any option below":"Выберите любой вариант",
+      "Earn 15":"Заработайте 15","Invite Friends":"Пригласить друзей",
+      "Invite friends and earn 15 for every active referral.":"Приглашайте друзей и получайте 15 за каждого активного реферала.",
+      "Invite & Earn":"Пригласить и заработать","Soon":"Скоро","Community Giveaways":"Розыгрыши сообщества",
+      "Join future community reward pools and special PAYME cash drops.":"Участвуйте в будущих пулах наград сообщества и специальных денежных раздачах PAYME.",
+      "Coming Soon":"Скоро","How Earning Works":"Как это работает","Simple & fair":"Просто и честно",
+      "Pick any option above — a game, referral, or task.":"Выберите любой вариант выше — игру, приглашение или задание.",
+      "Complete it — your progress saves automatically.":"Выполните его — прогресс сохранится автоматически.",
+      "Get your reward instantly, straight to your PAYME account.":"Получите награду мгновенно прямо на аккаунт PAYME."
+    },
+    es: {
+      "Back to Dashboard":"Volver al panel","PAYME REWARDS":"RECOMPENSAS PAYME",
+      "Turn your activity":"Convierte tu actividad en","real rewards.":"recompensas reales.",
+      "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.":"Juega, invita a amigos, promociona comunidades y gana en PAYME — todo lo que puedes hacer está aquí.",
+      "3 games to play":"3 juegos","Instant rewards":"Recompensas instantáneas","15 per referral":"15 por referido",
+      "Arcade Games":"Juegos arcade","Tap a game to play":"Toca un juego para jugar",
+      "3 Games Active":"3 juegos activos","Tap, spin and match for PAYME rewards.":"Toca, gira y juega para conseguir recompensas de PAYME.",
+      "Max Payout":"Pago máximo","Luck Vault":"Bóveda de la Suerte",
+      "Open the treasure chests to unlock Luck Tickets and rewards.":"Abre los cofres del tesoro para obtener Tickets de Suerte y recompensas.",
+      "20–70 Luck Tickets per chest":"20–70 Tickets de Suerte por cofre",
+      "PAYME Spin":"PAYME Spin","Spin the wheel and try your luck for instant cash prizes.":"Gira la rueda y prueba tu suerte para ganar premios en efectivo al instante.",
+      "Up to 50 prize opportunity":"Oportunidad de premio de hasta 50","Lucky3":"Lucky3",
+      "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Elige 3 números y apuesta tus Tickets de Suerte por efectivo o giros gratis.",
+      "Win up to 15,000":"Gana hasta 15.000",
+      "More Ways To Earn":"Más formas de ganar","Pick any option below":"Elige cualquier opción",
+      "Earn 15":"Gana 15","Invite Friends":"Invitar amigos",
+      "Invite friends and earn 15 for every active referral.":"Invita amigos y gana 15 por cada referido activo.",
+      "Invite & Earn":"Invita y gana","Soon":"Próximamente","Community Giveaways":"Regalos de la comunidad",
+      "Join future community reward pools and special PAYME cash drops.":"Únete a futuros fondos de recompensas de la comunidad y entregas especiales de efectivo de PAYME.",
+      "Coming Soon":"Próximamente","How Earning Works":"Cómo funciona","Simple & fair":"Simple y justo",
+      "Pick any option above — a game, referral, or task.":"Elige cualquier opción de arriba — un juego, referido o tarea.",
+      "Complete it — your progress saves automatically.":"Complétalo — tu progreso se guarda automáticamente.",
+      "Get your reward instantly, straight to your PAYME account.":"Recibe tu recompensa al instante directamente en tu cuenta PAYME."
+    },
+    hi: {
+      "Back to Dashboard":"डैशबोर्ड पर वापस जाएँ","PAYME REWARDS":"PAYME रिवॉर्ड्स",
+      "Turn your activity":"अपनी गतिविधि को बदलें","real rewards.":"असली रिवॉर्ड्स में।",
+      "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.":"गेम खेलें, दोस्तों को आमंत्रित करें, कम्युनिटी को बढ़ावा दें और PAYME पर कमाएँ — सब कुछ इसी पेज पर है।",
+      "3 games to play":"खेलने के लिए 3 गेम","Instant rewards":"तुरंत रिवॉर्ड्स","15 per referral":"हर रेफरल पर 15",
+      "Arcade Games":"आर्केड गेम्स","Tap a game to play":"खेलने के लिए गेम चुनें",
+      "3 Games Active":"3 गेम सक्रिय","Tap, spin and match for PAYME rewards.":"PAYME रिवॉर्ड्स के लिए टैप, स्पिन और मैच करें।",
+      "Max Payout":"अधिकतम भुगतान","Luck Vault":"लक वॉल्ट",
+      "Open the treasure chests to unlock Luck Tickets and rewards.":"लक टिकट और रिवॉर्ड्स पाने के लिए खजाने के चेस्ट खोलें।",
+      "20–70 Luck Tickets per chest":"हर चेस्ट पर 20–70 लक टिकट",
+      "PAYME Spin":"PAYME स्पिन","Spin the wheel and try your luck for instant cash prizes.":"व्हील घुमाएँ और तुरंत नकद इनाम के लिए अपनी किस्मत आज़माएँ।",
+      "Up to 50 prize opportunity":"50 तक इनाम का मौका","Lucky3":"Lucky3",
+      "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"3 नंबर चुनें और नकद या फ्री स्पिन के लिए अपने लक टिकट दाँव पर लगाएँ।",
+      "Win up to 15,000":"15,000 तक जीतें",
+      "More Ways To Earn":"कमाने के और तरीके","Pick any option below":"नीचे कोई भी विकल्प चुनें",
+      "Earn 15":"15 कमाएँ","Invite Friends":"दोस्तों को आमंत्रित करें",
+      "Invite friends and earn 15 for every active referral.":"दोस्तों को आमंत्रित करें और हर सक्रिय रेफरल पर 15 कमाएँ।",
+      "Invite & Earn":"आमंत्रित करें और कमाएँ","Soon":"जल्द","Community Giveaways":"कम्युनिटी गिवअवे",
+      "Join future community reward pools and special PAYME cash drops.":"भविष्य के कम्युनिटी रिवॉर्ड पूल और विशेष PAYME कैश ड्रॉप्स में शामिल हों।",
+      "Coming Soon":"जल्द आ रहा है","How Earning Works":"कमाई कैसे काम करती है","Simple & fair":"सरल और निष्पक्ष",
+      "Pick any option above — a game, referral, or task.":"ऊपर कोई भी विकल्प चुनें — गेम, रेफरल या टास्क।",
+      "Complete it — your progress saves automatically.":"इसे पूरा करें — आपकी प्रगति अपने आप सेव हो जाएगी।",
+      "Get your reward instantly, straight to your PAYME account.":"अपना रिवॉर्ड तुरंत अपने PAYME अकाउंट में पाएँ।"
+    }
+  };
+
+  const original = new WeakMap();
+  function lang(){
+    const v = localStorage.getItem("paymeLanguage") || "en";
+    return I18N[v] ? v : "en";
+  }
+  function translate(root=document.body){
+    const l = lang(), dict = I18N[l];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while(walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n=>{
+      const raw = original.has(n) ? original.get(n) : n.nodeValue;
+      if(!original.has(n)) original.set(n, raw);
+      const key = raw.trim();
+      if(dict[key] && key){
+        const leading = raw.match(/^\s*/)?.[0] || "";
+        const trailing = raw.match(/\s*$/)?.[0] || "";
+        n.nodeValue = leading + dict[key] + trailing;
+      } else if(l === "en" && original.has(n)) {
+        n.nodeValue = raw;
+      }
+    });
+  }
+  function apply(){
+    translate(document.body);
+    document.documentElement.lang = lang();
+  }
+
+  window.addEventListener("storage", e=>{
+    if(e.key === "paymeLanguage") apply();
+  });
+  document.addEventListener("DOMContentLoaded", apply);
+
+  // Translate text added later without observing our own text-node edits.
+  const observer = new MutationObserver(muts=>{
+    let should = false;
+    muts.forEach(m=>{
+      if(m.type === "childList" && m.addedNodes.length) should = true;
+    });
+    if(should) translate(document.body);
+  });
+  observer.observe(document.body, {childList:true, subtree:true});
+})();
+</script>
+
 </body>
 </html>
+
 
