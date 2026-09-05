@@ -207,6 +207,37 @@
 .info-card:nth-child(3) strong{color:var(--gold);box-shadow:inset 0 0 0 1px rgba(255,215,106,.4)}
 .info-card small{display:block;color:#cbd5f5;font-size:8px;line-height:1.4;margin-top:3px}
 
+/* ============ MILESTONE REWARDS ============ */
+.milestone-card{position:relative;overflow:hidden;padding:16px 15px 15px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(155deg,rgba(255,255,255,.05),rgba(255,255,255,.015));margin-bottom:10px;transition:border-color .3s,box-shadow .3s,opacity .3s;isolation:isolate}
+.milestone-card:last-child{margin-bottom:0}
+.milestone-head{display:flex;align-items:center;gap:11px}
+.milestone-icon{width:40px;height:40px;flex:0 0 40px;border-radius:13px;display:grid;place-items:center;font-size:18px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.milestone-body{flex:1;min-width:0}
+.milestone-body h4{margin:0 0 2px;font-size:12px;font-weight:900;color:#fff}
+.milestone-body p{margin:0;font-size:9px;color:var(--muted);line-height:1.4}
+.milestone-reward{flex:0 0 auto;text-align:right;font-size:10.5px;font-weight:900;color:var(--gold);white-space:nowrap;padding-left:6px}
+.milestone-reward small{display:block;font-size:7px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.milestone-progress-row{display:flex;align-items:center;gap:9px;margin-top:12px}
+.milestone-bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;position:relative}
+.milestone-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--purple));width:0%;transition:width .6s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
+.milestone-bar-fill:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:barShine 2.2s linear infinite}
+@keyframes barShine{to{transform:translateX(100%)}}
+.milestone-count{flex:0 0 auto;font-size:9px;font-weight:900;color:#cbd5f5;min-width:38px;text-align:right}
+.milestone-actions{display:flex;gap:8px;margin-top:12px}
+.milestone-go,.milestone-claim{flex:1;padding:10px 8px;border-radius:13px;font-size:11px;font-weight:900;text-align:center;text-decoration:none;color:#fff;border:1px solid var(--line);background:rgba(255,255,255,.05);transition:transform .15s,opacity .2s,box-shadow .3s;display:flex;align-items:center;justify-content:center;gap:5px}
+.milestone-go:active{transform:scale(.96)}
+.milestone-claim{cursor:pointer;opacity:.5;pointer-events:none}
+.milestone-claim.ready{opacity:1;pointer-events:auto;background:linear-gradient(135deg,var(--gold),var(--orange));color:#321b00;border-color:transparent;animation:claimGlow 1.6s ease-in-out infinite}
+.milestone-claim.ready:active{transform:scale(.94)}
+@keyframes claimGlow{0%,100%{box-shadow:0 0 10px rgba(255,215,106,.35),0 0 0 rgba(255,159,67,0)}50%{box-shadow:0 0 22px rgba(255,215,106,.85),0 0 34px rgba(255,159,67,.45)}}
+.milestone-claim.done{opacity:.55;pointer-events:none;background:rgba(98,240,165,.12);color:var(--green);border-color:rgba(98,240,165,.3);animation:none}
+.milestone-card.ready-glow{border-color:rgba(255,215,106,.45);box-shadow:0 0 0 1px rgba(255,215,106,.15),0 18px 40px rgba(255,159,67,.16)}
+.milestone-card.milestone-done{opacity:.68}
+.modal-card.bouncy{animation:none}
+.modal.open .modal-card.bouncy{animation:milestoneBouncePop .62s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes milestoneBouncePop{0%{transform:translateY(34px) scale(.68);opacity:0}50%{transform:translateY(-10px) scale(1.09);opacity:1}72%{transform:translateY(4px) scale(.96)}88%{transform:translateY(-2px) scale(1.015)}100%{transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.milestone-bar-fill:after,.milestone-claim.ready,.modal.open .modal-card.bouncy{animation:none!important}}
+
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,25px);opacity:0;pointer-events:none;z-index:50;padding:11px 16px;border-radius:25px;background:#171b2c;border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;font-weight:800;transition:.25s;max-width:88%;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .modal{position:fixed;inset:0;z-index:40;display:flex;visibility:hidden;opacity:0;pointer-events:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,3,9,.72);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:opacity .25s ease,visibility 0s linear .25s,backdrop-filter .25s ease}
@@ -961,6 +992,67 @@
   <div class="vault-note">Reward: <strong>20-50 Luck Tickets 🪙</strong> · Chest relocks for 24h after opening</div>
 </section>
 
+<div class="section-title"><h3>Milestone Rewards</h3><span>Claim once</span></div>
+<section class="vault-card" id="milestoneSection" style="padding:16px 14px 14px">
+
+  <div class="milestone-card" id="milestoneRef10">
+    <div class="milestone-head">
+      <div class="milestone-icon">🤝</div>
+      <div class="milestone-body">
+        <h4>Refer 10 Friends</h4>
+        <p>Invite 10 friends to PAYME.</p>
+      </div>
+      <div class="milestone-reward"><small>Reward</small>100 🪙</div>
+    </div>
+    <div class="milestone-progress-row">
+      <div class="milestone-bar"><div class="milestone-bar-fill" id="ref10Fill"></div></div>
+      <div class="milestone-count" id="ref10Count">0/10</div>
+    </div>
+    <div class="milestone-actions">
+      <a href="/dashboard.html#referrals" class="milestone-go">Go <span>→</span></a>
+      <button class="milestone-claim" id="ref10Claim" data-id="ref10">Claim</button>
+    </div>
+  </div>
+
+  <div class="milestone-card" id="milestoneRef25">
+    <div class="milestone-head">
+      <div class="milestone-icon">🚀</div>
+      <div class="milestone-body">
+        <h4>Refer 25 Friends</h4>
+        <p>Invite 25 friends to PAYME.</p>
+      </div>
+      <div class="milestone-reward"><small>Reward</small>200 🪙</div>
+    </div>
+    <div class="milestone-progress-row">
+      <div class="milestone-bar"><div class="milestone-bar-fill" id="ref25Fill"></div></div>
+      <div class="milestone-count" id="ref25Count">0/25</div>
+    </div>
+    <div class="milestone-actions">
+      <a href="/dashboard.html#referrals" class="milestone-go">Go <span>→</span></a>
+      <button class="milestone-claim" id="ref25Claim" data-id="ref25">Claim</button>
+    </div>
+  </div>
+
+  <div class="milestone-card" id="milestoneChest5">
+    <div class="milestone-head">
+      <div class="milestone-icon">🗝️</div>
+      <div class="milestone-body">
+        <h4>Open Treasure Box 5 Times</h4>
+        <p>Crack open the Luck Vault chest 5 times.</p>
+      </div>
+      <div class="milestone-reward"><small>Reward</small>200 🪙</div>
+    </div>
+    <div class="milestone-progress-row">
+      <div class="milestone-bar"><div class="milestone-bar-fill" id="chest5Fill"></div></div>
+      <div class="milestone-count" id="chest5Count">0/5</div>
+    </div>
+    <div class="milestone-actions">
+      <button class="milestone-claim" id="chest5Claim" data-id="chest5">Claim</button>
+    </div>
+  </div>
+
+</section>
+
 <div class="section-title"><h3>How it works</h3><span>Fast &amp; simple</span></div>
 <div class="info">
   <div class="info-card"><strong>1</strong><small>Flip for gems or watch ads for tickets.</small></div>
@@ -992,6 +1084,14 @@
   <div class="modal-reward" id="chestRewardAmount">+20 🪙</div>
   <p>Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.</p>
   <button class="close" id="chestRewardClose">Nice!</button>
+</div></div>
+
+<div class="modal" id="milestoneRewardModal"><div class="modal-card bouncy">
+  <div class="modal-icon" id="milestoneRewardIcon">🎉</div>
+  <h2>Reward Claimed!</h2>
+  <div class="modal-reward" id="milestoneRewardAmount">+100 🪙</div>
+  <p id="milestoneRewardSub">Luck Tickets have been added to your balance.</p>
+  <button class="close" id="milestoneRewardClose">Nice!</button>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -1226,8 +1326,87 @@ async function loadVault(){
     chestState=d;
     renderTopPills();
     renderVault();
+    renderMilestones();
   }catch(e){toast(e.message||'Unable to load Luck Vault.')}
 }
+
+/* ============ MILESTONE REWARDS ============ */
+const MILESTONE_DEFS={
+  ref10:{need:10,unit:'referrals',fillId:'ref10Fill',countId:'ref10Count',cardId:'milestoneRef10',btnId:'ref10Claim'},
+  ref25:{need:25,unit:'referrals',fillId:'ref25Fill',countId:'ref25Count',cardId:'milestoneRef25',btnId:'ref25Claim'},
+  chest5:{need:5,unit:'chests',fillId:'chest5Fill',countId:'chest5Count',cardId:'milestoneChest5',btnId:'chest5Claim'}
+};
+let busyMilestone=false;
+
+function renderMilestones(){
+  if(!chestState) return;
+  const referrals=Number(chestState.totalReferrals||0);
+  const chestsOpened=Number(chestState.chestOpensTotal||0);
+  const milestones=chestState.milestones||{};
+
+  Object.entries(MILESTONE_DEFS).forEach(([id,def])=>{
+    const have=def.unit==='referrals' ? referrals : chestsOpened;
+    const pct=Math.min(100,Math.round((have/def.need)*100));
+    const done=!!milestones[id];
+    const ready=!done && have>=def.need;
+
+    $(def.fillId).style.width=pct+'%';
+    $(def.countId).textContent=Math.min(have,def.need)+'/'+def.need;
+
+    const card=$(def.cardId), btn=$(def.btnId);
+    card.classList.toggle('ready-glow',ready);
+    card.classList.toggle('milestone-done',done);
+    btn.classList.toggle('ready',ready);
+    btn.classList.toggle('done',done);
+    if(!btn.dataset.busy){
+      btn.textContent = done ? 'Claimed ✓' : (ready ? 'Claim ✨' : 'Claim');
+    }
+  });
+}
+
+document.querySelectorAll('.milestone-claim').forEach(btn=>{
+  btn.addEventListener('click',async()=>{
+    if(busyMilestone || !btn.classList.contains('ready')) return;
+    busyMilestone=true;
+    btn.dataset.busy='1';
+    const id=btn.dataset.id;
+    const prevText=btn.textContent;
+    btn.textContent='...';
+    let success=false;
+    try{
+      const r=await fetch('/api/luck/milestones/claim',{
+        method:'POST',
+        credentials:'same-origin',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({id})
+      });
+      const d=await r.json();
+      if(!r.ok || !d.success){
+        toast(d.message||'Unable to claim this reward yet.');
+        return;
+      }
+      success=true;
+      luckTickets=Number(d.luckTickets||0);
+      chestState.milestones=d.milestones||chestState.milestones;
+      if(d.totalReferrals!=null) chestState.totalReferrals=Number(d.totalReferrals);
+      if(d.chestOpensTotal!=null) chestState.chestOpensTotal=Number(d.chestOpensTotal);
+      renderTopPills();
+      bump($('ticketsTop'));bump($('vaultTicketsBadge'));
+      $('milestoneRewardAmount').textContent='+'+Number(d.reward||0).toLocaleString()+' 🪙';
+      $('milestoneRewardModal').classList.add('open');
+      confetti();
+    }catch(e){
+      toast('Network error. Please try again.');
+    }finally{
+      busyMilestone=false;
+      delete btn.dataset.busy;
+      if(!success) btn.textContent=prevText;
+      renderMilestones();
+    }
+  });
+});
+$('milestoneRewardClose').onclick=()=>closeModal('milestoneRewardModal');
+$('milestoneRewardModal').addEventListener('click',e=>{if(e.target===$('milestoneRewardModal'))closeModal('milestoneRewardModal')});
 
 function spawnTicketBurst(tickets){
   const stage=$('vaultStage');
@@ -1279,6 +1458,7 @@ document.addEventListener('keydown',e=>{
   closeModal('flipResultModal');
   closeModal('depositModal');
   closeModal('chestRewardModal');
+  closeModal('milestoneRewardModal');
 });
 
 $('vaultWatchBtn').onclick=async()=>{
@@ -1548,6 +1728,7 @@ loadVault();
 
 </body>
 </html>
+
 
 
 

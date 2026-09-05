@@ -5537,6 +5537,12 @@ function getLuckChestSnapshot(user) {
       waitingForGap: nextAdReadyAt > now,
       nextAdReadyAt: nextAdReadyAt > now ? nextAdReadyAt : 0
     },
+    // Already present on req.user / the daily_reward blob for this request —
+    // included here so the tap page's existing /api/luck/chests poll can
+    // drive the milestone progress bars without any additional fetch.
+    totalReferrals: number(user.totalReferrals),
+    chestOpensTotal: number(daily.chestOpensTotal),
+    milestones: { ...daily.milestones },
     serverNow: now
   };
 }
@@ -5583,6 +5589,7 @@ function applyLuckChestCompletion(user) {
   if (chest.progress >= cfg.ads) {
     tickets = chooseLuckTicketReward();
     daily.luckTickets = number(daily.luckTickets) + tickets;
+    daily.chestOpensTotal = number(daily.chestOpensTotal) + 1;
     // The chest re-locks for 24 hours after opening.
     chest.progress = 0;
     chest.firstAdAt = 0;
@@ -5602,6 +5609,77 @@ app.get('/api/luck/chests', requireLogin, async (req, res) => {
   } catch (err) {
     console.error('Luck chest state error:', err);
     return res.status(500).json({ success: false, message: 'Unable to load Luck Chest progress.' });
+  }
+});
+
+// ======================================================
+// MILESTONE REWARDS (referrals + treasure chest)
+// ======================================================
+// One-time claims. Progress for these is read from data already loaded
+// for every request (req.user.totalReferrals, the daily_reward JSON blob)
+// so this route is the only extra Supabase write in the whole feature —
+// and it only fires when the user actually presses Claim.
+const LUCK_MILESTONE_CONFIG = {
+  ref10: { need: 10, unit: 'referrals', reward: 100 },
+  ref25: { need: 25, unit: 'referrals', reward: 200 },
+  chest5: { need: 5, unit: 'chests', reward: 200 }
+};
+
+app.post('/api/luck/milestones/claim', requireLogin, async (req, res) => {
+  try {
+    const id = String(req.body?.id || '').trim();
+    const cfg = LUCK_MILESTONE_CONFIG[id];
+
+    if (!cfg) {
+      return res.status(400).json({ success: false, message: 'Unknown reward.' });
+    }
+
+    const user = req.user;
+    const daily = normalizeDailyReward(user);
+
+    if (daily.milestones[id]) {
+      return res.status(400).json({ success: false, message: 'This reward has already been claimed.' });
+    }
+
+    const have =
+      cfg.unit === 'referrals'
+        ? number(user.totalReferrals)
+        : number(daily.chestOpensTotal);
+
+    if (have < cfg.need) {
+      return res.status(400).json({ success: false, message: 'You have not unlocked this reward yet.' });
+    }
+
+    daily.milestones[id] = true;
+    daily.luckTickets = number(daily.luckTickets) + cfg.reward;
+    user.dailyReward = daily;
+    user.luckTickets = number(daily.luckTickets);
+
+    await updateUser(user);
+
+    await addTransaction(user.id, {
+      id: generateTransactionId('tx_luck_milestone_' + id),
+      type: 'luck_milestone_reward',
+      description: `Milestone reward — ${id} (${cfg.reward} Luck Tickets)`,
+      amount: cfg.reward,
+      currency: 'LUCK_TICKETS',
+      status: 'completed',
+      bank: 'Luck Ticket Wallet'
+    });
+
+    return res.json({
+      success: true,
+      reward: cfg.reward,
+      luckTickets: number(daily.luckTickets),
+      milestones: { ...daily.milestones },
+      totalReferrals: number(user.totalReferrals),
+      chestOpensTotal: number(daily.chestOpensTotal),
+      serverNow: Date.now()
+    });
+
+  } catch (err) {
+    console.error('Luck milestone claim error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to claim reward right now.' });
   }
 });
 
@@ -6470,6 +6548,26 @@ function normalizeDailyReward(
       }
     };
   }
+
+  // Lifetime count of chests opened (never resets) — lives in the same
+  // daily_reward JSON blob so tracking it costs no extra Supabase reads
+  // or columns. Used by the "Open the treasure box 5 times" milestone.
+  if (!Number.isFinite(Number(user.dailyReward.chestOpensTotal))) {
+    user.dailyReward.chestOpensTotal = 0;
+  }
+  user.dailyReward.chestOpensTotal = Math.max(0, number(user.dailyReward.chestOpensTotal));
+
+  // One-time milestone claim flags — also in the same JSON blob, so
+  // claiming a milestone reward piggybacks on a write that already
+  // has to happen (crediting Luck Tickets) rather than needing its own.
+  if (!user.dailyReward.milestones || typeof user.dailyReward.milestones !== 'object') {
+    user.dailyReward.milestones = {};
+  }
+  user.dailyReward.milestones = {
+    ref10: !!user.dailyReward.milestones.ref10,
+    ref25: !!user.dailyReward.milestones.ref25,
+    chest5: !!user.dailyReward.milestones.chest5
+  };
 
   return user.dailyReward;
 
@@ -9447,6 +9545,7 @@ app.listen(
   }
 
 );
+
 
 
 
