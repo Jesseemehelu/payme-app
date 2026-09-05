@@ -233,9 +233,9 @@
 .milestone-claim.done{opacity:.55;pointer-events:none;background:rgba(98,240,165,.12);color:var(--green);border-color:rgba(98,240,165,.3);animation:none}
 .milestone-card.ready-glow{border-color:rgba(255,215,106,.45);box-shadow:0 0 0 1px rgba(255,215,106,.15),0 18px 40px rgba(255,159,67,.16)}
 .milestone-card.milestone-done{opacity:.68}
-.modal-card.bouncy{animation:none}
+.modal-card.bouncy{animation:none;opacity:0}
 .modal.open .modal-card.bouncy{animation:milestoneBouncePop .62s cubic-bezier(.34,1.56,.64,1) forwards}
-@keyframes milestoneBouncePop{0%{transform:translateY(34px) scale(.68);opacity:0}50%{transform:translateY(-10px) scale(1.09);opacity:1}72%{transform:translateY(4px) scale(.96)}88%{transform:translateY(-2px) scale(1.015)}100%{transform:translateY(0) scale(1)}}
+@keyframes milestoneBouncePop{0%{transform:translateY(34px) scale(.68);opacity:0}50%{transform:translateY(-10px) scale(1.09);opacity:1}72%{transform:translateY(4px) scale(.96);opacity:1}88%{transform:translateY(-2px) scale(1.015);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){.milestone-bar-fill:after,.milestone-claim.ready,.modal.open .modal-card.bouncy{animation:none!important}}
 
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,25px);opacity:0;pointer-events:none;z-index:50;padding:11px 16px;border-radius:25px;background:#171b2c;border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;font-weight:800;transition:.25s;max-width:88%;text-align:center}
@@ -243,7 +243,7 @@
 .modal{position:fixed;inset:0;z-index:40;display:flex;visibility:hidden;opacity:0;pointer-events:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,3,9,.72);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:opacity .25s ease,visibility 0s linear .25s,backdrop-filter .25s ease}
 .modal.open{visibility:visible;opacity:1;pointer-events:auto;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:opacity .25s ease,visibility 0s,backdrop-filter .25s ease}
 .modal-card{position:relative;width:min(100%,390px);padding:26px;border-radius:27px;background:linear-gradient(145deg,rgba(27,33,58,.98),rgba(10,14,29,.98));border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px 0 rgba(255,255,255,.08);text-align:center;transform:translateY(18px) scale(.92);opacity:0}
-.modal.open .modal-card{animation:modalCardIn .45s cubic-bezier(.16,1,.3,1) forwards}
+.modal.open .modal-card:not(.bouncy){animation:modalCardIn .45s cubic-bezier(.16,1,.3,1) forwards}
 @keyframes modalCardIn{0%{transform:translateY(18px) scale(.92);opacity:0}60%{transform:translateY(-3px) scale(1.015);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
 .modal-card:after{content:"";position:absolute;inset:1px;border-radius:26px;background:linear-gradient(135deg,rgba(255,255,255,.07),transparent 32%,transparent 68%,rgba(87,231,255,.04));pointer-events:none}
 @media(prefers-reduced-motion:reduce){.app:before,.app:after,.flip-card h2,.flip-go:after,.vault-glow,.chest-scene *,.treasure-chest,.chest-shadow,.modal-icon,.modal-reward,.confetti-piece,.modal.open .modal-card{animation:none!important}.coin3d{transition:none!important}}
@@ -1574,7 +1574,13 @@ loadVault();
       'Rewarded ad is not available right now.':'Rewarded ad is not available right now.',
       'Ad finished. Waiting for confirmation — please try again in a moment.':'Ad finished. Waiting for confirmation — please try again in a moment.',
       'Ad counted! Watch one more to open the chest.':'Ad counted! Watch one more to open the chest.',
-      'Something went wrong.':'Something went wrong.','Animated treasure chest':'Animated treasure chest'
+      'Something went wrong.':'Something went wrong.','Animated treasure chest':'Animated treasure chest',
+      'Milestone Rewards':'Milestone Rewards','Claim once':'Claim once','Refer 10 Friends':'Refer 10 Friends',
+      'Invite 10 friends to PAYME.':'Invite 10 friends to PAYME.','Reward':'Reward','Go':'Go','Claim':'Claim',
+      'Refer 25 Friends':'Refer 25 Friends','Invite 25 friends to PAYME.':'Invite 25 friends to PAYME.',
+      'Open Treasure Box 5 Times':'Open Treasure Box 5 Times','Crack open the Luck Vault chest 5 times.':'Crack open the Luck Vault chest 5 times.',
+      'Reward Claimed!':'Reward Claimed!','Luck Tickets have been added to your balance.':'Luck Tickets have been added to your balance.',
+      'Claimed ✓':'Claimed ✓','Claim ✨':'Claim ✨','Unable to claim this reward yet.':'Unable to claim this reward yet.'
     },
     ru: {
       'Luck Vault':'Хранилище удачи','‹ Back':'‹ Назад','Gems':'Gems','Luck Tickets':'Билеты удачи',
@@ -1605,7 +1611,13 @@ loadVault();
       'Rewarded ad is not available right now.':'Реклама с наградой сейчас недоступна.',
       'Ad finished. Waiting for confirmation — please try again in a moment.':'Реклама завершена. Ожидаем подтверждение — попробуйте снова через несколько секунд.',
       'Ad counted! Watch one more to open the chest.':'Реклама засчитана! Посмотрите ещё одну, чтобы открыть сундук.',
-      'Something went wrong.':'Что-то пошло не так.','Animated treasure chest':'Анимированный сундук с сокровищами'
+      'Something went wrong.':'Что-то пошло не так.','Animated treasure chest':'Анимированный сундук с сокровищами',
+      'Milestone Rewards':'Награды за достижения','Claim once':'Забрать один раз','Refer 10 Friends':'Пригласите 10 друзей',
+      'Invite 10 friends to PAYME.':'Пригласите 10 друзей в PAYME.','Reward':'Награда','Go':'Перейти','Claim':'Забрать',
+      'Refer 25 Friends':'Пригласите 25 друзей','Invite 25 friends to PAYME.':'Пригласите 25 друзей в PAYME.',
+      'Open Treasure Box 5 Times':'Откройте сундук 5 раз','Crack open the Luck Vault chest 5 times.':'Откройте сундук Хранилища удачи 5 раз.',
+      'Reward Claimed!':'Награда получена!','Luck Tickets have been added to your balance.':'Билеты удачи добавлены на ваш баланс.',
+      'Claimed ✓':'Получено ✓','Claim ✨':'Забрать ✨','Unable to claim this reward yet.':'Пока нельзя забрать эту награду.'
     },
     es: {
       'Luck Vault':'Bóveda de la Suerte','‹ Back':'‹ Volver','Gems':'Gems','Luck Tickets':'Boletos de Suerte',
@@ -1634,7 +1646,13 @@ loadVault();
       'Rewarded ad is not available right now.':'El anuncio con recompensa no está disponible ahora.',
       'Ad finished. Waiting for confirmation — please try again in a moment.':'Anuncio terminado. Esperando confirmación — inténtalo de nuevo en un momento.',
       'Ad counted! Watch one more to open the chest.':'¡Anuncio contado! Mira uno más para abrir el cofre.',
-      'Something went wrong.':'Algo salió mal.','Animated treasure chest':'Cofre del tesoro animado'
+      'Something went wrong.':'Algo salió mal.','Animated treasure chest':'Cofre del tesoro animado',
+      'Milestone Rewards':'Recompensas por hitos','Claim once':'Reclamar una vez','Refer 10 Friends':'Invita a 10 amigos',
+      'Invite 10 friends to PAYME.':'Invita a 10 amigos a PAYME.','Reward':'Recompensa','Go':'Ir','Claim':'Reclamar',
+      'Refer 25 Friends':'Invita a 25 amigos','Invite 25 friends to PAYME.':'Invita a 25 amigos a PAYME.',
+      'Open Treasure Box 5 Times':'Abre el cofre 5 veces','Crack open the Luck Vault chest 5 times.':'Abre el cofre de la Bóveda de la Suerte 5 veces.',
+      'Reward Claimed!':'¡Recompensa reclamada!','Luck Tickets have been added to your balance.':'Los Boletos de Suerte se han añadido a tu saldo.',
+      'Claimed ✓':'Reclamado ✓','Claim ✨':'Reclamar ✨','Unable to claim this reward yet.':'Aún no puedes reclamar esta recompensa.'
     },
     hi: {
       'Luck Vault':'लकी वॉल्ट','‹ Back':'‹ वापस','Gems':'Gems','Luck Tickets':'लकी टिकट',
@@ -1662,7 +1680,13 @@ loadVault();
       'Rewarded ad is not available right now.':'रिवॉर्ड विज्ञापन अभी उपलब्ध नहीं है।',
       'Ad finished. Waiting for confirmation — please try again in a moment.':'विज्ञापन पूरा हुआ। पुष्टि की प्रतीक्षा है — थोड़ी देर बाद फिर कोशिश करें।',
       'Ad counted! Watch one more to open the chest.':'विज्ञापन गिना गया! संदूक खोलने के लिए एक और देखें।',
-      'Something went wrong.':'कुछ गलत हो गया।','Animated treasure chest':'एनिमेटेड खजाने का संदूक'
+      'Something went wrong.':'कुछ गलत हो गया।','Animated treasure chest':'एनिमेटेड खजाने का संदूक',
+      'Milestone Rewards':'माइलस्टोन रिवॉर्ड','Claim once':'एक बार क्लेम करें','Refer 10 Friends':'10 दोस्तों को रेफर करें',
+      'Invite 10 friends to PAYME.':'PAYME में 10 दोस्तों को आमंत्रित करें।','Reward':'इनाम','Go':'जाएं','Claim':'क्लेम करें',
+      'Refer 25 Friends':'25 दोस्तों को रेफर करें','Invite 25 friends to PAYME.':'PAYME में 25 दोस्तों को आमंत्रित करें।',
+      'Open Treasure Box 5 Times':'ट्रेजर बॉक्स 5 बार खोलें','Crack open the Luck Vault chest 5 times.':'लकी वॉल्ट का संदूक 5 बार खोलें।',
+      'Reward Claimed!':'इनाम क्लेम हो गया!','Luck Tickets have been added to your balance.':'लकी टिकट आपके बैलेंस में जोड़ दिए गए हैं।',
+      'Claimed ✓':'क्लेम हो गया ✓','Claim ✨':'क्लेम करें ✨','Unable to claim this reward yet.':'अभी यह इनाम क्लेम नहीं किया जा सकता।'
     }
   };
 
