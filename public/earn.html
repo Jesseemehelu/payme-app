@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PAYME — Earn</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Monetag rewarded interstitial SDK. Loaded once here (not injected
+     per hold) so it's warm/cached by the time the user actually holds
+     the Mining button, matching the same tag already used by the Luck
+     Vault treasure chest. -->
+<script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
 <script>
 /* This page already had CSS safe-area fallbacks (env()) but no actual
    Telegram WebApp integration — no expand(), no swipe-lock, and no
@@ -1903,11 +1908,64 @@ document.addEventListener('DOMContentLoaded',function(){
     if(window.Telegram?.WebApp?.HapticFeedback){
       try{window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');}catch(_){}
     }
-    startMining();
+    requestMiningAd();
     setTimeout(()=>{
       els.hold.classList.remove('holding','hold-success');
       setHoldProgress(0);
     },400);
+  }
+
+  // Gate: a completed 2-second hold no longer starts mining directly — it
+  // must first be confirmed by a server-verified rewarded-ad watch, the
+  // same pattern already used by the Luck Vault treasure chest (see
+  // /api/monetag/start + show_11688228 + /api/monetag/status there).
+  // Deliberately NOT falling back to starting mining if show_11688228 is
+  // missing/unavailable — that's what let mining start without an ad in
+  // environments where the SDK can't actually load (e.g. testing outside
+  // a real browser/Telegram client). If the ad can't be shown, mining
+  // simply doesn't start.
+  async function requestMiningAd(){
+    if(els.hold.disabled || miningStartInFlight) return;
+    els.hold.disabled=true;
+    try{
+      const start = await api('/api/monetag/start',{
+        method:'POST',
+        body:JSON.stringify({context:'mining_gate'})
+      });
+
+      if(typeof window.show_11688228 !== 'function'){
+        throw new Error('Rewarded ad is not available right now.');
+      }
+      await window.show_11688228({ ymid: start.sessionId, requestVar: 'mining_gate' });
+
+      // The ad SDK resolving only means the ad finished playing on the
+      // client — it is not proof the watch was genuine. Wait for our own
+      // server to confirm it actually received Monetag's postback before
+      // letting mining start, exactly like the treasure chest does.
+      let confirmed=false;
+      for(let i=0;i<12;i++){
+        await new Promise(r=>setTimeout(r, i<5?900:1500));
+        try{
+          const status = await api('/api/monetag/status?sessionId='+encodeURIComponent(start.sessionId)+'&startedAt='+encodeURIComponent(start.createdAt));
+          if(status.confirmed){ confirmed=true; break; }
+        }catch(_){ /* keep polling until the loop above gives up */ }
+      }
+
+      if(!confirmed){
+        showToast('Ad not confirmed','Please try again in a moment.');
+        els.hold.disabled=false;
+        return;
+      }
+
+      await startMining();
+    }catch(err){
+      els.hold.disabled=false;
+      if(err.code==='RATE_LIMITED' || err.payload?.nextAllowedAt){
+        showToast('Please wait',err.message||'Please wait before watching another ad.');
+      }else{
+        showToast('Ad required',err.message||'Hold the button again to start mining.');
+      }
+    }
   }
 
   function holdLoop(now){

@@ -2881,6 +2881,8 @@ app.post('/api/monetag/start', requireLogin, async (req, res) => {
       ? 'game_free_spin'
       : rawContext === 'earn_watch_ad'
       ? 'earn_watch_ad'
+      : rawContext === 'mining_gate'
+      ? 'mining_gate'
       : 'dashboard';
 
     if (context === 'luck_chest') {
@@ -3104,7 +3106,38 @@ app.all('/api/monetag/postback', async (req, res) => {
       ? 'game_free_spin'
       : pendingContext === 'earn_watch_ad'
       ? 'earn_watch_ad'
+      : pendingContext === 'mining_gate'
+      ? 'mining_gate'
       : 'dashboard';
+
+    // The mining-gate ad is a pure gate, not a cash/free-spin reward — it
+    // only exists so startMining() on the client can wait for a genuine
+    // server-confirmed ad watch instead of trusting the browser. Record
+    // the zero-value transaction (idempotency lock, same as every other
+    // context) and mark the session confirmed; nothing is credited to the
+    // user's balance.
+    if (adContext === 'mining_gate') {
+      await addTransaction(user.id, {
+        id: transactionId,
+        type: 'monetag_reward',
+        description: 'Mining Gate Ad',
+        amount: 0,
+        currency: 'GEMS',
+        status: 'completed',
+        bank: `Monetag ${MONETAG_ZONE_ID}`
+      });
+
+      if (pending) {
+        monetagCompletedSessions.set(pending.id, {
+          userId: user.id,
+          reward: { key: 'mining_gate', label: 'Mining Gate Ad', cash: 0, spins: 0 },
+          completedAt: Date.now(),
+          expiresAt: Date.now() + 5 * 60 * 1000
+        });
+      }
+
+      return res.status(200).send('ok');
+    }
 
     // Chest ads are progress events, not cash/free-spin rewards.
     if (adContext === 'luck_chest') {
@@ -3443,6 +3476,65 @@ function earnWebappKeyboard(label) {
     ]
   };
 }
+
+// ======================================================
+// TELEGRAM BOT — /start WELCOME MESSAGE
+// ======================================================
+// This is a webhook (push), not a getUpdates poll loop — Telegram only
+// calls this endpoint the moment someone actually messages the bot, so it
+// costs zero requests/CPU the rest of the time. That's the lowest-egress
+// way to answer /start; a second permanent 1-req/sec poll loop (like the
+// deposit bot's below) would run forever whether or not anyone starts the
+// bot.
+//
+// ONE-TIME SETUP after you deploy this: point the Payme bot's webhook at
+// this endpoint by visiting (once, in a browser, with your real values):
+//   https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://payme-app-jusi.onrender.com/api/telegram/start-webhook&secret_token=<TELEGRAM_START_WEBHOOK_SECRET>
+// Set TELEGRAM_START_WEBHOOK_SECRET to that same value in your Render env
+// vars first (any random string) — it's how this endpoint verifies a
+// request genuinely came from Telegram and not some random POST to a
+// guessed public URL.
+const TELEGRAM_START_WEBHOOK_SECRET = String(process.env.TELEGRAM_START_WEBHOOK_SECRET || '').trim();
+const PAYME_OPEN_APP_URL = 'https://t.me/paymeoobot/earn?startapp';
+
+app.post('/api/telegram/start-webhook', async (req, res) => {
+  // Acknowledge immediately. Telegram retries webhook deliveries that
+  // don't get a fast 200, and we don't want a slow sendMessage call on
+  // our end to turn into duplicate welcome messages.
+  res.status(200).end();
+
+  try {
+    if (
+      TELEGRAM_START_WEBHOOK_SECRET &&
+      req.get('X-Telegram-Bot-Api-Secret-Token') !== TELEGRAM_START_WEBHOOK_SECRET
+    ) {
+      return;
+    }
+
+    const message = req.body && req.body.message;
+    const text = typeof message?.text === 'string' ? message.text.trim() : '';
+    if (!/^\/start(\s|$|@)/i.test(text)) return;
+
+    const chatId = message?.chat?.id;
+    if (!chatId || !TELEGRAM_BOT_TOKEN) return;
+
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: "Press 'OPEN' and enter your dashboard 👇",
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'OPEN APP', url: PAYME_OPEN_APP_URL }]
+          ]
+        }
+      })
+    });
+  } catch (err) {
+    console.error('Telegram /start webhook error:', err.message);
+  }
+});
 
 // ------------------------------------------------------------------
 // MINING-COMPLETE SWEEP
