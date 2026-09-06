@@ -437,6 +437,190 @@ const LUCK_CHEST_CONFIG = {
   }
 };
 
+
+// ======================================================
+// LUCK TICKET MINING RIG
+// ======================================================
+// Mining state is stored inside the existing daily_reward JSON column,
+// so this feature does not require a new Supabase table or extra columns.
+// The server is authoritative: the client only renders the timer locally.
+const LUCK_MINING_CONFIG = {
+  cycleMs: 30 * 60 * 1000,
+  holdMs: 2000,
+  levels: {
+    1: { cost: 0, min: 1, max: 2, label: 'Free' },
+    2: { cost: 500, min: 3, max: 4, label: '500 Gems💎' },
+    3: { cost: 700, min: 4.5, max: 7, label: '700 Gems💎' },
+    4: { cost: 1000, min: 6, max: 10, label: '1,000 Gems💎' },
+    5: { cost: 5000, min: 20, max: 25, label: '5,000 Gems💎' }
+  }
+};
+
+// ======================================================
+// MINING-COMPLETE / INACTIVITY TELEGRAM REMINDERS
+// ======================================================
+// Both features message the user's own Telegram account directly, so they
+// go out through TELEGRAM_BOT_TOKEN (the Payme bot the user opened the Mini
+// App from) — never the deposit/admin bot, which only talks to the admin
+// chat. The "1 day since login" reminder and the mining-complete flag both
+// live inside the same daily_reward JSON blob as everything else on this
+// page, so neither needs a new Supabase column.
+const EARN_WEBAPP_URL = 'https://t.me/paymeoobot/earn?startapp=WF6R1R';
+const INACTIVITY_REMINDER_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 1 day since last login
+const INACTIVITY_REMINDER_REPEAT_MS = 24 * 60 * 60 * 1000; // don't re-ping more than once/day
+const INACTIVITY_SWEEP_INTERVAL_MS = 30 * 60 * 1000; // check every 30 minutes
+const MINING_SWEEP_INTERVAL_MS = 60 * 1000; // check every 60 seconds (cycle is 30 min)
+const REMINDER_SWEEP_PAGE_SIZE = 500;
+
+// Per-user in-process mutex. This is deliberately short-lived and only
+// serializes mining mutations on a single Render instance; the Supabase
+// compare-and-swap below remains the source of truth for duplicate safety.
+const luckMiningLocks = new Map();
+
+function luckMiningLockKey(userId) {
+  return String(userId || '');
+}
+
+async function withLuckMiningLock(userId, fn) {
+  const key = luckMiningLockKey(userId);
+  const previous = luckMiningLocks.get(key) || Promise.resolve();
+
+  let release;
+  const current = new Promise(resolve => { release = resolve; });
+  luckMiningLocks.set(key, current);
+
+  await previous;
+
+  try {
+    return await fn();
+  } finally {
+    release();
+    if (luckMiningLocks.get(key) === current) {
+      luckMiningLocks.delete(key);
+    }
+  }
+}
+
+function normalizeLuckMining(daily) {
+  const source =
+    daily && daily.luckMining && typeof daily.luckMining === 'object'
+      ? daily.luckMining
+      : {};
+
+  let level = Number(source.level);
+  if (!Number.isInteger(level) || level < 1 || level > 5) level = 1;
+
+  let status = String(source.status || 'offline');
+  if (!['offline', 'mining', 'completed'].includes(status)) {
+    status = 'offline';
+  }
+
+  const startAt = String(source.startAt || '');
+  const completeAt = String(source.completeAt || '');
+  const reward = source.reward === null || source.reward === undefined
+    ? null
+    : Number(source.reward);
+
+  return {
+    level,
+    status,
+    startAt: startAt || null,
+    completeAt: completeAt || null,
+    reward: Number.isFinite(reward) && reward >= 0 ? reward : null,
+    cycleId: String(source.cycleId || ''),
+    lastClaimAt: Number(source.lastClaimAt) || 0,
+    // Marks that the "mining complete" Telegram DM has already been sent
+    // for the current cycle, so the background sweep never double-sends.
+    // Reset to false whenever a new cycle is started.
+    notifiedComplete: !!source.notifiedComplete
+  };
+}
+
+function secureMiningReward(level) {
+  const cfg = LUCK_MINING_CONFIG.levels[level] || LUCK_MINING_CONFIG.levels[1];
+
+  // Level 1 (the free rig) and Level 3 pay out in single-decimal
+  // increments (e.g. 1.1, 1.7, 4.5) so even a small win still moves the
+  // balance. The other paid levels use whole tickets exactly within
+  // their configured inclusive range.
+  if (level === 1 || level === 3) {
+    const steps = Math.round((cfg.max - cfg.min) * 10);
+    const pick = crypto.randomInt(0, steps + 1);
+    return Number((cfg.min + pick / 10).toFixed(1));
+  }
+
+  return crypto.randomInt(
+    Math.floor(cfg.min),
+    Math.floor(cfg.max) + 1
+  );
+}
+
+function getLuckMiningSnapshot(user, now = Date.now()) {
+  const daily = normalizeDailyReward(user);
+  const mining = daily.luckMining;
+  let status = mining.status;
+  let reward = mining.reward;
+
+  if (status === 'mining') {
+    const completeAt = Date.parse(mining.completeAt || '');
+    if (Number.isFinite(completeAt) && completeAt <= now) {
+      status = 'completed';
+      if (reward === null) {
+        reward = secureMiningReward(mining.level);
+      }
+    }
+  }
+
+  const startMs = Date.parse(mining.startAt || '');
+  const completeMs = Date.parse(mining.completeAt || '');
+  const progress =
+    status === 'mining' && Number.isFinite(startMs) && Number.isFinite(completeMs)
+      ? Math.max(0, Math.min(1, (now - startMs) / Math.max(1, completeMs - startMs)))
+      : status === 'completed'
+      ? 1
+      : 0;
+
+  const cfg = LUCK_MINING_CONFIG.levels[mining.level] || LUCK_MINING_CONFIG.levels[1];
+
+  return {
+    level: mining.level,
+    status,
+    startAt: mining.startAt,
+    completeAt: mining.completeAt,
+    reward,
+    cycleId: mining.cycleId || null,
+    lastClaimAt: mining.lastClaimAt || 0,
+    progress,
+    rewardMin: cfg.min,
+    rewardMax: cfg.max,
+    rewardLabel: `${cfg.min}–${cfg.max}`,
+    cycleMs: LUCK_MINING_CONFIG.cycleMs,
+    serverNow: now,
+    luckTickets: number(daily.luckTickets)
+  };
+}
+
+async function commitLuckMiningCAS(user, oldDaily, newDaily, extraPatch = {}, conditions = {}) {
+  let query = supabase
+    .from('users')
+    .update({
+      daily_reward: newDaily,
+      ...extraPatch
+    })
+    .eq('id', user.id)
+    .eq('daily_reward', JSON.stringify(oldDaily));
+
+  for (const [column, value] of Object.entries(conditions || {})) {
+    query = query.eq(column, value);
+  }
+
+  const { data, error } = await query.select('id');
+
+  if (error) throw error;
+  return Array.isArray(data) && data.length > 0;
+}
+
+
 // Double Your Gems — weighted coin flip.
 // The server alone decides the outcome: 20% win / 80% loss.
 // The result is independent of stake size and the user's selected side.
@@ -931,6 +1115,78 @@ async function getUserById(id) {
 
 }
 
+// ------------------------------------------------------------------
+// LUCK MINING — narrow-column reads
+// ------------------------------------------------------------------
+// requireLogin's getUserById() above does `select('*')`, pulling every
+// column of the users row (name, email, phone, referral stats, etc.) on
+// every single authenticated request. The luck-mining rig only ever
+// touches daily_reward (and, for upgrades, the balance columns), so
+// giving it its own narrow SELECT — instead of riding on the full-row
+// fetch — meaningfully cuts the Supabase egress this feature is
+// responsible for, without changing behavior for any other endpoint.
+async function getUserMiningCore(id) {
+  if (!id) return null;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, daily_reward')
+    .eq('id', String(id))
+    .maybeSingle();
+
+  if (error) throw error;
+  return mapUser(data);
+}
+
+async function getUserMiningWithBalance(id) {
+  if (!id) return null;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, daily_reward, balance, deposit_balance, withdrawable_balance')
+    .eq('id', String(id))
+    .maybeSingle();
+
+  if (error) throw error;
+  return mapUser(data);
+}
+
+async function requireLoginMiningCore(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized session.' });
+  }
+
+  try {
+    req.user = await getUserMiningCore(req.session.userId);
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'User session not found.' });
+    }
+  } catch (err) {
+    console.error('Require login (mining) error:', err);
+    return res.status(401).json({ success: false, message: 'User session not found.' });
+  }
+
+  return next();
+}
+
+async function requireLoginMiningUpgrade(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ success: false, message: 'Unauthorized session.' });
+  }
+
+  try {
+    req.user = await getUserMiningWithBalance(req.session.userId);
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'User session not found.' });
+    }
+  } catch (err) {
+    console.error('Require login (mining upgrade) error:', err);
+    return res.status(401).json({ success: false, message: 'User session not found.' });
+  }
+
+  return next();
+}
+
 async function getUserByTelegramId(
   telegramId
 ) {
@@ -1069,6 +1325,22 @@ async function createUser(user) {
 
   return mapUser(data);
 
+}
+
+// Total registered users — a cheap head-only count (no rows transferred),
+// used to stamp new-signup notifications with the running user number and
+// to size the admin broadcast.
+async function getTotalUserCount() {
+  const { count, error } = await supabase
+    .from('users')
+    .select('id', { count: 'exact', head: true });
+
+  if (error) {
+    console.error('getTotalUserCount error:', error);
+    return null;
+  }
+
+  return count || 0;
 }
 
 // ======================================================
@@ -2146,6 +2418,441 @@ async function requireLogin(
 
 
 
+
+// ======================================================
+// LUCK TICKET MINING RIG API
+// ======================================================
+// GET performs one server read. While a cycle is active the browser renders
+// progress locally using serverNow; there is no polling.
+// ======================================================
+
+async function finalizeLuckMiningIfDue(user, persist = true) {
+  const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
+    ? user.dailyReward
+    : {};
+
+  const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+  const daily = normalizeDailyReward(user);
+  const mining = daily.luckMining;
+  const now = Date.now();
+
+  const completeAt = Date.parse(mining.completeAt || '');
+  if (
+    mining.status === 'mining' &&
+    Number.isFinite(completeAt) &&
+    completeAt <= now
+  ) {
+    mining.status = 'completed';
+    if (mining.reward === null) {
+      mining.reward = secureMiningReward(mining.level);
+    }
+    user.dailyReward = daily;
+
+    if (persist) {
+      const committed = await commitLuckMiningCAS(user, oldDaily, daily);
+      if (!committed) {
+        const fresh = await getUserMiningCore(user.id);
+        if (!fresh) throw new Error('User session not found.');
+        user.dailyReward = fresh.dailyReward;
+        return { user: fresh, changed: false };
+      }
+    }
+
+    return { user, changed: true };
+  }
+
+  return { user, changed: false };
+}
+
+app.get('/api/luck-mining/state', requireLoginMiningCore, async (req, res) => {
+  try {
+    const result = await withLuckMiningLock(req.user.id, async () => {
+      const resolved = await finalizeLuckMiningIfDue(req.user, true);
+      const user = resolved.user;
+      const now = Date.now();
+
+      return {
+        success: true,
+        mining: getLuckMiningSnapshot(user, now),
+        serverNow: new Date(now).toISOString()
+      };
+    });
+
+    return res.json(result);
+  } catch (err) {
+    console.error('Luck mining state error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to load the mining rig.'
+    });
+  }
+});
+
+app.post('/api/luck-mining/start', requireLoginMiningCore, async (req, res) => {
+  try {
+    const result = await withLuckMiningLock(req.user.id, async () => {
+      const user = req.user;
+      const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
+        ? user.dailyReward
+        : {};
+      const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+      const daily = normalizeDailyReward(user);
+      const mining = daily.luckMining;
+      const now = Date.now();
+
+      // Resolve an already-finished cycle before deciding whether a new
+      // session can start. This prevents starting over an unclaimed cycle.
+      const completeAt = Date.parse(mining.completeAt || '');
+      if (
+        mining.status === 'mining' &&
+        Number.isFinite(completeAt) &&
+        completeAt <= now
+      ) {
+        mining.status = 'completed';
+        if (mining.reward === null) mining.reward = secureMiningReward(mining.level);
+      }
+
+      if (mining.status === 'mining') {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            code: 'MINING_ACTIVE',
+            message: 'Your mining rig is already active.'
+          }
+        };
+      }
+
+      if (mining.status === 'completed') {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            code: 'READY_TO_CLAIM',
+            message: 'Claim your completed Luck Tickets before starting another cycle.'
+          }
+        };
+      }
+
+      const holdMs = Math.max(0, Math.min(10000, number(req.body?.holdMs)));
+      if (holdMs < LUCK_MINING_CONFIG.holdMs) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            code: 'HOLD_REQUIRED',
+            message: 'Hold the mining button continuously for 2 seconds.'
+          }
+        };
+      }
+
+      const cycleId = generateTransactionId('luck_mining');
+      mining.status = 'mining';
+      mining.startAt = new Date(now).toISOString();
+      mining.completeAt = new Date(now + LUCK_MINING_CONFIG.cycleMs).toISOString();
+      mining.reward = null;
+      mining.cycleId = cycleId;
+      mining.notifiedComplete = false;
+      user.dailyReward = daily;
+
+      const committed = await commitLuckMiningCAS(user, oldDaily, daily);
+      if (!committed) {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            code: 'MINING_STATE_CHANGED',
+            message: 'Your mining state changed. Please reload and try again.'
+          }
+        };
+      }
+
+      return {
+        status: 200,
+        body: {
+          success: true,
+          mining: getLuckMiningSnapshot(user, now),
+          serverNow: new Date(now).toISOString()
+        }
+      };
+    });
+
+    return res.status(result.status || 200).json(result.body);
+  } catch (err) {
+    console.error('Luck mining start error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to activate the mining rig.'
+    });
+  }
+});
+
+app.post('/api/luck-mining/claim', requireLoginMiningCore, async (req, res) => {
+  try {
+    const result = await withLuckMiningLock(req.user.id, async () => {
+      let user = req.user;
+
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
+          ? user.dailyReward
+          : {};
+        const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+        const daily = normalizeDailyReward(user);
+        const mining = daily.luckMining;
+        const now = Date.now();
+
+        const completeAt = Date.parse(mining.completeAt || '');
+        if (mining.status === 'mining') {
+          if (!Number.isFinite(completeAt) || completeAt > now) {
+            return {
+              status: 400,
+              body: {
+                success: false,
+                code: 'NOT_COMPLETE',
+                message: 'Your mining cycle is not complete yet.'
+              }
+            };
+          }
+
+          mining.status = 'completed';
+          if (mining.reward === null) {
+            mining.reward = secureMiningReward(mining.level);
+          }
+        }
+
+        if (mining.status !== 'completed') {
+          return {
+            status: 400,
+            body: {
+              success: false,
+              code: 'NOT_READY',
+              message: 'There are no Luck Tickets ready to claim.'
+            }
+          };
+        }
+
+        const reward = Number(mining.reward);
+        if (!Number.isFinite(reward) || reward <= 0) {
+          return {
+            status: 409,
+            body: {
+              success: false,
+              code: 'INVALID_REWARD',
+              message: 'The mining reward is invalid. Please contact support.'
+            }
+          };
+        }
+
+        daily.luckTickets = number(daily.luckTickets) + reward;
+        mining.status = 'offline';
+        mining.startAt = null;
+        mining.completeAt = null;
+        mining.lastClaimAt = now;
+        mining.reward = null;
+        mining.notifiedComplete = false;
+        user.dailyReward = daily;
+
+        const committed = await commitLuckMiningCAS(user, oldDaily, daily);
+        if (!committed) {
+          if (attempt === 0) {
+            const fresh = await getUserMiningCore(user.id);
+            if (!fresh) throw new Error('User session not found.');
+            user = fresh;
+            continue;
+          }
+
+          return {
+            status: 409,
+            body: {
+              success: false,
+              code: 'CLAIM_CONFLICT',
+              message: 'This mining claim was already processed or the state changed.'
+            }
+          };
+        }
+
+        await addTransaction(user.id, {
+          id: generateTransactionId('tx_luck_mining'),
+          type: 'luck_mining_reward',
+          description: `Luck Ticket Mining — Level ${mining.level} cycle ${mining.cycleId || ''}`.trim(),
+          amount: reward,
+          currency: 'LUCK_TICKETS',
+          status: 'completed',
+          bank: 'Luck Ticket Wallet'
+        });
+
+        return {
+          status: 200,
+          body: {
+            success: true,
+            reward,
+            mining: getLuckMiningSnapshot(user, now),
+            luckTickets: number(daily.luckTickets),
+            serverNow: new Date(now).toISOString()
+          }
+        };
+      }
+
+      throw new Error('Mining claim retry exhausted.');
+    });
+
+    return res.status(result.status || 200).json(result.body);
+  } catch (err) {
+    console.error('Luck mining claim error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to claim Luck Tickets.'
+    });
+  }
+});
+
+app.post('/api/luck-mining/upgrade', requireLoginMiningUpgrade, async (req, res) => {
+  try {
+    const requestedLevel = Number(req.body?.level);
+
+    const result = await withLuckMiningLock(req.user.id, async () => {
+      const user = req.user;
+      const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
+        ? user.dailyReward
+        : {};
+      const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+      const daily = normalizeDailyReward(user);
+      const mining = daily.luckMining;
+      const currentLevel = Number(mining.level) || 1;
+      const target = LUCK_MINING_CONFIG.levels[requestedLevel];
+
+      if (!Number.isInteger(requestedLevel) || !target || requestedLevel !== currentLevel + 1) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            code: 'INVALID_UPGRADE',
+            message: currentLevel >= 5
+              ? 'Your miner is already at the maximum level.'
+              : `Upgrades happen one level at a time — you need Level ${currentLevel + 1} next.`
+          }
+        };
+      }
+
+      if (mining.status === 'mining') {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            code: 'MINING_ACTIVE',
+            message: 'Wait for the current mining cycle to finish before upgrading.'
+          }
+        };
+      }
+
+      if (mining.status === 'completed') {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            code: 'READY_TO_CLAIM',
+            message: 'Claim your completed Luck Tickets before upgrading the miner.'
+          }
+        };
+      }
+
+      const cost = Number(target.cost) || 0;
+      const originalDepositBalance = getDepositBalance(user);
+      const originalWithdrawableBalance = getWithdrawableBalance(user);
+      const currentBalance = originalDepositBalance + originalWithdrawableBalance;
+      if (currentBalance < cost) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            code: 'INSUFFICIENT_GEMS',
+            message: `You need ${cost.toLocaleString()} Gems💎 to upgrade to Level ${requestedLevel}. Your current balance is ${currentBalance.toLocaleString()} Gems💎.`
+          }
+        };
+      }
+
+      // Spend deposit balance first, then withdrawable earnings, matching
+      // the existing PAYME spending convention.
+      let remaining = cost;
+      let deposit = getDepositBalance(user);
+      let earnings = getWithdrawableBalance(user);
+
+      if (deposit >= remaining) {
+        deposit -= remaining;
+        remaining = 0;
+      } else {
+        remaining -= deposit;
+        deposit = 0;
+        earnings = Math.max(0, earnings - remaining);
+        remaining = 0;
+      }
+
+      mining.level = requestedLevel;
+      user.dailyReward = daily;
+
+      const extraPatch = {
+        deposit_balance: deposit,
+        withdrawable_balance: earnings,
+        balance: deposit + earnings
+      };
+
+      const committed = await commitLuckMiningCAS(
+        user,
+        oldDaily,
+        daily,
+        extraPatch,
+        {
+          deposit_balance: originalDepositBalance,
+          withdrawable_balance: originalWithdrawableBalance
+        }
+      );
+      if (!committed) {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            code: 'UPGRADE_CONFLICT',
+            message: 'Your balance or mining state changed. Please reload and try again.'
+          }
+        };
+      }
+
+      user.depositBalance = deposit;
+      user.withdrawableBalance = earnings;
+      user.balance = deposit + earnings;
+
+      await addTransaction(user.id, {
+        id: generateTransactionId('tx_luck_miner_upgrade'),
+        type: 'luck_miner_upgrade',
+        description: `Luck Ticket Miner upgraded from Level ${currentLevel} to Level ${requestedLevel}`,
+        amount: cost,
+        currency: 'GEMS',
+        status: 'completed',
+        bank: 'PAYME Wallet'
+      });
+
+      const now = Date.now();
+      return {
+        status: 200,
+        body: {
+          success: true,
+          mining: getLuckMiningSnapshot(user, now),
+          balance: user.balance,
+          serverNow: new Date(now).toISOString()
+        }
+      };
+    });
+
+    return res.status(result.status || 200).json(result.body);
+  } catch (err) {
+    console.error('Luck mining upgrade error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to upgrade the mining rig.'
+    });
+  }
+});
+
 // ======================================================
 // MONETAG REWARDED INTERSTITIAL API
 // ======================================================
@@ -2671,6 +3378,294 @@ async function sendTelegramNotification(
   }
 
 }
+
+// ======================================================
+// TELEGRAM DIRECT-TO-USER MESSAGES
+// ======================================================
+// Sends a DM through the main Payme bot (TELEGRAM_BOT_TOKEN) to a specific
+// user's Telegram ID — as opposed to sendTelegramNotification() above,
+// which always posts to the admin chat via the deposit bot. Used for the
+// mining-complete ping, the inactivity reminder, and the admin broadcast.
+async function sendTelegramUserMessage(telegramId, text, options = {}) {
+
+  if (!TELEGRAM_BOT_TOKEN || !telegramId) {
+    return null;
+  }
+
+  try {
+
+    const body = {
+      chat_id: telegramId,
+      text,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true
+    };
+
+    if (options.replyMarkup) {
+      body.reply_markup = options.replyMarkup;
+    }
+
+    const response = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!data.ok) {
+      // Common and expected for users who blocked the bot or never
+      // started a chat with it — log quietly rather than throwing.
+      console.warn('Telegram user message not delivered:', telegramId, data.description || data);
+      return null;
+    }
+
+    return data.result;
+
+  } catch (err) {
+
+    console.error('Telegram user message send error:', telegramId, err.message);
+    return null;
+
+  }
+
+}
+
+function earnWebappKeyboard(label) {
+  return {
+    inline_keyboard: [
+      [
+        { text: label, url: EARN_WEBAPP_URL }
+      ]
+    ]
+  };
+}
+
+// ------------------------------------------------------------------
+// MINING-COMPLETE SWEEP
+// ------------------------------------------------------------------
+// The mining rig itself only finalizes a cycle lazily (when the user next
+// opens the app and calls /api/luck-mining/state or /claim). This sweep
+// runs independently every MINING_SWEEP_INTERVAL_MS and proactively DMs
+// anyone whose cycle finished but who hasn't come back to claim it yet, so
+// they find out even if they never reopen the app on their own.
+//
+// EGRESS: completeAt is stored as an ISO-8601 UTC string, which — unlike
+// most timestamp formats — sorts correctly as plain text. That lets the
+// "already due" and "not already notified" checks run as real Postgres
+// filters (?daily_reward->luckMining->>completeAt=lte....) instead of
+// pulling every active miner over the wire and filtering in Node. In
+// steady state this query returns 0 rows on almost every tick — only
+// users who are BOTH mining AND already past completeAt AND not yet
+// notified ever come back. The write-back reuses the row already in hand
+// (no extra getUserById/updateUser round trip) and is guarded by a WHERE
+// clause matching the exact cycle, so a claim/upgrade racing in between
+// simply makes the update a no-op instead of clobbering it.
+async function runMiningCompletionSweep() {
+
+  if (!TELEGRAM_BOT_TOKEN) return;
+
+  const now = Date.now();
+
+  try {
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, telegram_id, daily_reward')
+      .eq('daily_reward->luckMining->>status', 'mining')
+      .lte('daily_reward->luckMining->>completeAt', new Date(now).toISOString())
+      .neq('daily_reward->luckMining->>notifiedComplete', 'true');
+
+    if (error) {
+      console.error('Mining completion sweep read error:', error);
+      return;
+    }
+
+    for (const row of data || []) {
+
+      try {
+
+        const telegramId = row.telegram_id;
+        if (!telegramId) continue;
+
+        const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
+        const mining = daily.luckMining || {};
+
+        // Belt-and-braces re-check in Node in case of any edge-case in the
+        // above filter (e.g. a malformed completeAt string) — cheap since
+        // the query already narrowed this down to a handful of rows.
+        const completeAt = Date.parse(mining.completeAt || '');
+        if (!Number.isFinite(completeAt) || completeAt > now) continue;
+        if (mining.notifiedComplete) continue;
+
+        const cfg = LUCK_MINING_CONFIG.levels[mining.level] || LUCK_MINING_CONFIG.levels[1];
+
+        const sent = await sendTelegramUserMessage(
+          telegramId,
+          `⛏️ <b>Mining Complete!</b>\n\n` +
+          `Your Luck Ticket Mining Rig just finished a cycle — ${cfg.min}–${cfg.max} Luck Tickets🎟️ are ready to claim.\n\n` +
+          `Open PAYME to collect your reward and start the next cycle before it sits idle.`,
+          { replyMarkup: earnWebappKeyboard('⛏️ Claim Now') }
+        );
+
+        if (!sent) continue;
+
+        // Single targeted write using the data already fetched above — no
+        // extra read. The WHERE guard means this only takes effect if the
+        // row is still on this exact cycle, so a claim/upgrade that lands
+        // in between just makes this a 0-row no-op.
+        const updatedDaily = {
+          ...daily,
+          luckMining: { ...mining, notifiedComplete: true }
+        };
+
+        const { error: writeError } = await supabase
+          .from('users')
+          .update({ daily_reward: updatedDaily })
+          .eq('id', row.id)
+          .eq('daily_reward->luckMining->>status', 'mining')
+          .eq('daily_reward->luckMining->>completeAt', mining.completeAt);
+
+        if (writeError) {
+          console.error('Mining completion sweep write error:', row.id, writeError);
+        }
+
+      } catch (rowErr) {
+        console.error('Mining completion sweep row error:', row.id, rowErr.message);
+      }
+
+    }
+
+  } catch (err) {
+    console.error('Mining completion sweep error:', err.message);
+  }
+
+}
+
+setInterval(
+  () => {
+    runMiningCompletionSweep().catch(
+      err => console.error('Mining completion sweep error:', err)
+    );
+  },
+  MINING_SWEEP_INTERVAL_MS
+).unref();
+
+// ------------------------------------------------------------------
+// INACTIVITY REMINDER SWEEP
+// ------------------------------------------------------------------
+// Every INACTIVITY_SWEEP_INTERVAL_MS, DM anyone who hasn't opened the Mini
+// App (i.e. hit /api/auth/telegram-signup) in over a day, pointing them
+// back to the earn page. Re-pinging is capped at once per
+// INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt.
+//
+// EGRESS: lastLoginAt/lastInactivityReminderAt are stored as epoch-ms
+// numbers, and every epoch-ms value between now and the year 2286 is
+// exactly 13 digits — so, like the ISO strings above, they sort correctly
+// as plain text. Both thresholds are therefore pushed into the query
+// (?lte./lt.) instead of paging through the entire users table and
+// filtering client-side, so only users who are actually due ever cross
+// the wire. The write-back skips the old "re-read then write" step and
+// instead does a single guarded update keyed on the exact lastLoginAt we
+// read, so a login that lands mid-sweep makes the write a no-op rather
+// than overwriting a fresher timestamp.
+async function runInactivityReminderSweep() {
+
+  if (!TELEGRAM_BOT_TOKEN) return;
+
+  const now = Date.now();
+  const loginCutoff = String(now - INACTIVITY_REMINDER_THRESHOLD_MS);
+  const reminderCutoff = String(now - INACTIVITY_REMINDER_REPEAT_MS);
+  let offset = 0;
+
+  try {
+
+    while (true) {
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, telegram_id, daily_reward')
+        .not('telegram_id', 'is', null)
+        .not('daily_reward->>lastLoginAt', 'is', null)
+        .lte('daily_reward->>lastLoginAt', loginCutoff)
+        .lt('daily_reward->>lastInactivityReminderAt', reminderCutoff)
+        .range(offset, offset + REMINDER_SWEEP_PAGE_SIZE - 1);
+
+      if (error) {
+        console.error('Inactivity reminder sweep read error:', error);
+        break;
+      }
+
+      if (!data || data.length === 0) break;
+
+      for (const row of data) {
+
+        try {
+
+          const telegramId = row.telegram_id;
+          if (!telegramId) continue;
+
+          const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
+          const lastLoginAt = Number(daily.lastLoginAt) || 0;
+          const lastReminderAt = Number(daily.lastInactivityReminderAt) || 0;
+
+          // Belt-and-braces re-check — the query already narrowed this to
+          // a small set, so re-validating in Node is essentially free.
+          if (!lastLoginAt) continue;
+          if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
+          if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
+
+          const sent = await sendTelegramUserMessage(
+            telegramId,
+            `👋 <b>We miss you on PAYME!</b>\n\n` +
+            `It's been a day since you last logged in. Your Luck Tickets, mining rig, daily rewards, and referral earnings are all still waiting for you.\n\n` +
+            `Tap below to jump back in. 💎`,
+            { replyMarkup: earnWebappKeyboard('🚀 Open PAYME') }
+          );
+
+          if (!sent) continue;
+
+          const updatedDaily = { ...daily, lastInactivityReminderAt: now };
+
+          const { error: writeError } = await supabase
+            .from('users')
+            .update({ daily_reward: updatedDaily })
+            .eq('id', row.id)
+            .eq('daily_reward->>lastLoginAt', String(lastLoginAt));
+
+          if (writeError) {
+            console.error('Inactivity reminder sweep write error:', row.id, writeError);
+          }
+
+        } catch (rowErr) {
+          console.error('Inactivity reminder sweep row error:', row.id, rowErr.message);
+        }
+
+      }
+
+      if (data.length < REMINDER_SWEEP_PAGE_SIZE) break;
+      offset += REMINDER_SWEEP_PAGE_SIZE;
+
+    }
+
+  } catch (err) {
+    console.error('Inactivity reminder sweep error:', err.message);
+  }
+
+}
+
+setInterval(
+  () => {
+    runInactivityReminderSweep().catch(
+      err => console.error('Inactivity reminder sweep error:', err)
+    );
+  },
+  INACTIVITY_SWEEP_INTERVAL_MS
+).unref();
+
 
 
 // ======================================================
@@ -3611,6 +4606,8 @@ app.post(
             ? String(user.dailyReward.language)
             : (selectedLanguage || 'en');
         user.dailyReward.language = selectedLanguage || existingLanguage;
+        user.dailyReward.lastLoginAt = Date.now();
+        user.dailyReward.lastInactivityReminderAt = 0;
         await updateUser(user);
 
         // User is already loaded; no transaction history is needed for authentication.
@@ -3902,7 +4899,13 @@ app.post(
                 firstAdAt: 0,
                 cooldownUntil: 0
               }
-            }
+            },
+
+            lastLoginAt:
+              Date.now(),
+
+            lastInactivityReminderAt:
+              0
 
           }
 
@@ -3979,9 +4982,24 @@ app.post(
 
         try {
 
+          let totalUsers = null;
+
+          try {
+            totalUsers = await getTotalUserCount();
+          } catch (countError) {
+            console.error(
+              'Telegram signup user-count error:',
+              countError
+            );
+          }
+
           await sendTelegramNotification(
 
             `<b>NEW TELEGRAM USER REGISTERED</b>\n\n` +
+
+            `<b>User #:</b> ${
+              totalUsers !== null ? totalUsers : 'N/A'
+            }\n` +
 
             `<b>Name:</b> ${user.fullName}\n` +
 
@@ -4158,6 +5176,12 @@ app.post(
         await ensureWelcomeBonus(
           user
         );
+
+        // Stamp this sign-in and clear the inactivity-reminder marker so a
+        // returning user doesn't get pinged again until they've been away
+        // another full day.
+        user.dailyReward.lastLoginAt = Date.now();
+        user.dailyReward.lastInactivityReminderAt = 0;
 
         user.sessionVersion =
           number(
@@ -5621,8 +6645,8 @@ app.get('/api/luck/chests', requireLogin, async (req, res) => {
 // and it only fires when the user actually presses Claim.
 const LUCK_MILESTONE_CONFIG = {
   ref10: { need: 10, unit: 'referrals', reward: 100 },
-  ref25: { need: 25, unit: 'referrals', reward: 200 },
-  chest5: { need: 5, unit: 'chests', reward: 200 }
+  ref25: { need: 25, unit: 'referrals', reward: 100 },
+  chest5: { need: 5, unit: 'chests', reward: 100 }
 };
 
 app.post('/api/luck/milestones/claim', requireLogin, async (req, res) => {
@@ -5694,6 +6718,14 @@ app.post('/api/games/coinflip/play', requireLogin, async (req, res) => {
     const user = req.user;
     const choice = String(req.body?.choice || '').trim().toLowerCase();
     const amount = Math.floor(Number(req.body?.amount));
+    const currency = String(req.body?.currency || 'gems').trim().toLowerCase();
+
+    if (!['gems', 'tickets'].includes(currency)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid currency.'
+      });
+    }
 
     if (!['heads', 'tails'].includes(choice)) {
       return res.status(400).json({
@@ -5707,12 +6739,124 @@ app.post('/api/games/coinflip/play', requireLogin, async (req, res) => {
       amount < COIN_FLIP_CONFIG.min ||
       amount > COIN_FLIP_CONFIG.max
     ) {
+      const unit = currency === 'tickets' ? 'Luck Tickets🪙' : 'Gems💎';
       return res.status(400).json({
         success: false,
-        message: `Choose an amount between Gems💎${COIN_FLIP_CONFIG.min} and Gems💎${COIN_FLIP_CONFIG.max}.`
+        message: `Choose an amount between ${unit}${COIN_FLIP_CONFIG.min} and ${unit}${COIN_FLIP_CONFIG.max}.`
       });
     }
 
+    // First decide whether this play is a win (20%) or a loss (80%).
+    // Only after that do we choose the displayed side. On a win the
+    // result matches the user's choice; on a loss it is the opposite.
+    // This preserves a natural coin-flip animation while enforcing the
+    // configured 20/80 outcome rate server-side.
+    const won = crypto.randomInt(0, 10000) < Math.round(COIN_FLIP_CONFIG.winChance * 10000);
+    const result = won
+      ? choice
+      : (choice === 'heads' ? 'tails' : 'heads');
+    let payout = 0;
+
+    if (currency === 'tickets') {
+      // ---- Luck Tickets mode: stake/reward Luck Tickets instead of Gems ----
+      const daily = normalizeDailyReward(user);
+      let oldDaily = JSON.parse(JSON.stringify(daily));
+      const tickets = number(daily.luckTickets);
+
+      if (tickets < amount) {
+        return res.status(400).json({
+          success: false,
+          code: 'INSUFFICIENT_TICKETS',
+          message: `You need ${amount} Luck Tickets to play.`
+        });
+      }
+
+      daily.luckTickets = tickets - amount;
+      user.dailyReward = daily;
+      user.luckTickets = daily.luckTickets;
+
+      // Optimistic concurrency check, same pattern used by Lucky 3, so two
+      // rapid taps can't spend the same ticket balance twice.
+      let committed = false;
+      for (let attempt = 0; attempt < 3 && !committed; attempt++) {
+        const { data: updatedRows, error: updateError } = await supabase
+          .from('users')
+          .update({ daily_reward: user.dailyReward })
+          .eq('id', user.id)
+          .eq('daily_reward', JSON.stringify(oldDaily))
+          .select('id');
+
+        if (updateError) throw updateError;
+        committed = Array.isArray(updatedRows) && updatedRows.length > 0;
+
+        if (!committed) {
+          const fresh = await getUserById(user.id);
+          if (!fresh) throw new Error('User session not found.');
+          const freshDaily = normalizeDailyReward(fresh);
+          if (number(freshDaily.luckTickets) < amount) {
+            return res.status(400).json({
+              success: false,
+              code: 'INSUFFICIENT_TICKETS',
+              message: `You need ${amount} Luck Tickets to play.`
+            });
+          }
+          oldDaily = JSON.parse(JSON.stringify(freshDaily));
+          freshDaily.luckTickets = number(freshDaily.luckTickets) - amount;
+          fresh.dailyReward = freshDaily;
+          user.dailyReward = freshDaily;
+          user.luckTickets = freshDaily.luckTickets;
+        }
+      }
+
+      if (!committed) {
+        return res.status(409).json({
+          success: false,
+          code: 'RETRY',
+          message: 'Please try Double or Nothing again.'
+        });
+      }
+
+      await addTransaction(user.id, {
+        id: generateTransactionId('tx_coinflip_stake'),
+        type: 'coinflip_stake',
+        description: `Double Your Luck Tickets — ${amount} 🪙 wagered on ${choice}`,
+        amount,
+        currency: 'LUCK_TICKETS',
+        status: 'completed',
+        bank: 'Luck Ticket Wallet'
+      });
+
+      if (won) {
+        payout = amount * 2;
+        const freshDaily = normalizeDailyReward(user);
+        freshDaily.luckTickets = number(freshDaily.luckTickets) + payout;
+        user.dailyReward = freshDaily;
+        user.luckTickets = freshDaily.luckTickets;
+        await updateUser(user);
+
+        await addTransaction(user.id, {
+          id: generateTransactionId('tx_coinflip_win'),
+          type: 'coinflip_win',
+          description: `Double Your Luck Tickets — Won ${payout} 🪙 (landed ${result})`,
+          amount: payout,
+          currency: 'LUCK_TICKETS',
+          status: 'completed',
+          bank: 'Luck Ticket Wallet'
+        });
+      }
+
+      return res.json({
+        success: true,
+        result,
+        won,
+        amount,
+        payout,
+        currency: 'tickets',
+        luckTickets: number(user.dailyReward.luckTickets)
+      });
+    }
+
+    // ---- Gems mode (original behavior) ----
     syncUserBalance(user);
 
     if (number(user.balance) < amount) {
@@ -5750,17 +6894,6 @@ app.post('/api/games/coinflip/play', requireLogin, async (req, res) => {
       bank: 'PAYME Wallet'
     });
 
-    // First decide whether this play is a win (20%) or a loss (80%).
-    // Only after that do we choose the displayed side. On a win the
-    // result matches the user's choice; on a loss it is the opposite.
-    // This preserves a natural coin-flip animation while enforcing the
-    // configured 20/80 outcome rate server-side.
-    const won = crypto.randomInt(0, 10000) < Math.round(COIN_FLIP_CONFIG.winChance * 10000);
-    const result = won
-      ? choice
-      : (choice === 'heads' ? 'tails' : 'heads');
-    let payout = 0;
-
     if (won) {
       payout = amount * 2;
       user.withdrawableBalance = getWithdrawableBalance(user) + payout;
@@ -5784,6 +6917,7 @@ app.post('/api/games/coinflip/play', requireLogin, async (req, res) => {
       won,
       amount,
       payout,
+      currency: 'gems',
       balance: user.balance,
       withdrawableBalance: user.withdrawableBalance,
       depositBalance: user.depositBalance
@@ -5793,7 +6927,129 @@ app.post('/api/games/coinflip/play', requireLogin, async (req, res) => {
     console.error('Coin flip error:', err);
     return res.status(500).json({
       success: false,
-      message: 'Unable to play Double Your Gems right now.'
+      message: 'Unable to play Double or Nothing right now.'
+    });
+  }
+});
+
+// ======================================================
+// LUCK TICKETS → GEMS SWAP
+// ======================================================
+// Lets a user convert idle Luck Tickets into withdrawable Gems at a
+// fixed rate. Tickets are deducted with the same optimistic-concurrency
+// pattern used elsewhere against the daily_reward JSON blob, then Gems
+// are credited to withdrawableBalance (Gems earned this way are
+// withdrawable, same as game winnings).
+const LUCK_TO_GEMS_RATE = 0.25;
+
+app.post('/api/luck/convert-to-gems', requireLogin, async (req, res) => {
+  try {
+    const user = req.user;
+    const amount = Math.floor(Number(req.body?.amount));
+
+    if (!Number.isFinite(amount) || amount < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Enter how many Luck Tickets you want to swap.'
+      });
+    }
+
+    const daily = normalizeDailyReward(user);
+    let oldDaily = JSON.parse(JSON.stringify(daily));
+    const tickets = number(daily.luckTickets);
+
+    if (tickets < amount) {
+      return res.status(400).json({
+        success: false,
+        code: 'INSUFFICIENT_TICKETS',
+        message: "You don't have enough Luck Tickets for that."
+      });
+    }
+
+    daily.luckTickets = tickets - amount;
+    user.dailyReward = daily;
+    user.luckTickets = daily.luckTickets;
+
+    let committed = false;
+    for (let attempt = 0; attempt < 3 && !committed; attempt++) {
+      const { data: updatedRows, error: updateError } = await supabase
+        .from('users')
+        .update({ daily_reward: user.dailyReward })
+        .eq('id', user.id)
+        .eq('daily_reward', JSON.stringify(oldDaily))
+        .select('id');
+
+      if (updateError) throw updateError;
+      committed = Array.isArray(updatedRows) && updatedRows.length > 0;
+
+      if (!committed) {
+        const fresh = await getUserById(user.id);
+        if (!fresh) throw new Error('User session not found.');
+        const freshDaily = normalizeDailyReward(fresh);
+        if (number(freshDaily.luckTickets) < amount) {
+          return res.status(400).json({
+            success: false,
+            code: 'INSUFFICIENT_TICKETS',
+            message: "You don't have enough Luck Tickets for that."
+          });
+        }
+        oldDaily = JSON.parse(JSON.stringify(freshDaily));
+        freshDaily.luckTickets = number(freshDaily.luckTickets) - amount;
+        fresh.dailyReward = freshDaily;
+        user.dailyReward = freshDaily;
+        user.luckTickets = freshDaily.luckTickets;
+      }
+    }
+
+    if (!committed) {
+      return res.status(409).json({
+        success: false,
+        code: 'RETRY',
+        message: 'Please try the swap again.'
+      });
+    }
+
+    const gemsAdded = Math.round(amount * LUCK_TO_GEMS_RATE * 100) / 100;
+
+    await addTransaction(user.id, {
+      id: generateTransactionId('tx_luck_swap_out'),
+      type: 'luck_ticket_swap',
+      description: `Swapped ${amount} 🪙 Luck Tickets for Gems💎${gemsAdded}`,
+      amount,
+      currency: 'LUCK_TICKETS',
+      status: 'completed',
+      bank: 'Luck Ticket Wallet'
+    });
+
+    user.withdrawableBalance = getWithdrawableBalance(user) + gemsAdded;
+    syncUserBalance(user);
+    await updateUser(user);
+
+    await addTransaction(user.id, {
+      id: generateTransactionId('tx_luck_swap_in'),
+      type: 'luck_ticket_swap',
+      description: `Received Gems💎${gemsAdded} from swapping ${amount} 🪙 Luck Tickets`,
+      amount: gemsAdded,
+      currency: 'GEMS',
+      status: 'completed',
+      bank: 'PAYME Wallet'
+    });
+
+    return res.json({
+      success: true,
+      amountSwapped: amount,
+      gemsAdded,
+      luckTickets: number(user.dailyReward.luckTickets),
+      balance: user.balance,
+      withdrawableBalance: user.withdrawableBalance,
+      depositBalance: user.depositBalance
+    });
+
+  } catch (err) {
+    console.error('Luck ticket swap error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to swap Luck Tickets right now.'
     });
   }
 });
@@ -6568,6 +7824,23 @@ function normalizeDailyReward(
     ref25: !!user.dailyReward.milestones.ref25,
     chest5: !!user.dailyReward.milestones.chest5
   };
+
+  // Luck Ticket Mining Rig state. It is intentionally kept inside the
+  // existing daily_reward JSON wallet to avoid a new table/column and
+  // additional reads on page loads.
+  user.dailyReward.luckMining = normalizeLuckMining(user.dailyReward);
+
+  // Last-login / inactivity-reminder bookkeeping — also piggybacked onto
+  // this same JSON blob. lastLoginAt is stamped on every successful
+  // /api/auth/telegram-signup call (i.e. every time the Mini App opens).
+  // lastInactivityReminderAt tracks the last time we DM'd the user about
+  // being away, so the reminder sweep never repeats more than once/day.
+  if (!Number.isFinite(Number(user.dailyReward.lastLoginAt))) {
+    user.dailyReward.lastLoginAt = 0;
+  }
+  if (!Number.isFinite(Number(user.dailyReward.lastInactivityReminderAt))) {
+    user.dailyReward.lastInactivityReminderAt = 0;
+  }
 
   return user.dailyReward;
 
@@ -8183,6 +9456,126 @@ async function editTelegramMessage(
 }
 
 // ======================================================
+// ADMIN BROADCAST (deposit/admin bot -> all Payme users)
+// ======================================================
+// Lets whoever is in the admin chat (TELEGRAM_CHAT_ID, the same chat that
+// receives deposit/withdrawal notifications) send a message to every
+// registered user by typing /broadcast <message> in that chat. The command
+// is read via the deposit bot's polling loop, but the actual DMs go out
+// through the main Payme bot (TELEGRAM_BOT_TOKEN) since that's the bot the
+// users themselves have a chat with.
+let broadcastInProgress = false;
+
+async function handleTelegramAdminMessage(message) {
+
+  if (!message || typeof message.text !== 'string') return;
+
+  // Only the configured admin chat can trigger a broadcast.
+  if (!TELEGRAM_CHAT_ID || String(message.chat?.id) !== String(TELEGRAM_CHAT_ID)) {
+    return;
+  }
+
+  const text = message.text.trim();
+  if (!/^\/broadcast(\s|$)/i.test(text)) return;
+
+  const broadcastText = text.replace(/^\/broadcast\s*/i, '').trim();
+
+  if (!broadcastText) {
+    await sendTelegramNotification(
+      '⚠️ Usage: <code>/broadcast Your message here</code>'
+    );
+    return;
+  }
+
+  if (broadcastInProgress) {
+    await sendTelegramNotification(
+      '⏳ A broadcast is already in progress — please wait for it to finish before starting another.'
+    );
+    return;
+  }
+
+  broadcastInProgress = true;
+
+  try {
+
+    const totalUsers = await getTotalUserCount();
+
+    await sendTelegramNotification(
+      `📣 <b>Broadcast started</b>\n\nSending to ${
+        totalUsers !== null ? totalUsers : 'all'
+      } users. This may take a few minutes...`
+    );
+
+    let offset = 0;
+    let total = 0;
+    let delivered = 0;
+    let failed = 0;
+
+    while (true) {
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('telegram_id')
+        .range(offset, offset + REMINDER_SWEEP_PAGE_SIZE - 1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+
+      for (const row of data) {
+
+        const telegramId = row.telegram_id;
+        if (!telegramId) continue;
+
+        total++;
+
+        const result = await sendTelegramUserMessage(
+          telegramId,
+          broadcastText
+        );
+
+        if (result) {
+          delivered++;
+        } else {
+          failed++;
+        }
+
+        // Telegram allows roughly ~30 messages/second across all chats.
+        // A small per-message delay keeps this comfortably under that
+        // limit without needing a queue/worker for what is an occasional
+        // admin action.
+        await new Promise(resolve => setTimeout(resolve, 40));
+
+      }
+
+      if (data.length < REMINDER_SWEEP_PAGE_SIZE) break;
+      offset += REMINDER_SWEEP_PAGE_SIZE;
+
+    }
+
+    await sendTelegramNotification(
+      `✅ <b>Broadcast complete</b>\n\n` +
+      `Total users: ${total}\n` +
+      `Delivered: ${delivered}\n` +
+      `Failed/blocked: ${failed}`
+    );
+
+  } catch (err) {
+
+    console.error('Broadcast error:', err);
+
+    await sendTelegramNotification(
+      `❌ Broadcast failed: ${err.message}`
+    );
+
+  } finally {
+
+    broadcastInProgress = false;
+
+  }
+
+}
+
+// ======================================================
 // HANDLE TELEGRAM DEPOSIT CALLBACK
 // ======================================================
 
@@ -8466,6 +9859,15 @@ async function pollTelegramUpdates() {
           update.callback_query
         );
 
+      }
+
+      if (update.message) {
+        // Fire-and-forget: a broadcast can take a while to page through
+        // every user, and it must not block the getUpdates loop (or the
+        // deposit-approval callbacks) while it runs.
+        handleTelegramAdminMessage(update.message).catch(
+          err => console.error('Admin message handling error:', err)
+        );
       }
 
     }
@@ -9545,6 +10947,7 @@ app.listen(
   }
 
 );
+
 
 
 

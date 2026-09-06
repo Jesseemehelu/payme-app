@@ -81,18 +81,26 @@
 .flip-card h2{position:relative;z-index:1;margin:6px 0 5px;font-size:22px;letter-spacing:-.03em;background:linear-gradient(90deg,#fff 10%,var(--pink) 45%,var(--gold) 90%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:heroShine 6s linear infinite}
 @keyframes heroShine{to{background-position:220% center}}
 .flip-card > p{position:relative;z-index:1;margin:0;color:#dce4ff;font-size:11px;line-height:1.5;max-width:320px}
-.coin-stage{position:relative;z-index:1;perspective:1200px;height:166px;display:flex;align-items:center;justify-content:center;margin:13px 0 4px}
+.coin-stage{position:relative;z-index:1;-webkit-perspective:1200px;perspective:1200px;height:166px;display:flex;align-items:center;justify-content:center;margin:13px 0 4px}
 .coin-shadow{position:absolute;bottom:10px;width:108px;height:20px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.72),transparent 70%);filter:blur(3px);animation:coinShadow 2.3s ease-in-out infinite}
 @keyframes coinShadow{0%,100%{transform:scale(.82);opacity:.55}50%{transform:scale(1.04);opacity:.3}}
-.coin3d{position:relative;width:118px;height:118px;transform-style:preserve-3d;transform:rotateY(0deg) rotateX(7deg);will-change:transform;filter:drop-shadow(0 17px 20px rgba(0,0,0,.5))}
-.coin3d:before,.coin3d:after{content:"";position:absolute;inset:3px;border-radius:50%;backface-visibility:hidden;transform-style:preserve-3d;pointer-events:none}
+.coin3d{position:relative;width:118px;height:118px;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;transform:rotateY(0deg) rotateX(7deg);will-change:transform;filter:drop-shadow(0 17px 20px rgba(0,0,0,.5))}
+.coin3d:before,.coin3d:after{content:"";position:absolute;inset:3px;border-radius:50%;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;pointer-events:none}
 .coin3d:before{transform:translateZ(-7px);background:repeating-linear-gradient(90deg,#8d4e0d 0 3px,#e6a82e 3px 6px,#7a3d08 6px 9px);border:2px solid #ffd76a;box-shadow:0 0 0 3px rgba(255,215,106,.2),inset 0 0 10px rgba(0,0,0,.55)}
 .coin3d:after{transform:translateZ(7px);border:2px solid rgba(255,247,197,.85);box-shadow:inset 0 0 0 3px rgba(126,67,8,.25),0 0 22px rgba(255,215,106,.22)}
-.coin-face{position:absolute;inset:5px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:33px;backface-visibility:hidden;transform-style:preserve-3d;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),inset 0 -9px 16px rgba(0,0,0,.22),inset 0 8px 14px rgba(255,255,255,.2),0 7px 16px rgba(0,0,0,.35)}
+.coin-face{position:absolute;inset:5px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:33px;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),inset 0 -9px 16px rgba(0,0,0,.22),inset 0 8px 14px rgba(255,255,255,.2),0 7px 16px rgba(0,0,0,.35)}
 .coin-face:before{content:"";position:absolute;inset:11px;border-radius:50%;border:2px solid rgba(255,255,255,.28);box-shadow:inset 0 0 0 2px rgba(83,43,0,.16),0 0 12px rgba(255,255,255,.12)}
 .coin-face:after{content:"";position:absolute;width:46px;height:16px;top:15px;left:22px;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.52),transparent);transform:rotate(-24deg);filter:blur(2px);opacity:.7}
-.coin-front{background:radial-gradient(circle at 34% 28%,#fff3aa 0 8%,#ffd95d 24%,#e6a62c 60%,#9b500b 100%);border:3px solid #fff1a8;color:#3a2200;transform:translateZ(7px)}
-.coin-back{background:radial-gradient(circle at 34% 28%,#e4fbff 0 8%,#63e7ff 24%,#278eb2 60%,#10536c 100%);border:3px solid #d9fbff;color:#02222f;transform:rotateY(180deg) translateZ(7px)}
+.coin-front{background:radial-gradient(circle at 34% 28%,#fff3aa 0 8%,#ffd95d 24%,#e6a62c 60%,#9b500b 100%);border:3px solid #fff1a8;color:#3a2200;transform:translateZ(7px);opacity:1}
+.coin-back{background:radial-gradient(circle at 34% 28%,#e4fbff 0 8%,#63e7ff 24%,#278eb2 60%,#10536c 100%);border:3px solid #d9fbff;color:#02222f;transform:rotateY(180deg) translateZ(7px);opacity:0}
+/* Some in-app WebViews (Telegram's Android browser in particular) flatten
+   nested preserve-3d contexts once an ancestor has overflow:hidden/isolation
+   (see .flip-card), which breaks backface-visibility and lets the Tail face
+   render as a mirrored ghost of the Head face instead of being hidden. These
+   explicit opacity rules — toggled in JS, independent of the 3D transform —
+   guarantee only one real, correctly-oriented face is ever visible. */
+.coin3d.show-tails .coin-front{opacity:0}
+.coin3d.show-tails .coin-back{opacity:1}
 .coin-face span{position:relative;z-index:2;font-size:12px;font-weight:950;letter-spacing:.1em;margin-top:2px;text-transform:uppercase;text-shadow:0 2px 3px rgba(0,0,0,.18)}
 .coin-front span:first-child,.coin-back span:first-child{font-size:34px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
 .side-picker{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
@@ -115,6 +123,63 @@
 .flip-go:disabled:after{display:none}
 .flip-balance{position:relative;z-index:1;margin-top:9px;text-align:center;color:var(--muted);font-size:9px}
 .flip-balance b{color:#fff;font-weight:900}
+
+/* ---- flip header row + how-to-play ---- */
+.flip-top-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.howto-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#e7ebff;font-size:10px;font-weight:900;white-space:nowrap;transition:transform .15s ease,background .15s ease}
+.howto-btn span{font-size:11px}
+.howto-btn:active{transform:scale(.94);background:rgba(255,255,255,.12)}
+
+/* ---- currency switch ---- */
+.currency-toggle{position:relative;z-index:1;display:block;width:100%;margin:12px 0 6px;background:none;padding:0;cursor:pointer}
+.toggle-track{position:relative;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;background:#0b0e1c;border:1px solid var(--line);border-radius:16px;padding:4px;overflow:hidden}
+.toggle-thumb{position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--purple));box-shadow:0 6px 16px rgba(87,231,255,.3);transition:transform .35s cubic-bezier(.16,1,.3,1),background .35s ease,box-shadow .35s ease;z-index:0}
+.currency-toggle.on-tickets .toggle-thumb{transform:translateX(100%);background:linear-gradient(135deg,var(--gold),var(--orange));box-shadow:0 6px 16px rgba(255,215,106,.32)}
+.toggle-opt{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 4px;font-size:11.5px;font-weight:950;color:#9aa3c4;transition:color .3s ease}
+.currency-toggle:not(.on-tickets) .gems-opt{color:#07131f}
+.currency-toggle.on-tickets .tickets-opt{color:#2c1400}
+.currency-swap-icon{font-size:9px;opacity:.65;position:relative;z-index:1;text-align:center;margin:2px 0 12px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+
+/* ---- how-to-play modal ---- */
+.howto-list{position:relative;z-index:1;text-align:left;margin:14px 0 18px;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.howto-list li{font-size:11.5px;line-height:1.5;color:#dce4ff;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:13px;padding:10px 12px}
+.howto-list li b{color:var(--gold);margin-right:6px}
+.howto-note{position:relative;z-index:1;margin:0 0 16px;font-size:10px;color:var(--muted);line-height:1.5}
+
+/* ============ LUCK TICKETS → GEMS SWAP ============ */
+.swap-card{position:relative;overflow:hidden;padding:20px 20px 18px;border-radius:28px;margin-bottom:16px;background:linear-gradient(155deg,#0c2a20 0%,#0a1a1e 55%,#070d12 100%);border:1px solid rgba(98,240,165,.28);box-shadow:0 25px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);isolation:isolate}
+.swap-card:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.05),transparent 28%,transparent 72%,rgba(98,240,165,.04));pointer-events:none}
+.swap-glow{position:absolute;width:220px;height:220px;border-radius:50%;top:-90px;left:-70px;background:radial-gradient(circle,rgba(98,240,165,.3),transparent 70%);filter:blur(4px);pointer-events:none;animation:vaultPulse 3.2s ease-in-out infinite}
+.swap-head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.swap-eyebrow{color:var(--green);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.swap-head h2{margin:5px 0 4px;font-size:19px;letter-spacing:-.03em;background:linear-gradient(90deg,#fff 8%,var(--green) 55%,var(--cyan) 96%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:heroShine 6s linear infinite}
+.swap-head p{margin:0;color:#c8f5e0;font-size:10.5px;line-height:1.5;max-width:205px}
+.swap-rate-badge{padding:8px 11px;border-radius:13px;background:rgba(98,240,165,.12);border:1px solid rgba(98,240,165,.35);font-weight:950;font-size:11px;white-space:nowrap;height:fit-content;box-shadow:0 7px 20px rgba(98,240,165,.12);color:#eafff3}
+.swap-visual{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 14px;padding:16px 8px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.swap-token{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:30px;flex:1}
+.swap-token span{font-size:8.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.swap-token.from{filter:drop-shadow(0 0 14px rgba(255,215,106,.4))}
+.swap-token.to{filter:drop-shadow(0 0 14px rgba(87,231,255,.4))}
+.swap-arrow{font-size:19px;color:var(--green);animation:swapPulse 1.8s ease-in-out infinite}
+@keyframes swapPulse{0%,100%{transform:scale(1) rotate(0deg);opacity:.7}50%{transform:scale(1.18) rotate(6deg);opacity:1}}
+.swap-balance-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--muted);padding:0 3px;margin-bottom:13px}
+.swap-balance-row b{color:#fff;font-size:13px;margin-left:4px;font-weight:900}
+.swap-open-btn{position:relative;z-index:1;overflow:hidden;width:100%;padding:15px;border-radius:15px;border:1px solid rgba(255,255,255,.3);background:linear-gradient(135deg,var(--green),var(--cyan) 55%,var(--purple));color:#04150e;font-weight:950;font-size:13px;box-shadow:0 8px 0 rgba(0,0,0,.25),0 14px 28px rgba(98,240,165,.22);cursor:pointer}
+.swap-open-btn:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg);animation:watchSheen 2.8s ease-in-out infinite}
+.swap-open-btn:active{transform:translateY(2px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
+
+/* ---- swap modal ---- */
+.swap-modal-sub{position:relative;z-index:1;margin:2px 0 0;font-size:11.5px;color:#b9c3e6}
+.swap-input-wrap{position:relative;z-index:1;display:flex;align-items:center;gap:8px;background:#0b0e1c;border:1px solid var(--line);border-radius:15px;padding:12px 14px;margin:16px 0 10px}
+.swap-input-wrap span{font-size:18px}
+.swap-input-wrap input{flex:1;min-width:0;background:transparent;border:0;color:#fff;font-size:18px;font-weight:900;outline:0}
+.swap-max-btn{padding:7px 12px;border-radius:10px;background:rgba(98,240,165,.16);border:1px solid rgba(98,240,165,.4);color:#8ff5c4;font-size:10px;font-weight:900}
+.swap-result-row{position:relative;z-index:1;text-align:center;font-size:11.5px;color:#c8f5e0;margin-bottom:8px}
+.swap-result-row b{font-size:17px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+.swap-avail-note{position:relative;z-index:1;text-align:center;font-size:9.5px;color:var(--muted);margin-bottom:16px}
+.swap-avail-note b{color:#fff;font-weight:900}
+.close.swap-confirm{background:linear-gradient(135deg,var(--green),var(--cyan));color:#04150e;box-shadow:0 6px 0 rgba(0,0,0,.28),0 12px 25px rgba(98,240,165,.22)}
+.close.secondary{background:transparent;box-shadow:none;margin-top:9px}
 
 /* ============ LUCK VAULT — 3D TREASURE CHEST ============ */
 .vault-card{position:relative;overflow:hidden;padding:20px 20px 18px;border-radius:28px;margin-bottom:16px;background:linear-gradient(155deg,#121d35 0%,#0a0f1e 58%,#070912 100%);border:1px solid rgba(155,114,255,.24);box-shadow:0 25px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
@@ -900,26 +965,38 @@
 
 <section class="flip-card" id="coinFlipSection">
   <div class="flip-glow"></div>
-  <div class="flip-eyebrow">DOUBLE OR NOTHING</div>
-  <h2>Double Your Gems</h2>
-  <p>Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.</p>
+  <div class="flip-top-row">
+    <div class="flip-eyebrow">DOUBLE OR NOTHING</div>
+    <button class="howto-btn" id="howToPlayBtn" type="button"><span>❓</span>How to Play</button>
+  </div>
+  <h2 id="flipTitle">Double Your Gems</h2>
+  <p id="flipWriteup">Call it in the air. Pick heads or tails, set your stake, and flip — land your side and your stake doubles instantly, straight into your balance. Simple odds, instant payouts, no waiting around.</p>
+
+  <button class="currency-toggle" id="currencyToggleBtn" type="button" aria-label="Switch currency">
+    <span class="toggle-track">
+      <span class="toggle-thumb"></span>
+      <span class="toggle-opt gems-opt">💎 Gems</span>
+      <span class="toggle-opt tickets-opt">🪙 Luck Tickets</span>
+    </span>
+  </button>
+  <div class="currency-swap-icon">Tap to switch what you're doubling</div>
 
   <div class="coin-stage">
     <div class="coin-shadow"></div>
     <div class="coin3d" id="coin3d">
-      <div class="coin-face coin-front"><span>💎</span><span>Heads</span></div>
-      <div class="coin-face coin-back"><span>⚡</span><span>Tails</span></div>
+      <div class="coin-face coin-front"><span>🎩</span><span>Head</span></div>
+      <div class="coin-face coin-back"><span>⚡</span><span>Tail</span></div>
     </div>
   </div>
 
   <div class="side-picker">
-    <button class="side-btn active" data-side="heads" id="pickHeads"><span class="side-ico">💎</span>Heads</button>
+    <button class="side-btn active" data-side="heads" id="pickHeads"><span class="side-ico">🎩</span>Heads</button>
     <button class="side-btn" data-side="tails" id="pickTails"><span class="side-ico">⚡</span>Tails</button>
   </div>
 
   <div class="stake-row">
     <span class="stake-label">Your stake</span>
-    <div class="stake-input-wrap"><span>💎</span><input type="number" id="stakeInput" min="10" max="1000" step="1" value="10" inputmode="numeric"></div>
+    <div class="stake-input-wrap"><span id="stakeInputIcon">💎</span><input type="number" id="stakeInput" min="10" max="1000" step="1" value="10" inputmode="numeric"></div>
   </div>
   <div class="chip-row" id="chipRow">
     <button class="chip" data-amt="10">10</button>
@@ -930,7 +1007,7 @@
   </div>
 
   <button class="flip-go" id="flipGoBtn">Flip &amp; Double <span>→</span></button>
-  <div class="flip-balance">Balance: <b id="flipBalance">0</b> 💎</div>
+  <div class="flip-balance">Balance: <b id="flipBalance">0</b> <span id="flipBalanceIcon">💎</span></div>
 </section>
 
 <section class="vault-card" id="luckVault">
@@ -992,6 +1069,28 @@
   <div class="vault-note">Reward: <strong>20-50 Luck Tickets 🪙</strong> · Chest relocks for 24h after opening</div>
 </section>
 
+<section class="swap-card" id="luckSwapSection">
+  <div class="swap-glow"></div>
+  <div class="swap-head">
+    <div>
+      <div class="swap-eyebrow">CONVERT</div>
+      <h2>Tickets → Gems</h2>
+      <p>Cash in idle Luck Tickets for withdrawable Gems, any time.</p>
+    </div>
+    <div class="swap-rate-badge">🪙1 = 💎0.25</div>
+  </div>
+
+  <div class="swap-visual">
+    <div class="swap-token from">🪙<span>Luck Tickets</span></div>
+    <div class="swap-arrow">⇄</div>
+    <div class="swap-token to">💎<span>Gems</span></div>
+  </div>
+
+  <div class="swap-balance-row"><span>Available to swap</span><span><b id="swapTicketsAvail">0</b> 🪙</span></div>
+
+  <button class="swap-open-btn" id="openSwapBtn" type="button">Swap Tickets for Gems <span>→</span></button>
+</section>
+
 <div class="section-title"><h3>Milestone Rewards</h3><span>Claim once</span></div>
 <section class="vault-card" id="milestoneSection" style="padding:16px 14px 14px">
 
@@ -1021,7 +1120,7 @@
         <h4>Refer 25 Friends</h4>
         <p>Invite 25 friends to PAYME.</p>
       </div>
-      <div class="milestone-reward"><small>Reward</small>200 🪙</div>
+      <div class="milestone-reward"><small>Reward</small>100 🪙</div>
     </div>
     <div class="milestone-progress-row">
       <div class="milestone-bar"><div class="milestone-bar-fill" id="ref25Fill"></div></div>
@@ -1040,7 +1139,7 @@
         <h4>Open Treasure Box 5 Times</h4>
         <p>Crack open the Luck Vault chest 5 times.</p>
       </div>
-      <div class="milestone-reward"><small>Reward</small>200 🪙</div>
+      <div class="milestone-reward"><small>Reward</small>100 🪙</div>
     </div>
     <div class="milestone-progress-row">
       <div class="milestone-bar"><div class="milestone-bar-fill" id="chest5Fill"></div></div>
@@ -1078,6 +1177,36 @@
   <button class="close" id="depositModalClose">Not now</button>
 </div></div>
 
+<div class="modal" id="howToPlayModal"><div class="modal-card">
+  <div class="modal-icon">🎯</div>
+  <h2>How to Play</h2>
+  <ul class="howto-list">
+    <li><b>1.</b> Use the switch to choose whether you're doubling Gems 💎 or Luck Tickets 🪙.</li>
+    <li><b>2.</b> Pick Heads or Tails, then set your stake with the input or the quick chips.</li>
+    <li><b>3.</b> Tap <strong>Flip &amp; Double</strong> — the coin lands on a side chosen server-side.</li>
+    <li><b>4.</b> Win and your stake is doubled straight into your balance. Lose and the stake is gone — so only stake what you're comfortable risking.</li>
+  </ul>
+  <p class="howto-note">Both modes use the same 10–1,000 stake range in whichever currency is selected.</p>
+  <button class="close" id="howToPlayClose">Got it</button>
+</div></div>
+
+<div class="modal" id="swapModal"><div class="modal-card">
+  <div class="modal-icon">🔄</div>
+  <h2>Swap Luck Tickets</h2>
+  <p class="swap-modal-sub">1 Luck Ticket 🪙 = 0.25 Gems 💎</p>
+
+  <div class="swap-input-wrap">
+    <span>🪙</span>
+    <input type="number" id="swapAmountInput" min="1" step="1" placeholder="0" inputmode="numeric">
+    <button class="swap-max-btn" id="swapMaxBtn" type="button">MAX</button>
+  </div>
+  <div class="swap-result-row">You'll receive <b id="swapResultAmount">0</b> 💎</div>
+  <div class="swap-avail-note">Balance: <b id="swapModalAvail">0</b> 🪙 Luck Tickets</div>
+
+  <button class="close swap-confirm" id="swapConfirmBtn">Swap Now</button>
+  <button class="close secondary" id="swapCancelBtn">Cancel</button>
+</div></div>
+
 <div class="modal" id="chestRewardModal"><div class="modal-card">
   <div class="modal-icon">🪙</div>
   <h2>Chest opened!</h2>
@@ -1099,10 +1228,12 @@
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
-let busyFlip=false, busyVault=false;
+let busyFlip=false, busyVault=false, busySwap=false;
 let balance=0, luckTickets=0;
 let clockOffset=0, chestState=null, vaultTimer=null;
 let selectedSide='heads';
+let flipCurrency='gems';
+const SWAP_RATE=0.25;
 
 function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2800)}
 function bump(el){el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
@@ -1110,9 +1241,15 @@ function confetti(){const colors=['#ffd76a','#ff63c3','#57e7ff','#9b72ff','#62f0
 
 function renderTopPills(){
   $('gemsTop').textContent=balance.toLocaleString();
-  $('flipBalance').textContent=balance.toLocaleString();
   $('ticketsTop').textContent=luckTickets.toLocaleString();
   $('vaultTicketsBadge').textContent=luckTickets.toLocaleString();
+  $('swapTicketsAvail').textContent=luckTickets.toLocaleString();
+  renderFlipBalance();
+}
+
+function renderFlipBalance(){
+  const val = flipCurrency==='tickets' ? luckTickets : balance;
+  $('flipBalance').textContent=val.toLocaleString();
 }
 
 async function loadBalance(){
@@ -1129,15 +1266,50 @@ async function loadBalance(){
 }
 
 /* ============ COIN FLIP ============ */
-$('pickHeads').onclick=()=>{selectedSide='heads';$('pickHeads').classList.add('active');$('pickTails').classList.remove('active')};
-$('pickTails').onclick=()=>{selectedSide='tails';$('pickTails').classList.add('active');$('pickHeads').classList.remove('active')};
+const FLIP_COPY={
+  gems:{
+    title:'Double Your Gems',
+    writeup:'Call it in the air. Pick heads or tails, set your stake, and flip — land your side and your stake doubles instantly, straight into your balance. Simple odds, instant payouts, no waiting around.',
+    icon:'💎'
+  },
+  tickets:{
+    title:'Double Your Luck Tickets',
+    writeup:'Same coin, different stakes — this time it\'s Luck Tickets on the line. Pick heads or tails, set how many tickets to risk, and flip for a shot at doubling them instantly.',
+    icon:'🪙'
+  }
+};
+
+function applyFlipCurrency(){
+  const cfg=FLIP_COPY[flipCurrency];
+  $('currencyToggleBtn').classList.toggle('on-tickets',flipCurrency==='tickets');
+  $('flipTitle').textContent=cfg.title;
+  $('flipWriteup').textContent=cfg.writeup;
+  $('stakeInputIcon').textContent=cfg.icon;
+  $('flipBalanceIcon').textContent=cfg.icon;
+  renderFlipBalance();
+}
+
+$('currencyToggleBtn').onclick=()=>{
+  flipCurrency = flipCurrency==='gems' ? 'tickets' : 'gems';
+  applyFlipCurrency();
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
+};
+applyFlipCurrency();
+
+$('howToPlayBtn').onclick=()=>{$('howToPlayModal').classList.add('open')};
+$('howToPlayClose').onclick=()=>closeModal('howToPlayModal');
+$('howToPlayModal').addEventListener('click',e=>{if(e.target===$('howToPlayModal'))closeModal('howToPlayModal')});
+
+$('pickHeads').onclick=()=>{selectedSide='heads';$('pickHeads').classList.add('active');$('pickTails').classList.remove('active');if(!busyFlip)$('coin3d').classList.remove('show-tails')};
+$('pickTails').onclick=()=>{selectedSide='tails';$('pickTails').classList.add('active');$('pickHeads').classList.remove('active');if(!busyFlip)$('coin3d').classList.add('show-tails')};
 
 document.querySelectorAll('.chip').forEach(btn=>{
   btn.onclick=()=>{
     document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     const raw=btn.dataset.amt;
-    const amt = raw==='1000' && balance>0 && balance<1000 ? Math.max(10,Math.min(1000,Math.floor(balance))) : Number(raw);
+    const avail = flipCurrency==='tickets' ? luckTickets : balance;
+    const amt = raw==='1000' && avail>0 && avail<1000 ? Math.max(10,Math.min(1000,Math.floor(avail))) : Number(raw);
     $('stakeInput').value=amt;
   };
 });
@@ -1155,6 +1327,7 @@ function spinCoin(landHeads){
     const spins=7;
     const base=spins*360;
     const target=landHeads ? base : base+180;
+    coin.classList.remove('show-tails');
     coin.style.transition='none';
     coin.style.transform='rotateX(7deg) rotateY(0deg) rotateZ(0deg)';
     void coin.offsetWidth;
@@ -1165,6 +1338,10 @@ function spinCoin(landHeads){
     setTimeout(()=>{
       coin.style.transition='transform .45s cubic-bezier(.2,1.4,.4,1)';
       coin.style.transform=`rotateX(0deg) rotateY(${target}deg) rotateZ(0deg)`;
+      // Lock in the landed face explicitly instead of trusting the 3D
+      // rotation alone to reveal it — this is what stops Tails from
+      // rendering as a mirrored ghost of Heads on affected WebViews.
+      coin.classList.toggle('show-tails', !landHeads);
       setTimeout(resolve,420);
     },2550);
   });
@@ -1188,12 +1365,13 @@ function spawnCoinResultBurst(won){
     holder.appendChild(p);
   });
 }
-function openFlipResultModal(won,amount,payout){
+function openFlipResultModal(won,amount,payout,currency){
+  const icon = currency==='tickets' ? '🪙' : '💎';
   $('flipResultIcon').textContent = won ? '🎉' : '💨';
   $('flipResultTitle').textContent = won ? 'You won!' : 'You lost';
   const rewardEl=$('flipResultAmount');
   rewardEl.classList.toggle('lose',!won);
-  rewardEl.textContent = won ? ('+'+payout.toLocaleString()+' 💎') : ('-'+amount.toLocaleString()+' 💎');
+  rewardEl.textContent = won ? ('+'+payout.toLocaleString()+' '+icon) : ('-'+amount.toLocaleString()+' '+icon);
   $('flipResultSub').textContent = won
     ? 'Your stake was doubled and added to your balance.'
     : 'Your stake was lost this round. Try again when you’re ready.';
@@ -1218,8 +1396,10 @@ $('depositModal').addEventListener('click',e=>{if(e.target===$('depositModal'))c
 $('flipGoBtn').onclick=async()=>{
   if(busyFlip) return;
   const amt=Math.floor(Number($('stakeInput').value));
+  const currency=flipCurrency;
+  const unitLabel = currency==='tickets' ? 'Luck Tickets🪙' : 'Gems💎';
   if(!Number.isFinite(amt) || amt<10 || amt>1000){
-    toast('Choose an amount between Gems💎10 and Gems💎1,000.');
+    toast(`Choose an amount between ${unitLabel}10 and ${unitLabel}1,000.`);
     return;
   }
   busyFlip=true;
@@ -1232,12 +1412,14 @@ $('flipGoBtn').onclick=async()=>{
       method:'POST',
       credentials:'same-origin',
       headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({choice:selectedSide,amount:amt})
+      body:JSON.stringify({choice:selectedSide,amount:amt,currency})
     });
     const d=await r.json();
     if(!r.ok || !d.success){
       if(d.code==='INSUFFICIENT_BALANCE'){
         openDepositModal(d.message);
+      }else if(d.code==='INSUFFICIENT_TICKETS'){
+        toast(d.message||`You need ${amt} Luck Tickets to play. Earn more from the Luck Vault below.`);
       }else{
         toast(d.message||'Unable to play right now.');
       }
@@ -1248,18 +1430,87 @@ $('flipGoBtn').onclick=async()=>{
     landedCoin.classList.remove('result-win','result-lose');
     void landedCoin.offsetWidth;
     landedCoin.classList.add(d.won?'result-win':'result-lose');
-    balance=Number(d.balance||0);
+    if(currency==='tickets'){
+      luckTickets=Number(d.luckTickets||0);
+    }else{
+      balance=Number(d.balance||0);
+    }
     renderTopPills();
     if(d.won){
-      openFlipResultModal(true,amt,d.payout);
+      openFlipResultModal(true,amt,d.payout,currency);
       confetti();
     }else{
-      openFlipResultModal(false,amt,0);
+      openFlipResultModal(false,amt,0,currency);
     }
   }catch(e){
     toast('Network error. Please try again.');
   }finally{
     busyFlip=false;
+    btn.disabled=false;
+    btn.innerHTML=prevHtml;
+  }
+};
+
+/* ============ LUCK TICKETS → GEMS SWAP ============ */
+function updateSwapPreview(){
+  let v=Math.floor(Number($('swapAmountInput').value));
+  if(!Number.isFinite(v) || v<0) v=0;
+  const gems=(v*SWAP_RATE);
+  $('swapResultAmount').textContent = gems.toLocaleString(undefined,{maximumFractionDigits:2});
+}
+$('swapAmountInput').addEventListener('input',updateSwapPreview);
+
+$('openSwapBtn').onclick=()=>{
+  $('swapAmountInput').value='';
+  $('swapModalAvail').textContent=luckTickets.toLocaleString();
+  updateSwapPreview();
+  $('swapModal').classList.add('open');
+};
+$('swapCancelBtn').onclick=()=>closeModal('swapModal');
+$('swapModal').addEventListener('click',e=>{if(e.target===$('swapModal'))closeModal('swapModal')});
+$('swapMaxBtn').onclick=()=>{
+  $('swapAmountInput').value=Math.floor(luckTickets);
+  updateSwapPreview();
+};
+
+$('swapConfirmBtn').onclick=async()=>{
+  if(busySwap) return;
+  const amt=Math.floor(Number($('swapAmountInput').value));
+  if(!Number.isFinite(amt) || amt<1){
+    toast('Enter how many Luck Tickets you want to swap.');
+    return;
+  }
+  if(amt>luckTickets){
+    toast("You don't have enough Luck Tickets for that.");
+    return;
+  }
+  busySwap=true;
+  const btn=$('swapConfirmBtn');
+  const prevHtml=btn.innerHTML;
+  btn.disabled=true;
+  btn.textContent='Swapping…';
+  try{
+    const r=await fetch('/api/luck/convert-to-gems',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({amount:amt})
+    });
+    const d=await r.json();
+    if(!r.ok || !d.success){
+      toast(d.message||'Unable to swap right now.');
+      return;
+    }
+    luckTickets=Number(d.luckTickets||0);
+    balance=Number(d.balance||balance);
+    renderTopPills();
+    bump($('gemsTop'));
+    closeModal('swapModal');
+    toast(`Swapped ${amt.toLocaleString()} 🪙 for ${Number(d.gemsAdded||0).toLocaleString(undefined,{maximumFractionDigits:2})} 💎`);
+  }catch(e){
+    toast('Network error. Please try again.');
+  }finally{
+    busySwap=false;
     btn.disabled=false;
     btn.innerHTML=prevHtml;
   }
@@ -1550,7 +1801,7 @@ loadVault();
       'TAP VAULT • PLAY & EARN':'TAP VAULT • PLAY & EARN','DOUBLE OR NOTHING':'DOUBLE OR NOTHING',
       'Double Your Gems':'Double Your Gems',
       'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.',
-      'Heads':'Heads','Tails':'Tails','Your stake':'Your stake','MAX':'MAX','Flip & Double':'Flip & Double',
+      'Heads':'Heads','Tails':'Tails','Head':'Head','Tail':'Tail','Your stake':'Your stake','MAX':'MAX','Flip & Double':'Flip & Double',
       'Balance:':'Balance:','LUCK VAULT':'LUCK VAULT','Treasure Chest':'Treasure Chest',
       'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.',
       'Watch Ad':'Watch Ad','Reward:':'Reward:','20-50 Luck Tickets 🪙':'20-50 Luck Tickets 🪙',
@@ -1587,7 +1838,7 @@ loadVault();
       'TAP VAULT • PLAY & EARN':'ХРАНИЛИЩЕ • ИГРА И ЗАРАБОТОК','DOUBLE OR NOTHING':'УДВОЙ ИЛИ ПОТЕРЯЙ',
       'Double Your Gems':'Удвой свои Gems',
       'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'Выберите сторону, поставьте от Gems💎10 до 1 000 и подбросьте монету. При победе ставка мгновенно удваивается.',
-      'Heads':'Орёл','Tails':'Решка','Your stake':'Ваша ставка','MAX':'МАКС.','Flip & Double':'Подбросить и удвоить',
+      'Heads':'Орёл','Tails':'Решка','Head':'Орёл','Tail':'Решка','Your stake':'Ваша ставка','MAX':'МАКС.','Flip & Double':'Подбросить и удвоить',
       'Balance:':'Баланс:','LUCK VAULT':'ХРАНИЛИЩЕ УДАЧИ','Treasure Chest':'Сундук с сокровищами',
       'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'Посмотрите 2 рекламных видео, чтобы открыть светящийся сундук. Награда — 20–50 билетов удачи.',
       'Watch Ad':'Смотреть рекламу','Reward:':'Награда:','20-50 Luck Tickets 🪙':'20–50 билетов удачи 🪙',
@@ -1623,7 +1874,7 @@ loadVault();
       'Luck Vault':'Bóveda de la Suerte','‹ Back':'‹ Volver','Gems':'Gems','Luck Tickets':'Boletos de Suerte',
       'TAP VAULT • PLAY & EARN':'BÓVEDA • JUEGA Y GANA','DOUBLE OR NOTHING':'TODO O NADA','Double Your Gems':'Duplica tus Gems',
       'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'Elige un lado, apuesta entre Gems💎10 y 1.000 y lanza la moneda. Si ganas, tu apuesta se duplica al instante.',
-      'Heads':'Cara','Tails':'Cruz','Your stake':'Tu apuesta','MAX':'MÁX.','Flip & Double':'Lanzar y duplicar',
+      'Heads':'Cara','Tails':'Cruz','Head':'Cara','Tail':'Cruz','Your stake':'Tu apuesta','MAX':'MÁX.','Flip & Double':'Lanzar y duplicar',
       'Balance:':'Saldo:','LUCK VAULT':'BÓVEDA DE LA SUERTE','Treasure Chest':'Cofre del tesoro',
       'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'Mira 2 anuncios con recompensa para abrir el cofre brillante. La recompensa es de 20–50 boletos de suerte.',
       'Watch Ad':'Ver anuncio','Reward:':'Recompensa:','20-50 Luck Tickets 🪙':'20–50 boletos de suerte 🪙',
@@ -1658,7 +1909,7 @@ loadVault();
       'Luck Vault':'लकी वॉल्ट','‹ Back':'‹ वापस','Gems':'Gems','Luck Tickets':'लकी टिकट',
       'TAP VAULT • PLAY & EARN':'टैप वॉल्ट • खेलें और कमाएँ','DOUBLE OR NOTHING':'डबल या कुछ नहीं','Double Your Gems':'अपने Gems दोगुने करें',
       'Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.':'एक पक्ष चुनें, Gems💎10 से 1,000 तक दांव लगाएँ और सिक्का उछालें। जीतने पर आपका दांव तुरंत दोगुना हो जाएगा।',
-      'Heads':'हेड्स','Tails':'टेल्स','Your stake':'आपका दांव','MAX':'अधिकतम','Flip & Double':'उछालें और दोगुना करें',
+      'Heads':'हेड्स','Tails':'टेल्स','Head':'हेड','Tail':'टेल','Your stake':'आपका दांव','MAX':'अधिकतम','Flip & Double':'उछालें और दोगुना करें',
       'Balance:':'बैलेंस:','LUCK VAULT':'लकी वॉल्ट','Treasure Chest':'खजाने का संदूक',
       'Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.':'चमकते संदूक को खोलने के लिए 2 रिवॉर्ड विज्ञापन देखें। इनाम 20–50 लकी टिकट है।',
       'Watch Ad':'विज्ञापन देखें','Reward:':'इनाम:','20-50 Luck Tickets 🪙':'20–50 लकी टिकट 🪙',
@@ -1752,6 +2003,8 @@ loadVault();
 
 </body>
 </html>
+
+
 
 
 

@@ -5020,6 +5020,15 @@ function txIsCredit(tx){
   return /(winning|winnings|win|prize|reward|bonus|credit|deposit|refund|cashback|earning)/.test(text);
 }
 
+/* Luck Ticket Mining pays out in Luck Tickets, not Gems — those rows
+   should read with the 🪙 ticket icon instead of the 💎 gem icon. */
+function txIsLuckTickets(tx){
+  const currency = String(tx.currency || "").toLowerCase();
+  if(currency === "luck_tickets" || currency === "luck tickets") return true;
+  const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""} ${tx.bank || ""}`.toLowerCase();
+  return /luck[\s_-]*ticket/.test(text);
+}
+
 function txIsTapRush(tx){
   const text = `${tx.type || ""} ${tx.description || ""} ${tx.reason || ""} ${tx.category || ""} ${tx.bank || ""}`.toLowerCase();
   return /(tap[\s_-]*rush|taprush)/.test(text);
@@ -5152,6 +5161,7 @@ function renderTransactionRows(serverRows){
     const date = txDate(tx);
     const sign = credit ? "+" : "-";
     const badge = txIsTapRush(tx) ? `<span class="tap-tx-badge">TAP RUSH</span>` : "";
+    const currencyIcon = txIsLuckTickets(tx) ? "🪙" : "💎";
 
     return `
       <div class="tap-tx" style="animation-delay:${Math.min(index,12)*25}ms">
@@ -5160,7 +5170,7 @@ function renderTransactionRows(serverRows){
           <div class="tap-tx-title">${escapeHtmlDashboard(title)}${badge}</div>
           <div class="tap-tx-sub">${escapeHtmlDashboard([bank,date,status].filter(Boolean).join(" • "))}</div>
         </div>
-        <div class="tap-tx-amount ${credit ? "credit" : "debit"}">${sign}💎 ${amount.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2})}</div>
+        <div class="tap-tx-amount ${credit ? "credit" : "debit"}">${sign}${currencyIcon} ${amount.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2})}</div>
       </div>
     `;
   }).join("");
@@ -5342,6 +5352,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
 </body>
 </html>
+
 
 
 
