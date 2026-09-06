@@ -3136,6 +3136,18 @@ app.all('/api/monetag/postback', async (req, res) => {
         });
       }
 
+      console.log('Monetag mining-gate ad confirmed:', {
+        userId: user.id,
+        telegramId,
+        zoneId: zoneId || MONETAG_ZONE_ID,
+        eventType,
+        rewardEventType,
+        ymid: ymid || null,
+        requestVar: requestVar || null,
+        subZoneId: subZoneId || null,
+        estimatedPrice: estimatedPrice || null
+      });
+
       return res.status(200).send('ok');
     }
 
