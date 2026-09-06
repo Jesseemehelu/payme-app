@@ -300,6 +300,20 @@ const LIVE_GEM_RATE_TTL_MS = 60 * 1000;
 const MIN_CRYPTO_USD = 0.50;
 const CRYPTO_ASSETS = ['USDT', 'TON', 'BTC', 'ETH', 'LTC', 'BNB', 'TRX', 'USDC'];
 
+// ======================================================
+// TELEGRAM STARS / GLOBAL GEMS PAYMENTS
+// ======================================================
+// Telegram Stars (currency code "XTR") let a user pay for Gems entirely
+// inside Telegram — no external payment provider, no provider_token.
+// The invoice MUST be created and confirmed by the same bot the Mini App
+// runs under (TELEGRAM_BOT_TOKEN), because Telegram routes the
+// pre_checkout_query / successful_payment updates to that bot's webhook.
+// STARS_USD_RATE is the approximate USD value of 1 Star (Telegram sells
+// Stars around $0.013 each depending on platform/region) — override with
+// the env var if that changes.
+const STARS_USD_RATE = Math.max(0.001, number(process.env.STARS_USD_RATE) || 0.013);
+const MIN_STARS_USD = 0.50;
+
 const isProduction =
   process.env.NODE_ENV === 'production';
 
@@ -2271,6 +2285,107 @@ function cryptoAmountFromUsd(usd, asset, rates, currencies) {
 }
 
 // ======================================================
+// TELEGRAM STARS API HELPERS
+// ======================================================
+async function telegramApi(method, payload = {}) {
+  if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN is not configured.');
+  }
+
+  const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${method}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!data.ok) {
+    throw new Error(data.description || `Telegram API error (${method})`);
+  }
+
+  return data.result;
+}
+
+function starsFromUsd(usd) {
+  // Stars are whole numbers — no fractional Stars.
+  return Math.max(1, Math.ceil(Number(usd) / STARS_USD_RATE));
+}
+
+async function createStarsInvoiceLink({ gems, usd, stars, reference }) {
+  return telegramApi('createInvoiceLink', {
+    title: `${gems.toLocaleString()} Gems`,
+    description: `Top up ${gems.toLocaleString()} Gems on PAYME (~$${usd.toFixed(2)}).`,
+    payload: reference,
+    currency: 'XTR',
+    prices: [{ label: 'Gems', amount: stars }]
+  });
+}
+
+// Shared by the /api/telegram/start-webhook handler once Telegram reports
+// a completed Stars payment. Mirrors the CryptoBot webhook credit logic
+// above so both payment rails behave identically.
+async function handleStarsSuccessfulPayment(successfulPayment, chatId) {
+  try {
+    const reference = String(successfulPayment?.invoice_payload || '').trim();
+    if (!reference) return;
+
+    const deposit = await getDeposit(reference);
+    if (!deposit) {
+      console.warn('Stars payment for unknown deposit reference:', reference);
+      return;
+    }
+
+    // Telegram may redeliver updates. Only a still-pending deposit may be
+    // credited.
+    if (deposit.status !== 'Pending Verification') return;
+
+    const gems = number(deposit.amount);
+    const usd = gemUsd(gems);
+    const chargeId = successfulPayment.telegram_payment_charge_id || '';
+    const starsPaid = number(successfulPayment.total_amount);
+
+    const user = await getUserById(deposit.user_id);
+    if (!user) return;
+
+    user.depositBalance = getDepositBalance(user) + gems;
+    await updateUser(user);
+
+    const { error } = await supabase
+      .from('deposits')
+      .update({
+        status: 'Approved',
+        reason: `Telegram Stars paid — ${starsPaid} XTR — $${usd.toFixed(2)} — charge ${chargeId}`
+      })
+      .eq('reference', reference)
+      .eq('status', 'Pending Verification');
+    if (error) throw error;
+
+    await addTransaction(user.id, {
+      id: generateTransactionId('tx_stars_deposit'),
+      type: 'Deposit Approved',
+      description: `Telegram Stars Deposit ${reference} — ${starsPaid} XTR — $${usd.toFixed(2)}`,
+      amount: gems,
+      currency: 'GEMS',
+      status: 'completed',
+      bank: 'Telegram Stars'
+    });
+
+    if (chatId && TELEGRAM_BOT_TOKEN) {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: `✅ ${gems.toLocaleString()} Gems have been credited to your PAYME wallet.`
+        })
+      }).catch(() => {});
+    }
+  } catch (err) {
+    console.error('Stars successful_payment handling error:', err.message);
+  }
+}
+
+// ======================================================
 // CRYPTOBOT WEBHOOK — DEPOSIT CONFIRMATION
 // ======================================================
 app.post('/api/crypto/webhook', async (req, res) => {
@@ -3520,6 +3635,33 @@ app.post('/api/telegram/start-webhook', async (req, res) => {
       TELEGRAM_START_WEBHOOK_SECRET &&
       req.get('X-Telegram-Bot-Api-Secret-Token') !== TELEGRAM_START_WEBHOOK_SECRET
     ) {
+      return;
+    }
+
+    // ---- Telegram Stars: pre-checkout approval ----
+    // Telegram requires ok/false within 10 seconds or the payment fails
+    // client-side. Only approve payloads that match a still-pending
+    // deposit we actually created.
+    const preCheckout = req.body && req.body.pre_checkout_query;
+    if (preCheckout) {
+      try {
+        const deposit = await getDeposit(String(preCheckout.invoice_payload || '').trim());
+        const ok = !!deposit && deposit.status === 'Pending Verification';
+        await telegramApi('answerPreCheckoutQuery', {
+          pre_checkout_query_id: preCheckout.id,
+          ok,
+          ...(ok ? {} : { error_message: 'This deposit is no longer valid — please start a new deposit.' })
+        });
+      } catch (err) {
+        console.error('Stars pre-checkout error:', err.message);
+      }
+      return;
+    }
+
+    // ---- Telegram Stars: payment completed ----
+    const successfulPayment = req.body?.message?.successful_payment;
+    if (successfulPayment) {
+      await handleStarsSuccessfulPayment(successfulPayment, req.body.message.chat?.id);
       return;
     }
 
@@ -7431,6 +7573,74 @@ app.get('/api/crypto/config', requireLogin, async (req, res) => {
 });
 
 // ======================================================
+// TELEGRAM STARS DEPOSIT CONFIG
+// ======================================================
+app.get('/api/stars/config', requireLogin, async (req, res) => {
+  try {
+    await refreshLiveGemRate();
+    return res.json({
+      success: true,
+      gemUsdRate: GEM_USD_RATE,
+      starsUsdRate: STARS_USD_RATE,
+      minUsd: MIN_STARS_USD,
+      minGems: Math.ceil(MIN_STARS_USD / GEM_USD_RATE),
+      starsConfigured: !!TELEGRAM_BOT_TOKEN
+    });
+  } catch (err) {
+    console.error('Stars config error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to load Telegram Stars settings.' });
+  }
+});
+
+// ======================================================
+// CREATE TELEGRAM STARS DEPOSIT INVOICE
+// ======================================================
+app.post('/api/stars/deposit', requireLogin, async (req, res) => {
+  try {
+    await refreshLiveGemRate();
+    if (!TELEGRAM_BOT_TOKEN) {
+      return res.status(503).json({ success: false, message: 'Telegram Stars payments are not configured yet.' });
+    }
+
+    const gems = number(req.body?.gems);
+    const usd = gemUsd(gems);
+
+    if (!Number.isFinite(gems) || gems <= 0 || usd < MIN_STARS_USD) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum deposit is $${MIN_STARS_USD.toFixed(2)} (${Math.ceil(MIN_STARS_USD / GEM_USD_RATE).toLocaleString()} Gems).`
+      });
+    }
+
+    const stars = starsFromUsd(usd);
+    const reference = generateDepositReference();
+    const invoiceUrl = await createStarsInvoiceLink({ gems, usd, stars, reference });
+
+    const { error } = await supabase.from('deposits').insert({
+      reference,
+      user_id: req.user.id,
+      amount: gems,
+      status: 'Pending Verification',
+      screenshot: null,
+      reason: `Telegram Stars invoice — ${stars} XTR — $${usd.toFixed(2)}`
+    });
+    if (error) throw error;
+
+    return res.json({
+      success: true,
+      reference,
+      gems,
+      usd,
+      stars,
+      invoiceUrl
+    });
+  } catch (err) {
+    console.error('Stars deposit error:', err);
+    return res.status(500).json({ success: false, message: err.message || 'Unable to create Telegram Stars invoice.' });
+  }
+});
+
+// ======================================================
 // GET DEPOSITS
 // ======================================================
 app.get('/api/deposits', requireLogin, async (req, res) => {
@@ -11051,6 +11261,7 @@ app.listen(
   }
 
 );
+
 
 
 
