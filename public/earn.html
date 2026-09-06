@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>PAYME — Earn</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://libtl.com/sdk.js" data-zone="11688228" data-sdk="show_11688228"></script>
-<script>addEventListener('load',function(){if(typeof show_11688228==='function')show_11688228({type:'inApp',inAppSettings:{frequency:15,capping:1,interval:240,timeout:8,everyPage:false}})});</script>
 <script>
 /* This page already had CSS safe-area fallbacks (env()) but no actual
    Telegram WebApp integration — no expand(), no swipe-lock, and no
@@ -597,7 +595,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 }
 .claim-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
 .claim-btn.upgrade-cta{background:linear-gradient(155deg,#ffe36d,#d17d00);color:#3a2400;display:flex;align-items:center;justify-content:center;gap:6px}
-.claim-btn.refer-cta{background:linear-gradient(155deg,#22e0ff,#0e6f8a);color:#04222c;display:flex;align-items:center;justify-content:center;gap:6px}
 .claim-btn.dismiss{background:linear-gradient(155deg,#2a2350,#15142d);color:#fff}
 .claim-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 .claim-confetti i{position:absolute;top:-10%;width:6px;height:10px;border-radius:2px;opacity:0;animation:confettiFall 1.4s ease-in forwards}
@@ -666,8 +663,8 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 .mining-rig{
   position:relative;
   overflow:hidden;
-  padding:16px;
-  border-radius:25px;
+  padding:13px;
+  border-radius:24px;
   background:
     radial-gradient(circle at 8% 0%,rgba(34,224,255,.20),transparent 32%),
     radial-gradient(circle at 100% 100%,rgba(255,79,184,.16),transparent 35%),
@@ -825,7 +822,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 .rig-core-layout{
   display:grid;
-  grid-template-columns:130px 1fr;
+  grid-template-columns:118px 1fr;
   align-items:center;
   gap:10px;
 }
@@ -838,7 +835,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 }
 
 .mining-ring-wrap{
-  width:114px;height:114px;
+  width:104px;height:104px;
   margin:0 auto;
 }
 .ring-decoration{
@@ -855,7 +852,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 }
 .ring-center{inset:0}
 .ring-percent{
-  font-size:1.28rem;
+  font-size:1.18rem;
   font-weight:900;
   text-shadow:0 0 18px rgba(34,224,255,.6);
 }
@@ -876,12 +873,12 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   margin-bottom:6px;
 }
 .heading-icon{
-  width:27px;height:27px;
+  width:25px;height:25px;
   display:grid;place-items:center;
   border-radius:8px;
   background:linear-gradient(145deg,#ffdd68,#c77b00);
   box-shadow:0 3px 0 #765000;
-  font-size:.78rem;
+  font-size:.75rem;
   animation:headingBounce 2s ease-in-out infinite;
 }
 @keyframes headingBounce{
@@ -890,7 +887,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 }
 .rig-section-heading b{
   display:block;
-  font-size:.58rem;
+  font-size:.55rem;
   font-weight:900;
   letter-spacing:.09em;
 }
@@ -904,14 +901,14 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 .mining-hash-box{
   margin-top:0;
-  min-height:44px;
-  padding:8px 9px;
+  min-height:39px;
+  padding:7px 8px;
   border-radius:13px;
   background:linear-gradient(145deg,#030a18,#071426);
   border:1px solid rgba(34,224,255,.20);
   box-shadow:inset 0 0 24px rgba(34,224,255,.045),0 3px 0 rgba(0,0,0,.24);
 }
-.hash-engine{width:27px;height:27px}
+.hash-engine{width:25px;height:25px}
 .engine-ring{border-width:2px}
 .engine-ring-2{inset:4px}
 .engine-core{width:11px;height:11px}
@@ -929,9 +926,9 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
   border:1px solid rgba(255,255,255,.08);
 }
-.mining-stat b{font-size:.67rem}
+.mining-stat b{font-size:.62rem}
 .mining-stat span{
-  font-size:.43rem;
+  font-size:.40rem;
   letter-spacing:.04em;
   white-space:nowrap;
 }
@@ -948,15 +945,15 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 .mining-actions{
   display:grid;
-  grid-template-columns:66px 1fr;
+  grid-template-columns:60px 1fr;
   align-items:center;
   gap:8px;
   margin-top:0;
 }
 .hold-mine-wrap{padding:0}
 .hold-mine-btn{
-  width:64px;height:64px;
-  border-radius:18px;
+  width:58px;height:58px;
+  border-radius:17px;
   background:linear-gradient(145deg,#ff5fc4 0%,#a21caf 55%,#68136f 100%);
   box-shadow:
     0 6px 0 #58105e,
@@ -1061,16 +1058,16 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 }
 
 @media(max-width:390px){
-  .mining-rig{padding:12px;border-radius:22px}
-  .rig-core-layout{grid-template-columns:112px 1fr;gap:8px}
-  .mining-ring-wrap{width:100px;height:100px}
+  .mining-rig{padding:10px;border-radius:21px}
+  .rig-core-layout{grid-template-columns:103px 1fr;gap:8px}
+  .mining-ring-wrap{width:94px;height:94px}
   .rig-level-pill{padding:6px 7px}
   .rig-level-pill b{font-size:.57rem}
   .rig-level-pill small{font-size:.39rem}
   .rig-title-block h3{font-size:.93rem}
   .rig-title-block p{font-size:.51rem}
-  .hold-mine-btn{width:58px;height:58px}
-  .mining-actions{grid-template-columns:60px 1fr;gap:6px}
+  .hold-mine-btn{width:53px;height:53px}
+  .mining-actions{grid-template-columns:55px 1fr;gap:6px}
   .mining-btn{font-size:.52rem;min-height:27px}
   .mining-how-btn{min-width:68px;font-size:.45rem}
 }
@@ -1078,7 +1075,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 @media(max-width:350px){
   .rig-core-layout{grid-template-columns:1fr}
   .rig-progress-card{display:flex;justify-content:center;gap:5px}
-  .mining-ring-wrap{width:94px;height:94px}
+  .mining-ring-wrap{width:88px;height:88px}
   .rig-info-column{width:100%}
   .rig-bottom{grid-template-columns:1fr}
   .mining-how-btn{width:100%}
@@ -1401,22 +1398,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   </div>
 </div>
 
-<div class="mining-modal modal-center" id="miningGemsModal" aria-hidden="true">
-  <div class="mining-modal-card" role="dialog" aria-modal="true" aria-labelledby="miningGemsTitle" style="max-width:360px;text-align:center">
-    <div class="mining-modal-glow" aria-hidden="true"></div>
-    <div class="claim-modal-icon-wrap">
-      <div class="claim-modal-icon">💎</div>
-    </div>
-    <h3 id="miningGemsTitle" class="claim-modal-title">Insufficient Gems💎</h3>
-    <p class="claim-modal-sub" id="miningGemsSub">You need more Gems to upgrade your rig.</p>
-    <div class="claim-modal-actions">
-      <button class="claim-btn upgrade-cta" id="miningGemsDeposit" type="button">💳 Deposit Gems</button>
-      <button class="claim-btn refer-cta" id="miningGemsRefer" type="button">👥 Refer &amp; Get More 💎</button>
-      <button class="claim-btn dismiss" id="miningGemsDismiss" type="button">Maybe later</button>
-    </div>
-  </div>
-</div>
-
 <div class="mining-toast" id="miningToast" role="status" aria-live="polite"></div>
 
 <div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
@@ -1524,12 +1505,7 @@ document.addEventListener('DOMContentLoaded',function(){
     claimSub: document.getElementById('claimSub'),
     claimUpgradeCta: document.getElementById('claimUpgradeCta'),
     claimDismiss: document.getElementById('claimDismiss'),
-    claimConfetti: document.getElementById('claimConfetti'),
-    gemsModal: document.getElementById('miningGemsModal'),
-    gemsSub: document.getElementById('miningGemsSub'),
-    gemsDeposit: document.getElementById('miningGemsDeposit'),
-    gemsRefer: document.getElementById('miningGemsRefer'),
-    gemsDismiss: document.getElementById('miningGemsDismiss')
+    claimConfetti: document.getElementById('claimConfetti')
   };
 
   if(!els.rig) return;
@@ -1786,21 +1762,6 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.classList.remove('modal-open');
   }
 
-  function openGemsModal(message){
-    if(!els.gemsModal) return;
-    if(els.gemsSub) els.gemsSub.textContent = message || 'You need more Gems to upgrade your rig.';
-    els.gemsModal.classList.add('active');
-    els.gemsModal.setAttribute('aria-hidden','false');
-    document.body.classList.add('modal-open');
-  }
-
-  function closeGemsModal(){
-    if(!els.gemsModal) return;
-    els.gemsModal.classList.remove('active');
-    els.gemsModal.setAttribute('aria-hidden','true');
-    document.body.classList.remove('modal-open');
-  }
-
   function openHow(){
     els.howModal.classList.add('active');
     els.howModal.setAttribute('aria-hidden','false');
@@ -1914,7 +1875,10 @@ document.addEventListener('DOMContentLoaded',function(){
     }catch(err){
       if(err.code==='INSUFFICIENT_GEMS'){
         closeUpgrade();
-        openGemsModal(err.message||'You need more Gems to upgrade your rig.');
+        showToast('Insufficient Gems💎',err.message||'You need more Gems to upgrade.',{
+          label:'Deposit Gems',
+          run:()=>{ window.location.href='/deposit.html'; }
+        });
       }else{
         showToast('Upgrade unavailable',err.message||'Please try again.');
       }
@@ -1939,20 +1903,11 @@ document.addEventListener('DOMContentLoaded',function(){
     if(window.Telegram?.WebApp?.HapticFeedback){
       try{window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');}catch(_){}
     }
+    startMining();
     setTimeout(()=>{
       els.hold.classList.remove('holding','hold-success');
       setHoldProgress(0);
     },400);
-    watchRewardedAdThenMine();
-  }
-
-  function watchRewardedAdThenMine(){
-    if(typeof show_11688228!=='function'){ startMining(); return; }
-    els.hold.disabled=true;
-    show_11688228().then(startMining).catch(()=>{
-      els.hold.disabled=false;
-      showToast('Ad not completed','Watch the full ad to activate your mining rig.');
-    });
   }
 
   function holdLoop(now){
@@ -2006,11 +1961,6 @@ document.addEventListener('DOMContentLoaded',function(){
   els.upgrade.addEventListener('click',openUpgrade);
   els.closeModal.addEventListener('click',closeUpgrade);
   els.modal.addEventListener('click',e=>{if(e.target===els.modal) closeUpgrade();});
-
-  if(els.gemsDeposit) els.gemsDeposit.addEventListener('click',()=>{ window.location.href='/deposit.html'; });
-  if(els.gemsRefer) els.gemsRefer.addEventListener('click',()=>{ window.location.href='/dashboard.html#referrals'; });
-  if(els.gemsDismiss) els.gemsDismiss.addEventListener('click',closeGemsModal);
-  if(els.gemsModal) els.gemsModal.addEventListener('click',e=>{if(e.target===els.gemsModal) closeGemsModal();});
 
   if(els.howBtn) els.howBtn.addEventListener('click',openHow);
   if(els.howClose) els.howClose.addEventListener('click',closeHow);

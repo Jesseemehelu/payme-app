@@ -10043,58 +10043,6 @@ setInterval(
 
 pollTelegramUpdates();
 
-// ======================================================
-// MAIN BOT /start HANDLER — WELCOME MESSAGE + "OPEN APP" BUTTON
-// ======================================================
-// Long-polls TELEGRAM_BOT_TOKEN for /start messages only. timeout=50 (Telegram's
-// max) + allowed_updates=['message'] keep this to ~1 tiny request/min when idle
-// and strip unrelated update types (edited_message, channel_post, etc.) out of
-// the response — minimizing both request count and payload size.
-// ⚠️ A bot token can only run getUpdates OR a webhook, never both — enabling
-// this will silently remove any webhook already set on TELEGRAM_BOT_TOKEN.
-
-const EARN_APP_DEEP_LINK = 'https://t.me/paymeoobot/earn?startapp';
-let mainBotUpdateOffset = 0;
-
-async function sendMainBotStartMessage(chatId) {
-  try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: "Press 'OPEN' and enter your dashboard 👇",
-        reply_markup: { inline_keyboard: [[{ text: 'OPEN APP', url: EARN_APP_DEEP_LINK }]] }
-      })
-    });
-  } catch (err) {
-    console.error('Main bot /start send error:', err);
-  }
-}
-
-async function pollMainBotUpdates() {
-  if (!TELEGRAM_BOT_TOKEN) return;
-  try {
-    const res = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?timeout=50&offset=${mainBotUpdateOffset}&allowed_updates=%5B%22message%22%5D`
-    );
-    const data = await res.json();
-    if (!data.ok) return setTimeout(pollMainBotUpdates, 5000);
-    for (const update of data.result || []) {
-      mainBotUpdateOffset = update.update_id + 1;
-      const msg = update.message;
-      if (msg && typeof msg.text === 'string' && msg.text.trim().split(' ')[0].startsWith('/start')) {
-        await sendMainBotStartMessage(msg.chat.id);
-      }
-    }
-  } catch (err) {
-    console.error('Main bot polling connection error:', err.message);
-  }
-  setTimeout(pollMainBotUpdates, 1000);
-}
-
-pollMainBotUpdates();
-
 
 
 // ============================================================
