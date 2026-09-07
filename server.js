@@ -883,7 +883,7 @@ function mapUser(row) {
       row.phone || '',
 
     language:
-      ['en','ru','es','hi'].includes(String(daily.language || ''))
+      ['en','ru','es','hi','ar'].includes(String(daily.language || ''))
         ? String(daily.language)
         : 'en',
 
@@ -3615,7 +3615,7 @@ function earnWebappKeyboard(label) {
 // Admin-authored messages (the /broadcast command, the admin notification
 // channel) are intentionally NOT covered here — those are free text an
 // admin typed themselves and are sent verbatim to everyone.
-const PAYME_BOT_SUPPORTED_LANGUAGES = ['en', 'ru', 'es', 'hi'];
+const PAYME_BOT_SUPPORTED_LANGUAGES = ['en', 'ru', 'es', 'hi', 'ar'];
 
 function resolveBotLanguage(daily) {
   const lang = daily && typeof daily === 'object' ? String(daily.language || '') : '';
@@ -3640,14 +3640,19 @@ const PAYME_BOT_MESSAGES = {
     hi: (min, max) =>
       `⛏️ <b>माइनिंग पूरी हुई!</b>\n\n` +
       `आपकी माइनिंग रिग ने अभी एक चक्र पूरा किया है — ${min}–${max} Luck Tickets🎟️ लेने के लिए तैयार हैं।\n\n` +
-      `अपना इनाम पाने और अगला चक्र शुरू करने के लिए PAYME खोलें, इससे पहले कि यह बेकार पड़ा रहे।`
+      `अपना इनाम पाने और अगला चक्र शुरू करने के लिए PAYME खोलें, इससे पहले कि यह बेकार पड़ा रहे।`,
+    ar: (min, max) =>
+      `⛏️ <b>اكتمل التعدين!</b>\n\n` +
+      `انتهت جهاز تعدين بطاقات الحظ من دورة جديدة — ${min}–${max} بطاقة حظ🎟️ جاهزة للاستلام.\n\n` +
+      `افتح PAYME لتحصيل مكافأتك وبدء الدورة التالية قبل أن يبقى خاملاً.`
   },
 
   miningCompleteButton: {
     en: '⛏️ Claim Now',
     ru: '⛏️ Забрать сейчас',
     es: '⛏️ Reclamar ahora',
-    hi: '⛏️ अभी लें'
+    hi: '⛏️ अभी लें',
+    ar: '⛏️ استلم الآن'
   },
 
   inactivityReminder: {
@@ -3666,14 +3671,19 @@ const PAYME_BOT_MESSAGES = {
     hi: () =>
       `👋 <b>हमें PAYME पर आपकी कमी खल रही है!</b>\n\n` +
       `आपको लॉग इन किए एक दिन हो गया है। आपके Luck Tickets, माइनिंग रिग, दैनिक इनाम और रेफ़रल कमाई अभी भी आपका इंतज़ार कर रहे हैं।\n\n` +
-      `वापस आने के लिए नीचे टैप करें। 💎`
+      `वापस आने के लिए नीचे टैप करें। 💎`,
+    ar: () =>
+      `👋 <b>اشتقنا إليك في PAYME!</b>\n\n` +
+      `مرّ يوم منذ آخر تسجيل دخول لك. بطاقات الحظ، جهاز التعدين، المكافآت اليومية وأرباح الإحالة لا تزال بانتظارك.\n\n` +
+      `اضغط أدناه للعودة. 💎`
   },
 
   inactivityReminderButton: {
     en: '🚀 Open PAYME',
     ru: '🚀 Открыть PAYME',
     es: '🚀 Abrir PAYME',
-    hi: '🚀 PAYME खोलें'
+    hi: '🚀 PAYME खोलें',
+    ar: '🚀 افتح PAYME'
   }
 
 };
@@ -4461,7 +4471,7 @@ function sanitizeUser(
       user.username,
 
     language:
-      ['en','ru','es','hi'].includes(String(user.language || user.dailyReward?.language || ''))
+      ['en','ru','es','hi','ar'].includes(String(user.language || user.dailyReward?.language || ''))
         ? String(user.language || user.dailyReward?.language)
         : 'en',
 
@@ -4860,7 +4870,7 @@ app.post(
       } = req.body || {};
 
       const selectedLanguage =
-        ['en','ru','es','hi'].includes(String(language || ''))
+        ['en','ru','es','hi','ar'].includes(String(language || ''))
           ? String(language)
           : '';
 
@@ -4921,7 +4931,7 @@ app.post(
           ? user.dailyReward
           : {};
         const existingLanguage =
-          ['en','ru','es','hi'].includes(String(user.dailyReward.language || ''))
+          ['en','ru','es','hi','ar'].includes(String(user.dailyReward.language || ''))
             ? String(user.dailyReward.language)
             : (selectedLanguage || 'en');
         user.dailyReward.language = selectedLanguage || existingLanguage;
@@ -5365,7 +5375,7 @@ app.post(
             : {};
 
         const storedLanguage =
-          ['en','ru','es','hi'].includes(String(user.language || user.dailyReward?.language || ''))
+          ['en','ru','es','hi','ar'].includes(String(user.language || user.dailyReward?.language || ''))
             ? String(user.language || user.dailyReward?.language)
             : '';
 
@@ -6449,7 +6459,7 @@ app.get(
           !!req.user.hasClaimedGiftBox,
 
         language:
-          ['en','ru','es','hi'].includes(String(req.user.language || req.user.dailyReward?.language || ''))
+          ['en','ru','es','hi','ar'].includes(String(req.user.language || req.user.dailyReward?.language || ''))
             ? String(req.user.language || req.user.dailyReward?.language)
             : 'en'
 
@@ -11339,6 +11349,7 @@ app.listen(
   }
 
 );
+
 
 
 
