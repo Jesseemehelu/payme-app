@@ -49,8 +49,8 @@
 
 <!-- Monetag rewarded interstitial SDK, same zone used across the app. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 5s after this page loads, then
-     up to 2 ads per 4-minute window with a 45s gap between them.
+<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
+     up to 2 ads per 6-minute window with a 60s gap between them.
      everyPage:false means this session (and its timing/frequency budget)
      carries over to any other page that also calls show_11688228 with
      these same settings — it does not reset per page. Polls briefly for
@@ -65,9 +65,9 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.0667,
-            interval: 45,
-            timeout: 5,
+            capping: 0.1,
+            interval: 60,
+            timeout: 15,
             everyPage: false
           }
         });
@@ -3794,7 +3794,7 @@ async function fetchGameState() {
       /* Keep the account language authoritative across page navigation. */
       try {
         const serverLanguage = String(data.language || '').toLowerCase();
-        if (['en','ru','es','hi'].includes(serverLanguage)) {
+        if (['en','ru','es','hi','ar'].includes(serverLanguage)) {
           localStorage.setItem('paymeLanguage', serverLanguage);
           localStorage.setItem('payme_language', serverLanguage);
           document.documentElement.lang = serverLanguage;
@@ -4858,9 +4858,9 @@ fetchGameState();
       localStorage.getItem("payme_language") ||
       ""
     ).toLowerCase();
-    const lang = ["en","ru","es","hi"].includes(urlLang)
+    const lang = ["en","ru","es","hi","ar"].includes(urlLang)
       ? urlLang
-      : (["en","ru","es","hi"].includes(storedLang) ? storedLang : "en");
+      : (["en","ru","es","hi","ar"].includes(storedLang) ? storedLang : "en");
 
     localStorage.setItem("paymeLanguage", lang);
     localStorage.setItem("payme_language", lang);
@@ -4874,6 +4874,7 @@ fetchGameState();
 ========================================================= */
 (function(){
   const D={
+    ar:{'Dashboard':'لوحة التحكم','PAYME PLAY':'العب PAYME','MAIN BALANCE':'الرصيد الرئيسي','LUCK TICKETS':'تذاكر الحظ','Play Lucky 3':'العب لاكي3','FREE SPINS':'دورات مجانية','Ready to use':'جاهزة للاستخدام','LIVE REWARDS':'مكافآت مباشرة','PAYME Wheel':'عجلة PAYME','Spin the wheel and win instant cash rewards':'أدر العجلة واربح مكافآت نقدية فورية','SPIN COST: 💎 50':'تكلفة الدوران: 💎 50','1 FREE SPIN':'دوران مجاني واحد','SPIN FOR 💎 50':'دُر مقابل 💎 50','Auto Spin':'الدوران التلقائي','Automatically spin again after each result':'الدوران تلقائيًا مرة أخرى بعد كل نتيجة','Auto Spin is active':'الدوران التلقائي نشط','SPIN COST':'تكلفة الدوران','TOP PRIZE':'الجائزة الكبرى','INSTANT':'فورية','REWARDS':'مكافآت','Recent Activity':'النشاط الأخير','YOUR SPINS':'دوراتك','Your wheel history will appear here.':'سيظهر سجل دوراتك هنا.','✨ REWARD UNLOCKED':'✨ تم فتح المكافأة','LUCKY HIT!':'ضربة محظوظة!','Your tickets are safely in your wallet.':'تذاكرك محفوظة بأمان في محفظتك.','Use them to enter Lucky 3 and chase bigger rewards.':'استخدمها لدخول لاكي3 والسعي وراء مكافآت أكبر.','🪙 PLAY LUCKY 3':'🪙 العب لاكي3','Keep Spinning':'واصل الدوران','Winner!':'فائز!','Continue':'متابعة','Not Enough Balance':'الرصيد غير كافٍ','You need at least':'تحتاج على الأقل','to spin the wheel.':'لإدارة العجلة.','Add funds to your balance and try again.':'أضف رصيدًا وحاول مرة أخرى.','Your Balance':'رصيدك','Required':'المطلوب','Deposit Now':'أودِع الآن','Add funds to continue spinning':'أضف رصيدًا لمواصلة الدوران','Spin completed':'اكتمل الدوران','Something went wrong':'حدث خطأ ما','Launching...':'جارٍ التشغيل...','Spinning...':'جارٍ الدوران...','Auto Spin enabled':'تم تفعيل الدوران التلقائي','Auto Spin disabled':'تم إيقاف الدوران التلقائي','Auto Spin stopped — insufficient balance':'توقف الدوران التلقائي — الرصيد غير كافٍ','Failed to process spin.':'تعذرت معالجة الدوران.','Network error. Please check your connection and try again.':'خطأ في الشبكة. تحقق من اتصالك وحاول مرة أخرى.','Better luck next time!':'حظ أوفر في المرة القادمة!','You won':'لقد ربحت','You got 💎 0':'حصلت على 💎 0','Luck Tickets':'تذاكر الحظ','Wheel Spin':'دوران العجلة','Congratulations!':'تهانينا!'},
     ru:{
       'Dashboard':'Панель','PAYME PLAY':'ИГРА PAYME','MAIN BALANCE':'ОСНОВНОЙ БАЛАНС','LUCK TICKETS':'БИЛЕТЫ УДАЧИ','Play Lucky 3':'Играть в Lucky 3','FREE SPINS':'БЕСПЛАТНЫЕ ВРАЩЕНИЯ','Ready to use':'Готово к использованию','LIVE REWARDS':'ЖИВЫЕ НАГРАДЫ','PAYME Wheel':'Колесо PAYME','Spin the wheel and win instant cash rewards':'Вращайте колесо и выигрывайте мгновенные денежные награды','SPIN COST: 💎 50':'СТОИМОСТЬ: 💎 50','1 FREE SPIN':'1 БЕСПЛАТНОЕ ВРАЩЕНИЕ','SPIN FOR 💎 50':'ВРАЩАТЬ ЗА 💎 50','Auto Spin':'Автовращение','Automatically spin again after each result':'Автоматически вращать снова после каждого результата','Auto Spin is active':'Автовращение включено','SPIN COST':'СТОИМОСТЬ','TOP PRIZE':'ГЛАВНЫЙ ПРИЗ','INSTANT':'МГНОВЕННЫЕ','REWARDS':'НАГРАДЫ','Recent Activity':'Последняя активность','YOUR SPINS':'ВАШИ ВРАЩЕНИЯ','Your wheel history will appear here.':'Здесь появится история ваших вращений.','✨ REWARD UNLOCKED':'✨ НАГРАДА ОТКРЫТА','LUCKY HIT!':'СЧАСТЛИВАЯ ПОБЕДА!','Your tickets are safely in your wallet.':'Ваши билеты надёжно сохранены в кошельке.','Use them to enter Lucky 3 and chase bigger rewards.':'Используйте их в Lucky 3 ради более крупных наград.','🪙 PLAY LUCKY 3':'🪙 ИГРАТЬ В LUCKY 3','Keep Spinning':'Продолжить вращения','Winner!':'Победитель!','Continue':'Продолжить','Not Enough Balance':'Недостаточно средств','You need at least':'Вам нужно минимум','to spin the wheel.':'для вращения колеса.','Add funds to your balance and try again.':'Пополните баланс и попробуйте снова.','Your Balance':'Ваш баланс','Required':'Требуется','Deposit Now':'Пополнить сейчас','Add funds to continue spinning':'Пополните баланс, чтобы продолжить вращения','Spin completed':'Вращение завершено','Something went wrong':'Что-то пошло не так','Launching...':'Запуск...','Spinning...':'Вращение...','Auto Spin enabled':'Автовращение включено','Auto Spin disabled':'Автовращение выключено','Auto Spin stopped — insufficient balance':'Автовращение остановлено — недостаточно средств','Failed to process spin.':'Не удалось обработать вращение.','Network error. Please check your connection and try again.':'Ошибка сети. Проверьте соединение и попробуйте снова.','Better luck next time!':'Удачи в следующий раз!','You won':'Вы выиграли','You got 💎 0':'Вы получили 💎 0','Luck Tickets':'Билеты удачи','Wheel Spin':'Вращение колеса','Congratulations!':'Поздравляем!'},
     es:{
@@ -4892,9 +4893,9 @@ fetchGameState();
     if(!out){
       if(/^USE FREE SPIN \(/.test(key)){
         const count=key.match(/\((\d+)\)/)?.[1]||'';
-        out=lang()==='ru'?'ИСПОЛЬЗОВАТЬ БЕСПЛАТНОЕ ВРАЩЕНИЕ ('+count+')':lang()==='es'?'USAR GIRO GRATIS ('+count+')':lang()==='hi'?'फ्री स्पिन इस्तेमाल करें ('+count+')':key;
+        out=lang()==='ru'?'ИСПОЛЬЗОВАТЬ БЕСПЛАТНОЕ ВРАЩЕНИЕ ('+count+')':lang()==='es'?'USAR GIRO GRATIS ('+count+')':lang()==='hi'?'फ्री स्पिन इस्तेमाल करें ('+count+')':lang()==='ar'?'استخدم الدوران المجاني ('+count+')':key;
       } else if(/^\d+ FREE SPINS?$/.test(key)){
-        const count=key.match(/^\d+/)[0];out=lang()==='ru'?count+' БЕСПЛАТНЫХ ВРАЩЕНИЙ':lang()==='es'?count+' GIROS GRATIS':lang()==='hi'?count+' फ्री स्पिन':key;
+        const count=key.match(/^\d+/)[0];out=lang()==='ru'?count+' БЕСПЛАТНЫХ ВРАЩЕНИЙ':lang()==='es'?count+' GIROS GRATIS':lang()==='hi'?count+' फ्री स्पिन':lang()==='ar'?count+' دورات مجانية':key;
       } else if(/^You won 💎 /.test(key)) out=(d['You won']||'You won')+' '+key.slice(9);
       else if(/^You got 💎 /.test(key)) out=(d['You got 💎 0']||'You got') .replace('💎 0','💎 '+key.slice(10));
     }
@@ -4937,6 +4938,7 @@ fetchGameState();
   window.applyGameLanguage=translate;
 })();
 </script>
+
 
 
 

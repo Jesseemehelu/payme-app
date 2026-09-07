@@ -50,8 +50,8 @@
 <!-- Rewarded-ad SDK, also used below for the Watch Ad chest's rewarded
      ads (show_11688228 with ymid/requestVar). -->
 <script src="//libtl.com/sdk.js" data-zone="11688228" data-sdk="show_11688228"></script>
-<!-- Monetag in-app interstitial: first ad 5s after this page loads, then
-     up to 2 ads per 4-minute window with a 45s gap between them.
+<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
+     up to 2 ads per 6-minute window with a 60s gap between them.
      everyPage:false means this session (and its timing/frequency budget)
      carries over to any other page that also calls show_11688228 with
      these same settings — it does not reset per page. Polls briefly for
@@ -66,9 +66,9 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.0667,
-            interval: 45,
-            timeout: 5,
+            capping: 0.1,
+            interval: 60,
+            timeout: 15,
             everyPage: false
           }
         });
@@ -1817,12 +1817,13 @@ loadVault();
 (function(){
   'use strict';
 
-  const LANGS = ['en','ru','es','hi'];
+  const LANGS = ['en','ru','es','hi','ar'];
   const lang = LANGS.includes(localStorage.getItem('paymeLanguage'))
     ? localStorage.getItem('paymeLanguage')
     : 'en';
 
   const I18N = {
+    ar: {"Luck Vault": "خزنة الحظ", "‹ Back": "‹ رجوع", "Gems": "جواهر", "Luck Tickets": "تذاكر الحظ", "TAP VAULT • PLAY & EARN": "اضغط على الخزنة • العب واربح", "DOUBLE OR NOTHING": "ضاعف أو اخسر الكل", "Double Your Gems": "ضاعف جواهرك", "Pick a side, set your stake between Gems💎10-1,000, then flip. If you win, your stake is doubled instantly.": "اختر جهة، حدد رهانك بين 10-1,000 جوهرة💎، ثم اقلب العملة. إذا فزت، تُضاعف رهانك فورًا.", "Heads": "صورة", "Tails": "كتابة", "Head": "صورة", "Tail": "كتابة", "Your stake": "رهانك", "MAX": "الحد الأقصى", "Flip & Double": "اقلب وضاعِف", "Balance:": "الرصيد:", "LUCK VAULT": "خزنة الحظ", "Treasure Chest": "صندوق الكنز", "Watch 2 rewarded ads to crack open the glowing chest. Reward is 20-50 Luck Tickets.": "شاهد إعلانين مكافأة لفتح الصندوق المتوهج. المكافأة 20-50 تذكرة حظ.", "Watch Ad": "شاهد إعلانًا", "Reward:": "المكافأة:", "20-50 Luck Tickets 🪙": "20-50 تذكرة حظ 🪙", "Chest relocks for 24h after opening": "يُقفل الصندوق مجددًا لمدة 24 ساعة بعد فتحه", "How it works": "كيف يعمل", "Fast & simple": "سريع وبسيط", "Flip for gems or watch ads for tickets.": "اقلب العملة للجواهر أو شاهد الإعلانات للتذاكر.", "Rewards land in your balance instantly.": "تصل المكافآت إلى رصيدك فورًا.", "Spend Luck Tickets in Lucky 3.": "أنفق تذاكر الحظ في لعبة لاكي3.", "You won!": "لقد فزت!", "You lost": "لقد خسرت", "Added to your balance.": "أُضيفت إلى رصيدك.", "Your stake was doubled and added to your balance.": "تمت مضاعفة رهانك وإضافته إلى رصيدك.", "Your stake was lost this round. Try again when you’re ready.": "خسرت رهانك في هذه الجولة. حاول مرة أخرى عندما تكون مستعدًا.", "Continue": "متابعة", "Top up needed": "يلزم شحن الرصيد", "You don't have enough gems for this stake.": "ليس لديك جواهر كافية لهذا الرهان.", "Deposit Gems": "إيداع جواهر", "Not now": "ليس الآن", "Chest opened!": "تم فتح الصندوق!", "Luck Tickets have been added to your balance. Use them in Lucky 3. The vault relocks for 24 hours.": "تمت إضافة تذاكر الحظ إلى رصيدك. استخدمها في لاكي3. تُقفل الخزنة مجددًا لمدة 24 ساعة.", "Nice!": "رائع!", "Loading ad": "جارٍ تحميل الإعلان", "Flipping": "جارٍ القلب", "Unlocks in": "يُفتح خلال", "Next ad in": "الإعلان التالي خلال", "Watch Ad 1 of 2": "شاهد الإعلان 1 من 2", "Watch Ad 2 of 2": "شاهد الإعلان 2 من 2", "Choose an amount between Gems💎10 and Gems💎1,000.": "اختر مبلغًا بين 10💎 و1,000💎 جوهرة.", "Unable to play right now.": "تعذر اللعب الآن.", "Network error. Please try again.": "خطأ في الشبكة. حاول مرة أخرى.", "Unable to load vault.": "تعذر تحميل الخزنة.", "Unable to load Luck Vault.": "تعذر تحميل خزنة الحظ.", "Please wait before watching another ad.": "يرجى الانتظار قبل مشاهدة إعلان آخر.", "Rewarded ad is not available right now.": "الإعلان المكافأة غير متاح حاليًا.", "Ad finished. Waiting for confirmation — please try again in a moment.": "انتهى الإعلان. جارٍ انتظار التأكيد — يرجى المحاولة مرة أخرى بعد قليل.", "Ad counted! Watch one more to open the chest.": "تم احتساب الإعلان! شاهد إعلانًا آخر لفتح الصندوق.", "Something went wrong.": "حدث خطأ ما.", "Animated treasure chest": "صندوق كنز متحرك", "Milestone Rewards": "مكافآت الإنجازات", "Claim once": "استلام مرة واحدة", "Refer 10 Friends": "ادعُ 10 أصدقاء", "Invite 10 friends to PAYME.": "ادعُ 10 أصدقاء إلى PAYME.", "Reward": "المكافأة", "Go": "ابدأ", "Claim": "استلام", "Refer 25 Friends": "ادعُ 25 صديقًا", "Invite 25 friends to PAYME.": "ادعُ 25 صديقًا إلى PAYME.", "Open Treasure Box 5 Times": "افتح صندوق الكنز 5 مرات", "Crack open the Luck Vault chest 5 times.": "افتح صندوق خزنة الحظ 5 مرات.", "Reward Claimed!": "تم استلام المكافأة!", "Luck Tickets have been added to your balance.": "تمت إضافة تذاكر الحظ إلى رصيدك.", "Claimed ✓": "تم الاستلام ✓", "Claim ✨": "استلام ✨", "Unable to claim this reward yet.": "لا يمكن استلام هذه المكافأة بعد.", "CONVERT": "تحويل", "Tickets → Gems": "تذاكر ← جواهر", "Cash in idle Luck Tickets for withdrawable Gems, any time.": "استبدل تذاكر الحظ غير المستخدمة بجواهر قابلة للسحب، في أي وقت.", "Available to swap": "متاح للتبديل", "Swap Tickets for Gems": "بدّل التذاكر بجواهر", "Swap Luck Tickets": "بدّل تذاكر الحظ", "1 Luck Ticket 🪙 = 0.25 Gems 💎": "1 تذكرة حظ 🪙 = 0.25 جوهرة 💎", "You'll receive": "ستحصل على", "Swap Now": "بدّل الآن", "Cancel": "إلغاء", "🪙 Luck Tickets": "🪙 تذاكر الحظ"},
     en: {
       'Luck Vault':'Luck Vault','‹ Back':'‹ Back','Gems':'Gems','Luck Tickets':'Luck Tickets',
       'TAP VAULT • PLAY & EARN':'TAP VAULT • PLAY & EARN','DOUBLE OR NOTHING':'DOUBLE OR NOTHING',
@@ -2054,6 +2055,7 @@ loadVault();
 
 </body>
 </html>
+
 
 
 

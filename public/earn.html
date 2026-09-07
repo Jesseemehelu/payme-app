@@ -10,8 +10,8 @@
      the Mining button, matching the same tag already used by the Luck
      Vault treasure chest. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 5s after this page loads, then
-     up to 2 ads per 4-minute window with a 45s gap between them.
+<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
+     up to 2 ads per 6-minute window with a 60s gap between them.
      everyPage:false means this session (and its timing/frequency budget)
      carries over to any other page that also calls show_11688228 with
      these same settings — it does not reset per page. Polls briefly for
@@ -26,9 +26,9 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.0667,
-            interval: 45,
-            timeout: 5,
+            capping: 0.1,
+            interval: 60,
+            timeout: 15,
             everyPage: false
           }
         });
@@ -2134,6 +2134,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <script>
 (function PAYMEEarnLanguage(){
   const I18N = {
+    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your invite link — every friend who joins puts more Gems in your wallet.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "💎15 per successful referral": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
     en: {
       "Back to Dashboard":"Back to Dashboard","PAYME REWARDS":"PAYME REWARDS",
       "Turn your activity":"Turn your activity","real rewards.":"real rewards.",
@@ -2392,6 +2393,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </body>
 </html>
+
 
 
 

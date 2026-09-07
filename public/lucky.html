@@ -51,8 +51,8 @@
 
 <!-- Monetag rewarded interstitial SDK, same zone used across the app. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 5s after this page loads, then
-     up to 2 ads per 4-minute window with a 45s gap between them.
+<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
+     up to 2 ads per 6-minute window with a 60s gap between them.
      everyPage:false means this session (and its timing/frequency budget)
      carries over to any other page that also calls show_11688228 with
      these same settings — it does not reset per page. Polls briefly for
@@ -67,9 +67,9 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.0667,
-            interval: 45,
-            timeout: 5,
+            capping: 0.1,
+            interval: 60,
+            timeout: 15,
             everyPage: false
           }
         });
@@ -269,6 +269,7 @@ if(!howtoHidden){ open('howtoModal'); }
 (function(){
   'use strict';
   const LANGS = {
+    ar:{'Luck Vault':'خزنة الحظ','Luck Tickets':'تذاكر الحظ','LUCKY 3 • TICKET PLAY':'لاكي3 • اللعب بالتذاكر','Choose your 3 lucky numbers':'اختر أرقامك المحظوظة الثلاثة','Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.':'استخدم تذاكر الحظ للمشاركة. اختر 3 أرقام من 01 إلى 30، واختر لعبة، ثم اكشف نتيجتك.','YOUR TICKET WALLET':'محفظة تذاكرك','WIN REWARDS IN':'اربح مكافآت في','💎 GEMS':'💎 جواهر','Choose 3 numbers':'اختر 3 أرقام','Tap any 3 numbers':'اضغط على أي 3 أرقام','Choose 3 different numbers • Tap again to remove':'اختر 3 أرقام مختلفة • اضغط مرة أخرى للإزالة','YOUR PICKS • 3 REQUIRED':'اختياراتك • مطلوب 3','Choose game':'اختر لعبة','Instant result':'نتيجة فورية','Entry tickets':'تذاكر الدخول','Not cash':'ليست نقودًا','Reveal My Lucky 3 ✨':'اكشف لاكي3 الخاص بي ✨','Higher entry tickets unlock bigger prizes. Tickets are deducted before the draw.':'تذاكر الدخول الأعلى تفتح جوائز أكبر. تُخصم التذاكر قبل السحب.','NOT ENOUGH LUCK TICKETS':'تذاكر الحظ غير كافية','You need more tickets':'تحتاج مزيدًا من التذاكر','You don\'t have enough Luck Tickets to play this entry. Earn more tickets in the Luck Vault, then come back and play Lucky 3.':'ليس لديك تذاكر حظ كافية لهذا الدخول. اكسب مزيدًا من التذاكر في خزنة الحظ، ثم عد والعب لاكي3.','Your tickets':'تذاكرك','Needed':'المطلوب','🎁 Earn More Luck Tickets':'🎁 اكسب مزيدًا من تذاكر الحظ','Maybe Later':'ربما لاحقًا','READY TO DRAW':'جاهز للسحب','Confirm your Lucky 3':'أكّد لاكي3 الخاص بك','Your ticket entry will be deducted before the server performs the draw.':'سيُخصم تذكرة دخولك قبل أن يجري الخادم السحب.','Your numbers':'أرقامك','Game':'اللعبة','Entry':'الدخول','Possible reward':'المكافأة المحتملة','Cancel':'إلغاء','Draw Now':'اسحب الآن','SERVER DRAW':'سحب الخادم','Revealing your numbers…':'جارٍ الكشف عن أرقامك…','Generating a secure draw.':'جارٍ إنشاء سحب آمن.','Play Again':'العب مرة أخرى','✨ HOW TO PLAY':'✨ كيفية اللعب','Lucky 3 — quick guide':'لاكي3 — دليل سريع','A simple pick-3 number game. Here\'s all you need to know:':'لعبة بسيطة لاختيار 3 أرقام. إليك كل ما تحتاج معرفته:','Pick 3 numbers':'اختر 3 أرقام','Tap any 3 numbers from 01–30. Tap a number again to remove it.':'اضغط على أي 3 أرقام من 01 إلى 30. اضغط على الرقم مرة أخرى لإزالته.','Choose a game mode':'اختر وضع اللعبة','Choose your entry':'اختر دخولك','Reveal your result':'اكشف نتيجتك','👑 Jackpot pays the biggest prize if all 3 numbers match. 💎 Cash Win pays if 2 or more match. ✨ Free Spins pays if just 1 matches — easiest to win.':'👑 الجائزة الكبرى تُدفع إذا تطابقت الأرقام الثلاثة كلها. 💎 الفوز النقدي يُدفع إذا تطابق رقمان أو أكثر. ✨ الدورات المجانية تُدفع إذا تطابق رقم واحد فقط — الأسهل للفوز.','Pick how many Luck Tickets to spend. Bigger entries unlock bigger prizes — tickets are deducted before the draw.':'اختر عدد تذاكر الحظ التي تريد إنفاقها. الدخول الأكبر يفتح جوائز أكبر — تُخصم التذاكر قبل السحب.','Tap "Reveal My Lucky 3". 3 numbers are drawn instantly — match them to your picks to win!':'اضغط على "اكشف لاكي3 الخاص بي". تُسحب 3 أرقام فورًا — طابقها مع اختياراتك للفوز!','Don\'t show this again':'لا تُظهر هذا مرة أخرى','Got it, let\'s play! ✨':'فهمت، لنبدأ اللعب! ✨','Match all 3 numbers':'طابق الأرقام الثلاثة كلها','Match at least 2 numbers':'طابق رقمين على الأقل','Match at least 1 number':'طابق رقمًا واحدًا على الأقل','3/3 JACKPOT':'جائزة كبرى 3/3','2/3 CASH WIN':'فوز نقدي 2/3','1/3 FREE SPINS':'دورات مجانية 1/3','FREE SPINS':'دورات مجانية','Starter stake':'رهان مبتدئ','Popular pick':'الخيار الشائع','High roller':'رهان كبير','Win':'فوز','Pick only 3 numbers.':'اختر 3 أرقام فقط.','Pick 3 numbers first.':'اختر 3 أرقام أولًا.','Secure draw in progress.':'السحب الآمن قيد التنفيذ.','🎉 YOU HIT!':'🎉 لقد فزت!','DRAW COMPLETE':'اكتمل السحب','No win this time':'لا فوز هذه المرة','No prize':'لا جائزة','Unable to load Luck Tickets.':'تعذر تحميل تذاكر الحظ.','Unable to load ticket wallet.':'تعذر تحميل محفظة التذاكر.','Lucky 3 could not be completed.':'تعذر إتمام لاكي3.','Something went wrong.':'حدث خطأ ما.','3/3 MATCHED • WINNER!':'تطابق 3/3 • فائز!'},
     en: {
       'Luck Vault':'Luck Vault','Luck Tickets':'Luck Tickets','LUCKY 3 • TICKET PLAY':'LUCKY 3 • TICKET PLAY',
       'Choose your 3 lucky numbers':'Choose your 3 lucky numbers','Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.':'Use Luck Tickets to enter. Pick 3 numbers from 01–30, choose a game, then reveal your result.',
@@ -433,6 +434,7 @@ if(!howtoHidden){ open('howtoModal'); }
 </script>
 
 </body></html>
+
 
 
 
