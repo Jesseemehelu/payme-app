@@ -11,9 +11,12 @@
      Vault treasure chest. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
 <!-- Monetag in-app interstitial: first ad 5s after this page loads, then
-     up to 2 ads per 5-minute window with a 60s gap between them. Polls
-     briefly for show_11688228 since the SDK script above finishes
-     initializing asynchronously. -->
+     up to 2 ads per 4-minute window with a 45s gap between them.
+     everyPage:false means this session (and its timing/frequency budget)
+     carries over to any other page that also calls show_11688228 with
+     these same settings — it does not reset per page. Polls briefly for
+     show_11688228 since the SDK script above finishes initializing
+     asynchronously. -->
 <script>
 (function startInAppInterstitial(){
   function tryStart(retries){
@@ -23,8 +26,8 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.0833,
-            interval: 60,
+            capping: 0.0667,
+            interval: 45,
             timeout: 5,
             everyPage: false
           }
@@ -2382,6 +2385,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </body>
 </html>
+
 
 
 
