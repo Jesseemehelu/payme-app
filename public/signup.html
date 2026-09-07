@@ -852,7 +852,7 @@ body{
      SIGNUP CARD
 ===================================================== -->
 
-<div class="signup-card">
+<div class="signup-card" id="signupCard" style="visibility:hidden;">
 
 
   <div
@@ -1388,6 +1388,8 @@ async function checkUserAccountStatus() {
 
     renderLoginUI();
 
+    startReturningUserAnimation();
+
     await handleTelegramAuth();
 
     return;
@@ -1426,6 +1428,8 @@ async function checkUserAccountStatus() {
 
       renderLoginUI();
 
+      startReturningUserAnimation();
+
       await handleTelegramAuth();
 
     } else {
@@ -1463,6 +1467,92 @@ async function checkUserAccountStatus() {
 /* ======================================================
    LOGIN UI
 ====================================================== */
+
+/* ======================================================
+   SIGNUP CARD VISIBILITY HELPERS
+====================================================== */
+
+function revealSignupCard() {
+
+  const card =
+    document.getElementById('signupCard');
+
+  if (!card) return;
+
+  if (card.style.visibility === 'hidden') {
+
+    // Restart the entrance animation so revealing the
+    // card still gets a clean fade-in instead of popping in.
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = '';
+
+  }
+
+  card.style.visibility = 'visible';
+
+}
+
+
+function deactivateLoginAnimation() {
+
+  const modal =
+    document.getElementById('onboardingModal');
+
+  if (modal) modal.classList.remove('active');
+
+  revealSignupCard();
+
+}
+
+
+/* ======================================================
+   RETURNING USER — INSTANT LOGIN ANIMATION
+   ------------------------------------------------------
+   Shown immediately for known returning users, before the
+   auth request even resolves, so they never see the signup
+   card — only the login animation, then the dashboard.
+====================================================== */
+
+function startReturningUserAnimation() {
+
+  loadSavedSignupLanguage();
+
+  const modal =
+    document.getElementById('onboardingModal');
+
+  const animBadge =
+    document.getElementById('animBadge');
+
+  const animHeading =
+    document.getElementById('animHeading');
+
+  const animSubtext =
+    document.getElementById('animSubtext');
+
+  const continueBtn =
+    document.getElementById('continueBtn');
+
+  if (animBadge) animBadge.style.display = 'none';
+  if (continueBtn) continueBtn.style.display = 'none';
+
+  if (animHeading) {
+    animHeading.innerText = signupT('logging');
+    animHeading.style.opacity = '1';
+    animHeading.style.transform = 'translateY(0)';
+  }
+
+  if (animSubtext) {
+    animSubtext.innerText =
+      ({en:'Authenticating your session and taking you to your dashboard.',ru:'Проверяем вашу сессию и открываем панель управления.',es:'Estamos autenticando tu sesión y abriendo tu panel.',hi:'आपका सत्र सत्यापित करके डैशबोर्ड खोला जा रहा है।'})[paymeSignupLanguage||'en'];
+    animSubtext.style.opacity = '1';
+    animSubtext.style.transform = 'translateY(0)';
+  }
+
+  if (modal) modal.classList.add('active');
+
+}
+
 
 function renderLoginUI() {
 
@@ -1519,6 +1609,8 @@ function renderLoginUI() {
 ====================================================== */
 
 function renderSignupUI() {
+
+  revealSignupCard();
 
   document.getElementById(
     'mainTitle'
@@ -1734,6 +1826,8 @@ if (!activeTg || !activeTg.initData) {
     !telegramUser.id
   ) {
 
+    deactivateLoginAnimation();
+
     errorBox.innerText =
       'Telegram account information could not be detected. Please close this page and reopen PAYME directly from Telegram.';
 
@@ -1762,6 +1856,8 @@ if (!activeTg || !activeTg.initData) {
     typeof initData !== 'string' ||
     !initData.trim()
   ) {
+
+    deactivateLoginAnimation();
 
     errorBox.innerText =
       'Telegram authentication data is missing. Please reopen PAYME from Telegram.';
@@ -1886,6 +1982,8 @@ if (!activeTg || !activeTg.initData) {
 
         tgBtn.disabled = false;
 
+        deactivateLoginAnimation();
+
         renderSignupUI();
 
         const langSection =
@@ -1967,6 +2065,9 @@ if (!activeTg || !activeTg.initData) {
       'Telegram authentication error:',
       error
     );
+
+
+    deactivateLoginAnimation();
 
 
     tgBtn.disabled =
@@ -2298,6 +2399,7 @@ function redirectDashboard() {
 
 </body>
 </html>
+
 
 
 
