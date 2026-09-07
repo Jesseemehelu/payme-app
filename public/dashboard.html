@@ -4918,6 +4918,23 @@ await res.json();
 
 if(data.success){
 
+/* =========================================================
+   PRESERVE THE USER'S SELECTED LANGUAGE THROUGH THE
+   ONBOARDING -> GAME -> DASHBOARD NAVIGATION FLOW.
+   The game page also reads this value from the URL, so the
+   language cannot fall back to English during the redirect.
+========================================================= */
+const selectedDashboardLanguage =
+  (typeof paymeDashboardLanguage !== "undefined" &&
+   ['en','ru','es','hi'].includes(String(paymeDashboardLanguage)))
+    ? String(paymeDashboardLanguage)
+    : (localStorage.getItem("paymeLanguage") || "en");
+
+try{
+  localStorage.setItem("paymeLanguage", selectedDashboardLanguage);
+  localStorage.setItem("payme_language", selectedDashboardLanguage);
+}catch(_e){}
+
 alert(
 dashboardT("Free spin granted! Redirecting to the Spin Game...")
 );
@@ -4933,7 +4950,7 @@ sessionStorage.setItem("paymeFreeSpinStarted","1");
 }catch(e){}
 
 window.location.href =
-"/game.html";
+"/game.html?lang=" + encodeURIComponent(selectedDashboardLanguage);
 
 }else{
 
@@ -5352,6 +5369,8 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
 </body>
 </html>
+
+
 
 
 

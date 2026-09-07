@@ -6373,7 +6373,12 @@ app.get(
           number(normalizeDailyReward(req.user).luckTickets),
 
         hasClaimedGiftBox:
-          !!req.user.hasClaimedGiftBox
+          !!req.user.hasClaimedGiftBox,
+
+        language:
+          ['en','ru','es','hi'].includes(String(req.user.language || req.user.dailyReward?.language || ''))
+            ? String(req.user.language || req.user.dailyReward?.language)
+            : 'en'
 
       });
 
@@ -11261,6 +11266,8 @@ app.listen(
   }
 
 );
+
+
 
 
 

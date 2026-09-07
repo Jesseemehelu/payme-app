@@ -3758,6 +3758,19 @@ async function fetchGameState() {
 
     if (data.success) {
 
+      /* Keep the account language authoritative across page navigation. */
+      try {
+        const serverLanguage = String(data.language || '').toLowerCase();
+        if (['en','ru','es','hi'].includes(serverLanguage)) {
+          localStorage.setItem('paymeLanguage', serverLanguage);
+          localStorage.setItem('payme_language', serverLanguage);
+          document.documentElement.lang = serverLanguage;
+          if (typeof window.applyGameLanguage === 'function') {
+            window.applyGameLanguage();
+          }
+        }
+      } catch (_languageError) {}
+
       currentBalance =
         Number(
           data.balance || 0
@@ -4798,6 +4811,31 @@ fetchGameState();
 
 <script>
 /* =========================================================
+   PAYME LANGUAGE BOOTSTRAP
+   The dashboard passes ?lang=... when sending a newly onboarded
+   user to this page. Store it immediately so the game never
+   initializes in English and overwrites the selected language.
+========================================================= */
+(function(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = String(params.get("lang") || "").toLowerCase();
+    const storedLang = String(
+      localStorage.getItem("paymeLanguage") ||
+      localStorage.getItem("payme_language") ||
+      ""
+    ).toLowerCase();
+    const lang = ["en","ru","es","hi"].includes(urlLang)
+      ? urlLang
+      : (["en","ru","es","hi"].includes(storedLang) ? storedLang : "en");
+
+    localStorage.setItem("paymeLanguage", lang);
+    localStorage.setItem("payme_language", lang);
+    document.documentElement.lang = lang;
+  }catch(_e){}
+})();
+
+/* =========================================================
    PAYME GLOBAL LANGUAGE SYSTEM — WHEEL GAME
    Language is the same preference selected at signup.
 ========================================================= */
@@ -4866,4 +4904,6 @@ fetchGameState();
   window.applyGameLanguage=translate;
 })();
 </script>
+
+
 
