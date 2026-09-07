@@ -571,6 +571,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 .miner-level-card:nth-child(3){animation-delay:.14s}
 .miner-level-card:nth-child(4){animation-delay:.2s}
 .miner-level-card:nth-child(5){animation-delay:.26s}
+.miner-level-card:nth-child(6){animation-delay:.32s}
 @keyframes levelCardIn{to{opacity:1;transform:translateY(0)}}
 .miner-level-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--level-accent,linear-gradient(180deg,#22e0ff,#8b5cf6))}
 .miner-level-card[data-level="1"]{--level-accent:linear-gradient(180deg,#9be89a,#2fa864)}
@@ -578,6 +579,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 .miner-level-card[data-level="3"]{--level-accent:linear-gradient(180deg,#c39bff,#7c3aed)}
 .miner-level-card[data-level="4"]{--level-accent:linear-gradient(180deg,#ffd35e,#c97f00)}
 .miner-level-card[data-level="5"]{--level-accent:linear-gradient(180deg,#ff9bd8,#ff4fb8)}
+.miner-level-card[data-level="6"]{--level-accent:linear-gradient(180deg,#ff8a3d,#c45c14)}
 .miner-level-card.available:active{transform:translateY(3px) scale(.99)}
 .miner-level-card.current{border-color:rgba(34,224,255,.65);box-shadow:0 5px 0 rgba(10,143,168,.35),0 0 26px rgba(34,224,255,.18);background:linear-gradient(120deg,rgba(34,224,255,.14),rgba(34,224,255,.04))}
 .miner-level-card.recommended{border-color:rgba(255,204,51,.55);box-shadow:0 5px 0 rgba(150,95,0,.3),0 0 26px rgba(255,204,51,.14)}
@@ -1606,9 +1608,10 @@ document.addEventListener('DOMContentLoaded',function(){
   const levelMeta = {
     1:{cost:0,min:1,max:2,label:'FREE MINER',decimals:1,tagline:'A free rig for casual, everyday mining.'},
     2:{cost:500,min:3,max:4,label:'500 GEMS💎',decimals:0,tagline:'A faster rig with a higher reward floor.'},
-    3:{cost:700,min:4.5,max:7,label:'700 GEMS💎',decimals:1,tagline:'Fine-tuned payouts, including half tickets.'},
-    4:{cost:1000,min:6,max:10,label:'1,000 GEMS💎',decimals:0,tagline:'A serious upgrade for regular miners.'},
-    5:{cost:5000,min:20,max:25,label:'5,000 GEMS💎',decimals:0,tagline:'The top-tier rig — the biggest payouts.'}
+    3:{cost:500,min:5,max:8,label:'500 GEMS💎',decimals:0,tagline:'A solid mid-tier rig with steady payouts.'},
+    4:{cost:800,min:9,max:13,label:'800 GEMS💎',decimals:0,tagline:'A serious upgrade for regular miners.'},
+    5:{cost:2000,min:20,max:25,label:'2,000 GEMS💎',decimals:0,tagline:'A powerful rig with big payouts.'},
+    6:{cost:3000,min:26,max:35,label:'3,000 GEMS💎',decimals:0,tagline:'The top-tier rig — the biggest payouts.'}
   };
 
   // Balances are always shown to exactly one decimal place, since the
@@ -1771,12 +1774,12 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
 
-  const levelBadge = {1:'🔧',2:'⚙️',3:'🚀',4:'💎',5:'👑'};
+  const levelBadge = {1:'🔧',2:'⚙️',3:'🚀',4:'💎',5:'👑',6:'🔥'};
 
   function buildLevelStrip(current){
     if(!els.levelStrip) return;
     els.levelStrip.innerHTML='';
-    for(let level=1;level<=5;level++){
+    for(let level=1;level<=6;level++){
       const seg=document.createElement('div');
       seg.className='level-progress-seg' + (level<=current?' filled':'');
       seg.innerHTML='<i></i>';
@@ -1787,9 +1790,9 @@ document.addEventListener('DOMContentLoaded',function(){
   function buildUpgradeList(){
     const current=Number(state?.level)||1;
     buildLevelStrip(current);
-    const nextLevel = current < 5 ? current+1 : null;
+    const nextLevel = current < 6 ? current+1 : null;
     els.levelList.innerHTML='';
-    for(let level=1;level<=5;level++){
+    for(let level=1;level<=6;level++){
       const m=levelMeta[level];
       const isNext = level === nextLevel;
       const card=document.createElement('div');
@@ -2174,8 +2177,9 @@ document.addEventListener('DOMContentLoaded',function(){
       "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"Expected reward per cycle:",
       "A free rig for casual, everyday mining.":"A free rig for casual, everyday mining.",
       "A faster rig with a higher reward floor.":"A faster rig with a higher reward floor.",
-      "Fine-tuned payouts, including half tickets.":"Fine-tuned payouts, including half tickets.",
+      "A solid mid-tier rig with steady payouts.":"A solid mid-tier rig with steady payouts.",
       "A serious upgrade for regular miners.":"A serious upgrade for regular miners.",
+      "A powerful rig with big payouts.":"A powerful rig with big payouts.",
       "The top-tier rig — the biggest payouts.":"The top-tier rig — the biggest payouts."
     },
     ru: {
@@ -2220,8 +2224,9 @@ document.addEventListener('DOMContentLoaded',function(){
       "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"Ожидаемая награда за цикл:",
       "A free rig for casual, everyday mining.":"Бесплатная рига для повседневной добычи.",
       "A faster rig with a higher reward floor.":"Более быстрая рига с более высокой минимальной наградой.",
-      "Fine-tuned payouts, including half tickets.":"Точная настройка выплат, включая половинные билеты.",
+      "A solid mid-tier rig with steady payouts.":"Надёжная рига среднего уровня со стабильными выплатами.",
       "A serious upgrade for regular miners.":"Серьёзное улучшение для постоянных майнеров.",
+      "A powerful rig with big payouts.":"Мощная рига с крупными выплатами.",
       "The top-tier rig — the biggest payouts.":"Рига высшего уровня — самые большие выплаты."
     },
     es: {
@@ -2266,8 +2271,9 @@ document.addEventListener('DOMContentLoaded',function(){
       "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"Recompensa esperada por ciclo:",
       "A free rig for casual, everyday mining.":"Un equipo gratuito para minería casual del día a día.",
       "A faster rig with a higher reward floor.":"Un equipo más rápido con un mínimo de recompensa más alto.",
-      "Fine-tuned payouts, including half tickets.":"Pagos ajustados con precisión, incluyendo medios tickets.",
+      "A solid mid-tier rig with steady payouts.":"Un equipo sólido de nivel medio con pagos constantes.",
       "A serious upgrade for regular miners.":"Una mejora seria para mineros habituales.",
+      "A powerful rig with big payouts.":"Un equipo potente con grandes pagos.",
       "The top-tier rig — the biggest payouts.":"El equipo de gama alta — los mayores pagos."
     },
     hi: {
@@ -2312,8 +2318,9 @@ document.addEventListener('DOMContentLoaded',function(){
       "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"हर चक्र में अनुमानित इनाम:",
       "A free rig for casual, everyday mining.":"रोज़मर्रा की आम माइनिंग के लिए एक फ्री रिग।",
       "A faster rig with a higher reward floor.":"ज़्यादा न्यूनतम इनाम वाली तेज़ रिग।",
-      "Fine-tuned payouts, including half tickets.":"बेहतर तरीके से तय किए गए इनाम, आधे टिकट सहित।",
+      "A solid mid-tier rig with steady payouts.":"स्थिर इनाम वाली एक भरोसेमंद मिड-टियर रिग।",
       "A serious upgrade for regular miners.":"नियमित माइनर्स के लिए एक बड़ा अपग्रेड।",
+      "A powerful rig with big payouts.":"बड़े इनाम वाली एक शक्तिशाली रिग।",
       "The top-tier rig — the biggest payouts.":"सबसे ऊँचे स्तर की रिग — सबसे बड़े इनाम।"
     }
   };

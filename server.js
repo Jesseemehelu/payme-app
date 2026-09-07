@@ -464,9 +464,10 @@ const LUCK_MINING_CONFIG = {
   levels: {
     1: { cost: 0, min: 1, max: 2, label: 'Free' },
     2: { cost: 500, min: 3, max: 4, label: '500 Gems💎' },
-    3: { cost: 700, min: 4.5, max: 7, label: '700 Gems💎' },
-    4: { cost: 1000, min: 6, max: 10, label: '1,000 Gems💎' },
-    5: { cost: 5000, min: 20, max: 25, label: '5,000 Gems💎' }
+    3: { cost: 500, min: 5, max: 8, label: '500 Gems💎' },
+    4: { cost: 800, min: 9, max: 13, label: '800 Gems💎' },
+    5: { cost: 2000, min: 20, max: 25, label: '2,000 Gems💎' },
+    6: { cost: 3000, min: 26, max: 35, label: '3,000 Gems💎' }
   }
 };
 
@@ -522,7 +523,7 @@ function normalizeLuckMining(daily) {
       : {};
 
   let level = Number(source.level);
-  if (!Number.isInteger(level) || level < 1 || level > 5) level = 1;
+  if (!Number.isInteger(level) || level < 1 || level > 6) level = 1;
 
   let status = String(source.status || 'offline');
   if (!['offline', 'mining', 'completed'].includes(status)) {
@@ -2842,7 +2843,7 @@ app.post('/api/luck-mining/upgrade', requireLoginMiningUpgrade, async (req, res)
           body: {
             success: false,
             code: 'INVALID_UPGRADE',
-            message: currentLevel >= 5
+            message: currentLevel >= 6
               ? 'Your miner is already at the maximum level.'
               : `Upgrades happen one level at a time — you need Level ${currentLevel + 1} next.`
           }
@@ -11338,6 +11339,7 @@ app.listen(
   }
 
 );
+
 
 
 

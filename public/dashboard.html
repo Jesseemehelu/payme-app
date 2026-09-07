@@ -259,6 +259,155 @@ font-size:.75rem;
 line-height:1.5;
 }
 
+/* WELCOME HEADER ROW — name on one side, Luck Ticket chip on the other */
+.welcome-header-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap;
+}
+.welcome-text-block{ min-width:0; flex:1 1 auto; }
+
+/* LUCK TICKET CHIP */
+.luck-ticket-chip{
+position:relative;
+display:flex;
+align-items:center;
+gap:8px;
+flex:0 0 auto;
+padding:7px 8px 7px 12px;
+border-radius:999px;
+background:linear-gradient(135deg, rgba(245,158,11,.14), rgba(236,72,153,.10));
+border:1px solid rgba(245,158,11,.35);
+box-shadow:0 8px 20px rgba(245,158,11,.16), inset 0 1px 0 rgba(255,255,255,.5);
+overflow:hidden;
+isolation:isolate;
+animation:luckChipPopIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+.luck-ticket-chip-ring{
+position:absolute;
+inset:-40%;
+z-index:-1;
+background:conic-gradient(from 0deg, rgba(245,158,11,0) 0deg, rgba(245,158,11,.35) 60deg, rgba(236,72,153,.3) 140deg, rgba(245,158,11,0) 220deg, rgba(245,158,11,0) 360deg);
+animation:luckChipSpin 4.5s linear infinite;
+}
+.luck-ticket-chip-shine{
+position:absolute;
+top:0; left:-60%;
+width:40%; height:100%;
+background:linear-gradient(115deg, transparent, rgba(255,255,255,.65), transparent);
+transform:skewX(-18deg);
+animation:luckChipShine 3.2s ease-in-out infinite;
+animation-delay:1s;
+pointer-events:none;
+}
+.luck-ticket-chip-body{
+display:flex;
+align-items:center;
+gap:5px;
+padding-right:2px;
+}
+.luck-ticket-coin{
+font-size:1.05rem;
+display:inline-block;
+animation:luckCoinFlip 2.6s ease-in-out infinite;
+filter:drop-shadow(0 2px 3px rgba(245,158,11,.4));
+}
+.luck-ticket-balance{
+font-size:.86rem;
+font-weight:900;
+letter-spacing:-.02em;
+color:#92400e;
+font-variant-numeric:tabular-nums;
+}
+.luck-ticket-mine-btn{
+position:relative;
+display:inline-flex;
+align-items:center;
+gap:4px;
+border:none;
+cursor:pointer;
+padding:7px 13px;
+border-radius:999px;
+background:linear-gradient(135deg,#f59e0b,#ec4899 65%,#7c3aed);
+background-size:220% 220%;
+color:#fff;
+font-size:.72rem;
+font-weight:800;
+letter-spacing:-.01em;
+box-shadow:0 6px 16px rgba(236,72,153,.4);
+overflow:hidden;
+transition:transform .18s ease, box-shadow .18s ease;
+animation:luckBtnGradientShift 3.5s ease infinite, luckBtnPulse 2.2s ease-in-out infinite;
+white-space:nowrap;
+}
+.luck-ticket-mine-btn .mine-btn-icon{
+display:inline-block;
+animation:mineSwing 1.6s ease-in-out infinite;
+}
+.luck-ticket-mine-btn .mine-btn-shine{
+position:absolute;
+top:0; left:-60%;
+width:35%; height:100%;
+background:linear-gradient(115deg, transparent, rgba(255,255,255,.75), transparent);
+transform:skewX(-18deg);
+animation:luckChipShine 2.4s ease-in-out infinite;
+}
+.luck-ticket-mine-btn:active{
+transform:scale(.94);
+box-shadow:0 3px 10px rgba(236,72,153,.35);
+}
+.luck-ticket-mine-btn:hover{
+box-shadow:0 8px 22px rgba(236,72,153,.5);
+}
+
+@keyframes luckChipPopIn{
+0%{ opacity:0; transform:scale(.7) translateY(-6px); }
+100%{ opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes luckChipSpin{
+to{ transform:rotate(360deg); }
+}
+@keyframes luckChipShine{
+0%{ left:-60%; }
+55%,100%{ left:130%; }
+}
+@keyframes luckCoinFlip{
+0%,80%,100%{ transform:rotateY(0deg) scale(1); }
+40%{ transform:rotateY(180deg) scale(1.12); }
+}
+@keyframes luckBtnGradientShift{
+0%{ background-position:0% 50%; }
+50%{ background-position:100% 50%; }
+100%{ background-position:0% 50%; }
+}
+@keyframes luckBtnPulse{
+0%,100%{ box-shadow:0 6px 16px rgba(236,72,153,.4); }
+50%{ box-shadow:0 6px 22px rgba(245,158,11,.55); }
+}
+@keyframes mineSwing{
+0%,100%{ transform:rotate(0deg); }
+25%{ transform:rotate(-18deg); }
+50%{ transform:rotate(6deg); }
+}
+@media(prefers-reduced-motion:reduce){
+  .luck-ticket-chip,
+  .luck-ticket-chip-ring,
+  .luck-ticket-chip-shine,
+  .luck-ticket-coin,
+  .luck-ticket-mine-btn,
+  .luck-ticket-mine-btn .mine-btn-icon,
+  .luck-ticket-mine-btn .mine-btn-shine{
+    animation:none !important;
+  }
+}
+@media(max-width:420px){
+  .luck-ticket-chip{ padding:6px 6px 6px 10px; gap:6px; }
+  .luck-ticket-balance{ font-size:.78rem; }
+  .luck-ticket-mine-btn{ padding:6px 11px; font-size:.68rem; }
+}
+
 /* BALANCE HERO */
 .balance-card{
 position:relative;
@@ -2638,9 +2787,31 @@ stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 <div class="main-col">
 <!-- WELCOME -->
 <section class="welcome">
+<div class="welcome-header-row">
+<div class="welcome-text-block">
 <div class="welcome-small">WELCOME BACK</div>
 <h1 class="welcome-title">Hello, <span id="userNameText"
 class="user-name loading-skeleton name-loading" aria-label="Loading user name"></span></h1>
+</div>
+
+<div class="luck-ticket-chip" id="luckTicketChip">
+<span class="luck-ticket-chip-ring" aria-hidden="true"></span>
+<span class="luck-ticket-chip-shine" aria-hidden="true"></span>
+<div class="luck-ticket-chip-body">
+<span class="luck-ticket-coin" aria-hidden="true">🪙</span>
+<span class="luck-ticket-balance" id="luckTicketBalanceText" aria-label="Luck Ticket balance">0</span>
+</div>
+<button type="button"
+        class="luck-ticket-mine-btn"
+        id="luckTicketMineBtn"
+        onclick="window.location.href='/earn.html'"
+        aria-label="Mine Luck Tickets — go to Earn page">
+<span class="mine-btn-shine" aria-hidden="true"></span>
+<span class="mine-btn-icon" aria-hidden="true">⛏️</span>
+<span class="mine-btn-label">Mine now</span>
+</button>
+</div>
+</div>
 <p class="welcome-sub">Manage your wallet, earnings, deposits and referrals.</p>
 </section>
 
@@ -3554,6 +3725,7 @@ let dashboardRaw = {
     earnings:0,
     deposit:0,
     freeSpins:0,
+    luckTickets:0,
     gemUsdRate:0
 };
 
@@ -3575,6 +3747,16 @@ function formatUsdAmount(value){
         minimumFractionDigits:3,
         maximumFractionDigits:3
     });
+}
+
+function formatLuckTickets(value){
+    return Math.max(0, Math.round(Number(value || 0))).toLocaleString("en-US");
+}
+
+function renderLuckTicketBalance(){
+    const el = document.getElementById("luckTicketBalanceText");
+    if(!el) return;
+    el.innerText = formatLuckTickets(dashboardRaw.luckTickets);
 }
 
 function renderBalanceField(elId, currencyElId, rawValue){
@@ -3616,6 +3798,8 @@ function renderDashboardBalances(){
         "depositCurrency",
         dashboardRaw.deposit
     );
+
+    renderLuckTicketBalance();
 
     const usdEl = document.getElementById("balanceUsdEquivalent");
     if(usdEl){
@@ -3712,6 +3896,7 @@ function restoreCachedDashboard(){
         if(data.earnings != null) dashboardRaw.earnings = Number(data.earnings) || 0;
         if(data.deposit != null) dashboardRaw.deposit = Number(data.deposit) || 0;
         if(data.freeSpins != null) dashboardRaw.freeSpins = Number(data.freeSpins) || 0;
+        if(data.luckTickets != null) dashboardRaw.luckTickets = Number(data.luckTickets) || 0;
         if(data.gemUsdRate != null) dashboardRaw.gemUsdRate = Number(data.gemUsdRate) || 0;
 
         renderDashboardBalances();
@@ -3723,7 +3908,7 @@ function restoreCachedDashboard(){
     }
 }
 
-function cacheDashboardData(name, balance, earnings, deposit, freeSpins, gemUsdRate){
+function cacheDashboardData(name, balance, earnings, deposit, freeSpins, gemUsdRate, luckTickets){
     try{
         localStorage.setItem(
             "paymeDashboardCache",
@@ -3733,7 +3918,8 @@ function cacheDashboardData(name, balance, earnings, deposit, freeSpins, gemUsdR
                 earnings:earnings,
                 deposit:deposit,
                 freeSpins:freeSpins,
-                gemUsdRate:Number(gemUsdRate || 0)
+                gemUsdRate:Number(gemUsdRate || 0),
+                luckTickets:Number(luckTickets || 0)
             })
         );
     }catch(error){
@@ -3748,6 +3934,7 @@ function setDashboardLoading(isLoading){
         document.getElementById("balanceText"),
         document.getElementById("earningsBalanceText"),
         document.getElementById("depositBalanceText"),
+        document.getElementById("luckTicketBalanceText"),
     ];
 
     const currencyEls = [
@@ -3884,10 +4071,16 @@ Number(
 user.freeSpins ?? 0
 );
 
+const luckTicketsBalance =
+Number(
+user.luckTickets ?? 0
+);
+
 dashboardRaw.balance = availableBalance;
 dashboardRaw.earnings = withdrawableBalance;
 dashboardRaw.deposit = depositBalance;
 dashboardRaw.freeSpins = freeSpinsBalance;
+dashboardRaw.luckTickets = luckTicketsBalance;
 dashboardRaw.gemUsdRate = Number(user.gemUsdRate || data.gemUsdRate || 0);
 
 renderDashboardBalances();
@@ -3905,7 +4098,8 @@ cacheDashboardData(
     withdrawableBalance.toFixed(3),
     depositBalance.toFixed(3),
     freeSpinsBalance.toFixed(1),
-    Number(user.gemUsdRate || data.gemUsdRate || 0)
+    Number(user.gemUsdRate || data.gemUsdRate || 0),
+    luckTicketsBalance
 );
 
 /* DATA IS READY: reveal the real name and balances only when
