@@ -54,8 +54,8 @@
 
 <!-- Monetag rewarded interstitial SDK, same zone used across the app. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 5s after this page loads, then
-     up to 2 ads per 4-minute window with a 45s gap between them.
+<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
+     up to 2 ads per 6-minute window with a 60s gap between them.
      everyPage:false means this session (and its timing/frequency budget)
      carries over to any other page that also calls show_11688228 with
      these same settings — it does not reset per page. Polls briefly for
@@ -70,9 +70,9 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.0667,
-            interval: 45,
-            timeout: 5,
+            capping: 0.1,
+            interval: 60,
+            timeout: 15,
             everyPage: false
           }
         });
@@ -3336,7 +3336,9 @@ const D={
  es:{
   'Referral Leaderboard':'Clasificación de referidos','Live':'En vivo','⚡ Weekly Sprint':'⚡ Sprint semanal','Referral Challenge':'Desafío de referidos','Invite friends. Climb higher. Win weekly rewards!':'Invita amigos. Sube de posición. ¡Gana recompensas semanales!','Challenge Ends In':'El desafío termina en','Loading...':'Cargando...','2nd Place':'2.º lugar','1st Place':'1.º lugar','3rd Place':'3.º lugar','Your Current Position':'Tu posición actual','Unranked':'Sin clasificación','Referrals':'Referidos','Invite 1 user to rank!':'¡Invita a 1 usuario para entrar en la clasificación!','Top 10 Referrers':'Top 10 referidores','Rankings update automatically as referrals join.':'La clasificación se actualiza automáticamente con cada referido.','LIVE':'EN VIVO','Loading rankings...':'Cargando clasificación...','Previous Champions':'Campeones anteriores','Winners from completed weekly challenges.':'Ganadores de desafíos semanales completados.','No Past Winners Yet':'Aún no hay ganadores','Be the first champion of the weekly challenge.':'Sé el primer campeón del desafío semanal.','No referrals recorded yet this week.':'Aún no hay referidos esta semana.','Be the first to climb the leaderboard!':'¡Sé el primero en subir en la clasificación!','Keep inviting to hold your spot!':'¡Sigue invitando para mantener tu posición!','Top 10 spots are higher up!':'¡Los 10 primeros puestos están más arriba!','Unable to load live standings right now.':'No se pudo cargar la clasificación en vivo.','Please try again shortly.':'Inténtalo de nuevo en unos momentos.','Referral':'Referido','Refs':'Refs','(You)':'(Tú)','Back to Dashboard':'Volver al panel','Ended':'Finalizado'},
  hi:{
-  'Referral Leaderboard':'रेफरल लीडरबोर्ड','Live':'लाइव','⚡ Weekly Sprint':'⚡ साप्ताहिक स्प्रिंट','Referral Challenge':'रेफरल चैलेंज','Invite friends. Climb higher. Win weekly rewards!':'दोस्तों को आमंत्रित करें। ऊपर जाएं। साप्ताहिक रिवॉर्ड जीतें!','Challenge Ends In':'चैलेंज खत्म होने में','Loading...':'लोड हो रहा है...','2nd Place':'दूसरा स्थान','1st Place':'पहला स्थान','3rd Place':'तीसरा स्थान','Your Current Position':'आपकी वर्तमान स्थिति','Unranked':'रैंक नहीं है','Referrals':'रेफरल','Invite 1 user to rank!':'रैंक करने के लिए 1 यूज़र को आमंत्रित करें!','Top 10 Referrers':'टॉप 10 रेफरर्स','Rankings update automatically as referrals join.':'रेफरल जुड़ने पर रैंकिंग अपने आप अपडेट होती है।','LIVE':'लाइव','Loading rankings...':'रैंकिंग लोड हो रही है...','Previous Champions':'पिछले चैंपियन','Winners from completed weekly challenges.':'पूरे हुए साप्ताहिक चैलेंज के विजेता।','No Past Winners Yet':'अभी कोई पिछले विजेता नहीं','Be the first champion of the weekly challenge.':'साप्ताहिक चैलेंज के पहले चैंपियन बनें।','No referrals recorded yet this week.':'इस सप्ताह अभी कोई रेफरल दर्ज नहीं हुआ।','Be the first to climb the leaderboard!':'लीडरबोर्ड पर सबसे पहले ऊपर जाएं!','Keep inviting to hold your spot!':'अपनी जगह बनाए रखने के लिए आमंत्रित करते रहें!','Top 10 spots are higher up!':'टॉप 10 स्थान ऊपर हैं!','Unable to load live standings right now.':'अभी लाइव रैंकिंग लोड नहीं हो सकी।','Please try again shortly.':'थोड़ी देर बाद फिर कोशिश करें।','Referral':'रेफरल','Refs':'रेफ.','(You)':'(आप)','Back to Dashboard':'डैशबोर्ड पर वापस','Ended':'समाप्त'}
+  'Referral Leaderboard':'रेफरल लीडरबोर्ड','Live':'लाइव','⚡ Weekly Sprint':'⚡ साप्ताहिक स्प्रिंट','Referral Challenge':'रेफरल चैलेंज','Invite friends. Climb higher. Win weekly rewards!':'दोस्तों को आमंत्रित करें। ऊपर जाएं। साप्ताहिक रिवॉर्ड जीतें!','Challenge Ends In':'चैलेंज खत्म होने में','Loading...':'लोड हो रहा है...','2nd Place':'दूसरा स्थान','1st Place':'पहला स्थान','3rd Place':'तीसरा स्थान','Your Current Position':'आपकी वर्तमान स्थिति','Unranked':'रैंक नहीं है','Referrals':'रेफरल','Invite 1 user to rank!':'रैंक करने के लिए 1 यूज़र को आमंत्रित करें!','Top 10 Referrers':'टॉप 10 रेफरर्स','Rankings update automatically as referrals join.':'रेफरल जुड़ने पर रैंकिंग अपने आप अपडेट होती है।','LIVE':'लाइव','Loading rankings...':'रैंकिंग लोड हो रही है...','Previous Champions':'पिछले चैंपियन','Winners from completed weekly challenges.':'पूरे हुए साप्ताहिक चैलेंज के विजेता।','No Past Winners Yet':'अभी कोई पिछले विजेता नहीं','Be the first champion of the weekly challenge.':'साप्ताहिक चैलेंज के पहले चैंपियन बनें।','No referrals recorded yet this week.':'इस सप्ताह अभी कोई रेफरल दर्ज नहीं हुआ।','Be the first to climb the leaderboard!':'लीडरबोर्ड पर सबसे पहले ऊपर जाएं!','Keep inviting to hold your spot!':'अपनी जगह बनाए रखने के लिए आमंत्रित करते रहें!','Top 10 spots are higher up!':'टॉप 10 स्थान ऊपर हैं!','Unable to load live standings right now.':'अभी लाइव रैंकिंग लोड नहीं हो सकी।','Please try again shortly.':'थोड़ी देर बाद फिर कोशिश करें।','Referral':'रेफरल','Refs':'रेफ.','(You)':'(आप)','Back to Dashboard':'डैशबोर्ड पर वापस','Ended':'समाप्त'},
+ ar:{
+  'Referral Leaderboard':'لوحة صدارة الإحالات','Live':'مباشر','⚡ Weekly Sprint':'⚡ السباق الأسبوعي','Referral Challenge':'تحدي الإحالة','Invite friends. Climb higher. Win weekly rewards!':'ادعُ أصدقاءك. تصاعد في الترتيب. اربح مكافآت أسبوعية!','Challenge Ends In':'ينتهي التحدي خلال','Loading...':'جارٍ التحميل...','2nd Place':'المركز الثاني','1st Place':'المركز الأول','3rd Place':'المركز الثالث','Your Current Position':'مركزك الحالي','Unranked':'غير مصنف','Referrals':'الإحالات','Invite 1 user to rank!':'ادعُ مستخدمًا واحدًا للتصنيف!','Top 10 Referrers':'أفضل 10 محيلين','Rankings update automatically as referrals join.':'يتم تحديث الترتيب تلقائيًا مع انضمام الإحالات.','LIVE':'مباشر','Loading rankings...':'جارٍ تحميل الترتيب...','Previous Champions':'الأبطال السابقون','Winners from completed weekly challenges.':'الفائزون من التحديات الأسبوعية المكتملة.','No Past Winners Yet':'لا يوجد فائزون سابقون بعد','Be the first champion of the weekly challenge.':'كن أول بطل في التحدي الأسبوعي.','No referrals recorded yet this week.':'لم يتم تسجيل أي إحالات هذا الأسبوع بعد.','Be the first to climb the leaderboard!':'كن أول من يتصدر لوحة الصدارة!','Keep inviting to hold your spot!':'استمر في الدعوة للحفاظ على مركزك!','Top 10 spots are higher up!':'أفضل 10 مراكز أعلى من هنا!','Unable to load live standings right now.':'تعذر تحميل الترتيب المباشر الآن.','Please try again shortly.':'يرجى المحاولة مرة أخرى بعد قليل.','Referral':'إحالة','Refs':'إحالات','(You)':'(أنت)','Back to Dashboard':'العودة إلى لوحة التحكم','Ended':'انتهى'}
 };
 const original=new WeakMap();let observer=null,applying=false;
 function getLang(){const l=(localStorage.getItem('paymeLanguage')||'en').toLowerCase();return D[l]?l:'en'}
@@ -3344,6 +3346,7 @@ function tr(base,l){let s=base,dict=D[l]||D.en;const exact=dict[s.trim()];if(exa
  if(l==='ru') s=s.replace(/(\d+) Referrals?\b/g,'$1 Приглашений').replace(/(\d+) Refs\b/g,'$1 Пригл.').replace(/#(\d+)\s*$/,'#$1');
  if(l==='es') s=s.replace(/(\d+) Referrals?\b/g,'$1 Referidos').replace(/(\d+) Refs\b/g,'$1 Refs');
  if(l==='hi') s=s.replace(/(\d+) Referrals?\b/g,'$1 रेफरल').replace(/(\d+) Refs\b/g,'$1 रेफ.');
+ if(l==='ar') s=s.replace(/(\d+) Referrals?\b/g,'$1 إحالة').replace(/(\d+) Refs\b/g,'$1 إحالات');
  return s;
 }
 function walk(root,l){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];let n;while(n=w.nextNode())nodes.push(n);nodes.forEach(node=>{if(!node.nodeValue.trim())return;const p=node.parentElement;if(!p||['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))return;if(!original.has(node))original.set(node,node.nodeValue);node.nodeValue=tr(original.get(node),l)})}
@@ -3355,6 +3358,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 </body>
 </html>
+
 
 
 

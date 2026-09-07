@@ -1148,14 +1148,6 @@ body{
   </div>
 
 
-  <button
-    class="btn-continue"
-    id="continueBtn"
-    onclick="redirectDashboard()"
-  >
-    Continue to PAYME
-  </button>
-
 
 </div>
 
@@ -2023,12 +2015,6 @@ function triggerLoginAnimation() {
     );
 
 
-  const continueBtn =
-    document.getElementById(
-      'continueBtn'
-    );
-
-
   animBadge.style.display =
     'none';
 
@@ -2037,10 +2023,6 @@ function triggerLoginAnimation() {
 
 
   animSubtext.innerText = ({en:'Authenticating your session and taking you to your dashboard.',ru:'Проверяем вашу сессию и открываем панель управления.',es:'Estamos autenticando tu sesión y abriendo tu panel.',hi:'आपका सत्र सत्यापित करके डैशबोर्ड खोला जा रहा है।',ar:'جارٍ التحقق من جلستك وتحويلك إلى لوحة التحكم.'})[paymeSignupLanguage||'en'];
-
-
-  continueBtn.style.display =
-    'none';
 
 
   modal.classList.add(
@@ -2065,7 +2047,7 @@ function triggerLoginAnimation() {
         'translateY(0)';
 
     },
-    200
+    100
   );
 
 
@@ -2075,7 +2057,7 @@ function triggerLoginAnimation() {
       redirectDashboard();
 
     },
-    1500
+    700
   );
 
 }
@@ -2090,7 +2072,6 @@ function triggerOnboardingAnimation() {
   const ab=document.getElementById('animBadge'); if(ab)ab.textContent='💎 '+signupT('bonus').replace(/^🎁\s*/, '');
   const ah=document.getElementById('animHeading'); if(ah)ah.textContent=signupT('congrats');
   const as=document.getElementById('animSubtext'); if(as)as.textContent=signupT('welcomeText');
-  const cb=document.getElementById('continueBtn'); if(cb)cb.textContent=signupT('continue');
 
   const modal =
     document.getElementById(
@@ -2122,12 +2103,6 @@ function triggerOnboardingAnimation() {
     );
 
 
-  const continueBtn =
-    document.getElementById(
-      'continueBtn'
-    );
-
-
   /*
    * Reset animation
    */
@@ -2156,22 +2131,13 @@ function triggerOnboardingAnimation() {
     'translateY(10px)';
 
 
-  continueBtn.classList.remove(
-    'show'
-  );
-
-
-  continueBtn.style.display =
-    'block';
-
-
   modal.classList.add(
     'active'
   );
 
 
   /*
-   * Coins
+   * Coins — cascade compressed so the whole animation clears faster
    */
 
   setTimeout(
@@ -2180,10 +2146,10 @@ function triggerOnboardingAnimation() {
       document.getElementById(
         'coin1'
       ).style.animation =
-        'dropCoin 0.8s ease-in forwards';
+        'dropCoin 0.5s ease-in forwards';
 
     },
-    300
+    100
   );
 
 
@@ -2193,10 +2159,10 @@ function triggerOnboardingAnimation() {
       document.getElementById(
         'coin2'
       ).style.animation =
-        'dropCoin 0.8s ease-in 0.2s forwards';
+        'dropCoin 0.5s ease-in 0.1s forwards';
 
     },
-    500
+    200
   );
 
 
@@ -2206,10 +2172,10 @@ function triggerOnboardingAnimation() {
       document.getElementById(
         'coin3'
       ).style.animation =
-        'dropCoin 0.8s ease-in 0.4s forwards';
+        'dropCoin 0.5s ease-in 0.2s forwards';
 
     },
-    700
+    300
   );
 
 
@@ -2232,7 +2198,7 @@ function triggerOnboardingAnimation() {
         'translateY(0)';
 
     },
-    1400
+    650
   );
 
 
@@ -2258,18 +2224,14 @@ function triggerOnboardingAnimation() {
       animSubtext.style.transform =
         'translateY(0)';
 
-
-      continueBtn.classList.add(
-        'show'
-      );
-
     },
-    2000
+    1000
   );
 
 
   /*
-   * Automatic redirect
+   * Automatic redirect — no button to press; the dashboard now loads
+   * on its own as soon as the reveal has been visible for a moment.
    */
 
   setTimeout(
@@ -2278,7 +2240,7 @@ function triggerOnboardingAnimation() {
       redirectDashboard();
 
     },
-    5000
+    1900
   );
 
 }
@@ -2299,6 +2261,7 @@ function redirectDashboard() {
 
 </body>
 </html>
+
 
 
 

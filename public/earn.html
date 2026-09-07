@@ -1976,64 +1976,13 @@ document.addEventListener('DOMContentLoaded',function(){
     if(window.Telegram?.WebApp?.HapticFeedback){
       try{window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');}catch(_){}
     }
-    requestMiningAd();
+    // A completed 2-second hold starts mining directly now — no rewarded
+    // ad gate in front of it.
+    startMining();
     setTimeout(()=>{
       els.hold.classList.remove('holding','hold-success');
       setHoldProgress(0);
     },400);
-  }
-
-  // Gate: a completed 2-second hold no longer starts mining directly — it
-  // must first be confirmed by a server-verified rewarded-ad watch, the
-  // same pattern already used by the Luck Vault treasure chest (see
-  // /api/monetag/start + show_11688228 + /api/monetag/status there).
-  // Deliberately NOT falling back to starting mining if show_11688228 is
-  // missing/unavailable — that's what let mining start without an ad in
-  // environments where the SDK can't actually load (e.g. testing outside
-  // a real browser/Telegram client). If the ad can't be shown, mining
-  // simply doesn't start.
-  async function requestMiningAd(){
-    if(els.hold.disabled || miningStartInFlight) return;
-    els.hold.disabled=true;
-    try{
-      const start = await api('/api/monetag/start',{
-        method:'POST',
-        body:JSON.stringify({context:'mining_gate'})
-      });
-
-      if(typeof window.show_11688228 !== 'function'){
-        throw new Error('Rewarded ad is not available right now.');
-      }
-      await window.show_11688228({ ymid: start.sessionId, requestVar: 'mining_gate' });
-
-      // The ad SDK resolving only means the ad finished playing on the
-      // client — it is not proof the watch was genuine. Wait for our own
-      // server to confirm it actually received Monetag's postback before
-      // letting mining start, exactly like the treasure chest does.
-      let confirmed=false;
-      for(let i=0;i<12;i++){
-        await new Promise(r=>setTimeout(r, i<5?900:1500));
-        try{
-          const status = await api('/api/monetag/status?sessionId='+encodeURIComponent(start.sessionId)+'&startedAt='+encodeURIComponent(start.createdAt));
-          if(status.confirmed){ confirmed=true; break; }
-        }catch(_){ /* keep polling until the loop above gives up */ }
-      }
-
-      if(!confirmed){
-        showToast('Ad not confirmed','Please try again in a moment.');
-        els.hold.disabled=false;
-        return;
-      }
-
-      await startMining();
-    }catch(err){
-      els.hold.disabled=false;
-      if(err.code==='RATE_LIMITED' || err.payload?.nextAllowedAt){
-        showToast('Please wait',err.message||'Please wait before watching another ad.');
-      }else{
-        showToast('Ad required',err.message||'Hold the button again to start mining.');
-      }
-    }
   }
 
   function holdLoop(now){
@@ -2134,7 +2083,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <script>
 (function PAYMEEarnLanguage(){
   const I18N = {
-    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your invite link — every friend who joins puts more Gems in your wallet.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "💎15 per successful referral": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
+    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your invite link — every friend who joins puts more Gems in your wallet.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "💎15 per successful referral": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "Mining": "التعدين", "Active": "نشط", "Cycle": "الدورة", "Complete": "اكتملت", "Hold to": "اضغط مطولًا لـ", "Mine": "التعدين", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
     en: {
       "Back to Dashboard":"Back to Dashboard","PAYME REWARDS":"PAYME REWARDS",
       "Turn your activity":"Turn your activity","real rewards.":"real rewards.",
@@ -2157,7 +2106,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "LEVEL 1":"LEVEL 1","FREE MINER":"FREE MINER","remaining":"remaining","OFFLINE":"OFFLINE","ONLINE":"ONLINE","MINING":"MINING","READY":"READY",
       "MINING ENGINE":"MINING ENGINE","Ready to activate":"Ready to activate","ENGINE / ":"ENGINE / ",
       "Ticket Range":"Ticket Range","Tickets Earned":"Tickets Earned","Time / Status":"Time / Status","Ready":"Ready",
-      "HOLD TO":"HOLD TO","ACTIVATE":"ACTIVATE","🎫 Claim Tickets":"🎫 Claim Tickets","⚙ Upgrade Miner":"⚙ Upgrade Miner",
+      "HOLD TO":"HOLD TO","ACTIVATE":"ACTIVATE","Mining":"Mining","Active":"Active","Cycle":"Cycle","Complete":"Complete","Hold to":"Hold to","Mine":"Mine","🎫 Claim Tickets":"🎫 Claim Tickets","⚙ Upgrade Miner":"⚙ Upgrade Miner",
       "How it works":"How it works",
       "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.",
       "Upgrade Mining Rig":"Upgrade Mining Rig","Choose any higher level. Upgrades apply to your next cycle.":"Choose any higher level. Upgrades apply to your next cycle.",
@@ -2205,7 +2154,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "LEVEL 1":"УРОВЕНЬ 1","FREE MINER":"БЕСПЛАТНЫЙ МАЙНЕР","remaining":"осталось","OFFLINE":"ОФЛАЙН","ONLINE":"ОНЛАЙН","MINING":"ДОБЫЧА","READY":"ГОТОВО",
       "MINING ENGINE":"ДВИГАТЕЛЬ ДОБЫЧИ","Ready to activate":"Готов к активации","ENGINE / ":"ДВИГАТЕЛЬ / ",
       "Ticket Range":"Диапазон билетов","Tickets Earned":"Заработано билетов","Time / Status":"Время / Статус","Ready":"Готово",
-      "HOLD TO":"УДЕРЖИВАЙТЕ","ACTIVATE":"АКТИВАЦИЯ","🎫 Claim Tickets":"🎫 Забрать билеты","⚙ Upgrade Miner":"⚙ Улучшить майнер",
+      "HOLD TO":"УДЕРЖИВАЙТЕ","ACTIVATE":"АКТИВАЦИЯ","Mining":"Майнинг","Active":"Активен","Cycle":"Цикл","Complete":"Завершён","Hold to":"Держите, чтобы","Mine":"майнить","🎫 Claim Tickets":"🎫 Забрать билеты","⚙ Upgrade Miner":"⚙ Улучшить майнер",
       "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"Удерживайте 2 секунды, чтобы активировать ригу. Ваш 30-минутный цикл продолжается, даже если вы вышли из приложения.",
       "Upgrade Mining Rig":"Улучшить майнинг-ригу","Choose any higher level. Upgrades apply to your next cycle.":"Выберите любой более высокий уровень. Улучшение применится к следующему циклу.",
       "How Mining Works":"Как работает добыча","The simple version — no jargon.":"Простыми словами — без сложных терминов.",
@@ -2252,7 +2201,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "LEVEL 1":"NIVEL 1","FREE MINER":"MINERO GRATUITO","remaining":"restante","OFFLINE":"DESCONECTADO","ONLINE":"CONECTADO","MINING":"MINANDO","READY":"LISTO",
       "MINING ENGINE":"MOTOR DE MINERÍA","Ready to activate":"Listo para activar","ENGINE / ":"MOTOR / ",
       "Ticket Range":"Rango de tickets","Tickets Earned":"Tickets ganados","Time / Status":"Tiempo / Estado","Ready":"Listo",
-      "HOLD TO":"MANTÉN PARA","ACTIVATE":"ACTIVAR","🎫 Claim Tickets":"🎫 Reclamar tickets","⚙ Upgrade Miner":"⚙ Mejorar minero",
+      "HOLD TO":"MANTÉN PARA","ACTIVATE":"ACTIVAR","Mining":"Minería","Active":"Activa","Cycle":"Ciclo","Complete":"Completo","Hold to":"Mantén para","Mine":"minar","🎫 Claim Tickets":"🎫 Reclamar tickets","⚙ Upgrade Miner":"⚙ Mejorar minero",
       "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"Mantén presionado 2 segundos para activar tu equipo. Tu ciclo de 30 minutos sigue aunque no estés en la app.",
       "Upgrade Mining Rig":"Mejorar equipo de minería","Choose any higher level. Upgrades apply to your next cycle.":"Elige cualquier nivel superior. Las mejoras se aplican a tu próximo ciclo.",
       "How Mining Works":"Cómo funciona la minería","The simple version — no jargon.":"La versión simple — sin tecnicismos.",
@@ -2299,7 +2248,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "LEVEL 1":"लेवल 1","FREE MINER":"फ्री माइनर","remaining":"बाकी","OFFLINE":"ऑफ़लाइन","ONLINE":"ऑनलाइन","MINING":"माइनिंग हो रही है","READY":"तैयार",
       "MINING ENGINE":"माइनिंग इंजन","Ready to activate":"सक्रिय करने के लिए तैयार","ENGINE / ":"इंजन / ",
       "Ticket Range":"टिकट रेंज","Tickets Earned":"कमाए गए टिकट","Time / Status":"समय / स्थिति","Ready":"तैयार",
-      "HOLD TO":"दबाकर रखें","ACTIVATE":"सक्रिय करें","🎫 Claim Tickets":"🎫 टिकट क्लेम करें","⚙ Upgrade Miner":"⚙ माइनर अपग्रेड करें",
+      "HOLD TO":"दबाकर रखें","ACTIVATE":"सक्रिय करें","Mining":"माइनिंग","Active":"सक्रिय","Cycle":"चक्र","Complete":"पूरा","Hold to":"दबाकर रखें","Mine":"माइनिंग करें","🎫 Claim Tickets":"🎫 टिकट क्लेम करें","⚙ Upgrade Miner":"⚙ माइनर अपग्रेड करें",
       "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"अपनी रिग सक्रिय करने के लिए 2 सेकंड दबाकर रखें। आपके दूर रहने पर भी आपका 30-मिनट का चक्र जारी रहता है।",
       "Upgrade Mining Rig":"माइनिंग रिग अपग्रेड करें","Choose any higher level. Upgrades apply to your next cycle.":"कोई भी ऊँचा लेवल चुनें। अपग्रेड आपके अगले चक्र पर लागू होगा।",
       "How Mining Works":"माइनिंग कैसे काम करती है","The simple version — no jargon.":"आसान भाषा में — कोई मुश्किल शब्द नहीं।",
