@@ -3605,6 +3605,79 @@ function earnWebappKeyboard(label) {
 }
 
 // ======================================================
+// TELEGRAM BOT — PER-USER MESSAGE TRANSLATIONS
+// ======================================================
+// The signup page lets a user choose en/ru/es/hi and stores it on
+// daily_reward.language. Every proactive DM the bot sends on its own
+// initiative (mining-complete ping, inactivity reminder, etc.) should be
+// worded in that same language instead of always defaulting to English.
+// Admin-authored messages (the /broadcast command, the admin notification
+// channel) are intentionally NOT covered here — those are free text an
+// admin typed themselves and are sent verbatim to everyone.
+const PAYME_BOT_SUPPORTED_LANGUAGES = ['en', 'ru', 'es', 'hi'];
+
+function resolveBotLanguage(daily) {
+  const lang = daily && typeof daily === 'object' ? String(daily.language || '') : '';
+  return PAYME_BOT_SUPPORTED_LANGUAGES.includes(lang) ? lang : 'en';
+}
+
+const PAYME_BOT_MESSAGES = {
+
+  miningComplete: {
+    en: (min, max) =>
+      `⛏️ <b>Mining Complete!</b>\n\n` +
+      `Your Luck Ticket Mining Rig just finished a cycle — ${min}–${max} Luck Tickets🎟️ are ready to claim.\n\n` +
+      `Open PAYME to collect your reward and start the next cycle before it sits idle.`,
+    ru: (min, max) =>
+      `⛏️ <b>Майнинг завершён!</b>\n\n` +
+      `Ваша майнинг-установка только что завершила цикл — ${min}–${max} билетов удачи🎟️ готовы к получению.\n\n` +
+      `Откройте PAYME, чтобы забрать награду и запустить новый цикл, пока он не простаивает.`,
+    es: (min, max) =>
+      `⛏️ <b>¡Minería completada!</b>\n\n` +
+      `Tu equipo de minería de Boletos de la Suerte acaba de terminar un ciclo — ${min}–${max} Boletos de la Suerte🎟️ están listos para reclamar.\n\n` +
+      `Abre PAYME para recoger tu recompensa e iniciar el siguiente ciclo antes de que quede inactivo.`,
+    hi: (min, max) =>
+      `⛏️ <b>माइनिंग पूरी हुई!</b>\n\n` +
+      `आपकी माइनिंग रिग ने अभी एक चक्र पूरा किया है — ${min}–${max} Luck Tickets🎟️ लेने के लिए तैयार हैं।\n\n` +
+      `अपना इनाम पाने और अगला चक्र शुरू करने के लिए PAYME खोलें, इससे पहले कि यह बेकार पड़ा रहे।`
+  },
+
+  miningCompleteButton: {
+    en: '⛏️ Claim Now',
+    ru: '⛏️ Забрать сейчас',
+    es: '⛏️ Reclamar ahora',
+    hi: '⛏️ अभी लें'
+  },
+
+  inactivityReminder: {
+    en: () =>
+      `👋 <b>We miss you on PAYME!</b>\n\n` +
+      `It's been a day since you last logged in. Your Luck Tickets, mining rig, daily rewards, and referral earnings are all still waiting for you.\n\n` +
+      `Tap below to jump back in. 💎`,
+    ru: () =>
+      `👋 <b>Мы скучаем по вам на PAYME!</b>\n\n` +
+      `Прошли сутки с вашего последнего входа. Ваши билеты удачи, майнинг-установка, ежедневные награды и реферальный доход всё ещё ждут вас.\n\n` +
+      `Нажмите ниже, чтобы вернуться. 💎`,
+    es: () =>
+      `👋 <b>¡Te extrañamos en PAYME!</b>\n\n` +
+      `Ha pasado un día desde tu último inicio de sesión. Tus Boletos de la Suerte, tu equipo de minería, las recompensas diarias y las ganancias por referidos siguen esperándote.\n\n` +
+      `Toca abajo para volver. 💎`,
+    hi: () =>
+      `👋 <b>हमें PAYME पर आपकी कमी खल रही है!</b>\n\n` +
+      `आपको लॉग इन किए एक दिन हो गया है। आपके Luck Tickets, माइनिंग रिग, दैनिक इनाम और रेफ़रल कमाई अभी भी आपका इंतज़ार कर रहे हैं।\n\n` +
+      `वापस आने के लिए नीचे टैप करें। 💎`
+  },
+
+  inactivityReminderButton: {
+    en: '🚀 Open PAYME',
+    ru: '🚀 Открыть PAYME',
+    es: '🚀 Abrir PAYME',
+    hi: '🚀 PAYME खोलें'
+  }
+
+};
+
+// ======================================================
 // TELEGRAM BOT — /start WELCOME MESSAGE
 // ======================================================
 // This is a webhook (push), not a getUpdates poll loop — Telegram only
@@ -3748,13 +3821,12 @@ async function runMiningCompletionSweep() {
         if (mining.notifiedComplete) continue;
 
         const cfg = LUCK_MINING_CONFIG.levels[mining.level] || LUCK_MINING_CONFIG.levels[1];
+        const lang = resolveBotLanguage(daily);
 
         const sent = await sendTelegramUserMessage(
           telegramId,
-          `⛏️ <b>Mining Complete!</b>\n\n` +
-          `Your Luck Ticket Mining Rig just finished a cycle — ${cfg.min}–${cfg.max} Luck Tickets🎟️ are ready to claim.\n\n` +
-          `Open PAYME to collect your reward and start the next cycle before it sits idle.`,
-          { replyMarkup: earnWebappKeyboard('⛏️ Claim Now') }
+          PAYME_BOT_MESSAGES.miningComplete[lang](cfg.min, cfg.max),
+          { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.miningCompleteButton[lang]) }
         );
 
         if (!sent) continue;
@@ -3864,12 +3936,12 @@ async function runInactivityReminderSweep() {
           if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
           if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
 
+          const lang = resolveBotLanguage(daily);
+
           const sent = await sendTelegramUserMessage(
             telegramId,
-            `👋 <b>We miss you on PAYME!</b>\n\n` +
-            `It's been a day since you last logged in. Your Luck Tickets, mining rig, daily rewards, and referral earnings are all still waiting for you.\n\n` +
-            `Tap below to jump back in. 💎`,
-            { replyMarkup: earnWebappKeyboard('🚀 Open PAYME') }
+            PAYME_BOT_MESSAGES.inactivityReminder[lang](),
+            { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.inactivityReminderButton[lang]) }
           );
 
           if (!sent) continue;

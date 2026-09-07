@@ -10,6 +10,33 @@
      the Mining button, matching the same tag already used by the Luck
      Vault treasure chest. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
+<!-- Monetag in-app interstitial: first ad 5s after this page loads, then
+     up to 2 ads per 5-minute window with a 60s gap between them. Polls
+     briefly for show_11688228 since the SDK script above finishes
+     initializing asynchronously. -->
+<script>
+(function startInAppInterstitial(){
+  function tryStart(retries){
+    if (typeof window.show_11688228 === 'function') {
+      try{
+        window.show_11688228({
+          type: 'inApp',
+          inAppSettings: {
+            frequency: 2,
+            capping: 0.0833,
+            interval: 60,
+            timeout: 5,
+            everyPage: false
+          }
+        });
+      }catch(e){}
+      return;
+    }
+    if (retries > 0) setTimeout(function(){ tryStart(retries - 1); }, 200);
+  }
+  tryStart(50);
+})();
+</script>
 <script>
 /* This page already had CSS safe-area fallbacks (env()) but no actual
    Telegram WebApp integration — no expand(), no swipe-lock, and no
@@ -1093,6 +1120,41 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   }
 }
 
+/* =========================================================
+   LUCK TICKET MINING — SIZE & EMPHASIS BOOST
+   Makes this the most visually prominent section on the page:
+   larger, heavier type across the section label and rig card
+   so users immediately notice and understand it.
+========================================================= */
+.mining-section-label h2{font-size:1.22rem;font-weight:900;letter-spacing:-.01em}
+.mining-section-label span{font-size:.74rem;font-weight:800}
+.rig-kicker{font-size:.54rem;font-weight:900;letter-spacing:.14em}
+.rig-title-block h3{font-size:1.24rem;font-weight:900}
+.rig-title-block p{font-size:.66rem;font-weight:600}
+.rig-emblem{width:48px;height:48px}
+.rig-emblem span{font-size:1.5rem}
+.rig-level-pill b{font-size:.74rem}
+.rig-level-pill small{font-size:.5rem}
+.ring-percent{font-size:1.34rem}
+.ring-caption{font-size:.5rem;font-weight:700}
+.mining-status{font-size:.58rem;font-weight:900}
+.rig-section-heading b{font-size:.66rem}
+.rig-section-heading small{font-size:.53rem}
+.hash-line{font-size:.6rem}
+.mining-stat b{font-size:.78rem;font-weight:900}
+.mining-stat span{font-size:.45rem;font-weight:900}
+.mining-btn{font-size:.66rem}
+.hold-label{font-size:.49rem}
+.mining-how-btn{font-size:.56rem}
+.mining-foot{font-size:.52rem}
+
+@media(max-width:390px){
+  .mining-section-label h2{font-size:1.08rem}
+  .rig-title-block h3{font-size:1.08rem}
+  .mining-stat b{font-size:.7rem}
+  .mining-btn{font-size:.6rem}
+}
+
 </style>
 </head>
 <body>
@@ -1121,7 +1183,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   <!-- ======================================================
        LUCK TICKET MINING RIG — now the first thing on the page
   ======================================================= -->
-  <div class="section-label"><h2>Luck Ticket Mining</h2><span>30-minute mining cycle</span></div>
+  <div class="section-label mining-section-label"><h2>Luck Ticket Mining</h2><span>30-minute mining cycle</span></div>
 
   <section class="mining-rig-wrap" id="luckMining">
     <div class="mining-rig" id="miningRig">
@@ -2082,15 +2144,36 @@ document.addEventListener('DOMContentLoaded',function(){
       "Win up to 15,000":"Win up to 15,000",
       "Invite & Earn":"Invite & Earn","Share your invite link — every friend who joins puts more Gems in your wallet.":"Share your invite link — every friend who joins puts more Gems in your wallet.",
       "💎15 per successful referral":"💎15 per successful referral",
-      
-      
-      
-      
-      
-      
-      
-      
-      
+
+      "Luck Ticket Mining":"Luck Ticket Mining","30-minute mining cycle":"30-minute mining cycle",
+      "LUCK REWARDS":"LUCK REWARDS","Ticket Miner":"Ticket Miner","Activate once. Let your rig do the work.":"Activate once. Let your rig do the work.",
+      "LEVEL 1":"LEVEL 1","FREE MINER":"FREE MINER","remaining":"remaining","OFFLINE":"OFFLINE","ONLINE":"ONLINE","MINING":"MINING","READY":"READY",
+      "MINING ENGINE":"MINING ENGINE","Ready to activate":"Ready to activate","ENGINE / ":"ENGINE / ",
+      "Ticket Range":"Ticket Range","Tickets Earned":"Tickets Earned","Time / Status":"Time / Status","Ready":"Ready",
+      "HOLD TO":"HOLD TO","ACTIVATE":"ACTIVATE","🎫 Claim Tickets":"🎫 Claim Tickets","⚙ Upgrade Miner":"⚙ Upgrade Miner",
+      "How it works":"How it works",
+      "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.",
+      "Upgrade Mining Rig":"Upgrade Mining Rig","Choose any higher level. Upgrades apply to your next cycle.":"Choose any higher level. Upgrades apply to your next cycle.",
+      "How Mining Works":"How Mining Works","The simple version — no jargon.":"The simple version — no jargon.",
+      "Hold the lightning button":"Hold the lightning button",
+      "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.",
+      "Let it run for 30 minutes":"Let it run for 30 minutes",
+      "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.":"The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.",
+      "Claim your Luck Tickets":"Claim your Luck Tickets",
+      "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.",
+      "Upgrade for bigger rewards":"Upgrade for bigger rewards",
+      "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.",
+      "Got it":"Got it","Tickets Claimed!":"Tickets Claimed!","Luck Tickets":"Luck Tickets",
+      "Added straight to your balance. Start a new cycle any time.":"Added straight to your balance. Start a new cycle any time.",
+      "⛏️ Upgrade to get higher Luck Tickets":"⛏️ Upgrade to get higher Luck Tickets","Nice, continue":"Nice, continue",
+      "CURRENT LEVEL":"CURRENT LEVEL","UPGRADE TO LEVEL":"UPGRADE TO LEVEL","LOCKED — REACH LEVEL":"LOCKED — REACH LEVEL",
+      "FIRST":"FIRST","LOCKED":"LOCKED","LEVEL":"LEVEL","— FREE":"— FREE","Next up":"Next up","FREE":"FREE",
+      "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"Expected reward per cycle:",
+      "A free rig for casual, everyday mining.":"A free rig for casual, everyday mining.",
+      "A faster rig with a higher reward floor.":"A faster rig with a higher reward floor.",
+      "Fine-tuned payouts, including half tickets.":"Fine-tuned payouts, including half tickets.",
+      "A serious upgrade for regular miners.":"A serious upgrade for regular miners.",
+      "The top-tier rig — the biggest payouts.":"The top-tier rig — the biggest payouts."
     },
     ru: {
       "Back to Dashboard":"Назад на панель","PAYME REWARDS":"НАГРАДЫ PAYME",
@@ -2107,7 +2190,36 @@ document.addEventListener('DOMContentLoaded',function(){
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Выберите 3 числа и поставьте билеты удачи на деньги или бесплатные вращения.",
       "Win up to 15,000":"Выигрыш до 15 000","Soon":"Скоро","Get your reward instantly, straight to your PAYME account.":"Получите награду мгновенно прямо на аккаунт PAYME.",
       "Invite & Earn":"Приглашай и зарабатывай","Share your invite link — every friend who joins puts more Gems in your wallet.":"Поделитесь ссылкой — за каждого друга вы получаете больше гемов.",
-      "💎15 per successful referral":"💎15 за каждого приглашённого"
+      "💎15 per successful referral":"💎15 за каждого приглашённого",
+
+      "Luck Ticket Mining":"Добыча билетов удачи","30-minute mining cycle":"30-минутный цикл добычи",
+      "LUCK REWARDS":"НАГРАДЫ УДАЧИ","Ticket Miner":"Майнер билетов","Activate once. Let your rig do the work.":"Активируйте один раз — рига сделает всё сама.",
+      "LEVEL 1":"УРОВЕНЬ 1","FREE MINER":"БЕСПЛАТНЫЙ МАЙНЕР","remaining":"осталось","OFFLINE":"ОФЛАЙН","ONLINE":"ОНЛАЙН","MINING":"ДОБЫЧА","READY":"ГОТОВО",
+      "MINING ENGINE":"ДВИГАТЕЛЬ ДОБЫЧИ","Ready to activate":"Готов к активации","ENGINE / ":"ДВИГАТЕЛЬ / ",
+      "Ticket Range":"Диапазон билетов","Tickets Earned":"Заработано билетов","Time / Status":"Время / Статус","Ready":"Готово",
+      "HOLD TO":"УДЕРЖИВАЙТЕ","ACTIVATE":"АКТИВАЦИЯ","🎫 Claim Tickets":"🎫 Забрать билеты","⚙ Upgrade Miner":"⚙ Улучшить майнер",
+      "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"Удерживайте 2 секунды, чтобы активировать ригу. Ваш 30-минутный цикл продолжается, даже если вы вышли из приложения.",
+      "Upgrade Mining Rig":"Улучшить майнинг-ригу","Choose any higher level. Upgrades apply to your next cycle.":"Выберите любой более высокий уровень. Улучшение применится к следующему циклу.",
+      "How Mining Works":"Как работает добыча","The simple version — no jargon.":"Простыми словами — без сложных терминов.",
+      "Hold the lightning button":"Удержите кнопку молнии",
+      "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"Нажмите и удерживайте кнопку ⚡ 2 секунды. Всё — рига включается и начинает цикл добычи.",
+      "Let it run for 30 minutes":"Дайте ей поработать 30 минут",
+      "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.":"Кольцо вокруг риги заполняется со временем. Можно закрыть приложение или заблокировать телефон — цикл продолжится в фоне и возобновится с того же места, когда вы вернётесь.",
+      "Claim your Luck Tickets":"Заберите билеты удачи",
+      "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"Когда кольцо достигнет 100%, нажмите «Забрать билеты», чтобы получить награду. Затем сразу можно начать новый цикл.",
+      "Upgrade for bigger rewards":"Улучшайте ради больших наград",
+      "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"Трата Gems💎 на улучшение риги повышает диапазон билетов удачи за цикл — чем выше уровень, тем больше потенциальная награда.",
+      "Got it":"Понятно","Tickets Claimed!":"Билеты получены!","Luck Tickets":"Билеты удачи",
+      "Added straight to your balance. Start a new cycle any time.":"Добавлено прямо на ваш баланс. Новый цикл можно начать в любой момент.",
+      "⛏️ Upgrade to get higher Luck Tickets":"⛏️ Улучшите, чтобы получать больше билетов удачи","Nice, continue":"Отлично, продолжить",
+      "CURRENT LEVEL":"ТЕКУЩИЙ УРОВЕНЬ","UPGRADE TO LEVEL":"УЛУЧШИТЬ ДО УРОВНЯ","LOCKED — REACH LEVEL":"ЗАБЛОКИРОВАНО — ДОСТИГНИТЕ УРОВНЯ",
+      "FIRST":"СНАЧАЛА","LOCKED":"ЗАБЛОКИРОВАНО","LEVEL":"УРОВЕНЬ","— FREE":"— БЕСПЛАТНО","Next up":"Следующий","FREE":"БЕСПЛАТНО",
+      "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"Ожидаемая награда за цикл:",
+      "A free rig for casual, everyday mining.":"Бесплатная рига для повседневной добычи.",
+      "A faster rig with a higher reward floor.":"Более быстрая рига с более высокой минимальной наградой.",
+      "Fine-tuned payouts, including half tickets.":"Точная настройка выплат, включая половинные билеты.",
+      "A serious upgrade for regular miners.":"Серьёзное улучшение для постоянных майнеров.",
+      "The top-tier rig — the biggest payouts.":"Рига высшего уровня — самые большие выплаты."
     },
     es: {
       "Back to Dashboard":"Volver al panel","PAYME REWARDS":"RECOMPENSAS PAYME",
@@ -2124,7 +2236,36 @@ document.addEventListener('DOMContentLoaded',function(){
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Elige 3 números y apuesta tus Tickets de Suerte por efectivo o giros gratis.",
       "Win up to 15,000":"Gana hasta 15.000","Soon":"Próximamente","Get your reward instantly, straight to your PAYME account.":"Recibe tu recompensa al instante directamente en tu cuenta PAYME.",
       "Invite & Earn":"Invita y gana","Share your invite link — every friend who joins puts more Gems in your wallet.":"Comparte tu enlace — por cada amigo que se una ganas más Gemas.",
-      "💎15 per successful referral":"💎15 por cada referido exitoso"
+      "💎15 per successful referral":"💎15 por cada referido exitoso",
+
+      "Luck Ticket Mining":"Minería de Tickets de Suerte","30-minute mining cycle":"Ciclo de minería de 30 minutos",
+      "LUCK REWARDS":"RECOMPENSAS DE SUERTE","Ticket Miner":"Minero de Tickets","Activate once. Let your rig do the work.":"Actívala una vez. Deja que tu equipo haga el trabajo.",
+      "LEVEL 1":"NIVEL 1","FREE MINER":"MINERO GRATUITO","remaining":"restante","OFFLINE":"DESCONECTADO","ONLINE":"CONECTADO","MINING":"MINANDO","READY":"LISTO",
+      "MINING ENGINE":"MOTOR DE MINERÍA","Ready to activate":"Listo para activar","ENGINE / ":"MOTOR / ",
+      "Ticket Range":"Rango de tickets","Tickets Earned":"Tickets ganados","Time / Status":"Tiempo / Estado","Ready":"Listo",
+      "HOLD TO":"MANTÉN PARA","ACTIVATE":"ACTIVAR","🎫 Claim Tickets":"🎫 Reclamar tickets","⚙ Upgrade Miner":"⚙ Mejorar minero",
+      "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"Mantén presionado 2 segundos para activar tu equipo. Tu ciclo de 30 minutos sigue aunque no estés en la app.",
+      "Upgrade Mining Rig":"Mejorar equipo de minería","Choose any higher level. Upgrades apply to your next cycle.":"Elige cualquier nivel superior. Las mejoras se aplican a tu próximo ciclo.",
+      "How Mining Works":"Cómo funciona la minería","The simple version — no jargon.":"La versión simple — sin tecnicismos.",
+      "Hold the lightning button":"Mantén presionado el botón del rayo",
+      "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"Presiona y mantén el botón ⚡ durante 2 segundos. Listo — tu equipo se enciende e inicia un ciclo de minería.",
+      "Let it run for 30 minutes":"Déjalo funcionar 30 minutos",
+      "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.":"El anillo alrededor del equipo se llena con el tiempo. Puedes cerrar la app o bloquear el teléfono — el ciclo sigue en segundo plano y continúa donde lo dejaste al volver.",
+      "Claim your Luck Tickets":"Reclama tus Tickets de Suerte",
+      "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"Cuando el anillo llegue al 100%, pulsa «Reclamar tickets» para cobrar tu recompensa. Luego puedes iniciar un ciclo nuevo de inmediato.",
+      "Upgrade for bigger rewards":"Mejora para obtener mayores recompensas",
+      "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"Gastar Gems💎 para mejorar tu equipo aumenta el rango de Tickets de Suerte que puedes ganar por ciclo — a mayor nivel, mayor el pago potencial.",
+      "Got it":"Entendido","Tickets Claimed!":"¡Tickets reclamados!","Luck Tickets":"Tickets de Suerte",
+      "Added straight to your balance. Start a new cycle any time.":"Añadido directamente a tu saldo. Inicia un nuevo ciclo cuando quieras.",
+      "⛏️ Upgrade to get higher Luck Tickets":"⛏️ Mejora para conseguir más Tickets de Suerte","Nice, continue":"Genial, continuar",
+      "CURRENT LEVEL":"NIVEL ACTUAL","UPGRADE TO LEVEL":"MEJORAR AL NIVEL","LOCKED — REACH LEVEL":"BLOQUEADO — ALCANZA EL NIVEL",
+      "FIRST":"PRIMERO","LOCKED":"BLOQUEADO","LEVEL":"NIVEL","— FREE":"— GRATIS","Next up":"Siguiente","FREE":"GRATIS",
+      "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"Recompensa esperada por ciclo:",
+      "A free rig for casual, everyday mining.":"Un equipo gratuito para minería casual del día a día.",
+      "A faster rig with a higher reward floor.":"Un equipo más rápido con un mínimo de recompensa más alto.",
+      "Fine-tuned payouts, including half tickets.":"Pagos ajustados con precisión, incluyendo medios tickets.",
+      "A serious upgrade for regular miners.":"Una mejora seria para mineros habituales.",
+      "The top-tier rig — the biggest payouts.":"El equipo de gama alta — los mayores pagos."
     },
     hi: {
       "Back to Dashboard":"डैशबोर्ड पर वापस जाएँ","PAYME REWARDS":"PAYME रिवॉर्ड्स",
@@ -2141,7 +2282,36 @@ document.addEventListener('DOMContentLoaded',function(){
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"3 नंबर चुनें और नकद या फ्री स्पिन के लिए अपने लक टिकट दाँव पर लगाएँ।",
       "Win up to 15,000":"15,000 तक जीतें","Soon":"जल्द","Get your reward instantly, straight to your PAYME account.":"अपना रिवॉर्ड तुरंत अपने PAYME अकाउंट में पाएँ।",
       "Invite & Earn":"आमंत्रित करें और कमाएँ","Share your invite link — every friend who joins puts more Gems in your wallet.":"अपनी लिंक साझा करें — हर दोस्त के जुड़ने पर आपके वॉलेट में ज़्यादा जेम्स आएँगे।",
-      "💎15 per successful referral":"हर सफल रेफरल पर 💎15"
+      "💎15 per successful referral":"हर सफल रेफरल पर 💎15",
+
+      "Luck Ticket Mining":"लक टिकट माइनिंग","30-minute mining cycle":"30 मिनट का माइनिंग चक्र",
+      "LUCK REWARDS":"लक रिवॉर्ड्स","Ticket Miner":"टिकट माइनर","Activate once. Let your rig do the work.":"एक बार सक्रिय करें। आपकी रिग बाकी काम करेगी।",
+      "LEVEL 1":"लेवल 1","FREE MINER":"फ्री माइनर","remaining":"बाकी","OFFLINE":"ऑफ़लाइन","ONLINE":"ऑनलाइन","MINING":"माइनिंग हो रही है","READY":"तैयार",
+      "MINING ENGINE":"माइनिंग इंजन","Ready to activate":"सक्रिय करने के लिए तैयार","ENGINE / ":"इंजन / ",
+      "Ticket Range":"टिकट रेंज","Tickets Earned":"कमाए गए टिकट","Time / Status":"समय / स्थिति","Ready":"तैयार",
+      "HOLD TO":"दबाकर रखें","ACTIVATE":"सक्रिय करें","🎫 Claim Tickets":"🎫 टिकट क्लेम करें","⚙ Upgrade Miner":"⚙ माइनर अपग्रेड करें",
+      "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.":"अपनी रिग सक्रिय करने के लिए 2 सेकंड दबाकर रखें। आपके दूर रहने पर भी आपका 30-मिनट का चक्र जारी रहता है।",
+      "Upgrade Mining Rig":"माइनिंग रिग अपग्रेड करें","Choose any higher level. Upgrades apply to your next cycle.":"कोई भी ऊँचा लेवल चुनें। अपग्रेड आपके अगले चक्र पर लागू होगा।",
+      "How Mining Works":"माइनिंग कैसे काम करती है","The simple version — no jargon.":"आसान भाषा में — कोई मुश्किल शब्द नहीं।",
+      "Hold the lightning button":"बिजली वाला बटन दबाकर रखें",
+      "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"⚡ बटन को 2 सेकंड तक दबाकर रखें। बस — आपकी रिग चालू हो जाएगी और माइनिंग चक्र शुरू हो जाएगा।",
+      "Let it run for 30 minutes":"इसे 30 मिनट तक चलने दें",
+      "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.":"समय के साथ रिग के चारों ओर की रिंग भरती जाती है। आप ऐप बंद कर सकते हैं या फोन लॉक कर सकते हैं — चक्र बैकग्राउंड में चलता रहता है और वापस आने पर वहीं से जारी हो जाता है।",
+      "Claim your Luck Tickets":"अपने लक टिकट क्लेम करें",
+      "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"जब रिंग 100% पूरी हो जाए, तो अपना रिवॉर्ड पाने के लिए \"टिकट क्लेम करें\" दबाएँ। फिर आप तुरंत एक नया चक्र शुरू कर सकते हैं।",
+      "Upgrade for bigger rewards":"बड़े रिवॉर्ड्स के लिए अपग्रेड करें",
+      "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"अपनी रिग अपग्रेड करने के लिए Gems💎 खर्च करने से हर चक्र में मिलने वाले लक टिकट की रेंज बढ़ जाती है — लेवल जितना ऊँचा, संभावित इनाम उतना बड़ा।",
+      "Got it":"समझ गया","Tickets Claimed!":"टिकट क्लेम हो गए!","Luck Tickets":"लक टिकट",
+      "Added straight to your balance. Start a new cycle any time.":"सीधे आपके बैलेंस में जोड़ दिया गया। कभी भी नया चक्र शुरू करें।",
+      "⛏️ Upgrade to get higher Luck Tickets":"⛏️ ज़्यादा लक टिकट पाने के लिए अपग्रेड करें","Nice, continue":"बढ़िया, जारी रखें",
+      "CURRENT LEVEL":"मौजूदा लेवल","UPGRADE TO LEVEL":"इस लेवल तक अपग्रेड करें","LOCKED — REACH LEVEL":"लॉक — पहले लेवल तक पहुँचें",
+      "FIRST":"पहले","LOCKED":"लॉक","LEVEL":"लेवल","— FREE":"— फ्री","Next up":"अगला","FREE":"फ्री",
+      "GEMS💎":"GEMS💎","Gems💎":"Gems💎","Expected reward per cycle:":"हर चक्र में अनुमानित इनाम:",
+      "A free rig for casual, everyday mining.":"रोज़मर्रा की आम माइनिंग के लिए एक फ्री रिग।",
+      "A faster rig with a higher reward floor.":"ज़्यादा न्यूनतम इनाम वाली तेज़ रिग।",
+      "Fine-tuned payouts, including half tickets.":"बेहतर तरीके से तय किए गए इनाम, आधे टिकट सहित।",
+      "A serious upgrade for regular miners.":"नियमित माइनर्स के लिए एक बड़ा अपग्रेड।",
+      "The top-tier rig — the biggest payouts.":"सबसे ऊँचे स्तर की रिग — सबसे बड़े इनाम।"
     }
   };
 
@@ -2159,10 +2329,30 @@ document.addEventListener('DOMContentLoaded',function(){
       const raw = original.has(n) ? original.get(n) : n.nodeValue;
       if(!original.has(n)) original.set(n, raw);
       const key = raw.trim();
-      if(dict[key] && key){
+      let translated = dict[key];
+      // Mining rig strings that embed a live number (time remaining, rig
+      // level, upgrade cost) can't be matched as a whole phrase — handle
+      // those dynamic shapes with targeted patterns instead.
+      if(!translated && key){
+        let m;
+        if(m = key.match(/^([\d:]+)\s+remaining$/)){
+          translated = m[1] + ' ' + (dict['remaining'] || 'remaining');
+        } else if(m = key.match(/^LEVEL\s+(\d+)(\s+—\s+FREE)?$/)){
+          translated = (dict['LEVEL'] || 'LEVEL') + ' ' + m[1] + (m[2] ? ' ' + (dict['— FREE'] || '— FREE') : '');
+        } else if(m = key.match(/^UPGRADE TO LEVEL\s+(\d+)$/)){
+          translated = (dict['UPGRADE TO LEVEL'] || 'UPGRADE TO LEVEL') + ' ' + m[1];
+        } else if(m = key.match(/^LOCKED\s+—\s+REACH LEVEL\s+(\d+)\s+FIRST$/)){
+          translated = (dict['LOCKED — REACH LEVEL'] || 'LOCKED — REACH LEVEL') + ' ' + m[1] + ' ' + (dict['FIRST'] || 'FIRST');
+        } else if(m = key.match(/^([\d,.]+)\s+GEMS💎$/)){
+          translated = m[1] + ' ' + (dict['GEMS💎'] || 'GEMS💎');
+        } else if(m = key.match(/^([\d,.]+)\s+Gems💎$/)){
+          translated = m[1] + ' ' + (dict['Gems💎'] || 'Gems💎');
+        }
+      }
+      if(translated && key){
         const leading = raw.match(/^\s*/)?.[0] || "";
         const trailing = raw.match(/\s*$/)?.[0] || "";
-        n.nodeValue = leading + dict[key] + trailing;
+        n.nodeValue = leading + translated + trailing;
       } else if(l === "en" && original.has(n)) {
         n.nodeValue = raw;
       }
@@ -2192,6 +2382,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </body>
 </html>
+
 
 
 
