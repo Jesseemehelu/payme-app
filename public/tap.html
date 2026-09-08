@@ -978,6 +978,217 @@
 }
 
 </style>
+
+<style id="payme-low-end-performance">
+/* =========================================================
+   PAYME LOW-END PERFORMANCE MODE
+   Keeps the original color palette and game logic.
+   Removes continuous/decorative GPU-heavy effects.
+   Functional coin/chest interactions remain available.
+   ========================================================= */
+
+/* Fast native fonts: no external font dependency */
+html,body,button,input,textarea,select{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif !important;
+}
+
+/* Stop smooth scrolling / decorative motion */
+html{scroll-behavior:auto !important}
+
+/* Remove the two large blurred moving background orbs */
+.app:before,.app:after{
+  display:none !important;
+  animation:none !important;
+  filter:none !important;
+}
+
+/* Keep the same general dark background, but remove expensive multi-radial painting */
+body{
+  background:var(--bg) !important;
+}
+
+/* Remove continuous decorative animations */
+.bump,
+.flip-glow,
+.coin-shadow,
+.swap-glow,
+.swap-arrow,
+.vault-glow,
+.chest-aura,
+.chest-spark,
+.chest-shadow,
+.chest-light,
+.chest-particle,
+.treasure-chest.ready,
+.flip-card h2,
+.flip-go:after,
+.swap-open-btn:after,
+.vault-watch:after,
+.milestone-bar-fill:after,
+.milestone-claim.ready,
+.busy i{
+  animation:none !important;
+}
+
+/* Decorative blur/drop-shadow filters are costly on low-end GPUs */
+.flip-glow,
+.coin-shadow,
+.coin3d,
+.swap-token.from,
+.swap-token.to,
+.vault-glow,
+.chest-aura,
+.treasure-chest,
+.chest-shadow,
+.chest-light,
+.modal-icon,
+.fly-ticket{
+  filter:none !important;
+}
+
+/* Remove decorative text glow */
+.chest-spark,
+.chest-particle,
+.fly-ticket.amount,
+.vault-note strong,
+.coin-face span{
+  text-shadow:none !important;
+}
+
+/* Remove unnecessary 3D scene depth outside the actual coin/chest interaction */
+.flip-card,
+.coin-stage,
+.chest-scene,
+.chest-base,
+.chest-lid-wrap,
+.chest-lid{
+  perspective:none !important;
+}
+
+/* Keep 3D coin/chest transforms functional, but reduce compositor overhead */
+.coin3d{
+  will-change:auto !important;
+}
+.treasure-chest{
+  will-change:auto !important;
+}
+
+/* Replace oversized shadows with small, cheap shadows */
+.flip-card,
+.swap-card,
+.vault-card,
+.modal-card,
+.coin3d,
+.treasure-chest,
+.flip-go,
+.swap-open-btn,
+.vault-watch,
+.close,
+.tickets-pill,
+.vault-tickets,
+.swap-rate-badge,
+.info-card,
+.milestone-card{
+  box-shadow:0 6px 18px rgba(0,0,0,.20) !important;
+}
+
+/* Remove extra pseudo-element glow layers while preserving structure */
+.flip-glow,
+.swap-glow,
+.vault-glow{
+  display:none !important;
+}
+.flip-card:after,
+.swap-card:after,
+.vault-card:after{
+  display:none !important;
+}
+
+/* Remove decorative coin/chest glow shadows */
+.coin3d:before,
+.coin3d:after,
+.coin-face,
+.coin-face:before,
+.coin-face:after,
+.chest-front,
+.chest-front:after,
+.chest-side,
+.chest-top-edge,
+.metal-band,
+.lock-plate,
+.lid-top,
+.lid-front,
+.lid-band,
+.lid-rim{
+  box-shadow:none !important;
+}
+
+/* Remove unnecessary backdrop blur if any modal/device supports it */
+.modal{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Modal entrance is decorative; keep modal visibility itself instant */
+.modal.open .modal-card:not(.bouncy){
+  animation:none !important;
+  opacity:1 !important;
+  transform:none !important;
+}
+
+/* Result popup decorative entrance/ring effects */
+.modal.coin-result .modal-icon,
+.modal.coin-result .modal-icon:after,
+.modal.coin-result h2,
+.modal.coin-result .modal-reward{
+  animation:none !important;
+}
+
+/* Keep disabled/active state visuals but remove animated transitions */
+.side-btn,
+.howto-btn,
+.toggle-thumb,
+.toggle-opt,
+.dot,
+.dot-line:after,
+.milestone-card,
+.milestone-bar-fill,
+.milestone-go,
+.milestone-claim,
+.vault-watch,
+.close,
+.toast{
+  transition:none !important;
+}
+
+/* Remove perspective/3D rendering from purely decorative containers */
+.app{
+  perspective:none !important;
+}
+.modal-card{
+  transform-style:flat !important;
+}
+
+/* Avoid unnecessary compositor promotion */
+*{
+  will-change:auto !important;
+}
+
+/* Reduce touch rendering overhead */
+button,a{
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Do not create extra paint layers for hidden decorative elements */
+.flip-glow,
+.swap-glow,
+.vault-glow,
+.app:before,
+.app:after{
+  content:none !important;
+}
+</style>
+
 </head>
 <body>
 <main class="app">
@@ -2055,6 +2266,7 @@ loadVault();
 
 </body>
 </html>
+
 
 
 

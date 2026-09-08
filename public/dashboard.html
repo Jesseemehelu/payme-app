@@ -106,8 +106,6 @@ user-scalable=no, viewport-fit=cover">
 })();
 </script>
 <title>PAYME Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
 href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -142,7 +140,7 @@ padding:0;
 }
 html{ scroll-behavior:smooth; }
 body{
-font-family:'Plus Jakarta Sans', sans-serif;
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
 background:
 radial-gradient(circle at 10% 0%,rgba(37,99,235,.07), transparent 30%),
 
@@ -2756,6 +2754,70 @@ transition-duration: 0.01ms !important;
 }
 </style>
 
+
+<style id="payme-low-end-performance">
+/* ============================================================
+   PAYME LOW-END PERFORMANCE MODE
+   Keeps the existing color palette and layout, but removes
+   expensive continuous GPU/CPU effects. Functional JS is untouched.
+   ============================================================ */
+* , *::before, *::after{
+  animation:none !important;
+  transition:none !important;
+}
+html{
+  scroll-behavior:auto !important;
+}
+/* Disable expensive blur/compositing effects. */
+*, *::before, *::after{
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+/* Disable CSS filters used mainly for glow/blur decoration. */
+
+.balance-card::after,
+.balance-shine,
+.luck-ticket-chip-ring,
+.luck-ticket-chip-shine,
+.luck-ticket-mine-btn .mine-btn-shine{
+  display:none !important;
+}
+
+/* Remove 3D scene setup; normal 2D compositing is much cheaper. */
+*, *::before, *::after{
+  transform-style:flat !important;
+  perspective:none !important;
+}
+/* Keep static shadows, but remove glow filters from SVG/text. */
+svg, img{
+  filter:none !important;
+}
+* , *::before, *::after{
+  text-shadow:none !important;
+}
+/* Reduce oversized decorative shadows that cause extra paint work. */
+.balance-card, .arcade-panel, .mining-rig, .earn-card-item, .game-item,
+.modal-card, .alert-card, .page-loader, .loader-dots{
+  box-shadow:0 6px 18px rgba(0,0,0,.16) !important;
+}
+/* Prevent hidden decorative pseudo-elements from creating paint layers. */
+.mining-rig::before, .mining-rig::after,
+.balance-card::before, .coming-card::before{
+  display:none !important;
+}
+/* Avoid GPU promotion on buttons/cards. */
+.bevel-3d, .game-item, .earn-card-item, .action-btn, .support-btn,
+.balance-icon-btn, .spin-chip{
+  will-change:auto !important;
+}
+/* Keep touch interaction responsive without animation overhead. */
+button, a{
+  -webkit-tap-highlight-color:transparent;
+}
+@media (prefers-reduced-motion:reduce){
+  *, *::before, *::after{animation:none !important;transition:none !important;}
+}
+</style>
 </head>
 <body>
 <!-- HEADER -->
@@ -5595,6 +5657,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
 </body>
 </html>
+
 
 
 
