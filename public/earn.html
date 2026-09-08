@@ -190,7 +190,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 /* =========================================================
    SECTION LABELS
 ========================================================= */
-.section-label{display:flex;align-items:center;justify-content:space-between;margin:28px 2px 10px}
+.section-label{display:flex;align-items:center;justify-content:space-between;margin:14px 2px 10px}
 .earn-container>.section-label:first-of-type{margin-top:6px}
 .section-label h2{font-family:'Sora',sans-serif;font-size:.98rem;letter-spacing:-.02em;color:#fff;font-weight:800}
 .section-label span{font-size:.66rem;color:var(--muted);font-weight:700}
@@ -203,14 +203,17 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   overflow:hidden;
   border-radius:28px;
   padding:18px;
-  background:linear-gradient(150deg,#241143 0%,#0e1a3d 55%,#04222e 100%);
-  border:1px solid rgba(139,92,246,.4);
-  box-shadow:0 6px 0 #150a2c,0 24px 52px rgba(60,20,110,.38),inset 0 1px 0 rgba(255,255,255,.1);
+  background:
+    radial-gradient(circle at 88% 12%,rgba(34,224,255,.14),transparent 25%),
+    radial-gradient(circle at 8% 82%,rgba(139,92,246,.16),transparent 28%),
+    linear-gradient(150deg,#111936 0%,#080e20 48%,#050a15 100%);
+  border:1px solid rgba(126,232,255,.22);
+  box-shadow:0 8px 0 #030611,0 24px 50px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.12);
 }
-.arcade-panel:before{content:"";position:absolute;width:200px;height:200px;right:-80px;top:-90px;border-radius:50%;background:var(--purple);opacity:.3;filter:blur(40px)}
+.arcade-panel:before{content:"";position:absolute;width:200px;height:200px;right:-80px;top:-90px;border-radius:50%;background:var(--cyan);opacity:.16;filter:blur(40px)}
 .arcade-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .arcade-head-left{display:flex;align-items:center;gap:12px}
-.arcade-icon{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:1.45rem;background:linear-gradient(155deg,#ffd35e,var(--gold-dk));box-shadow:0 5px 0 #8a5a00,0 12px 22px rgba(255,211,94,.32),inset 0 2px 0 rgba(255,255,255,.5);animation:floaty 4s ease-in-out infinite;transform-style:preserve-3d}
+.arcade-icon{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:1.45rem;background:linear-gradient(155deg,#8af3ff,#247a9b 55%,#11465e);box-shadow:0 5px 0 #063748,0 12px 22px rgba(34,224,255,.28),inset 0 2px 0 rgba(255,255,255,.5);animation:floaty 4s ease-in-out infinite;transform-style:preserve-3d}
 .arcade-head h3{font-family:'Sora',sans-serif;font-size:1.08rem;font-weight:700;letter-spacing:-.02em}
 .arcade-head p{font-size:.72rem;color:var(--muted);margin-top:2px}
 .arcade-max-badge{position:relative;z-index:1;text-align:right;flex:none;padding:8px 12px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
@@ -1160,6 +1163,259 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   .mining-btn{font-size:.6rem}
 }
 
+
+/* =========================================================
+   LUCK TICKET MINING — CONTROL CENTER REDESIGN
+   A completely new visual layer. Existing IDs/classes used by
+   the mining engine are intentionally preserved.
+========================================================= */
+.mining-rig-wrap{margin-top:7px}
+.rig-connector{display:flex;flex-direction:column;align-items:center;height:16px;position:relative;z-index:1}
+.rig-connector-line{width:2px;flex:1;background:linear-gradient(180deg,rgba(126,232,255,.55),rgba(126,232,255,.1))}
+.rig-connector-node{width:7px;height:7px;margin-top:-1px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 10px #22e0ff;flex:none}
+.mining-command-center{
+  position:relative;
+  overflow:hidden;
+  padding:13px;
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 88% 12%,rgba(34,224,255,.16),transparent 25%),
+    radial-gradient(circle at 8% 78%,rgba(139,92,246,.16),transparent 28%),
+    linear-gradient(150deg,#111936 0%,#080e20 48%,#050a15 100%);
+  border:1px solid rgba(126,232,255,.25);
+  box-shadow:0 8px 0 #030611,0 28px 55px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.13);
+  transform-style:preserve-3d;
+}
+.mining-command-center:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(90deg,transparent 49.7%,rgba(126,232,255,.025) 50%,transparent 50.3%),
+    linear-gradient(0deg,transparent 49.7%,rgba(126,232,255,.025) 50%,transparent 50.3%);
+  background-size:34px 34px;opacity:.55;
+}
+.mine-grid-lines{
+  position:absolute;inset:0;pointer-events:none;opacity:.25;
+  background:linear-gradient(105deg,transparent 0 35%,rgba(34,224,255,.08) 50%,transparent 65%);
+  background-size:180% 100%;animation:mineScan 6s linear infinite;
+}
+@keyframes mineScan{0%{background-position:-180% 0}100%{background-position:180% 0}}
+.mine-orbit{position:absolute;border:1px solid rgba(34,224,255,.10);border-radius:50%;pointer-events:none}
+.mine-orbit-a{width:250px;height:250px;right:-135px;top:55px;animation:mineOrbit 13s linear infinite}
+.mine-orbit-b{width:175px;height:175px;right:-96px;top:92px;border-color:rgba(255,79,184,.10);animation:mineOrbit 9s linear infinite reverse}
+@keyframes mineOrbit{to{transform:rotate(360deg)}}
+.mine-sparks{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.mine-sparks i{position:absolute;width:3px;height:3px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 10px #22e0ff;opacity:0}
+.mine-sparks i:nth-child(1){left:13%;bottom:15%;animation:mineSpark 3s linear infinite}
+.mine-sparks i:nth-child(2){left:36%;bottom:8%;animation:mineSpark 2.4s .8s linear infinite}
+.mine-sparks i:nth-child(3){left:67%;bottom:12%;animation:mineSpark 3.2s 1.4s linear infinite}
+.mine-sparks i:nth-child(4){left:83%;bottom:20%;animation:mineSpark 2.7s .3s linear infinite}
+.mine-sparks i:nth-child(5){left:52%;bottom:30%;animation:mineSpark 3.5s 1.8s linear infinite}
+@keyframes mineSpark{
+  0%{transform:translateY(20px) scale(.4);opacity:0}
+  25%{opacity:.8}
+  100%{transform:translateY(-95px) translateX(18px) scale(1.2);opacity:0}
+}
+
+/* LED strip along the top edge — lights chase left-to-right while
+   the rig is mining, like a real ASIC/GPU rig's status array. */
+.mine-led-strip{position:relative;z-index:3;display:flex;justify-content:center;gap:7px;margin-bottom:9px;pointer-events:none}
+.mine-led-strip i{width:5px;height:5px;border-radius:50%;background:rgba(126,232,255,.18)}
+.mining-command-center.is-mining .mine-led-strip i{background:#7ee8ff;box-shadow:0 0 8px #22e0ff;animation:ledChase 1.4s linear infinite}
+.mine-led-strip i:nth-child(1){animation-delay:0s}
+.mine-led-strip i:nth-child(2){animation-delay:.08s}
+.mine-led-strip i:nth-child(3){animation-delay:.16s}
+.mine-led-strip i:nth-child(4){animation-delay:.24s}
+.mine-led-strip i:nth-child(5){animation-delay:.32s}
+.mine-led-strip i:nth-child(6){animation-delay:.4s}
+.mine-led-strip i:nth-child(7){animation-delay:.48s}
+.mine-led-strip i:nth-child(8){animation-delay:.56s}
+@keyframes ledChase{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+
+/* Cooling-fan gear inside the level pill — spins slowly while idle,
+   spins up hard once the rig activates, so the card visibly "runs". */
+.mine-fan{display:inline-block;flex:none;font-size:.9rem;line-height:1;margin-right:2px;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));opacity:.85;animation:fanSpin 6s linear infinite}
+.mining-command-center.is-mining .mine-fan{animation:fanSpin 0.9s linear infinite;opacity:1}
+@keyframes fanSpin{to{transform:rotate(360deg)}}
+
+.mine-header,.mine-balance-panel,.mine-status-bar,.mine-progress-track,.mine-data-row,.mine-action-zone,.mining-how-btn{
+  position:relative;z-index:3
+}
+.mine-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mine-brand{display:flex;align-items:center;gap:11px;min-width:0}
+.mine-logo{
+  position:relative;width:48px;height:48px;flex:none;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#8af3ff,#247a9b 55%,#11465e);
+  box-shadow:0 6px 0 #063748,0 12px 26px rgba(34,224,255,.25),inset 0 2px 0 rgba(255,255,255,.55);
+  transform:rotate(-5deg);animation:mineLogoFloat 3s ease-in-out infinite;
+}
+.mine-logo span{font-size:1.5rem;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}
+.mine-logo i{
+  position:absolute;right:-3px;top:-3px;width:9px;height:9px;border-radius:50%;
+  background:#ffcc33;box-shadow:0 0 0 4px rgba(255,204,51,.12),0 0 15px #ffcc33;
+  animation:statusPop 1.3s infinite;
+}
+@keyframes mineLogoFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+.mine-eyebrow{font-size:.48rem;font-weight:900;letter-spacing:.16em;color:#7ee8ff}
+.mine-brand h3{font-family:'Sora',sans-serif;font-size:1.12rem;font-weight:900;letter-spacing:-.04em;margin-top:2px}
+.mine-brand p{font-size:.59rem;color:rgba(255,255,255,.58);margin-top:2px}
+.mine-level{
+  display:flex;align-items:center;gap:7px;flex:none;padding:7px 9px;border-radius:14px;
+  background:#0b1328;border:1px solid rgba(255,255,255,.10);box-shadow:0 4px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)
+}
+.mine-level-dot{width:8px;height:8px;border-radius:50%;background:#ffcc33;box-shadow:0 0 11px #ffcc33}
+.mine-level b{display:block;font-size:.64rem;font-weight:900}
+.mine-level small{display:block;color:#7ee8ff;font-size:.43rem;font-weight:900;margin-top:2px}
+
+.mine-balance-panel{
+  margin-top:10px;min-height:132px;padding:14px;border-radius:23px;
+  display:grid;grid-template-columns:1fr 116px;align-items:center;gap:10px;
+  background:
+    radial-gradient(circle at 18% 40%,rgba(34,224,255,.12),transparent 34%),
+    linear-gradient(145deg,#0d1830,#08101f);
+  border:1px solid rgba(126,232,255,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 0 rgba(0,0,0,.25);
+}
+.mine-balance-copy>span{font-size:.5rem;font-weight:900;letter-spacing:.15em;color:#7ee8ff}
+.mine-balance-copy strong{
+  display:block;margin-top:5px;font-family:'Sora',sans-serif;font-size:2.05rem;line-height:1;
+  letter-spacing:-.06em;color:#fff;text-shadow:0 0 25px rgba(34,224,255,.30);
+}
+.mine-balance-copy small{display:block;margin-top:7px;color:rgba(255,255,255,.48);font-size:.57rem;font-weight:700}
+.mine-progress-orb{display:flex;justify-content:center}
+.mine-orb-ring{position:relative;width:94px;height:94px}
+.mine-orb-ring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.mine-orb-ring .ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:11}
+.mine-orb-ring .ring-progress{
+  fill:none;stroke:url(#miningGradient);stroke-width:11;stroke-linecap:round;
+  filter:drop-shadow(0 0 9px rgba(34,224,255,.75));transition:stroke-dashoffset .35s ease
+}
+.mine-orb-ring .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.mine-orb-ring .ring-percent{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:900}
+.mine-orb-ring .ring-caption{font-size:.4rem;color:rgba(255,255,255,.55);font-weight:900;margin-top:2px;max-width:74px}
+.mining-command-center.is-mining .mine-orb-ring{animation:orbPulse 2.2s ease-in-out infinite}
+@keyframes orbPulse{50%{transform:scale(1.035)}}
+
+.mine-status-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 11px;
+  border-radius:15px;background:#060c18;border:1px solid rgba(255,255,255,.08)
+}
+.mine-status-main{display:flex;align-items:center;gap:8px;min-width:0}
+.mine-status-led{width:8px;height:8px;border-radius:50%;background:#64748b;flex:none}
+.mining-command-center.is-mining .mine-status-led{background:#22e0ff;box-shadow:0 0 14px #22e0ff;animation:statusPop .9s infinite}
+.mine-status-main b{display:block;font-size:.57rem;font-weight:900;letter-spacing:.09em}
+.mine-status-main small{display:block;color:rgba(255,255,255,.42);font-size:.46rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.mine-cycle{text-align:right;flex:none}
+.mine-cycle span{display:block;font-size:.42rem;color:rgba(255,255,255,.38);font-weight:900;letter-spacing:.08em}
+.mine-cycle b{display:block;margin-top:2px;font-size:.62rem;color:#7ee8ff}
+
+.mine-progress-track{
+  height:9px;margin-top:7px;border-radius:999px;overflow:hidden;background:#050a13;
+  border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 2px 4px rgba(0,0,0,.45)
+}
+.mine-progress-fill{
+  width:0%;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#22e0ff,#8b5cf6,#ff4fb8);
+  box-shadow:0 0 14px rgba(34,224,255,.55);transition:width .35s ease
+}
+.mine-progress-shine{
+  position:absolute;top:1px;left:-25%;width:25%;height:7px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);opacity:0
+}
+.mining-command-center.is-mining .mine-progress-shine{opacity:1;animation:progressShine 2.2s linear infinite}
+@keyframes progressShine{to{left:110%}}
+
+.mine-data-row{
+  display:grid;grid-template-columns:.8fr 1px 1.6fr;align-items:center;gap:11px;margin-top:9px;padding:10px 11px;
+  border-radius:15px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)
+}
+.mine-data span{display:block;color:rgba(255,255,255,.38);font-size:.42rem;font-weight:900;letter-spacing:.07em}
+.mine-data b{display:block;margin-top:3px;font-size:.62rem;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mine-data-hash{display:flex;flex-direction:column;min-width:0}
+.mine-data-hash .hash-readout{display:flex;align-items:center;gap:6px;margin-top:4px;min-width:0}
+.mine-data-hash .hash-engine{position:relative;flex:none;width:22px;height:22px;display:grid;place-items:center}
+.mine-data-hash .engine-ring{border-width:2px}
+.mine-data-hash .engine-ring-2{inset:4px}
+.mine-data-hash .engine-core{width:9px;height:9px}
+.mine-data-hash b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#7ee8ff;font-size:.78rem;font-weight:900;letter-spacing:.02em;text-shadow:0 0 14px rgba(34,224,255,.75);margin-top:0}
+.mine-hashrate-strip{margin-top:4px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.48rem;font-weight:800;color:rgba(126,232,255,.65);letter-spacing:.03em}
+.mine-data-divider{width:1px;height:34px;background:rgba(255,255,255,.08)}
+
+.mine-action-zone{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px;padding:11px;
+  border-radius:19px;background:linear-gradient(145deg,rgba(34,224,255,.07),rgba(139,92,246,.04));
+  border:1px solid rgba(126,232,255,.12)
+}
+.mine-action-copy{min-width:0}
+.mine-action-kicker{display:block;font-size:.44rem;color:#7ee8ff;font-weight:900;letter-spacing:.13em}
+.mine-action-copy>b{display:block;font-family:'Sora',sans-serif;font-size:.83rem;margin-top:3px}
+.mine-action-copy small{display:block;color:rgba(255,255,255,.48);font-size:.49rem;line-height:1.35;margin-top:4px;max-width:155px}
+.mine-action-buttons{display:flex;align-items:center;gap:10px;flex:none}
+.mine-button-stack{display:grid;gap:8px;width:138px}
+.mine-button-stack .mining-btn{width:100%;min-height:46px;padding:9px 8px;border-radius:14px;font-size:.68rem;font-weight:900;letter-spacing:.01em}
+.mine-action-zone .hold-mine-btn{
+  width:92px;height:92px;border-radius:50%;
+  background:linear-gradient(145deg,#ff67c8,#a21caf 65%,#5f125f);
+  box-shadow:0 8px 0 #4e0e50,0 14px 30px rgba(217,70,239,.36),inset 0 2px 0 rgba(255,255,255,.36);
+  animation:mineButtonFloat 2.5s ease-in-out infinite
+}
+.mine-action-zone .hold-mine-btn:before{
+  inset:5px;border-radius:50%;
+  background:radial-gradient(circle at 33% 22%,#ffc0ea,#ff59bf 43%,#8d1598 82%);
+  box-shadow:inset 0 3px 5px rgba(255,255,255,.45),inset 0 -10px 16px rgba(0,0,0,.35)
+}
+.mine-action-zone .hold-mine-btn:after{left:16%;right:16%;top:9%;height:25%}
+.mine-action-zone .hold-mine-btn.holding{animation:none;transform:translateY(5px) scale(.95);box-shadow:0 3px 0 #4e0e50,0 0 36px rgba(255,79,184,.65),inset 0 -5px 9px rgba(0,0,0,.35)}
+.mine-action-zone .hold-mine-btn.hold-success:before{background:radial-gradient(circle at 33% 22%,#caffd4,#4fdc82 45%,#0d7942 82%)}
+.mine-action-zone .hold-icon{font-size:1.55rem}
+.mine-action-zone .hold-label{font-size:.53rem;font-weight:900}
+@keyframes mineButtonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+.mining-command-center .mining-btn.primary{background:linear-gradient(145deg,#22e0ff,#087f9d)}
+.mining-command-center .mining-btn.primary.ready{
+  background:linear-gradient(145deg,#ffe36d,#d17d00);color:#241700;
+  box-shadow:0 4px 0 #754900,0 0 22px rgba(255,204,51,.35);animation:claimBounce 1.25s infinite
+}
+.mining-command-center .mining-btn.secondary{background:linear-gradient(145deg,#493878,#211a43)}
+.mining-command-center .mining-btn:disabled{opacity:.42;filter:saturate(.45)}
+
+.mining-command-center .mining-how-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:8px;padding:8px 10px;
+  border-radius:12px;background:#0b1124;border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 4px 0 rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.06);
+  font-size:.53rem;font-weight:900;color:rgba(255,255,255,.75)
+}
+.mining-command-center .mining-how-btn .how-ico{
+  width:16px;height:16px;display:grid;place-items:center;border-radius:50%;
+  background:linear-gradient(145deg,#22e0ff,#8b5cf6);color:#061522;font-size:.5rem;font-weight:900
+}
+.mining-command-center .mining-how-btn:active{transform:translateY(2px)}
+
+.mining-command-center .mining-foot{display:none}
+
+@media(max-width:390px){
+  .mining-command-center{padding:12px;border-radius:24px}
+  .mine-logo{width:43px;height:43px}.mine-brand h3{font-size:1rem}.mine-brand p{font-size:.53rem}
+  .mine-level{padding:6px 7px}.mine-level b{font-size:.57rem}.mine-level small{font-size:.39rem}
+  .mine-balance-panel{grid-template-columns:1fr 98px;min-height:140px;padding:13px}
+  .mine-balance-copy strong{font-size:1.72rem}.mine-orb-ring{width:94px;height:94px}
+  .mine-action-zone{gap:8px;padding:9px}.mine-action-copy small{max-width:135px;font-size:.46rem}
+  .mine-action-zone .hold-mine-btn{width:78px;height:78px}.mine-action-zone .hold-icon{font-size:1.3rem}.mine-button-stack{width:118px}
+  .mine-button-stack .mining-btn{font-size:.58rem;min-height:40px}
+}
+@media(max-width:350px){
+  .mine-header{align-items:flex-start}.mine-brand p{white-space:normal}
+  .mine-level{display:none}
+  .mine-balance-panel{grid-template-columns:1fr 88px}.mine-orb-ring{width:84px;height:84px}
+  .mine-action-zone{align-items:flex-start}.mine-action-copy{display:none}
+  .mine-action-buttons{width:100%;justify-content:center}
+  .mine-action-zone .hold-mine-btn{width:70px;height:70px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mining-command-center *,.mining-command-center:before,.mine-grid-lines,.mine-orbit,.mine-sparks i,.mine-logo,.mine-logo i,
+  .mine-orb-ring,.mine-progress-shine,.mine-action-zone .hold-mine-btn{animation:none !important}
+}
+
 </style>
 </head>
 <body>
@@ -1186,31 +1442,40 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   <a href="/dashboard.html" class="back-link"><span>←</span><span>Back to Dashboard</span></a>
 
   <!-- ======================================================
-       LUCK TICKET MINING RIG — now the first thing on the page
+       LUCK TICKET MINING — NEW CONTROL CENTER
+       Visual redesign only. All existing mining IDs are preserved
+       so the existing server/API logic continues to work.
   ======================================================= -->
-  <div class="section-label mining-section-label"><h2>Luck Ticket Mining</h2><span>30-minute mining cycle</span></div>
+  <div class="section-label mining-section-label">
+    <h2>Luck Ticket Mining</h2>
+    <span>30-minute mining cycle</span>
+  </div>
 
   <section class="mining-rig-wrap" id="luckMining">
-    <div class="mining-rig" id="miningRig">
-      <div class="rig-spark-field" aria-hidden="true">
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
+    <div class="mining-rig mining-command-center" id="miningRig">
 
-      <div class="rig-hero">
-        <div class="rig-title-block">
-          <div class="rig-emblem" aria-hidden="true">
+      <div class="mine-grid-lines" aria-hidden="true"></div>
+      <div class="mine-orbit mine-orbit-a" aria-hidden="true"></div>
+      <div class="mine-orbit mine-orbit-b" aria-hidden="true"></div>
+      <div class="mine-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="mine-led-strip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+      <div class="mine-header">
+        <div class="mine-brand">
+          <div class="mine-logo" aria-hidden="true">
             <span>🎫</span>
             <i></i>
           </div>
           <div>
-            <div class="rig-kicker">LUCK REWARDS</div>
+            <div class="mine-eyebrow">LUCK REWARDS</div>
             <h3>Ticket Miner</h3>
             <p>Activate once. Let your rig do the work.</p>
           </div>
         </div>
 
-        <div class="rig-level-pill">
-          <span class="level-dot"></span>
+        <div class="mine-level">
+          <span class="mine-fan" id="mineFan" aria-hidden="true">⚙️</span>
+          <span class="mine-level-dot"></span>
           <div>
             <b id="miningLevel">LEVEL 1</b>
             <small id="miningLevelCost">FREE MINER</small>
@@ -1218,12 +1483,16 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
         </div>
       </div>
 
-      <div class="rig-core-layout">
-        <div class="rig-progress-card">
-          <div class="mining-ring-wrap" aria-label="Mining progress">
-            <div class="ring-decoration" aria-hidden="true"></div>
-            <div class="ring-glow" aria-hidden="true"></div>
-            <svg viewBox="0 0 158 158" role="img">
+      <div class="mine-balance-panel">
+        <div class="mine-balance-copy">
+          <span>LUCK TICKETS</span>
+          <strong id="miningTickets">0.0</strong>
+          <small>Tickets Earned</small>
+        </div>
+
+        <div class="mine-progress-orb">
+          <div class="mine-orb-ring">
+            <svg viewBox="0 0 158 158" aria-label="Mining progress">
               <defs>
                 <linearGradient id="miningGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#22e0ff"/>
@@ -1236,85 +1505,90 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
             </svg>
             <div class="ring-center">
               <div class="ring-percent" id="miningPercent">0%</div>
-              <div class="ring-caption" id="miningTime">30:00 remaining</div>
-            </div>
-          </div>
-
-          <div class="mining-status-row">
-            <div class="mining-status" id="miningStatus" data-state="offline">OFFLINE</div>
-          </div>
-        </div>
-
-        <div class="rig-info-column">
-          <div class="rig-section-heading">
-            <span class="heading-icon">⚡</span>
-            <div>
-              <b>MINING ENGINE</b>
-              <small id="miningHashSub">Ready to activate</small>
-            </div>
-          </div>
-
-          <div class="mining-hash-box">
-            <div class="hash-engine" aria-hidden="true">
-              <span class="engine-ring"></span>
-              <span class="engine-ring engine-ring-2"></span>
-              <span class="engine-core"></span>
-            </div>
-            <div class="hash-text">
-              <div class="hash-line"><span class="hash-prefix">ENGINE / </span><span id="miningHash">0x000000_idle</span></div>
-            </div>
-          </div>
-
-          <div class="mining-stats">
-            <div class="mining-stat">
-              <b id="miningRewardRange">1–2</b>
-              <span>Ticket Range</span>
-            </div>
-            <div class="mining-stat">
-              <b id="miningTickets">0.0</b>
-              <span>Tickets Earned</span>
-            </div>
-            <div class="mining-stat">
-              <b id="miningEta">Ready</b>
-              <span>Time / Status</span>
+              <div class="ring-caption" id="miningTime">30:00 cycle</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="rig-bottom">
-        <div class="mining-actions">
-          <div class="hold-mine-wrap">
-            <button class="hold-mine-btn" id="holdMineBtn" type="button" aria-label="Hold for 2 seconds to start mining">
-              <span class="hold-ring" id="holdRing" aria-hidden="true"></span>
-              <span class="hold-core">
-                <span class="hold-icon" aria-hidden="true">⚡</span>
-                <span class="hold-label" id="holdLabel">HOLD TO<br>ACTIVATE</span>
-              </span>
-            </button>
+      <div class="mine-status-bar">
+        <div class="mine-status-main">
+          <span class="mine-status-led" id="mineStatusLed"></span>
+          <div>
+            <b id="miningStatus" data-state="offline">OFFLINE</b>
+            <small id="miningHashSub">Ready to activate</small>
           </div>
-          <div class="mining-buttons-row">
+        </div>
+        <div class="mine-cycle">
+          <span>TIME / STATUS</span>
+          <b id="miningEta">Ready</b>
+        </div>
+      </div>
+
+      <div class="mine-progress-track">
+        <div class="mine-progress-fill" id="mineProgressFill"></div>
+        <div class="mine-progress-shine" aria-hidden="true"></div>
+      </div>
+
+      <div class="mine-data-row">
+        <div class="mine-data">
+          <span>Ticket Range</span>
+          <b id="miningRewardRange">1–2</b>
+        </div>
+        <div class="mine-data-divider"></div>
+        <div class="mine-data mine-data-hash">
+          <span>MINING ENGINE</span>
+          <div class="hash-readout">
+            <span class="hash-engine" aria-hidden="true">
+              <span class="engine-ring"></span>
+              <span class="engine-ring-2"></span>
+              <span class="engine-core"></span>
+            </span>
+            <b id="miningHash">0x000000_idle</b>
+          </div>
+          <div class="mine-hashrate-strip" id="mineHashrateStrip">⚡ 000.0 KH/s</div>
+        </div>
+      </div>
+
+      <div class="mine-action-zone">
+        <div class="mine-action-copy">
+          <span class="mine-action-kicker">MINING ENGINE</span>
+          <b>Hold to activate</b>
+          <small id="miningFoot">Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.</small>
+        </div>
+
+        <div class="mine-action-buttons">
+          <button class="hold-mine-btn" id="holdMineBtn" type="button" aria-label="Hold for 2 seconds to start mining">
+            <span class="hold-ring" id="holdRing" aria-hidden="true"></span>
+            <span class="hold-core">
+              <span class="hold-icon" aria-hidden="true">⚡</span>
+              <span class="hold-label" id="holdLabel">HOLD TO<br>ACTIVATE</span>
+            </span>
+          </button>
+
+          <div class="mine-button-stack">
             <button class="mining-btn primary" id="claimMiningBtn" type="button" disabled>🎫 Claim Tickets</button>
             <button class="mining-btn secondary" id="upgradeMiningBtn" type="button">⚙ Upgrade Miner</button>
           </div>
         </div>
-
-        <button class="mining-how-btn" id="miningHowBtn" type="button" aria-haspopup="dialog">
-          <span class="how-ico" aria-hidden="true">?</span>
-          <span>How it works</span>
-        </button>
       </div>
 
-      <div class="mining-foot" id="miningFoot">
-        Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.
-      </div>
+      <button class="mining-how-btn" id="miningHowBtn" type="button" aria-haspopup="dialog">
+        <span class="how-ico" aria-hidden="true">?</span>
+        <span>How it works</span>
+      </button>
+
     </div>
   </section>
 
+  <div class="rig-connector" aria-hidden="true"><span class="rig-connector-line"></span><span class="rig-connector-node"></span></div>
+
   <!-- ======================================================
-       ARCADE GAMES — inlined directly on the page, no popup
+       ARCADE GAMES — inlined directly on the page, no popup.
+       Styled to match the mining rig above so this reads as one
+       machine with more modules, not a separate block.
   ======================================================= -->
-  <div class="section-label"><h2>Earn more</h2><span>Tap a game to play</span></div>
+  <div class="section-label"><h2>More Ways to Earn</h2><span>Tap a game to play</span></div>
 
   <div class="arcade-panel">
     <div class="arcade-head">
@@ -1553,6 +1827,7 @@ document.addEventListener('DOMContentLoaded',function(){
     time: document.getElementById('miningTime'),
     status: document.getElementById('miningStatus'),
     hash: document.getElementById('miningHash'),
+    hashrate: document.getElementById('mineHashrateStrip'),
     range: document.getElementById('miningRewardRange'),
     tickets: document.getElementById('miningTickets'),
     eta: document.getElementById('miningEta'),
@@ -1682,10 +1957,16 @@ document.addEventListener('DOMContentLoaded',function(){
   function randomHash(){
     const hexChars='0123456789abcdef';
     let out='0x';
-    const zeros = 3 + Math.floor(Math.random()*3);
+    const zeros = 2 + Math.floor(Math.random()*3);
     for(let i=0;i<zeros;i++) out += '0';
-    for(let i=0;i<10-zeros;i++) out += hexChars[Math.floor(Math.random()*hexChars.length)];
+    for(let i=0;i<14-zeros;i++) out += hexChars[Math.floor(Math.random()*hexChars.length)];
     return out;
+  }
+
+  // Cosmetic-only hashrate readout — never feeds into the actual reward,
+  // just gives the rig a "real miner" heartbeat.
+  function randomHashrate(){
+    return (140 + Math.random()*760).toFixed(1);
   }
 
   function startVisualMining(){
@@ -1693,7 +1974,8 @@ document.addEventListener('DOMContentLoaded',function(){
     stopAnimations();
     hashTimer=setInterval(()=>{
       els.hash.textContent=randomHash();
-    },900);
+      if(els.hashrate) els.hashrate.textContent='⚡ '+randomHashrate()+' KH/s';
+    },180);
     uiTimer=setInterval(render,1000);
     render();
   }
@@ -1711,6 +1993,21 @@ document.addEventListener('DOMContentLoaded',function(){
     els.levelCost.textContent=meta.cost===0?'FREE MINER':`${meta.cost.toLocaleString()} GEMS💎`;
     els.range.textContent=rewardRange(level);
     els.tickets.textContent=fmt1(state.luckTickets);
+    // Keep the redesigned progress bar synchronized with the existing SVG meter.
+    const progressFill=document.getElementById('mineProgressFill');
+    if(progressFill){
+      const rawStatus=String(state.status||'offline');
+      let barPct=0;
+      if(rawStatus==='mining'){
+        const a=Date.parse(state.startAt||''), b=Date.parse(state.completeAt||'');
+        const n=serverNow();
+        barPct=Number.isFinite(a)&&Number.isFinite(b)&&b>a ? Math.max(0,Math.min(100,(n-a)/(b-a)*100)) : 0;
+      }else if(rawStatus==='completed'){
+        barPct=100;
+      }
+      progressFill.style.width=barPct+'%';
+    }
+
 
     const status=String(state.status||'offline');
     if(status==='mining'){
@@ -1753,6 +2050,7 @@ document.addEventListener('DOMContentLoaded',function(){
       els.foot.textContent=`Your cycle finished. Claim ${fmt1(state.reward)} Luck Tickets to unlock the next mining cycle.`;
       stopVisualMining();
       els.hash.textContent='0x_ready';
+      if(els.hashrate) els.hashrate.textContent='⚡ 000.0 KH/s';
       if(els.hashSub) els.hashSub.textContent='Engine parked — claim to reset it';
     }else{
       els.meter.style.strokeDashoffset=String(RING_CIRC);
@@ -1770,6 +2068,7 @@ document.addEventListener('DOMContentLoaded',function(){
       els.foot.textContent='Hold for 2 seconds to start your rig. Your 30-minute cycle keeps running even if you close the app.';
       stopVisualMining();
       els.hash.textContent='0x000000_idle';
+      if(els.hashrate) els.hashrate.textContent='⚡ 000.0 KH/s';
       if(els.hashSub) els.hashSub.textContent='Idle — hold below to activate';
     }
   }
@@ -2342,6 +2641,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </body>
 </html>
+
 
 
 
