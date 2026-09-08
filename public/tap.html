@@ -83,7 +83,7 @@
 <style>
 :root{--bg:#070914;--card:#101426;--line:rgba(255,255,255,.09);--text:#fff;--muted:#8f96ad;--cyan:#57e7ff;--purple:#9b72ff;--pink:#ff63c3;--gold:#ffd76a;--green:#62f0a5;--orange:#ff9f43;--red:#ff5d7a;--shadow:0 18px 50px rgba(0,0,0,.42);--safe-top:env(safe-area-inset-top, 0px);--safe-bottom:env(safe-area-inset-bottom, 0px);--safe-left:env(safe-area-inset-left, 0px);--safe-right:env(safe-area-inset-right, 0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{scroll-behavior:smooth;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}body{touch-action:manipulation;margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0%,rgba(87,231,255,.13),transparent 32%),radial-gradient(circle at 100% 15%,rgba(155,114,255,.16),transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(30px + var(--safe-bottom, 0px));overflow-x:hidden}button,a{font:inherit}button{border:0}.app{position:relative;width:min(100%,680px);margin:auto;padding:calc(14px + var(--safe-top, 0px)) calc(16px + var(--safe-right, 0px)) 30px calc(16px + var(--safe-left, 0px))}
-.app:before,.app:after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(70px);opacity:.4;pointer-events:none;animation:orbFloat 10s ease-in-out infinite}
+.app:before,.app:after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(20px);opacity:.4;pointer-events:none}
 .app:before{width:280px;height:280px;top:-90px;left:-70px;background:radial-gradient(circle,var(--purple),transparent 70%)}
 .app:after{width:240px;height:240px;bottom:6%;right:-70px;background:radial-gradient(circle,var(--pink),transparent 70%);animation-delay:-5s}
 @keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,26px)}}
@@ -103,13 +103,13 @@
 
 /* ============ DOUBLE YOUR GEMS — COIN FLIP ============ */
 .flip-card{position:relative;overflow:hidden;padding:22px 20px 20px;border-radius:28px;margin-bottom:16px;background:linear-gradient(160deg,#1b1031 0%,#0e0a21 55%,#090714 100%);border:1px solid rgba(255,99,195,.25);box-shadow:0 25px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);isolation:isolate}
-.flip-glow{position:absolute;width:220px;height:220px;border-radius:50%;top:-90px;right:-70px;background:radial-gradient(circle,rgba(255,99,195,.28),transparent 70%);filter:blur(4px);pointer-events:none;animation:vaultPulse 3.4s ease-in-out infinite}
+.flip-glow{position:absolute;width:220px;height:220px;border-radius:50%;top:-90px;right:-70px;background:radial-gradient(circle,rgba(255,99,195,.28),transparent 70%);filter:blur(4px);pointer-events:none}
 .flip-eyebrow{position:relative;z-index:1;color:var(--pink);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
-.flip-card h2{position:relative;z-index:1;margin:6px 0 5px;font-size:22px;letter-spacing:-.03em;background:linear-gradient(90deg,#fff 10%,var(--pink) 45%,var(--gold) 90%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:heroShine 6s linear infinite}
+.flip-card h2{position:relative;z-index:1;margin:6px 0 5px;font-size:22px;letter-spacing:-.03em;background:linear-gradient(90deg,#fff 10%,var(--pink) 45%,var(--gold) 90%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent}
 @keyframes heroShine{to{background-position:220% center}}
 .flip-card > p{position:relative;z-index:1;margin:0;color:#dce4ff;font-size:11px;line-height:1.5;max-width:320px}
 .coin-stage{position:relative;z-index:1;-webkit-perspective:1200px;perspective:1200px;height:166px;display:flex;align-items:center;justify-content:center;margin:13px 0 4px}
-.coin-shadow{position:absolute;bottom:10px;width:108px;height:20px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.72),transparent 70%);filter:blur(3px);animation:coinShadow 2.3s ease-in-out infinite}
+.coin-shadow{position:absolute;bottom:10px;width:108px;height:20px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.72),transparent 70%);filter:blur(3px);transform:scale(.92);opacity:.42}
 @keyframes coinShadow{0%,100%{transform:scale(.82);opacity:.55}50%{transform:scale(1.04);opacity:.3}}
 .coin3d{position:relative;width:118px;height:118px;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;transform:rotateY(0deg) rotateX(7deg);will-change:transform;filter:drop-shadow(0 17px 20px rgba(0,0,0,.5))}
 .coin3d:before,.coin3d:after{content:"";position:absolute;inset:3px;border-radius:50%;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-transform-style:preserve-3d;transform-style:preserve-3d;pointer-events:none}
@@ -143,7 +143,7 @@
 .chip{padding:9px 2px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#c7d0ee;font-size:10.5px;font-weight:900}
 .chip.active{color:#2c1400;background:linear-gradient(135deg,var(--gold),var(--orange));border-color:transparent}
 .flip-go{position:relative;z-index:1;overflow:hidden;width:100%;padding:15px;border-radius:15px;border:1px solid rgba(255,255,255,.3);background:linear-gradient(135deg,#ff63c3,#9b72ff 55%,#57e7ff);color:#0d0817;font-weight:950;font-size:13px;box-shadow:0 8px 0 rgba(0,0,0,.25),0 14px 28px rgba(255,99,195,.2);cursor:pointer}
-.flip-go:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg);animation:watchSheen 2.8s ease-in-out infinite}
+.flip-go:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg)}
 @keyframes watchSheen{0%{left:-60%}100%{left:135%}}
 .flip-go:active{transform:translateY(2px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
 .flip-go:disabled{opacity:.55;cursor:not-allowed}
@@ -176,10 +176,10 @@
 /* ============ LUCK TICKETS → GEMS SWAP ============ */
 .swap-card{position:relative;overflow:hidden;padding:20px 20px 18px;border-radius:28px;margin-bottom:16px;background:linear-gradient(155deg,#0c2a20 0%,#0a1a1e 55%,#070d12 100%);border:1px solid rgba(98,240,165,.28);box-shadow:0 25px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);isolation:isolate}
 .swap-card:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.05),transparent 28%,transparent 72%,rgba(98,240,165,.04));pointer-events:none}
-.swap-glow{position:absolute;width:220px;height:220px;border-radius:50%;top:-90px;left:-70px;background:radial-gradient(circle,rgba(98,240,165,.3),transparent 70%);filter:blur(4px);pointer-events:none;animation:vaultPulse 3.2s ease-in-out infinite}
+.swap-glow{position:absolute;width:220px;height:220px;border-radius:50%;top:-90px;left:-70px;background:radial-gradient(circle,rgba(98,240,165,.3),transparent 70%);filter:blur(4px);pointer-events:none}
 .swap-head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .swap-eyebrow{color:var(--green);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
-.swap-head h2{margin:5px 0 4px;font-size:19px;letter-spacing:-.03em;background:linear-gradient(90deg,#fff 8%,var(--green) 55%,var(--cyan) 96%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:heroShine 6s linear infinite}
+.swap-head h2{margin:5px 0 4px;font-size:19px;letter-spacing:-.03em;background:linear-gradient(90deg,#fff 8%,var(--green) 55%,var(--cyan) 96%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent}
 .swap-head p{margin:0;color:#c8f5e0;font-size:10.5px;line-height:1.5;max-width:205px}
 .swap-rate-badge{padding:8px 11px;border-radius:13px;background:rgba(98,240,165,.12);border:1px solid rgba(98,240,165,.35);font-weight:950;font-size:11px;white-space:nowrap;height:fit-content;box-shadow:0 7px 20px rgba(98,240,165,.12);color:#eafff3}
 .swap-visual{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 14px;padding:16px 8px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
@@ -187,12 +187,12 @@
 .swap-token span{font-size:8.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .swap-token.from{filter:drop-shadow(0 0 14px rgba(255,215,106,.4))}
 .swap-token.to{filter:drop-shadow(0 0 14px rgba(87,231,255,.4))}
-.swap-arrow{font-size:19px;color:var(--green);animation:swapPulse 1.8s ease-in-out infinite}
+.swap-arrow{font-size:19px;color:var(--green)}
 @keyframes swapPulse{0%,100%{transform:scale(1) rotate(0deg);opacity:.7}50%{transform:scale(1.18) rotate(6deg);opacity:1}}
 .swap-balance-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--muted);padding:0 3px;margin-bottom:13px}
 .swap-balance-row b{color:#fff;font-size:13px;margin-left:4px;font-weight:900}
 .swap-open-btn{position:relative;z-index:1;overflow:hidden;width:100%;padding:15px;border-radius:15px;border:1px solid rgba(255,255,255,.3);background:linear-gradient(135deg,var(--green),var(--cyan) 55%,var(--purple));color:#04150e;font-weight:950;font-size:13px;box-shadow:0 8px 0 rgba(0,0,0,.25),0 14px 28px rgba(98,240,165,.22);cursor:pointer}
-.swap-open-btn:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg);animation:watchSheen 2.8s ease-in-out infinite}
+.swap-open-btn:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.65),transparent);transform:skewX(-20deg)}
 .swap-open-btn:active{transform:translateY(2px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
 
 /* ---- swap modal ---- */
@@ -281,7 +281,7 @@
 .dot.done + .dot-line:after{transform:scaleX(1)}
 .vault-watch{position:relative;z-index:2;overflow:hidden;width:100%;padding:14px;border-radius:15px;border:1px solid rgba(255,255,255,.3);background:linear-gradient(135deg,#9b72ff,#57e7ff 55%,#ff63c3);color:#060817;font-weight:950;font-size:12px;box-shadow:0 7px 0 rgba(0,0,0,.25),0 12px 25px rgba(155,114,255,.18);cursor:pointer;transition:transform .2s ease,filter .2s ease}
 .vault-watch:hover{filter:brightness(1.08)}
-.vault-watch:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:watchSheen 2.8s ease-in-out infinite}
+.vault-watch:after{content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg)}
 .vault-watch:active{transform:translateY(2px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
 .vault-watch:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .vault-watch:disabled:after{display:none}
@@ -312,14 +312,14 @@
 .milestone-progress-row{display:flex;align-items:center;gap:9px;margin-top:12px}
 .milestone-bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;position:relative}
 .milestone-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--purple));width:0%;transition:width .6s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}
-.milestone-bar-fill:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:barShine 2.2s linear infinite}
+.milestone-bar-fill:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%)}
 @keyframes barShine{to{transform:translateX(100%)}}
 .milestone-count{flex:0 0 auto;font-size:9px;font-weight:900;color:#cbd5f5;min-width:38px;text-align:right}
 .milestone-actions{display:flex;gap:8px;margin-top:12px}
 .milestone-go,.milestone-claim{flex:1;padding:10px 8px;border-radius:13px;font-size:11px;font-weight:900;text-align:center;text-decoration:none;color:#fff;border:1px solid var(--line);background:rgba(255,255,255,.05);transition:transform .15s,opacity .2s,box-shadow .3s;display:flex;align-items:center;justify-content:center;gap:5px}
 .milestone-go:active{transform:scale(.96)}
 .milestone-claim{cursor:pointer;opacity:.5;pointer-events:none}
-.milestone-claim.ready{opacity:1;pointer-events:auto;background:linear-gradient(135deg,var(--gold),var(--orange));color:#321b00;border-color:transparent;animation:claimGlow 1.6s ease-in-out infinite}
+.milestone-claim.ready{opacity:1;pointer-events:auto;background:linear-gradient(135deg,var(--gold),var(--orange));color:#321b00;border-color:transparent;box-shadow:0 0 16px rgba(255,215,106,.55)}
 .milestone-claim.ready:active{transform:scale(.94)}
 @keyframes claimGlow{0%,100%{box-shadow:0 0 10px rgba(255,215,106,.35),0 0 0 rgba(255,159,67,0)}50%{box-shadow:0 0 22px rgba(255,215,106,.85),0 0 34px rgba(255,159,67,.45)}}
 .milestone-claim.done{opacity:.55;pointer-events:none;background:rgba(98,240,165,.12);color:var(--green);border-color:rgba(98,240,165,.3);animation:none}
@@ -332,8 +332,8 @@
 
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,25px);opacity:0;pointer-events:none;z-index:50;padding:11px 16px;border-radius:25px;background:#171b2c;border:1px solid var(--line);box-shadow:var(--shadow);font-size:11px;font-weight:800;transition:.25s;max-width:88%;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-.modal{position:fixed;inset:0;z-index:40;display:flex;visibility:hidden;opacity:0;pointer-events:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,3,9,.72);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:opacity .25s ease,visibility 0s linear .25s,backdrop-filter .25s ease}
-.modal.open{visibility:visible;opacity:1;pointer-events:auto;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:opacity .25s ease,visibility 0s,backdrop-filter .25s ease}
+.modal{position:fixed;inset:0;z-index:40;display:flex;visibility:hidden;opacity:0;pointer-events:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,3,9,.86);transition:opacity .25s ease,visibility 0s linear .25s}
+.modal.open{visibility:visible;opacity:1;pointer-events:auto;transition:opacity .25s ease,visibility 0s}
 .modal-card{position:relative;width:min(100%,390px);padding:26px;border-radius:27px;background:linear-gradient(145deg,rgba(27,33,58,.98),rgba(10,14,29,.98));border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 90px rgba(0,0,0,.72),inset 0 1px 0 rgba(255,255,255,.08);text-align:center;transform:translateY(18px) scale(.92);opacity:0}
 .modal.open .modal-card:not(.bouncy){animation:modalCardIn .45s cubic-bezier(.16,1,.3,1) forwards}
 @keyframes modalCardIn{0%{transform:translateY(18px) scale(.92);opacity:0}60%{transform:translateY(-3px) scale(1.015);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
@@ -344,7 +344,7 @@
 @keyframes modalIconPop{0%{transform:scale(.2) rotate(-15deg);opacity:0}70%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
 .modal h2{position:relative;z-index:1;margin:8px 0 5px;font-size:23px;letter-spacing:-.03em}
 .modal p{position:relative;z-index:1;color:#aeb8d5;font-size:11px;line-height:1.65}
-.modal-reward{position:relative;z-index:1;font-size:31px;font-weight:950;background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:heroShine 3.5s linear infinite;margin:13px 0}
+.modal-reward{position:relative;z-index:1;font-size:31px;font-weight:950;background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;margin:13px 0}
 .modal-reward.lose{background:linear-gradient(90deg,#ff9f9f,var(--red));-webkit-background-clip:text;background-clip:text}
 .confetti-piece{position:fixed;top:-12px;width:8px;height:14px;pointer-events:none;z-index:60;animation:confettiFall linear forwards}
 @keyframes confettiFall{to{transform:translateY(112vh) rotate(560deg);opacity:.15}}
@@ -439,7 +439,7 @@
   color:transparent;
   filter:drop-shadow(0 8px 14px rgba(255,159,67,.18));
   box-shadow:inset 0 0 0 1px rgba(255,215,106,.10);
-  animation:rewardBounce .72s cubic-bezier(.16,1.4,.3,1) .24s both,heroShine 3.5s linear infinite;
+  animation:rewardBounce .72s cubic-bezier(.16,1.4,.3,1) .24s both;
 }
 @keyframes rewardBounce{
   0%{opacity:0;transform:translateY(20px) scale(.55)}
@@ -943,17 +943,23 @@
 .coin3d.result-lose{
   animation:coinLoseShake .5s ease;
 }
+/* These bounce/shake keyframes used to hardcode rotateY(0), which snapped
+   the coin back to the Heads orientation for an instant the moment a result
+   landed on Tails (a visible glitch/flash of the wrong side right after
+   every flip). They now oscillate around --coin-rest-y, which JS sets to
+   0deg or 180deg to match whichever face actually won, so the bounce plays
+   around the correct resting side instead of resetting it. */
 @keyframes coinWinBounce{
-  0%{transform:rotateY(0) scale(1)}
-  35%{transform:rotateY(18deg) translateY(-10px) scale(1.08)}
-  65%{transform:rotateY(-10deg) translateY(2px) scale(.98)}
-  100%{transform:rotateY(0) scale(1)}
+  0%{transform:rotateY(var(--coin-rest-y,0deg)) scale(1)}
+  35%{transform:rotateY(calc(var(--coin-rest-y,0deg) + 18deg)) translateY(-10px) scale(1.08)}
+  65%{transform:rotateY(calc(var(--coin-rest-y,0deg) - 10deg)) translateY(2px) scale(.98)}
+  100%{transform:rotateY(var(--coin-rest-y,0deg)) scale(1)}
 }
 @keyframes coinLoseShake{
-  0%,100%{transform:rotateY(0) translateX(0)}
-  25%{transform:rotateY(12deg) translateX(-7px)}
-  50%{transform:rotateY(-12deg) translateX(7px)}
-  75%{transform:rotateY(7deg) translateX(-3px)}
+  0%,100%{transform:rotateY(var(--coin-rest-y,0deg)) translateX(0)}
+  25%{transform:rotateY(calc(var(--coin-rest-y,0deg) + 12deg)) translateX(-7px)}
+  50%{transform:rotateY(calc(var(--coin-rest-y,0deg) - 12deg)) translateX(7px)}
+  75%{transform:rotateY(calc(var(--coin-rest-y,0deg) + 7deg)) translateX(-3px)}
 }
 
 
@@ -978,217 +984,6 @@
 }
 
 </style>
-
-<style id="payme-low-end-performance">
-/* =========================================================
-   PAYME LOW-END PERFORMANCE MODE
-   Keeps the original color palette and game logic.
-   Removes continuous/decorative GPU-heavy effects.
-   Functional coin/chest interactions remain available.
-   ========================================================= */
-
-/* Fast native fonts: no external font dependency */
-html,body,button,input,textarea,select{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif !important;
-}
-
-/* Stop smooth scrolling / decorative motion */
-html{scroll-behavior:auto !important}
-
-/* Remove the two large blurred moving background orbs */
-.app:before,.app:after{
-  display:none !important;
-  animation:none !important;
-  filter:none !important;
-}
-
-/* Keep the same general dark background, but remove expensive multi-radial painting */
-body{
-  background:var(--bg) !important;
-}
-
-/* Remove continuous decorative animations */
-.bump,
-.flip-glow,
-.coin-shadow,
-.swap-glow,
-.swap-arrow,
-.vault-glow,
-.chest-aura,
-.chest-spark,
-.chest-shadow,
-.chest-light,
-.chest-particle,
-.treasure-chest.ready,
-.flip-card h2,
-.flip-go:after,
-.swap-open-btn:after,
-.vault-watch:after,
-.milestone-bar-fill:after,
-.milestone-claim.ready,
-.busy i{
-  animation:none !important;
-}
-
-/* Decorative blur/drop-shadow filters are costly on low-end GPUs */
-.flip-glow,
-.coin-shadow,
-.coin3d,
-.swap-token.from,
-.swap-token.to,
-.vault-glow,
-.chest-aura,
-.treasure-chest,
-.chest-shadow,
-.chest-light,
-.modal-icon,
-.fly-ticket{
-  filter:none !important;
-}
-
-/* Remove decorative text glow */
-.chest-spark,
-.chest-particle,
-.fly-ticket.amount,
-.vault-note strong,
-.coin-face span{
-  text-shadow:none !important;
-}
-
-/* Remove unnecessary 3D scene depth outside the actual coin/chest interaction */
-.flip-card,
-.coin-stage,
-.chest-scene,
-.chest-base,
-.chest-lid-wrap,
-.chest-lid{
-  perspective:none !important;
-}
-
-/* Keep 3D coin/chest transforms functional, but reduce compositor overhead */
-.coin3d{
-  will-change:auto !important;
-}
-.treasure-chest{
-  will-change:auto !important;
-}
-
-/* Replace oversized shadows with small, cheap shadows */
-.flip-card,
-.swap-card,
-.vault-card,
-.modal-card,
-.coin3d,
-.treasure-chest,
-.flip-go,
-.swap-open-btn,
-.vault-watch,
-.close,
-.tickets-pill,
-.vault-tickets,
-.swap-rate-badge,
-.info-card,
-.milestone-card{
-  box-shadow:0 6px 18px rgba(0,0,0,.20) !important;
-}
-
-/* Remove extra pseudo-element glow layers while preserving structure */
-.flip-glow,
-.swap-glow,
-.vault-glow{
-  display:none !important;
-}
-.flip-card:after,
-.swap-card:after,
-.vault-card:after{
-  display:none !important;
-}
-
-/* Remove decorative coin/chest glow shadows */
-.coin3d:before,
-.coin3d:after,
-.coin-face,
-.coin-face:before,
-.coin-face:after,
-.chest-front,
-.chest-front:after,
-.chest-side,
-.chest-top-edge,
-.metal-band,
-.lock-plate,
-.lid-top,
-.lid-front,
-.lid-band,
-.lid-rim{
-  box-shadow:none !important;
-}
-
-/* Remove unnecessary backdrop blur if any modal/device supports it */
-.modal{
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-}
-
-/* Modal entrance is decorative; keep modal visibility itself instant */
-.modal.open .modal-card:not(.bouncy){
-  animation:none !important;
-  opacity:1 !important;
-  transform:none !important;
-}
-
-/* Result popup decorative entrance/ring effects */
-.modal.coin-result .modal-icon,
-.modal.coin-result .modal-icon:after,
-.modal.coin-result h2,
-.modal.coin-result .modal-reward{
-  animation:none !important;
-}
-
-/* Keep disabled/active state visuals but remove animated transitions */
-.side-btn,
-.howto-btn,
-.toggle-thumb,
-.toggle-opt,
-.dot,
-.dot-line:after,
-.milestone-card,
-.milestone-bar-fill,
-.milestone-go,
-.milestone-claim,
-.vault-watch,
-.close,
-.toast{
-  transition:none !important;
-}
-
-/* Remove perspective/3D rendering from purely decorative containers */
-.app{
-  perspective:none !important;
-}
-.modal-card{
-  transform-style:flat !important;
-}
-
-/* Avoid unnecessary compositor promotion */
-*{
-  will-change:auto !important;
-}
-
-/* Reduce touch rendering overhead */
-button,a{
-  -webkit-tap-highlight-color:transparent;
-}
-
-/* Do not create extra paint layers for hidden decorative elements */
-.flip-glow,
-.swap-glow,
-.vault-glow,
-.app:before,
-.app:after{
-  content:none !important;
-}
-</style>
-
 </head>
 <body>
 <main class="app">
@@ -1475,7 +1270,7 @@ const SWAP_RATE=0.25;
 
 function toast(msg){const e=$('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2800)}
 function bump(el){el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
-function confetti(){const colors=['#ffd76a','#ff63c3','#57e7ff','#9b72ff','#62f0a5','#ff9f43'];for(let i=0;i<26;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'vw';p.style.background=colors[i%colors.length];p.style.borderRadius=Math.random()<.5?'50%':'2px';const dur=2.2+Math.random()*1.3,delay=Math.random()*.3;p.style.animationDuration=dur+'s';p.style.animationDelay=delay+'s';p.style.transform=`rotate(${Math.random()*360}deg)`;document.body.appendChild(p);setTimeout(()=>p.remove(),(dur+delay)*1000+200)}}
+function confetti(){const colors=['#ffd76a','#ff63c3','#57e7ff','#9b72ff','#62f0a5','#ff9f43'];for(let i=0;i<14;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.left=Math.random()*100+'vw';p.style.background=colors[i%colors.length];p.style.borderRadius=Math.random()<.5?'50%':'2px';const dur=2.2+Math.random()*1.3,delay=Math.random()*.3;p.style.animationDuration=dur+'s';p.style.animationDelay=delay+'s';p.style.transform=`rotate(${Math.random()*360}deg)`;document.body.appendChild(p);setTimeout(()=>p.remove(),(dur+delay)*1000+200)}}
 
 function renderTopPills(){
   $('gemsTop').textContent=balance.toLocaleString();
@@ -1559,29 +1354,76 @@ $('stakeInput').addEventListener('change',()=>{
   document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
 });
 
+/* The coin flip used to be driven by a single CSS "transition" and relied
+   on backface-visibility to hide whichever face wasn't facing the camera.
+   Some in-app WebViews don't honor backface-visibility correctly once a
+   parent has overflow:hidden/isolation (see .flip-card), so the wrong face
+   could render as a mirrored ghost — during the spin, not just at the end.
+   This version drives every frame itself with requestAnimationFrame and
+   decides which face is visible purely from the angle it just calculated,
+   using the show-tails opacity toggle as the ONLY source of truth for which
+   side is showing. That makes the result correct on every browser, not
+   just ones with working 3D backface support. */
 function spinCoin(landHeads){
   return new Promise(resolve=>{
     const coin=$('coin3d');
     const spins=7;
     const base=spins*360;
     const target=landHeads ? base : base+180;
-    coin.classList.remove('show-tails');
+    const spinDuration=2550;
+    const settleDuration=450;
+    const endRotX=landHeads ? 16 : -16;
+    const endRotZ=landHeads ? 2 : -2;
+
     coin.style.transition='none';
+    coin.classList.remove('show-tails');
     coin.style.transform='rotateX(7deg) rotateY(0deg) rotateZ(0deg)';
     void coin.offsetWidth;
-    coin.style.transition='transform 2.55s cubic-bezier(.12,.78,.18,1)';
-    requestAnimationFrame(()=>{
-      coin.style.transform=`rotateX(${landHeads ? 16 : -16}deg) rotateY(${target}deg) rotateZ(${landHeads ? 2 : -2}deg)`;
-    });
-    setTimeout(()=>{
-      coin.style.transition='transform .45s cubic-bezier(.2,1.4,.4,1)';
-      coin.style.transform=`rotateX(0deg) rotateY(${target}deg) rotateZ(0deg)`;
-      // Lock in the landed face explicitly instead of trusting the 3D
-      // rotation alone to reveal it — this is what stops Tails from
-      // rendering as a mirrored ghost of Heads on affected WebViews.
-      coin.classList.toggle('show-tails', !landHeads);
-      setTimeout(resolve,420);
-    },2550);
+
+    function applyFaceForAngle(angle){
+      const a=((angle%360)+360)%360;
+      coin.classList.toggle('show-tails', a>90 && a<270);
+    }
+    function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
+    function easeOutBack(t){
+      const c1=1.70158, c3=c1+1;
+      return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);
+    }
+
+    let spinStart=null;
+    function spinFrame(now){
+      if(spinStart===null) spinStart=now;
+      const t=Math.min((now-spinStart)/spinDuration,1);
+      const eased=easeOutCubic(t);
+      const angle=eased*target;
+      const rotX=7+(endRotX-7)*eased;
+      const rotZ=(endRotZ)*eased;
+      coin.style.transform=`rotateX(${rotX}deg) rotateY(${angle}deg) rotateZ(${rotZ}deg)`;
+      applyFaceForAngle(angle);
+      if(t<1){ requestAnimationFrame(spinFrame); }
+      else { requestAnimationFrame(settleFrame); }
+    }
+
+    let settleStart=null;
+    function settleFrame(now){
+      if(settleStart===null) settleStart=now;
+      const t=Math.min((now-settleStart)/settleDuration,1);
+      const eased=easeOutBack(t);
+      const rotX=endRotX+(0-endRotX)*eased;
+      const rotZ=endRotZ*(1-eased);
+      coin.style.transform=`rotateX(${rotX}deg) rotateY(${target}deg) rotateZ(${rotZ}deg)`;
+      applyFaceForAngle(target);
+      if(t<1){ requestAnimationFrame(settleFrame); }
+      else {
+        // Lock in the landed face explicitly rather than trusting the 3D
+        // rotation alone — this is what stops Tails from ever rendering
+        // as a mirrored ghost of Heads on affected WebViews.
+        coin.classList.toggle('show-tails', !landHeads);
+        setTimeout(resolve,420);
+      }
+    }
+
+    requestAnimationFrame(spinFrame);
   });
 }
 
@@ -1666,6 +1508,7 @@ $('flipGoBtn').onclick=async()=>{
     await spinCoin(d.result==='heads');
     const landedCoin=$('coin3d');
     landedCoin.classList.remove('result-win','result-lose');
+    landedCoin.style.setProperty('--coin-rest-y', d.result==='heads' ? '0deg' : '180deg');
     void landedCoin.offsetWidth;
     landedCoin.classList.add(d.won?'result-win':'result-lose');
     if(currency==='tickets'){
