@@ -296,284 +296,176 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 
 /* =========================================================
-   LUCK TICKET MINING RIG — compact, high-polish 3D console
+   LUCK TICKET MINER — simple, colorful, compact card
+   Redesign goal: fewer moving parts, bigger legible type,
+   flat bold color blocks instead of a "hacker console" look.
+   Every element ID used by the mining script below is kept,
+   so /api/luck-mining/* logic keeps working untouched.
 ========================================================= */
 .mining-rig-wrap{position:relative;margin-top:6px}
-.mining-rig{
-  position:relative;overflow:hidden;padding:11px;border-radius:20px;
-  background:linear-gradient(150deg,#101b3b 0%,#091226 48%,#071d25 100%);
-  border:1px solid rgba(34,224,255,.28);
-  box-shadow:0 7px 0 #050b18,0 26px 54px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.12);
-  transform-style:preserve-3d;
-}
-/* animated gradient hairline that sweeps the rig's own border for a
-   living, premium feel instead of a static outline */
-.mining-rig:after{
-  content:"";position:absolute;inset:0;border-radius:22px;padding:1px;z-index:3;pointer-events:none;
-  background:linear-gradient(120deg,rgba(34,224,255,0) 0%,rgba(34,224,255,.55) 18%,rgba(139,92,246,.5) 36%,rgba(255,79,184,.4) 52%,rgba(34,224,255,0) 70%);
-  background-size:250% 250%;
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  ;
-  opacity:.85;
-}
-@keyframes rigBorderSweep{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-.mining-rig:before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 30% 25%,rgba(34,224,255,.18),transparent 28%),radial-gradient(circle at 75% 65%,rgba(139,92,246,.18),transparent 32%);pointer-events:none}
-@keyframes miningAurora{to{transform:translate3d(5%,3%,0) rotate(2deg) scale(1.04)}}
-.mining-top,.mining-status-row,.mining-actions,.mining-stats,.mining-hash-box{position:relative;z-index:2}
-.mining-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.mining-brand{display:flex;align-items:center;gap:10px}
-.rig-chip{
-  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:1rem;
-  background:linear-gradient(155deg,#7ee8ff,#0a8fa8);box-shadow:0 5px 0 #055264,0 12px 24px rgba(34,224,255,.28),inset 0 2px 0 rgba(255,255,255,.45);
-  ;transform:translateZ(24px)
-}
-@keyframes rigFloat{0%,100%{transform:translateY(0) translateZ(24px) rotate(-2deg)}50%{transform:translateY(-5px) translateZ(24px) rotate(2deg)}}
-.mining-brand h3{font-family:'Sora',sans-serif;font-size:.94rem;font-weight:800}
-.mining-brand p{font-size:.58rem;color:var(--muted);margin-top:2px}
-.mining-top-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.mining-how-btn{
-  display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:11px;
-  background:linear-gradient(155deg,#332e5e,#181534);border:1px solid rgba(255,255,255,.16);
-  box-shadow:0 4px 0 rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.12);
-  font-size:.58rem;font-weight:900;color:#fff;letter-spacing:.01em;white-space:nowrap;
-}
-.mining-how-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.32)}
-.mining-how-btn .how-ico{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:linear-gradient(155deg,#7ee8ff,#8b5cf6);font-size:.55rem;color:#052a33;flex:none}
-.mining-level{
-  padding:7px 10px;border-radius:12px;text-align:right;background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,255,255,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)
-}
-.mining-level b{display:block;color:#7ee8ff;font-size:.8rem}
-.mining-level span{display:block;font-size:.5rem;color:var(--muted);font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
 
-/* ---------------------------------------------------------
-   PROGRESS RING — a genuine circular gauge whose dash length
-   is set once from the SVG's own real geometry (see the
-   RING_CIRC constant in the script below), so 100% always
-   lands exactly on cycle completion — never before, never
-   after. Replaces the old approximate arc meter.
---------------------------------------------------------- */
-.mining-ring-wrap{position:relative;z-index:2;width:118px;height:118px;margin:8px auto 0}
-.ring-decoration{position:absolute;inset:-9px;border-radius:50%;border:2px dashed rgba(126,232,255,.16);pointer-events:none;animation:ringDecoSpin 14s linear infinite}
-@keyframes ringDecoSpin{to{transform:rotate(360deg)}}
-.mining-ring-wrap svg{width:100%;height:100%;overflow:visible;transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:13}
-.ring-progress{
-  fill:none;stroke:url(#miningGradient);stroke-width:13;stroke-linecap:round;
-  transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1);
-  filter:drop-shadow(0 0 9px rgba(34,224,255,.7));
+.miner-card{
+  position:relative;overflow:hidden;padding:20px 18px 18px;border-radius:26px;
+  background:linear-gradient(165deg,#131b32,#0a0f1d);
+  border:1px solid rgba(126,178,255,.22);
+  box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);
 }
-.ring-glow{position:absolute;inset:14px;border-radius:50%;background:radial-gradient(circle,rgba(34,224,255,.16),transparent 70%);pointer-events:none;opacity:0;transition:opacity .4s ease}
-.mining-rig.is-mining .ring-glow{opacity:1;animation:ringGlowPulse 2.4s ease-in-out infinite}
-@keyframes ringGlowPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
-.ring-percent{font-family:'Sora',sans-serif;font-size:1.32rem;font-weight:900;letter-spacing:-.04em;text-shadow:0 0 20px rgba(34,224,255,.5)}
-.ring-caption{font-size:.48rem;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.07em;margin-top:2px;max-width:96px}
+.miner-card:before{
+  content:"";position:absolute;left:-20%;right:-20%;top:-30%;height:70%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 20% 10%,rgba(59,130,246,.28),transparent 60%),
+             radial-gradient(circle at 92% 0%,rgba(34,224,255,.2),transparent 55%);
+}
 
-.mining-status-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:2px}
-.mining-status{
-  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
-  background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.12);font-size:.55rem;font-weight:900;letter-spacing:.08em
+/* ---- top row: level pill + info button ---- */
+.miner-top{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.miner-badge{display:flex;align-items:center;gap:9px;padding:8px 13px 8px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.miner-badge-dot{width:8px;height:8px;border-radius:50%;background:#5b6b85;flex:none;transition:background .25s,box-shadow .25s}
+.miner-card.is-mining .miner-badge-dot{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.miner-badge b{display:block;font-size:.72rem;font-weight:900;letter-spacing:.01em}
+.miner-badge small{display:block;font-size:.55rem;color:var(--muted);font-weight:700;margin-top:1px}
+.miner-info-btn{
+  width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:900;font-size:.8rem;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#cfe3ff;transition:transform .12s ease
 }
-.mining-status:before{content:"";width:6px;height:6px;border-radius:50%;background:#94a3b8}
-.mining-status[data-state="mining"]:before{background:var(--cyan);box-shadow:0 0 12px var(--cyan);}
-.mining-status[data-state="ready"]:before{background:var(--gold);box-shadow:0 0 12px var(--gold);}
-.mining-status[data-state="offline"]:before{background:#64748b}
+.miner-info-btn:active{transform:scale(.9)}
 
-/* ---------------------------------------------------------
-   HASH ENGINE — improved: a clean hex readout with a leading
-   difficulty tag and a scan-line sheen, instead of a flat
-   scrambling string. Purely cosmetic; no numbers here feed
-   into any reward — the server alone decides the payout.
---------------------------------------------------------- */
-.mining-hash-box{
-  position:relative;overflow:hidden;margin-top:8px;padding:8px 10px;border-radius:14px;
-  display:flex;align-items:center;gap:9px;
-  background:#030914;border:1px solid rgba(34,224,255,.18);box-shadow:inset 0 0 28px rgba(34,224,255,.05),0 5px 0 rgba(0,0,0,.22)
-}
-.mining-hash-box:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(34,224,255,.035) 6px 7px);pointer-events:none}
-.mining-hash-box:after{
-  content:"";position:absolute;left:-40%;top:0;bottom:0;width:40%;pointer-events:none;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.08),transparent);
-}
-.mining-rig.is-mining .mining-hash-box:after{}
-@keyframes hashSheen{0%{left:-40%}100%{left:120%}}
-.hash-engine{position:relative;z-index:1;flex:none;width:32px;height:32px;display:grid;place-items:center}
-.engine-ring{
-  position:absolute;inset:0;border-radius:50%;
-  border:2px solid transparent;border-top-color:#7ee8ff;border-right-color:rgba(126,232,255,.35);
-}
-.engine-ring-2{inset:5px;border-top-color:#ff9be8;border-right-color:rgba(255,155,232,.3);opacity:.8}
-.mining-rig.is-mining .engine-ring{}
-.mining-rig.is-mining .engine-ring-2{}
-@keyframes engineSpin{to{transform:rotate(360deg)}}
-.engine-core{
-  position:relative;z-index:1;width:15px;height:15px;border-radius:50%;
-  background:radial-gradient(circle at 34% 28%,#bff3ff,#0a8fa8 70%);
-  box-shadow:0 0 0 2px rgba(3,9,20,.9),0 0 10px rgba(34,224,255,.35);
-  transition:box-shadow .3s ease;
-}
-.mining-rig.is-mining .engine-core{box-shadow:0 0 0 2px rgba(3,9,20,.9),0 0 16px rgba(34,224,255,.85);}
-@keyframes engineCorePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
-.hash-text{position:relative;z-index:1;min-width:0;flex:1}
-.hash-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.62rem;color:#7ee8ff;letter-spacing:.03em;text-shadow:0 0 12px rgba(34,224,255,.5)}
-.hash-prefix{color:#64748b}
-.hash-sub{margin-top:2px;font-size:.52rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.mining-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.mining-particles i{position:absolute;width:4px;height:4px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 10px #7ee8ff;opacity:0}
-.mining-rig.is-mining .mining-particles i{}
-.mining-particles i:nth-child(1){left:8%;bottom:18%;animation-delay:-.2s}.mining-particles i:nth-child(2){left:23%;bottom:12%;animation-delay:-.9s}.mining-particles i:nth-child(3){left:41%;bottom:20%;animation-delay:-1.4s}.mining-particles i:nth-child(4){left:68%;bottom:16%;animation-delay:-.5s}.mining-particles i:nth-child(5){left:86%;bottom:25%;animation-delay:-1.8s}
-@keyframes particleDrift{0%{transform:translateY(20px) scale(.4);opacity:0}25%{opacity:.8}100%{transform:translateY(-80px) translateX(15px) scale(1.2);opacity:0}}
-
-.mining-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
-.mining-stat{padding:6px 5px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
-.mining-stat b{display:block;font-size:.7rem;font-weight:900;color:#fff}
-.mining-stat span{display:block;margin-top:2px;font-size:.46rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
-
-/* ---- actions: hold-to-mine centered on its own row, Claim + Upgrade
-   as a matched pair beneath it, instead of the old mismatched
-   circle-next-to-rectangle grid that looked scattered ---- */
-.mining-actions{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:8px}
-.mining-buttons-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%}
-.mining-btn{
-  min-height:38px;padding:9px;border-radius:14px;font-size:.64rem;font-weight:900;
-  border:1px solid rgba(255,255,255,.15);box-shadow:0 5px 0 rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.16);
-  transition:transform .12s ease,filter .2s ease,box-shadow .12s ease
-}
-.mining-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
-.mining-btn.primary{background:linear-gradient(155deg,#1de4ff,#087f9d);color:#fff}
-.mining-btn.primary.ready{background:linear-gradient(155deg,#ffe36d,#d17d00);box-shadow:0 5px 0 #754900,0 0 24px rgba(255,204,51,.35),inset 0 1px 0 rgba(255,255,255,.35);}
-@keyframes claimGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2);transform:translateY(-2px)}}
-.mining-btn.secondary{background:linear-gradient(155deg,#2a2350,#15142d)}
-.mining-btn:disabled{opacity:.45;filter:saturate(.4);box-shadow:0 3px 0 rgba(0,0,0,.25);transform:none}
-
-/* =========================================================
-   HOLD-TO-MINE — circular button with a conic-gradient ring
-   that fills as the hold progresses. touch-action:none keeps
-   the browser's own scroll gesture from stealing a long-press
-   on mobile, which is what silently cancelled holds before.
-========================================================= */
-/* ---------------------------------------------------------
-   HOLD-TO-MINE — rebuilt as a genuine layered "candy button":
-   a chunky offset base slab (the hard drop-shadow line),
-   a beveled outer rim, a glossy convex face, and a bright
-   top-highlight sheen — instead of a single flat radial fill.
---------------------------------------------------------- */
-.hold-mine-wrap{display:flex;align-items:center;justify-content:center;padding:0}
+/* ---- the big circular activation dial ---- */
+.miner-dial-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:11px;margin-bottom:16px}
 .hold-mine-btn{
-  position:relative;width:64px;height:64px;flex:none;border-radius:50%;
-  display:grid;place-items:center;touch-action:none;-webkit-touch-callout:none;
-  background:linear-gradient(160deg,#1c8fae 0%,#0a4b60 100%);
-  border:none;padding:4px;
-  box-shadow:
-    0 9px 0 #03303f,
-    0 20px 36px rgba(34,224,255,.38),
-    inset 0 -4px 8px rgba(0,0,0,.35),
-    inset 0 2px 0 rgba(255,255,255,.25);
-  transition:transform .15s cubic-bezier(.2,.8,.3,1),box-shadow .15s ease,filter .2s ease;
+  position:relative;width:168px;height:168px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 32% 26%,#78a4ff,#3b6df0 55%,#1c3d99 100%);
+  box-shadow:0 10px 0 #12276e,0 22px 46px rgba(59,109,240,.45),inset 0 3px 0 rgba(255,255,255,.3);
+  transition:transform .15s ease,box-shadow .15s ease;
 }
-/* the convex "face" sitting inside the rim — gives the dome its shine */
-.hold-mine-btn:before{
-  content:"";position:absolute;inset:4px;border-radius:50%;z-index:0;
-  background:radial-gradient(circle at 34% 24%,#7cf0ff 0%,#22b8dd 42%,#0f6b85 78%,#0a4b60 100%);
-  box-shadow:inset 0 3px 4px rgba(255,255,255,.55),inset 0 -10px 16px rgba(0,0,0,.4);
-}
-/* a slim bright sheen arcing across the top third, like glass/plastic */
-.hold-mine-btn:after{
-  content:"";position:absolute;left:14%;right:14%;top:10%;height:26%;z-index:0;border-radius:50%;
-  background:linear-gradient(180deg,rgba(255,255,255,.65),rgba(255,255,255,0));
-  filter:blur(1px);opacity:.8;pointer-events:none;
-}
-.hold-mine-btn:active{transform:translateY(4px) scale(.98);box-shadow:0 5px 0 #03303f,0 12px 22px rgba(34,224,255,.3),inset 0 -4px 8px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.2)}
-.hold-mine-btn.holding{
-  transform:translateY(6px) scale(.97);
-  box-shadow:0 3px 0 #03303f,0 0 46px rgba(34,224,255,.65),inset 0 -4px 8px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.2)
-}
-.hold-mine-btn.hold-success:before{background:radial-gradient(circle at 34% 24%,#c8ffce 0%,#4fdc82 42%,#128a4d 78%,#0a5c33 100%)}
-.hold-mine-btn.hold-success{box-shadow:0 5px 0 #063a20,0 0 55px rgba(47,232,154,.7),inset 0 -4px 8px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.25)}
-.hold-mine-btn:disabled{opacity:.55;filter:saturate(.35);box-shadow:0 5px 0 rgba(0,0,0,.3);transform:none}
-.hold-mine-btn.ready-pulse{}
-@keyframes holdReadyPulse{
-  0%,100%{box-shadow:0 9px 0 #03303f,0 20px 36px rgba(34,224,255,.38),inset 0 -4px 8px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.25)}
-  50%{box-shadow:0 9px 0 #03303f,0 22px 50px rgba(34,224,255,.62),inset 0 -4px 8px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.3)}
-}
+.hold-mine-btn:active:not(:disabled){transform:translateY(6px);box-shadow:0 4px 0 #12276e,0 12px 26px rgba(59,109,240,.4),inset 0 3px 0 rgba(255,255,255,.24)}
+.hold-mine-btn:disabled{cursor:default}
+.hold-mine-btn.ready-pulse{animation:dialReadyPulse 2.2s ease-in-out infinite}
+@keyframes dialReadyPulse{0%,100%{box-shadow:0 10px 0 #12276e,0 22px 46px rgba(59,109,240,.45),inset 0 3px 0 rgba(255,255,255,.3)}50%{box-shadow:0 10px 0 #12276e,0 22px 60px rgba(59,109,240,.7),inset 0 3px 0 rgba(255,255,255,.3)}}
+.hold-mine-btn.cycle-complete{background:radial-gradient(circle at 32% 26%,#ffe36d,#ffb020 55%,#c97f00 100%);animation:dialCompletePulse 1.8s ease-in-out infinite}
+@keyframes dialCompletePulse{0%,100%{box-shadow:0 10px 0 #7a4900,0 22px 46px rgba(255,176,32,.45),inset 0 3px 0 rgba(255,255,255,.35)}50%{box-shadow:0 10px 0 #7a4900,0 22px 60px rgba(255,176,32,.7),inset 0 3px 0 rgba(255,255,255,.35)}}
+.miner-dial-ring{position:absolute;inset:-9px;width:calc(100% + 18px);height:calc(100% + 18px);transform:rotate(-90deg);pointer-events:none}
+.miner-dial-ring .ring-track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:8}
+.miner-dial-ring .ring-progress{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .3s linear;opacity:.92}
 .hold-ring{
-  position:absolute;inset:-7px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .18s ease;z-index:1;
-  background:conic-gradient(from -90deg,#fff calc(var(--progress,0)*1%),transparent 0);
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
-  mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
+  position:absolute;inset:0;border-radius:50%;opacity:0;
+  background:conic-gradient(from -90deg,rgba(255,255,255,.9) calc(var(--progress,0)*1%),transparent 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 9px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 9px));
+  transition:opacity .2s;
 }
 .hold-mine-btn.holding .hold-ring{opacity:1}
-.hold-core{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;text-align:center}
-.hold-icon{font-size:1.08rem;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}
-.hold-mine-btn.holding .hold-icon{}
-@keyframes holdIconShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
-.hold-label{font-size:.5rem;font-weight:900;line-height:1.2;text-transform:uppercase;letter-spacing:.03em;text-shadow:0 1px 2px rgba(0,0,0,.4)}
-.mining-foot{position:relative;z-index:2;margin-top:6px;text-align:center;font-size:.52rem;color:var(--muted);line-height:1.4}
+.hold-mine-btn.hold-success{animation:holdSuccessPop .4s ease}
+@keyframes holdSuccessPop{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+.hold-core{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;color:#fff}
+.hold-icon{font-size:1.7rem;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+.hold-label{font-family:'Sora',sans-serif;font-weight:800;font-size:.92rem;line-height:1.2;letter-spacing:.01em}
+.hold-percent{font-size:.62rem;font-weight:800;color:rgba(255,255,255,.85);letter-spacing:.06em}
+
+.miner-status-line{display:flex;align-items:center;gap:8px;font-size:.7rem;font-weight:800}
+.miner-status-line b{padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.07);letter-spacing:.04em;font-size:.62rem}
+.miner-status-line b[data-state="offline"]{color:#9fb0c8}
+.miner-status-line b[data-state="mining"]{color:#7ee8ff;background:rgba(34,224,255,.12)}
+.miner-status-line b[data-state="ready"]{color:#ffd35e;background:rgba(255,204,51,.14)}
+.miner-status-line span{color:var(--muted);font-size:.66rem;font-weight:700}
+
+/* ---- info bar: level / countdown / upgrade (yellow, like the reference) ---- */
+.miner-infobar{
+  position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 12px 12px 14px;border-radius:16px;margin-bottom:10px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+}
+.miner-infobar-text b{display:block;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:800}
+.miner-infobar-text span{display:block;font-size:.62rem;color:var(--muted);font-weight:700;margin-top:2px}
+.miner-infobar-text strong{color:#7ee8ff}
+.miner-upgrade-btn{
+  flex:none;padding:11px 16px;border-radius:13px;font-size:.68rem;font-weight:900;color:#3a2400;
+  background:linear-gradient(155deg,#ffe36d,#ffb020);border:1px solid rgba(255,255,255,.4);
+  box-shadow:0 4px 0 #a35f00,0 10px 20px rgba(255,176,32,.28);transition:transform .12s ease,box-shadow .12s ease
+}
+.miner-upgrade-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #a35f00,0 4px 10px rgba(255,176,32,.24)}
+.miner-upgrade-btn:disabled{opacity:.45}
+
+/* ---- footer row: ticket balance + claim, side by side ---- */
+.miner-footer-row{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1.3fr;gap:9px}
+.miner-tickets-pill{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:14px;
+  background:linear-gradient(155deg,rgba(59,130,246,.22),rgba(59,130,246,.08));border:1px solid rgba(96,165,250,.3);
+}
+.miner-tickets-pill span{font-size:1.15rem;flex:none}
+.miner-tickets-pill b{display:block;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:900;line-height:1.1}
+.miner-tickets-pill small{display:block;font-size:.52rem;color:var(--muted);font-weight:700;margin-top:1px;white-space:nowrap}
+.miner-claim-btn{
+  padding:11px 10px;border-radius:14px;font-size:.72rem;font-weight:900;color:#fff;
+  background:linear-gradient(155deg,#3b6df0,#1d3f9e);border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 4px 0 #12276e,0 10px 20px rgba(59,109,240,.28);transition:transform .12s ease,box-shadow .12s ease,background .2s ease
+}
+.miner-claim-btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #12276e,0 4px 10px rgba(59,109,240,.24)}
+.miner-claim-btn:disabled{opacity:.42}
+.miner-claim-btn.ready{
+  background:linear-gradient(155deg,#ffe36d,#ffb020);color:#3a2400;border-color:rgba(255,255,255,.4);
+  box-shadow:0 4px 0 #a35f00,0 10px 22px rgba(255,176,32,.4);animation:claimReadyPulse 1.6s ease-in-out infinite
+}
+@keyframes claimReadyPulse{0%,100%{box-shadow:0 4px 0 #a35f00,0 10px 22px rgba(255,176,32,.4)}50%{box-shadow:0 4px 0 #a35f00,0 10px 30px rgba(255,176,32,.65)}}
+
+.miner-foot{position:relative;z-index:1;display:block;margin-top:11px;text-align:center;font-size:.62rem;color:var(--muted);line-height:1.5}
+
+.rig-connector{display:flex;flex-direction:column;align-items:center;height:16px;position:relative;z-index:1}
+.rig-connector-line{width:2px;flex:1;background:linear-gradient(180deg,rgba(126,232,255,.55),rgba(126,232,255,.1))}
+.rig-connector-node{width:7px;height:7px;margin-top:-1px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 10px #22e0ff;flex:none}
+
+@media(max-width:390px){
+  .hold-mine-btn{width:148px;height:148px}
+  .hold-icon{font-size:1.5rem}
+  .miner-footer-row{grid-template-columns:1fr 1.2fr}
+}
+@media(max-width:350px){
+  .miner-card{padding:16px 14px 14px}
+  .hold-mine-btn{width:132px;height:132px}
+  .hold-label{font-size:.82rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .hold-mine-btn,.hold-mine-btn.ready-pulse,.hold-mine-btn.cycle-complete,.miner-claim-btn.ready{animation:none !important}
+}
 
 /* ---------------------------------------------------------
-   Shared modal chrome (used by the Upgrade Miner, How It
-   Works and Claim popups). `.modal-center` is the modifier
-   that makes a popup appear as a true centered, scale+fade
-   dialog instead of the default bottom sheet.
+   UPGRADE POPUP — level picker sheet
 --------------------------------------------------------- */
 .mining-modal{
-  position:fixed;inset:0;z-index:100500;display:flex;align-items:flex-end;justify-content:center;padding:14px;
-  background:rgba(2,4,12,.78);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease
+  position:fixed;inset:0;z-index:100000;display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(3,5,14,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease;padding:0 0 var(--safe-bottom)
 }
 .mining-modal.active{opacity:1;visibility:visible;pointer-events:auto}
 .mining-modal-card{
-  position:relative;overflow:hidden;
-  width:min(100%,430px);max-height:min(88vh,720px);overflow-y:auto;border-radius:28px;padding:20px;
-  background:linear-gradient(160deg,#241243 0%,#131a44 45%,#062338 100%);border:1px solid rgba(167,139,250,.35);
-  box-shadow:0 25px 70px rgba(0,0,0,.65),0 6px 0 #050914,inset 0 1px 0 rgba(255,255,255,.14);
-  transform:translateY(35px) scale(.97);transition:transform .32s cubic-bezier(.16,1,.3,1)
+  position:relative;width:100%;max-width:440px;max-height:85vh;overflow-y:auto;padding:20px 18px calc(20px + var(--safe-bottom));
+  border-radius:26px 26px 0 0;background:linear-gradient(165deg,#161f3a,#0a0f1d);border:1px solid rgba(255,255,255,.12);border-bottom:none;
+  box-shadow:0 -20px 60px rgba(0,0,0,.5);transform:translateY(30px);transition:transform .3s cubic-bezier(.34,1.56,.64,1)
 }
-.mining-modal.active .mining-modal-card{transform:translateY(0) scale(1)}
+.mining-modal.active .mining-modal-card{transform:translateY(0)}
 .mining-modal.modal-center{align-items:center}
-.mining-modal.modal-center .mining-modal-card{transform:scale(.82);opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .28s ease}
+.mining-modal.modal-center .mining-modal-card{border-radius:26px;transform:scale(.82);opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .28s ease}
 .mining-modal.modal-center.active .mining-modal-card{transform:scale(1);opacity:1}
-.mining-modal-glow{
-  position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(circle at 12% -10%,rgba(255,79,184,.35),transparent 45%),
-    radial-gradient(circle at 108% 10%,rgba(34,224,255,.3),transparent 42%),
-    radial-gradient(circle at 90% 100%,rgba(139,92,246,.28),transparent 45%);
-  ;
-}
-@keyframes modalGlowDrift{from{opacity:.75;transform:scale(1)}to{opacity:1;transform:scale(1.06)}}
+.mining-modal-glow{position:absolute;inset:-30% -20% auto -20%;height:60%;pointer-events:none;z-index:0;background:radial-gradient(circle at 30% 0%,rgba(59,130,246,.24),transparent 60%)}
 .mining-modal-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .mining-modal-head-left{display:flex;align-items:center;gap:11px}
 .mining-modal-icon{
-  width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;
-  background:linear-gradient(155deg,#ffd35e,var(--gold-dk));box-shadow:0 4px 0 #8a5a00,0 10px 20px rgba(255,211,94,.35),inset 0 2px 0 rgba(255,255,255,.5);
-  transform:rotate(-6deg);}
+  width:42px;height:42px;border-radius:14px;flex:none;display:grid;place-items:center;font-size:1.2rem;
+  background:linear-gradient(150deg,var(--cyan),var(--purple));box-shadow:0 4px 0 rgba(60,20,110,.5)
+}
 .mining-modal-head h3{font-family:'Sora',sans-serif;font-size:1.08rem;background:linear-gradient(100deg,#fff,#c8e9ff 60%,#ffd6f5);-webkit-background-clip:text;background-clip:text;color:transparent}
-.mining-close{position:relative;z-index:1;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:1.2rem;transition:transform .15s ease,background .15s ease}
-.mining-close:active{transform:scale(.9) rotate(90deg);background:rgba(255,79,184,.25)}
-
-/* ---------------------------------------------------------
-   Upgrade Miner — level progress strip + richer level cards
---------------------------------------------------------- */
+.mining-close{
+  flex:none;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  font-size:1.1rem;color:#fff;display:grid;place-items:center
+}
 .level-progress-strip{position:relative;z-index:1;display:flex;align-items:center;gap:4px;margin-bottom:14px}
 .level-progress-seg{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
 .level-progress-seg i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#22e0ff,#8b5cf6);transition:width .4s ease}
 .level-progress-seg.filled i{width:100%}
 .miner-level-list{position:relative;z-index:1;display:grid;gap:10px}
 .miner-level-card{
-  position:relative;overflow:hidden;padding:14px 14px 14px 17px;border-radius:18px;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 0 rgba(0,0,0,.22);
-  transition:transform .18s cubic-bezier(.2,.8,.3,1),border-color .18s ease,box-shadow .18s ease;
-  opacity:0;transform:translateY(10px);animation:levelCardIn .4s cubic-bezier(.16,1,.3,1) forwards;
+  position:relative;overflow:hidden;padding:13px 13px 13px 16px;border-radius:16px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);
 }
-.miner-level-card:nth-child(1){animation-delay:.02s}
-.miner-level-card:nth-child(2){animation-delay:.08s}
-.miner-level-card:nth-child(3){animation-delay:.14s}
-.miner-level-card:nth-child(4){animation-delay:.2s}
-.miner-level-card:nth-child(5){animation-delay:.26s}
-.miner-level-card:nth-child(6){animation-delay:.32s}
-@keyframes levelCardIn{to{opacity:1;transform:translateY(0)}}
 .miner-level-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--level-accent,linear-gradient(180deg,#22e0ff,#8b5cf6))}
 .miner-level-card[data-level="1"]{--level-accent:linear-gradient(180deg,#9be89a,#2fa864)}
 .miner-level-card[data-level="2"]{--level-accent:linear-gradient(180deg,#7ee8ff,#1189b3)}
@@ -581,15 +473,14 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 .miner-level-card[data-level="4"]{--level-accent:linear-gradient(180deg,#ffd35e,#c97f00)}
 .miner-level-card[data-level="5"]{--level-accent:linear-gradient(180deg,#ff9bd8,#ff4fb8)}
 .miner-level-card[data-level="6"]{--level-accent:linear-gradient(180deg,#ff8a3d,#c45c14)}
-.miner-level-card.available:active{transform:translateY(3px) scale(.99)}
-.miner-level-card.current{border-color:rgba(34,224,255,.65);box-shadow:0 5px 0 rgba(10,143,168,.35),0 0 26px rgba(34,224,255,.18);background:linear-gradient(120deg,rgba(34,224,255,.14),rgba(34,224,255,.04))}
-.miner-level-card.recommended{border-color:rgba(255,204,51,.55);box-shadow:0 5px 0 rgba(150,95,0,.3),0 0 26px rgba(255,204,51,.14)}
+.miner-level-card.current{border-color:rgba(34,224,255,.65);box-shadow:0 0 26px rgba(34,224,255,.18);background:linear-gradient(120deg,rgba(34,224,255,.14),rgba(34,224,255,.04))}
+.miner-level-card.recommended{border-color:rgba(255,204,51,.55);box-shadow:0 0 26px rgba(255,204,51,.14)}
 .miner-level-card.locked{opacity:.55}
 .miner-level-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .miner-level-name{display:flex;align-items:center;gap:6px;font-weight:900;font-size:.78rem}
 .miner-level-badge{
-  width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:9px;font-size:.85rem;
-  background:var(--level-accent,linear-gradient(180deg,#22e0ff,#8b5cf6));box-shadow:0 2px 0 rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3);
+  width:26px;height:26px;border-radius:9px;display:grid;place-items:center;font-size:.8rem;flex:none;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)
 }
 .miner-level-cost{font-weight:900;font-size:.68rem;color:#7ee8ff}
 .miner-level-tagline{font-size:.6rem;color:var(--muted);margin-top:5px;line-height:1.4}
@@ -639,7 +530,8 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 @keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(240px) rotate(300deg)}}
 
 /* ---------------------------------------------------------
-   HOW IT WORKS POPUP — plain-language explainer
+   HOW MINING WORKS POPUP — plain-language explainer,
+   also shown automatically the first time the page loads
 --------------------------------------------------------- */
 .howworks-steps{position:relative;z-index:1;display:grid;gap:12px;margin-top:4px}
 .howworks-step{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
@@ -649,13 +541,14 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 }
 .howworks-step h4{font-family:'Sora',sans-serif;font-size:.82rem;font-weight:800;margin-bottom:3px}
 .howworks-step p{font-size:.68rem;color:var(--muted);line-height:1.5}
-.howworks-note{
-  position:relative;z-index:1;margin-top:14px;padding:12px 13px;border-radius:15px;font-size:.66rem;line-height:1.55;color:var(--muted);
-  background:rgba(34,224,255,.08);border:1px solid rgba(34,224,255,.22);
+.howto-dontshow{
+  position:relative;z-index:1;display:flex;align-items:center;gap:9px;margin-top:14px;padding:11px 12px;border-radius:13px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:.66rem;font-weight:700;color:var(--muted);
+  cursor:pointer;user-select:none
 }
-.howworks-note b{color:#7ee8ff}
+.howto-dontshow input{width:16px;height:16px;flex:none;accent-color:var(--blue);cursor:pointer}
 .howworks-close-btn{
-  position:relative;z-index:1;margin-top:16px;width:100%;min-height:46px;border-radius:15px;font-size:.72rem;font-weight:900;color:#fff;
+  position:relative;z-index:1;margin-top:14px;width:100%;min-height:46px;border-radius:15px;font-size:.72rem;font-weight:900;color:#fff;
   background:linear-gradient(155deg,#1de4ff,#087f9d);border:1px solid rgba(255,255,255,.15);
   box-shadow:0 5px 0 rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .12s ease
 }
@@ -670,747 +563,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 .mining-toast.active{opacity:1;visibility:visible;transform:translate(-50%,0)}
 .mining-toast strong{display:block;font-size:.8rem;margin-bottom:3px}
 .mining-toast .toast-action{display:inline-flex;margin-top:9px;padding:8px 12px;border-radius:10px;background:linear-gradient(155deg,#1de4ff,#087f9d);font-size:.6rem;font-weight:900}
-@media(max-width:390px){
-  .mining-rig{padding:10px}.mining-stats{gap:5px}.mining-stat{padding:5px 4px}.mining-actions{gap:6px}.mining-buttons-row{gap:6px}
-  .ring-percent{font-size:1.18rem}
-  .mining-ring-wrap{width:104px;height:104px}
-  .hold-mine-btn{width:56px;height:56px}.hold-icon{font-size:.92rem}.hold-label{font-size:.44rem}
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-@media (max-width:420px){
-  .earn-card-item{min-height:174px;padding:15px}
-}
-@media (max-width:350px){
-  .earn-cards-grid{gap:10px}
-  .game-details h4{font-size:.86rem}
-}
-@media (prefers-reduced-motion: reduce){
-  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
-}
-
-/* =========================================================
-   LUCK TICKET RIG — BOLD BOUNCY REDESIGN
-   Visual-only redesign. Existing mining IDs/JS are preserved.
-========================================================= */
-.mining-rig-wrap{margin-top:6px}
-
-.mining-rig{
-  position:relative;
-  overflow:hidden;
-  padding:13px;
-  border-radius:24px;
-  background:
-    radial-gradient(circle at 8% 0%,rgba(34,224,255,.20),transparent 32%),
-    radial-gradient(circle at 100% 100%,rgba(255,79,184,.16),transparent 35%),
-    linear-gradient(145deg,#111a38 0%,#0a1026 48%,#071a28 100%);
-  border:1px solid rgba(126,232,255,.30);
-  box-shadow:
-    0 7px 0 #040817,
-    0 22px 45px rgba(0,0,0,.45),
-    inset 0 1px 0 rgba(255,255,255,.15);
-  transform-style:preserve-3d;
-}
-
-.mining-rig:before{
-  content:"";
-  position:absolute;
-  width:180px;height:180px;
-  left:-70px;top:-100px;
-  border-radius:50%;
-  background:#22e0ff;
-  opacity:.12;
-  filter:blur(20px);
-  ;
-  pointer-events:none;
-}
-
-.mining-rig:after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:24px;
-  padding:1px;
-  pointer-events:none;
-  z-index:8;
-  background:linear-gradient(115deg,transparent 0%,rgba(34,224,255,.65) 28%,rgba(255,79,184,.65) 55%,transparent 78%);
-  background-size:220% 220%;
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;
-  mask-composite:exclude;
-  ;
-}
-@keyframes rigAuraBounce{
-  to{transform:translate(35px,22px) scale(1.25)}
-}
-@keyframes rigBorderBounce{
-  0%{background-position:0% 50%}
-  100%{background-position:200% 50%}
-}
-
-.rig-spark-field{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
-.rig-spark-field i{
-  position:absolute;width:4px;height:4px;border-radius:50%;
-  background:#7ee8ff;
-  box-shadow:0 0 12px #22e0ff;
-  opacity:0;
-}
-.rig-spark-field i:nth-child(1){left:8%;bottom:22%;}
-.rig-spark-field i:nth-child(2){left:22%;bottom:12%;}
-.rig-spark-field i:nth-child(3){left:39%;bottom:25%;}
-.rig-spark-field i:nth-child(4){left:61%;bottom:18%;}
-.rig-spark-field i:nth-child(5){left:77%;bottom:30%;}
-.rig-spark-field i:nth-child(6){left:90%;bottom:16%;}
-.rig-spark-field i:nth-child(7){left:52%;bottom:8%;}
-@keyframes rigSpark{
-  0%{transform:translateY(18px) scale(.3);opacity:0}
-  25%{opacity:.85}
-  100%{transform:translateY(-90px) translateX(15px) scale(1.2);opacity:0}
-}
-
-.rig-hero,.rig-core-layout,.rig-bottom,.mining-foot{position:relative;z-index:3}
-
-.rig-hero{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.rig-title-block{display:flex;align-items:center;gap:10px;min-width:0}
-.rig-emblem{
-  position:relative;
-  width:42px;height:42px;flex:none;
-  display:grid;place-items:center;
-  border-radius:14px;
-  background:linear-gradient(145deg,#75efff,#157d9c);
-  box-shadow:
-    0 5px 0 #06485b,
-    0 10px 22px rgba(34,224,255,.28),
-    inset 0 2px 0 rgba(255,255,255,.5);
-  transform:rotate(-5deg);
-  ;
-}
-.rig-emblem span{font-size:1.28rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
-.rig-emblem i{
-  position:absolute;
-  width:7px;height:7px;right:-3px;top:-3px;border-radius:50%;
-  background:#ffcc33;box-shadow:0 0 0 4px rgba(255,204,51,.16),0 0 14px #ffcc33;
-  ;
-}
-@keyframes emblemBounce{
-  0%,100%{transform:translateY(0) rotate(-5deg)}
-  50%{transform:translateY(-4px) rotate(5deg)}
-}
-@keyframes statusPop{
-  0%,100%{transform:scale(.8);opacity:.65}
-  50%{transform:scale(1.15);opacity:1}
-}
-
-.rig-kicker{
-  font-size:.46rem;
-  font-weight:900;
-  letter-spacing:.16em;
-  color:#7ee8ff;
-  margin-bottom:2px;
-}
-.rig-title-block h3{
-  font-family:'Sora',sans-serif;
-  font-size:1.02rem;
-  font-weight:900;
-  letter-spacing:-.035em;
-}
-.rig-title-block p{
-  margin-top:2px;
-  color:rgba(255,255,255,.66);
-  font-size:.56rem;
-  white-space:nowrap;
-}
-
-.rig-level-pill{
-  flex:none;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:7px 9px;
-  border-radius:14px;
-  background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
-  border:1px solid rgba(255,255,255,.13);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
-}
-.level-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#ffcc33;
-  box-shadow:0 0 10px rgba(255,204,51,.8);
-  ;
-}
-.rig-level-pill b{display:block;font-size:.64rem;font-weight:900;color:#fff}
-.rig-level-pill small{
-  display:block;
-  margin-top:1px;
-  color:#7ee8ff;
-  font-size:.43rem;
-  font-weight:900;
-  letter-spacing:.04em;
-}
-
-.rig-core-layout{
-  display:grid;
-  grid-template-columns:118px 1fr;
-  align-items:center;
-  gap:10px;
-}
-
-.rig-progress-card{
-  padding:5px 3px 4px;
-  border-radius:18px;
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.07);
-}
-
-.mining-ring-wrap{
-  width:104px;height:104px;
-  margin:0 auto;
-}
-.ring-decoration{
-  inset:-6px;
-  border-width:1px;
-  border-color:rgba(126,232,255,.20);
-  animation:ringDecoSpin 10s linear infinite;
-}
-.ring-track{stroke:rgba(255,255,255,.07);stroke-width:12}
-.ring-progress{
-  stroke-width:12;
-  filter:drop-shadow(0 0 8px rgba(34,224,255,.72));
-  transition:stroke-dashoffset .35s cubic-bezier(.2,.8,.2,1);
-}
-.ring-center{inset:0}
-.ring-percent{
-  font-size:1.18rem;
-  font-weight:900;
-  text-shadow:0 0 18px rgba(34,224,255,.6);
-}
-.ring-caption{font-size:.42rem}
-
-.mining-status-row{margin-top:0}
-.mining-status{
-  padding:5px 9px;
-  font-size:.48rem;
-  letter-spacing:.10em;
-  background:rgba(0,0,0,.26);
-}
-
-.rig-info-column{min-width:0}
-
-.rig-section-heading{
-  display:flex;align-items:center;gap:7px;
-  margin-bottom:6px;
-}
-.heading-icon{
-  width:25px;height:25px;
-  display:grid;place-items:center;
-  border-radius:8px;
-  background:linear-gradient(145deg,#ffdd68,#c77b00);
-  box-shadow:0 3px 0 #765000;
-  font-size:.75rem;
-  ;
-}
-@keyframes headingBounce{
-  0%,100%{transform:translateY(0) rotate(0)}
-  50%{transform:translateY(-3px) rotate(-6deg)}
-}
-.rig-section-heading b{
-  display:block;
-  font-size:.55rem;
-  font-weight:900;
-  letter-spacing:.09em;
-}
-.rig-section-heading small{
-  display:block;
-  margin-top:1px;
-  color:rgba(255,255,255,.55);
-  font-size:.47rem;
-  font-weight:700;
-}
-
-.mining-hash-box{
-  margin-top:0;
-  min-height:39px;
-  padding:7px 8px;
-  border-radius:13px;
-  background:linear-gradient(145deg,#030a18,#071426);
-  border:1px solid rgba(34,224,255,.20);
-  box-shadow:inset 0 0 24px rgba(34,224,255,.045),0 3px 0 rgba(0,0,0,.24);
-}
-.hash-engine{width:25px;height:25px}
-.engine-ring{border-width:2px}
-.engine-ring-2{inset:4px}
-.engine-core{width:11px;height:11px}
-.hash-line{font-size:.54rem}
-.hash-prefix{color:#64748b}
-.hash-sub{display:none}
-
-.mining-stats{
-  gap:5px;
-  margin-top:6px;
-}
-.mining-stat{
-  padding:5px 4px;
-  border-radius:10px;
-  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
-  border:1px solid rgba(255,255,255,.08);
-}
-.mining-stat b{font-size:.62rem}
-.mining-stat span{
-  font-size:.40rem;
-  letter-spacing:.04em;
-  white-space:nowrap;
-}
-
-.rig-bottom{
-  display:grid;
-  grid-template-columns:1fr auto;
-  align-items:center;
-  gap:8px;
-  margin-top:9px;
-  padding-top:8px;
-  border-top:1px solid rgba(255,255,255,.08);
-}
-
-.mining-actions{
-  display:grid;
-  grid-template-columns:60px 1fr;
-  align-items:center;
-  gap:8px;
-  margin-top:0;
-}
-.hold-mine-wrap{padding:0}
-.hold-mine-btn{
-  width:58px;height:58px;
-  border-radius:17px;
-  background:linear-gradient(145deg,#ff5fc4 0%,#a21caf 55%,#68136f 100%);
-  box-shadow:
-    0 6px 0 #58105e,
-    0 11px 24px rgba(217,70,239,.35),
-    inset 0 2px 0 rgba(255,255,255,.35);
-  ;
-}
-.hold-mine-btn:before{
-  inset:4px;
-  border-radius:14px;
-  background:radial-gradient(circle at 32% 20%,#ffb2e4,#ff58bd 42%,#a21caf 82%);
-  box-shadow:inset 0 3px 5px rgba(255,255,255,.42),inset 0 -8px 13px rgba(0,0,0,.32);
-}
-.hold-mine-btn:after{left:15%;right:15%;top:9%;height:23%}
-.hold-mine-btn:active{transform:translateY(4px) scale(.96)}
-.hold-mine-btn.holding{transform:translateY(4px) scale(.94)}
-@keyframes activateBounce{
-  0%,100%{transform:translateY(0) rotate(0)}
-  8%{transform:translateY(-3px) rotate(-2deg)}
-  16%{transform:translateY(0) rotate(2deg)}
-  24%{transform:translateY(-2px) rotate(0)}
-}
-.hold-icon{font-size:.96rem}
-.hold-label{font-size:.43rem;letter-spacing:.04em}
-
-.mining-buttons-row{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:6px;
-  width:100%;
-}
-.mining-btn{
-  min-height:29px;
-  padding:6px 8px;
-  border-radius:10px;
-  font-size:.56rem;
-  font-weight:900;
-  box-shadow:0 4px 0 rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.17);
-  transition:transform .12s cubic-bezier(.2,.8,.2,1),filter .2s ease;
-}
-.mining-btn.primary{
-  background:linear-gradient(145deg,#22e0ff,#087f9d);
-}
-.mining-btn.primary.ready{
-  background:linear-gradient(145deg,#ffe36d,#d17d00);
-  ;
-}
-.mining-btn.secondary{
-  background:linear-gradient(145deg,#4a397e,#211b46);
-}
-.mining-btn:active{transform:translateY(3px) scale(.98)}
-
-.mining-how-btn{
-  min-width:75px;
-  padding:7px 8px;
-  border-radius:11px;
-  background:linear-gradient(145deg,#332e5e,#17142f);
-  border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 4px 0 rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.11);
-  font-size:.49rem;
-  font-weight:900;
-  ;
-}
-.mining-how-btn .how-ico{
-  width:13px;height:13px;
-  font-size:.48rem;
-}
-.mining-how-btn:active{transform:translateY(3px)}
-@keyframes claimBounce{
-  0%,100%{transform:translateY(0) scale(1)}
-  50%{transform:translateY(-2px) scale(1.025)}
-}
-@keyframes howBounce{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-2px)}
-}
-
-.mining-foot{
-  margin-top:7px;
-  padding:5px 8px;
-  border-radius:9px;
-  background:rgba(255,255,255,.035);
-  color:rgba(255,255,255,.52);
-  font-size:.46rem;
-  line-height:1.35;
-  text-align:center;
-}
-
-.mining-rig.is-mining{
-  ;
-}
-@keyframes rigActiveBounce{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-1px)}
-}
-.mining-rig.is-mining .rig-emblem{
-  ;
-}
-@keyframes emblemMining{
-  0%,100%{transform:scale(1) rotate(-5deg)}
-  50%{transform:scale(1.06) rotate(5deg)}
-}
-
-@media(max-width:390px){
-  .mining-rig{padding:10px;border-radius:21px}
-  .rig-core-layout{grid-template-columns:103px 1fr;gap:8px}
-  .mining-ring-wrap{width:94px;height:94px}
-  .rig-level-pill{padding:6px 7px}
-  .rig-level-pill b{font-size:.57rem}
-  .rig-level-pill small{font-size:.39rem}
-  .rig-title-block h3{font-size:.93rem}
-  .rig-title-block p{font-size:.51rem}
-  .hold-mine-btn{width:53px;height:53px}
-  .mining-actions{grid-template-columns:55px 1fr;gap:6px}
-  .mining-btn{font-size:.52rem;min-height:27px}
-  .mining-how-btn{min-width:68px;font-size:.45rem}
-}
-
-@media(max-width:350px){
-  .rig-core-layout{grid-template-columns:1fr}
-  .rig-progress-card{display:flex;justify-content:center;gap:5px}
-  .mining-ring-wrap{width:88px;height:88px}
-  .rig-info-column{width:100%}
-  .rig-bottom{grid-template-columns:1fr}
-  .mining-how-btn{width:100%}
-}
-
-@media(prefers-reduced-motion:reduce){
-  .mining-rig,.rig-emblem,.hold-mine-btn,.mining-how-btn,.mining-btn.primary.ready,
-  .heading-icon,.level-dot,.rig-emblem i,.rig-spark-field i{
-    animation:none !important;
-  }
-}
-
-/* =========================================================
-   LUCK TICKET MINING — SIZE & EMPHASIS BOOST
-   Makes this the most visually prominent section on the page:
-   larger, heavier type across the section label and rig card
-   so users immediately notice and understand it.
-========================================================= */
-.mining-section-label h2{font-size:1.22rem;font-weight:900;letter-spacing:-.01em}
-.mining-section-label span{font-size:.74rem;font-weight:800}
-.rig-kicker{font-size:.54rem;font-weight:900;letter-spacing:.14em}
-.rig-title-block h3{font-size:1.24rem;font-weight:900}
-.rig-title-block p{font-size:.66rem;font-weight:600}
-.rig-emblem{width:48px;height:48px}
-.rig-emblem span{font-size:1.5rem}
-.rig-level-pill b{font-size:.74rem}
-.rig-level-pill small{font-size:.5rem}
-.ring-percent{font-size:1.34rem}
-.ring-caption{font-size:.5rem;font-weight:700}
-.mining-status{font-size:.58rem;font-weight:900}
-.rig-section-heading b{font-size:.66rem}
-.rig-section-heading small{font-size:.53rem}
-.hash-line{font-size:.6rem}
-.mining-stat b{font-size:.78rem;font-weight:900}
-.mining-stat span{font-size:.45rem;font-weight:900}
-.mining-btn{font-size:.66rem}
-.hold-label{font-size:.49rem}
-.mining-how-btn{font-size:.56rem}
-.mining-foot{font-size:.52rem}
-
-@media(max-width:390px){
-  .mining-section-label h2{font-size:1.08rem}
-  .rig-title-block h3{font-size:1.08rem}
-  .mining-stat b{font-size:.7rem}
-  .mining-btn{font-size:.6rem}
-}
-
-
-/* =========================================================
-   LUCK TICKET MINING — CONTROL CENTER REDESIGN
-   A completely new visual layer. Existing IDs/classes used by
-   the mining engine are intentionally preserved.
-========================================================= */
-.mining-rig-wrap{margin-top:7px}
-.rig-connector{display:flex;flex-direction:column;align-items:center;height:16px;position:relative;z-index:1}
-.rig-connector-line{width:2px;flex:1;background:linear-gradient(180deg,rgba(126,232,255,.55),rgba(126,232,255,.1))}
-.rig-connector-node{width:7px;height:7px;margin-top:-1px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 10px #22e0ff;flex:none}
-.mining-command-center{
-  position:relative;
-  overflow:hidden;
-  padding:13px;
-  border-radius:28px;
-  background:
-    radial-gradient(circle at 88% 12%,rgba(34,224,255,.16),transparent 25%),
-    radial-gradient(circle at 8% 78%,rgba(139,92,246,.16),transparent 28%),
-    linear-gradient(150deg,#111936 0%,#080e20 48%,#050a15 100%);
-  border:1px solid rgba(126,232,255,.25);
-  box-shadow:0 8px 0 #030611,0 28px 55px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.13);
-  transform-style:preserve-3d;
-}
-.mining-command-center:before{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    linear-gradient(90deg,transparent 49.7%,rgba(126,232,255,.025) 50%,transparent 50.3%),
-    linear-gradient(0deg,transparent 49.7%,rgba(126,232,255,.025) 50%,transparent 50.3%);
-  background-size:34px 34px;opacity:.55;
-}
-.mine-grid-lines{
-  position:absolute;inset:0;pointer-events:none;opacity:.25;
-  background:linear-gradient(105deg,transparent 0 35%,rgba(34,224,255,.08) 50%,transparent 65%);
-  background-size:180% 100%;
-}
-@keyframes mineScan{0%{background-position:-180% 0}100%{background-position:180% 0}}
-.mine-orbit{position:absolute;border:1px solid rgba(34,224,255,.10);border-radius:50%;pointer-events:none}
-.mine-orbit-a{width:250px;height:250px;right:-135px;top:55px;}
-.mine-orbit-b{width:175px;height:175px;right:-96px;top:92px;border-color:rgba(255,79,184,.10);}
-@keyframes mineOrbit{to{transform:rotate(360deg)}}
-.mine-sparks{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.mine-sparks i{position:absolute;width:3px;height:3px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 10px #22e0ff;opacity:0}
-.mine-sparks i:nth-child(1){left:13%;bottom:15%;}
-.mine-sparks i:nth-child(2){left:36%;bottom:8%;}
-.mine-sparks i:nth-child(3){left:67%;bottom:12%;}
-.mine-sparks i:nth-child(4){left:83%;bottom:20%;}
-.mine-sparks i:nth-child(5){left:52%;bottom:30%;}
-@keyframes mineSpark{
-  0%{transform:translateY(20px) scale(.4);opacity:0}
-  25%{opacity:.8}
-  100%{transform:translateY(-95px) translateX(18px) scale(1.2);opacity:0}
-}
-
-/* LED strip along the top edge — lights chase left-to-right while
-   the rig is mining, like a real ASIC/GPU rig's status array. */
-.mine-led-strip{position:relative;z-index:3;display:flex;justify-content:center;gap:7px;margin-bottom:9px;pointer-events:none}
-.mine-led-strip i{width:5px;height:5px;border-radius:50%;background:rgba(126,232,255,.18)}
-.mining-command-center.is-mining .mine-led-strip i{background:#7ee8ff;box-shadow:0 0 8px #22e0ff;}
-.mine-led-strip i:nth-child(1){animation-delay:0s}
-.mine-led-strip i:nth-child(2){animation-delay:.08s}
-.mine-led-strip i:nth-child(3){animation-delay:.16s}
-.mine-led-strip i:nth-child(4){animation-delay:.24s}
-.mine-led-strip i:nth-child(5){animation-delay:.32s}
-.mine-led-strip i:nth-child(6){animation-delay:.4s}
-.mine-led-strip i:nth-child(7){animation-delay:.48s}
-.mine-led-strip i:nth-child(8){animation-delay:.56s}
-@keyframes ledChase{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
-
-/* Cooling-fan gear inside the level pill — spins slowly while idle,
-   spins up hard once the rig activates, so the card visibly "runs". */
-.mine-fan{display:inline-block;flex:none;font-size:.9rem;line-height:1;margin-right:2px;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));opacity:.85;}
-.mining-command-center.is-mining .mine-fan{;opacity:1}
-@keyframes fanSpin{to{transform:rotate(360deg)}}
-
-.mine-header,.mine-balance-panel,.mine-status-bar,.mine-progress-track,.mine-data-row,.mine-action-zone,.mining-how-btn{
-  position:relative;z-index:3
-}
-.mine-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.mine-brand{display:flex;align-items:center;gap:11px;min-width:0}
-.mine-logo{
-  position:relative;width:48px;height:48px;flex:none;border-radius:16px;display:grid;place-items:center;
-  background:linear-gradient(145deg,#8af3ff,#247a9b 55%,#11465e);
-  box-shadow:0 6px 0 #063748,0 12px 26px rgba(34,224,255,.25),inset 0 2px 0 rgba(255,255,255,.55);
-  transform:rotate(-5deg);
-}
-.mine-logo span{font-size:1.5rem;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}
-.mine-logo i{
-  position:absolute;right:-3px;top:-3px;width:9px;height:9px;border-radius:50%;
-  background:#ffcc33;box-shadow:0 0 0 4px rgba(255,204,51,.12),0 0 15px #ffcc33;
-  ;
-}
-@keyframes mineLogoFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-4px) rotate(4deg)}}
-.mine-eyebrow{font-size:.48rem;font-weight:900;letter-spacing:.16em;color:#7ee8ff}
-.mine-brand h3{font-family:'Sora',sans-serif;font-size:1.12rem;font-weight:900;letter-spacing:-.04em;margin-top:2px}
-.mine-brand p{font-size:.59rem;color:rgba(255,255,255,.58);margin-top:2px}
-.mine-level{
-  display:flex;align-items:center;gap:7px;flex:none;padding:7px 9px;border-radius:14px;
-  background:#0b1328;border:1px solid rgba(255,255,255,.10);box-shadow:0 4px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06)
-}
-.mine-level-dot{width:8px;height:8px;border-radius:50%;background:#ffcc33;box-shadow:0 0 11px #ffcc33}
-.mine-level b{display:block;font-size:.64rem;font-weight:900}
-.mine-level small{display:block;color:#7ee8ff;font-size:.43rem;font-weight:900;margin-top:2px}
-
-.mine-balance-panel{
-  margin-top:10px;min-height:132px;padding:14px;border-radius:23px;
-  display:grid;grid-template-columns:1fr 116px;align-items:center;gap:10px;
-  background:
-    radial-gradient(circle at 18% 40%,rgba(34,224,255,.12),transparent 34%),
-    linear-gradient(145deg,#0d1830,#08101f);
-  border:1px solid rgba(126,232,255,.14);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 0 rgba(0,0,0,.25);
-}
-.mine-balance-copy>span{font-size:.5rem;font-weight:900;letter-spacing:.15em;color:#7ee8ff}
-.mine-balance-copy strong{
-  display:block;margin-top:5px;font-family:'Sora',sans-serif;font-size:2.05rem;line-height:1;
-  letter-spacing:-.06em;color:#fff;text-shadow:0 0 25px rgba(34,224,255,.30);
-}
-.mine-balance-copy small{display:block;margin-top:7px;color:rgba(255,255,255,.48);font-size:.57rem;font-weight:700}
-.mine-progress-orb{display:flex;justify-content:center}
-.mine-orb-ring{position:relative;width:94px;height:94px}
-.mine-orb-ring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
-.mine-orb-ring .ring-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:11}
-.mine-orb-ring .ring-progress{
-  fill:none;stroke:url(#miningGradient);stroke-width:11;stroke-linecap:round;
-  filter:drop-shadow(0 0 9px rgba(34,224,255,.75));transition:stroke-dashoffset .35s ease
-}
-.mine-orb-ring .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.mine-orb-ring .ring-percent{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:900}
-.mine-orb-ring .ring-caption{font-size:.4rem;color:rgba(255,255,255,.55);font-weight:900;margin-top:2px;max-width:74px}
-.mining-command-center.is-mining .mine-orb-ring{animation:orbPulse 2.2s ease-in-out infinite}
-@keyframes orbPulse{50%{transform:scale(1.035)}}
-
-.mine-status-bar{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 11px;
-  border-radius:15px;background:#060c18;border:1px solid rgba(255,255,255,.08)
-}
-.mine-status-main{display:flex;align-items:center;gap:8px;min-width:0}
-.mine-status-led{width:8px;height:8px;border-radius:50%;background:#64748b;flex:none}
-.mining-command-center.is-mining .mine-status-led{background:#22e0ff;box-shadow:0 0 14px #22e0ff;}
-.mine-status-main b{display:block;font-size:.57rem;font-weight:900;letter-spacing:.09em}
-.mine-status-main small{display:block;color:rgba(255,255,255,.42);font-size:.46rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-.mine-cycle{text-align:right;flex:none}
-.mine-cycle span{display:block;font-size:.42rem;color:rgba(255,255,255,.38);font-weight:900;letter-spacing:.08em}
-.mine-cycle b{display:block;margin-top:2px;font-size:.62rem;color:#7ee8ff}
-
-.mine-progress-track{
-  height:9px;margin-top:7px;border-radius:999px;overflow:hidden;background:#050a13;
-  border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 2px 4px rgba(0,0,0,.45)
-}
-.mine-progress-fill{
-  width:0%;height:100%;border-radius:999px;
-  background:linear-gradient(90deg,#22e0ff,#8b5cf6,#ff4fb8);
-  box-shadow:0 0 14px rgba(34,224,255,.55);transition:width .35s ease
-}
-.mine-progress-shine{
-  position:absolute;top:1px;left:-25%;width:25%;height:7px;border-radius:999px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);opacity:0
-}
-.mining-command-center.is-mining .mine-progress-shine{opacity:1;}
-@keyframes progressShine{to{left:110%}}
-
-.mine-data-row{
-  display:grid;grid-template-columns:.8fr 1px 1.6fr;align-items:center;gap:11px;margin-top:9px;padding:10px 11px;
-  border-radius:15px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)
-}
-.mine-data span{display:block;color:rgba(255,255,255,.38);font-size:.42rem;font-weight:900;letter-spacing:.07em}
-.mine-data b{display:block;margin-top:3px;font-size:.62rem;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mine-data-hash{display:flex;flex-direction:column;min-width:0}
-.mine-data-hash .hash-readout{display:flex;align-items:center;gap:6px;margin-top:4px;min-width:0}
-.mine-data-hash .hash-engine{position:relative;flex:none;width:22px;height:22px;display:grid;place-items:center}
-.mine-data-hash .engine-ring{border-width:2px}
-.mine-data-hash .engine-ring-2{inset:4px}
-.mine-data-hash .engine-core{width:9px;height:9px}
-.mine-data-hash b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#7ee8ff;font-size:.78rem;font-weight:900;letter-spacing:.02em;text-shadow:0 0 14px rgba(34,224,255,.75);margin-top:0}
-.mine-hashrate-strip{margin-top:4px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.48rem;font-weight:800;color:rgba(126,232,255,.65);letter-spacing:.03em}
-.mine-data-divider{width:1px;height:34px;background:rgba(255,255,255,.08)}
-
-.mine-action-zone{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px;padding:11px;
-  border-radius:19px;background:linear-gradient(145deg,rgba(34,224,255,.07),rgba(139,92,246,.04));
-  border:1px solid rgba(126,232,255,.12)
-}
-.mine-action-copy{min-width:0}
-.mine-action-kicker{display:block;font-size:.44rem;color:#7ee8ff;font-weight:900;letter-spacing:.13em}
-.mine-action-copy>b{display:block;font-family:'Sora',sans-serif;font-size:.83rem;margin-top:3px}
-.mine-action-copy small{display:block;color:rgba(255,255,255,.48);font-size:.49rem;line-height:1.35;margin-top:4px;max-width:155px}
-.mine-action-buttons{display:flex;align-items:center;gap:10px;flex:none}
-.mine-button-stack{display:grid;gap:8px;width:138px}
-.mine-button-stack .mining-btn{width:100%;min-height:46px;padding:9px 8px;border-radius:14px;font-size:.68rem;font-weight:900;letter-spacing:.01em}
-.mine-action-zone .hold-mine-btn{
-  width:92px;height:92px;border-radius:50%;
-  background:linear-gradient(145deg,#ff67c8,#a21caf 65%,#5f125f);
-  box-shadow:0 8px 0 #4e0e50,0 14px 30px rgba(217,70,239,.36),inset 0 2px 0 rgba(255,255,255,.36);
-  }
-.mine-action-zone .hold-mine-btn:before{
-  inset:5px;border-radius:50%;
-  background:radial-gradient(circle at 33% 22%,#ffc0ea,#ff59bf 43%,#8d1598 82%);
-  box-shadow:inset 0 3px 5px rgba(255,255,255,.45),inset 0 -10px 16px rgba(0,0,0,.35)
-}
-.mine-action-zone .hold-mine-btn:after{left:16%;right:16%;top:9%;height:25%}
-.mine-action-zone .hold-mine-btn.holding{animation:none;transform:translateY(5px) scale(.95);box-shadow:0 3px 0 #4e0e50,0 0 36px rgba(255,79,184,.65),inset 0 -5px 9px rgba(0,0,0,.35)}
-.mine-action-zone .hold-mine-btn.hold-success:before{background:radial-gradient(circle at 33% 22%,#caffd4,#4fdc82 45%,#0d7942 82%)}
-.mine-action-zone .hold-icon{font-size:1.55rem}
-.mine-action-zone .hold-label{font-size:.53rem;font-weight:900}
-@keyframes mineButtonFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-
-.mining-command-center .mining-btn.primary{background:linear-gradient(145deg,#22e0ff,#087f9d)}
-.mining-command-center .mining-btn.primary.ready{
-  background:linear-gradient(145deg,#ffe36d,#d17d00);color:#241700;
-  box-shadow:0 4px 0 #754900,0 0 22px rgba(255,204,51,.35);}
-.mining-command-center .mining-btn.secondary{background:linear-gradient(145deg,#493878,#211a43)}
-.mining-command-center .mining-btn:disabled{opacity:.42;filter:saturate(.45)}
-
-.mining-command-center .mining-how-btn{
-  display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:8px;padding:8px 10px;
-  border-radius:12px;background:#0b1124;border:1px solid rgba(255,255,255,.09);
-  box-shadow:0 4px 0 rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.06);
-  font-size:.53rem;font-weight:900;color:rgba(255,255,255,.75)
-}
-.mining-command-center .mining-how-btn .how-ico{
-  width:16px;height:16px;display:grid;place-items:center;border-radius:50%;
-  background:linear-gradient(145deg,#22e0ff,#8b5cf6);color:#061522;font-size:.5rem;font-weight:900
-}
-.mining-command-center .mining-how-btn:active{transform:translateY(2px)}
-
-.mining-command-center .mining-foot{display:none}
-
-@media(max-width:390px){
-  .mining-command-center{padding:12px;border-radius:24px}
-  .mine-logo{width:43px;height:43px}.mine-brand h3{font-size:1rem}.mine-brand p{font-size:.53rem}
-  .mine-level{padding:6px 7px}.mine-level b{font-size:.57rem}.mine-level small{font-size:.39rem}
-  .mine-balance-panel{grid-template-columns:1fr 98px;min-height:140px;padding:13px}
-  .mine-balance-copy strong{font-size:1.72rem}.mine-orb-ring{width:94px;height:94px}
-  .mine-action-zone{gap:8px;padding:9px}.mine-action-copy small{max-width:135px;font-size:.46rem}
-  .mine-action-zone .hold-mine-btn{width:78px;height:78px}.mine-action-zone .hold-icon{font-size:1.3rem}.mine-button-stack{width:118px}
-  .mine-button-stack .mining-btn{font-size:.58rem;min-height:40px}
-}
-@media(max-width:350px){
-  .mine-header{align-items:flex-start}.mine-brand p{white-space:normal}
-  .mine-level{display:none}
-  .mine-balance-panel{grid-template-columns:1fr 88px}.mine-orb-ring{width:84px;height:84px}
-  .mine-action-zone{align-items:flex-start}.mine-action-copy{display:none}
-  .mine-action-buttons{width:100%;justify-content:center}
-  .mine-action-zone .hold-mine-btn{width:70px;height:70px}
-}
-@media(prefers-reduced-motion:reduce){
-  .mining-command-center *,.mining-command-center:before,.mine-grid-lines,.mine-orbit,.mine-sparks i,.mine-logo,.mine-logo i,
-  .mine-orb-ring,.mine-progress-shine,.mine-action-zone .hold-mine-btn{animation:none !important}
-}
 
 </style>
 </head>
@@ -1438,9 +590,9 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   <a href="/dashboard.html" class="back-link"><span>←</span><span>Back to Dashboard</span></a>
 
   <!-- ======================================================
-       LUCK TICKET MINING — NEW CONTROL CENTER
-       Visual redesign only. All existing mining IDs are preserved
-       so the existing server/API logic continues to work.
+       LUCK TICKET MINER — simple, colorful, compact card.
+       All existing mining IDs are preserved so the existing
+       server/API logic (PAYMELuckMining below) keeps working.
   ======================================================= -->
   <div class="section-label mining-section-label">
     <h2>Luck Ticket Mining</h2>
@@ -1448,136 +600,65 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   </div>
 
   <section class="mining-rig-wrap" id="luckMining">
-    <div class="mining-rig mining-command-center" id="miningRig">
+    <div class="miner-card" id="miningRig">
 
-      <div class="mine-grid-lines" aria-hidden="true"></div>
-      <div class="mine-orbit mine-orbit-a" aria-hidden="true"></div>
-      <div class="mine-orbit mine-orbit-b" aria-hidden="true"></div>
-      <div class="mine-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="mine-led-strip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-
-      <div class="mine-header">
-        <div class="mine-brand">
-          <div class="mine-logo" aria-hidden="true">
-            <span>🎫</span>
-            <i></i>
-          </div>
-          <div>
-            <div class="mine-eyebrow">LUCK REWARDS</div>
-            <h3>Ticket Miner</h3>
-            <p>Activate once. Let your rig do the work.</p>
-          </div>
-        </div>
-
-        <div class="mine-level">
-          <span class="mine-fan" id="mineFan" aria-hidden="true">⚙️</span>
-          <span class="mine-level-dot"></span>
+      <div class="miner-top">
+        <div class="miner-badge">
+          <span class="miner-badge-dot" id="mineStatusLed" aria-hidden="true"></span>
           <div>
             <b id="miningLevel">LEVEL 1</b>
             <small id="miningLevelCost">FREE MINER</small>
           </div>
         </div>
+        <button class="miner-info-btn" id="miningHowBtn" type="button" aria-haspopup="dialog" aria-label="How mining works">?</button>
       </div>
 
-      <div class="mine-balance-panel">
-        <div class="mine-balance-copy">
-          <span>LUCK TICKETS</span>
-          <strong id="miningTickets">0.0</strong>
-          <small>Tickets Earned</small>
-        </div>
-
-        <div class="mine-progress-orb">
-          <div class="mine-orb-ring">
-            <svg viewBox="0 0 158 158" aria-label="Mining progress">
-              <defs>
-                <linearGradient id="miningGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#22e0ff"/>
-                  <stop offset="50%" stop-color="#8b5cf6"/>
-                  <stop offset="100%" stop-color="#ff4fb8"/>
-                </linearGradient>
-              </defs>
-              <circle class="ring-track" cx="79" cy="79" r="69"/>
-              <circle class="ring-progress" id="miningMeterProgress" cx="79" cy="79" r="69"/>
-            </svg>
-            <div class="ring-center">
-              <div class="ring-percent" id="miningPercent">0%</div>
-              <div class="ring-caption" id="miningTime">30:00 cycle</div>
-            </div>
-          </div>
+      <div class="miner-dial-wrap">
+        <button class="hold-mine-btn" id="holdMineBtn" type="button" aria-label="Hold for 2 seconds to start mining">
+          <svg class="miner-dial-ring" viewBox="0 0 158 158" aria-hidden="true">
+            <circle class="ring-track" cx="79" cy="79" r="69"/>
+            <circle class="ring-progress" id="miningMeterProgress" cx="79" cy="79" r="69"/>
+          </svg>
+          <span class="hold-ring" id="holdRing" aria-hidden="true"></span>
+          <span class="hold-core">
+            <span class="hold-icon" aria-hidden="true">⚡</span>
+            <span class="hold-label" id="holdLabel">HOLD TO<br>ACTIVATE</span>
+            <span class="hold-percent" id="miningPercent">0%</span>
+          </span>
+        </button>
+        <div class="miner-status-line">
+          <b id="miningStatus" data-state="offline">OFFLINE</b>
+          <span id="miningTime">30:00 cycle</span>
         </div>
       </div>
 
-      <div class="mine-status-bar">
-        <div class="mine-status-main">
-          <span class="mine-status-led" id="mineStatusLed"></span>
-          <div>
-            <b id="miningStatus" data-state="offline">OFFLINE</b>
-            <small id="miningHashSub">Ready to activate</small>
-          </div>
-        </div>
-        <div class="mine-cycle">
-          <span>TIME / STATUS</span>
+      <div class="miner-infobar">
+        <div class="miner-infobar-text">
           <b id="miningEta">Ready</b>
+          <span>Earn <strong id="miningRewardRange">1–2</strong> 🎫 per cycle</span>
         </div>
+        <button class="miner-upgrade-btn" id="upgradeMiningBtn" type="button">Upgrade</button>
       </div>
 
-      <div class="mine-progress-track">
-        <div class="mine-progress-fill" id="mineProgressFill"></div>
-        <div class="mine-progress-shine" aria-hidden="true"></div>
+      <div class="miner-footer-row">
+        <div class="miner-tickets-pill">
+          <span aria-hidden="true">🎫</span>
+          <div><b id="miningTickets">0.0</b><small>Luck Tickets</small></div>
+        </div>
+        <button class="miner-claim-btn" id="claimMiningBtn" type="button" disabled>🎫 Claim Tickets</button>
       </div>
 
-      <div class="mine-data-row">
-        <div class="mine-data">
-          <span>Ticket Range</span>
-          <b id="miningRewardRange">1–2</b>
-        </div>
-        <div class="mine-data-divider"></div>
-        <div class="mine-data mine-data-hash">
-          <span>MINING ENGINE</span>
-          <div class="hash-readout">
-            <span class="hash-engine" aria-hidden="true">
-              <span class="engine-ring"></span>
-              <span class="engine-ring-2"></span>
-              <span class="engine-core"></span>
-            </span>
-            <b id="miningHash">0x000000_idle</b>
-          </div>
-          <div class="mine-hashrate-strip" id="mineHashrateStrip">⚡ 000.0 KH/s</div>
-        </div>
-      </div>
+      <small class="miner-foot" id="miningFoot">Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.</small>
 
-      <div class="mine-action-zone">
-        <div class="mine-action-copy">
-          <span class="mine-action-kicker">MINING ENGINE</span>
-          <b>Hold to activate</b>
-          <small id="miningFoot">Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.</small>
-        </div>
-
-        <div class="mine-action-buttons">
-          <button class="hold-mine-btn" id="holdMineBtn" type="button" aria-label="Hold for 2 seconds to start mining">
-            <span class="hold-ring" id="holdRing" aria-hidden="true"></span>
-            <span class="hold-core">
-              <span class="hold-icon" aria-hidden="true">⚡</span>
-              <span class="hold-label" id="holdLabel">HOLD TO<br>ACTIVATE</span>
-            </span>
-          </button>
-
-          <div class="mine-button-stack">
-            <button class="mining-btn primary" id="claimMiningBtn" type="button" disabled>🎫 Claim Tickets</button>
-            <button class="mining-btn secondary" id="upgradeMiningBtn" type="button">⚙ Upgrade Miner</button>
-          </div>
-        </div>
-      </div>
-
-      <button class="mining-how-btn" id="miningHowBtn" type="button" aria-haspopup="dialog">
-        <span class="how-ico" aria-hidden="true">?</span>
-        <span>How it works</span>
-      </button>
-
+      <!-- Kept for compatibility with the mining script below; not part of the simplified visual layout. -->
+      <span id="miningHash" hidden>0x000000_idle</span>
+      <span id="mineHashrateStrip" hidden>⚡ 000.0 KH/s</span>
+      <span id="miningHashSub" hidden>Ready to activate</span>
     </div>
   </section>
 
   <div class="rig-connector" aria-hidden="true"><span class="rig-connector-line"></span><span class="rig-connector-node"></span></div>
+
 
   <!-- ======================================================
        ARCADE GAMES — inlined directly on the page, no popup.
@@ -1717,6 +798,7 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
         </div>
       </div>
     </div>
+    <label class="howto-dontshow" id="miningHowDontShowLabel"><input type="checkbox" id="miningHowDontShow"><span>Don't show this again</span></label>
     <button class="howworks-close-btn" id="miningHowGotIt" type="button">Got it</button>
   </div>
 </div>
@@ -1843,6 +925,7 @@ document.addEventListener('DOMContentLoaded',function(){
     howModal: document.getElementById('miningHowModal'),
     howClose: document.getElementById('closeMiningHow'),
     howGotIt: document.getElementById('miningHowGotIt'),
+    howDontShow: document.getElementById('miningHowDontShow'),
     claimModal: document.getElementById('miningClaimModal'),
     claimAmount: document.getElementById('claimAmount'),
     claimSub: document.getElementById('claimSub'),
@@ -1989,22 +1072,6 @@ document.addEventListener('DOMContentLoaded',function(){
     els.levelCost.textContent=meta.cost===0?'FREE MINER':`${meta.cost.toLocaleString()} GEMS💎`;
     els.range.textContent=rewardRange(level);
     els.tickets.textContent=fmt1(state.luckTickets);
-    // Keep the redesigned progress bar synchronized with the existing SVG meter.
-    const progressFill=document.getElementById('mineProgressFill');
-    if(progressFill){
-      const rawStatus=String(state.status||'offline');
-      let barPct=0;
-      if(rawStatus==='mining'){
-        const a=Date.parse(state.startAt||''), b=Date.parse(state.completeAt||'');
-        const n=serverNow();
-        barPct=Number.isFinite(a)&&Number.isFinite(b)&&b>a ? Math.max(0,Math.min(100,(n-a)/(b-a)*100)) : 0;
-      }else if(rawStatus==='completed'){
-        barPct=100;
-      }
-      progressFill.style.width=barPct+'%';
-    }
-
-
     const status=String(state.status||'offline');
     if(status==='mining'){
       const start=Date.parse(state.startAt||'');
@@ -2023,7 +1090,7 @@ document.addEventListener('DOMContentLoaded',function(){
       els.status.dataset.state='mining';
       els.eta.textContent=formatTime(remaining);
       els.hold.disabled=true;
-      els.hold.classList.remove('ready-pulse');
+      els.hold.classList.remove('ready-pulse','cycle-complete');
       els.claim.disabled=true;
       els.upgrade.disabled=true;
       els.holdLabel.innerHTML='Mining<br>Active';
@@ -2039,6 +1106,7 @@ document.addEventListener('DOMContentLoaded',function(){
       els.eta.textContent='Claim now';
       els.hold.disabled=true;
       els.hold.classList.remove('ready-pulse');
+      els.hold.classList.add('cycle-complete');
       els.claim.disabled=false;
       els.claim.classList.add('ready');
       els.upgrade.disabled=true;
@@ -2056,6 +1124,7 @@ document.addEventListener('DOMContentLoaded',function(){
       els.status.dataset.state='offline';
       els.eta.textContent='Ready';
       els.hold.disabled=false;
+      els.hold.classList.remove('cycle-complete');
       els.hold.classList.add('ready-pulse');
       els.claim.disabled=true;
       els.claim.classList.remove('ready');
@@ -2136,7 +1205,15 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.classList.add('modal-open');
   }
 
+  // "How Mining Works" is shown automatically the first time this page
+  // loads. If the user ticks "Don't show this again" before closing it,
+  // that choice is remembered in localStorage so it won't auto-open on
+  // future visits — the ⓘ button still opens it manually at any time.
+  const HOWTO_KEY = 'payme_earn_hide_howmining';
   function closeHow(){
+    if(els.howDontShow && els.howDontShow.checked){
+      try{ localStorage.setItem(HOWTO_KEY,'1'); }catch(e){}
+    }
     els.howModal.classList.remove('active');
     els.howModal.setAttribute('aria-hidden','true');
     document.body.classList.remove('modal-open');
@@ -2371,14 +1448,19 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   });
 
-  document.addEventListener('DOMContentLoaded',loadState);
+  document.addEventListener('DOMContentLoaded',function(){
+    loadState();
+    let howHidden=false;
+    try{ howHidden = localStorage.getItem(HOWTO_KEY)==='1'; }catch(e){}
+    if(!howHidden && els.howModal) openHow();
+  });
 })();
 </script>
 
 <script>
 (function PAYMEEarnLanguage(){
   const I18N = {
-    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "More Ways to Earn": "طرق أكثر للربح", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your invite link — every friend who joins puts more Gems in your wallet.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "💎15 per successful referral": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "TIME / STATUS": "الوقت / الحالة", "LUCK TICKETS": "تذاكر الحظ", "Hold to activate": "اضغط مطولًا للتفعيل", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "Mining": "التعدين", "Active": "نشط", "Cycle": "الدورة", "Complete": "اكتملت", "Hold to": "اضغط مطولًا لـ", "Mine": "التعدين", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
+    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "More Ways to Earn": "طرق أكثر للربح", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your invite link — every friend who joins puts more Gems in your wallet.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "💎15 per successful referral": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "TIME / STATUS": "الوقت / الحالة", "LUCK TICKETS": "تذاكر الحظ", "Hold to activate": "اضغط مطولًا للتفعيل", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "Mining": "التعدين", "Active": "نشط", "Cycle": "الدورة", "Complete": "اكتملت", "Hold to": "اضغط مطولًا لـ", "Mine": "التعدين", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Don't show this again": "لا تُظهر هذا مرة أخرى", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
     en: {
       "Back to Dashboard":"Back to Dashboard","PAYME REWARDS":"PAYME REWARDS",
       "Turn your activity":"Turn your activity","real rewards.":"real rewards.",
@@ -2414,7 +1496,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.",
       "Upgrade for bigger rewards":"Upgrade for bigger rewards",
       "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.",
-      "Got it":"Got it","Tickets Claimed!":"Tickets Claimed!","Luck Tickets":"Luck Tickets",
+      "Got it":"Got it","Don't show this again":"Don't show this again","Tickets Claimed!":"Tickets Claimed!","Luck Tickets":"Luck Tickets",
       "Added straight to your balance. Start a new cycle any time.":"Added straight to your balance. Start a new cycle any time.",
       "⛏️ Upgrade to get higher Luck Tickets":"⛏️ Upgrade to get higher Luck Tickets","Nice, continue":"Nice, continue",
       "CURRENT LEVEL":"CURRENT LEVEL","UPGRADE TO LEVEL":"UPGRADE TO LEVEL","LOCKED — REACH LEVEL":"LOCKED — REACH LEVEL",
@@ -2461,7 +1543,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"Когда кольцо достигнет 100%, нажмите «Забрать билеты», чтобы получить награду. Затем сразу можно начать новый цикл.",
       "Upgrade for bigger rewards":"Улучшайте ради больших наград",
       "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"Трата Gems💎 на улучшение риги повышает диапазон билетов удачи за цикл — чем выше уровень, тем больше потенциальная награда.",
-      "Got it":"Понятно","Tickets Claimed!":"Билеты получены!","Luck Tickets":"Билеты удачи",
+      "Got it":"Понятно","Don't show this again":"Больше не показывать","Tickets Claimed!":"Билеты получены!","Luck Tickets":"Билеты удачи",
       "Added straight to your balance. Start a new cycle any time.":"Добавлено прямо на ваш баланс. Новый цикл можно начать в любой момент.",
       "⛏️ Upgrade to get higher Luck Tickets":"⛏️ Улучшите, чтобы получать больше билетов удачи","Nice, continue":"Отлично, продолжить",
       "CURRENT LEVEL":"ТЕКУЩИЙ УРОВЕНЬ","UPGRADE TO LEVEL":"УЛУЧШИТЬ ДО УРОВНЯ","LOCKED — REACH LEVEL":"ЗАБЛОКИРОВАНО — ДОСТИГНИТЕ УРОВНЯ",
@@ -2508,7 +1590,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"Cuando el anillo llegue al 100%, pulsa «Reclamar tickets» para cobrar tu recompensa. Luego puedes iniciar un ciclo nuevo de inmediato.",
       "Upgrade for bigger rewards":"Mejora para obtener mayores recompensas",
       "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"Gastar Gems💎 para mejorar tu equipo aumenta el rango de Tickets de Suerte que puedes ganar por ciclo — a mayor nivel, mayor el pago potencial.",
-      "Got it":"Entendido","Tickets Claimed!":"¡Tickets reclamados!","Luck Tickets":"Tickets de Suerte",
+      "Got it":"Entendido","Don't show this again":"No mostrar de nuevo","Tickets Claimed!":"¡Tickets reclamados!","Luck Tickets":"Tickets de Suerte",
       "Added straight to your balance. Start a new cycle any time.":"Añadido directamente a tu saldo. Inicia un nuevo ciclo cuando quieras.",
       "⛏️ Upgrade to get higher Luck Tickets":"⛏️ Mejora para conseguir más Tickets de Suerte","Nice, continue":"Genial, continuar",
       "CURRENT LEVEL":"NIVEL ACTUAL","UPGRADE TO LEVEL":"MEJORAR AL NIVEL","LOCKED — REACH LEVEL":"BLOQUEADO — ALCANZA EL NIVEL",
@@ -2555,7 +1637,7 @@ document.addEventListener('DOMContentLoaded',function(){
       "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.":"जब रिंग 100% पूरी हो जाए, तो अपना रिवॉर्ड पाने के लिए \"टिकट क्लेम करें\" दबाएँ। फिर आप तुरंत एक नया चक्र शुरू कर सकते हैं।",
       "Upgrade for bigger rewards":"बड़े रिवॉर्ड्स के लिए अपग्रेड करें",
       "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.":"अपनी रिग अपग्रेड करने के लिए Gems💎 खर्च करने से हर चक्र में मिलने वाले लक टिकट की रेंज बढ़ जाती है — लेवल जितना ऊँचा, संभावित इनाम उतना बड़ा।",
-      "Got it":"समझ गया","Tickets Claimed!":"टिकट क्लेम हो गए!","Luck Tickets":"लक टिकट",
+      "Got it":"समझ गया","Don't show this again":"इसे फिर न दिखाएं","Tickets Claimed!":"टिकट क्लेम हो गए!","Luck Tickets":"लक टिकट",
       "Added straight to your balance. Start a new cycle any time.":"सीधे आपके बैलेंस में जोड़ दिया गया। कभी भी नया चक्र शुरू करें।",
       "⛏️ Upgrade to get higher Luck Tickets":"⛏️ ज़्यादा लक टिकट पाने के लिए अपग्रेड करें","Nice, continue":"बढ़िया, जारी रखें",
       "CURRENT LEVEL":"मौजूदा लेवल","UPGRADE TO LEVEL":"इस लेवल तक अपग्रेड करें","LOCKED — REACH LEVEL":"लॉक — पहले लेवल तक पहुँचें",
