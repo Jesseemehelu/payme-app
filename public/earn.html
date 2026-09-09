@@ -10,36 +10,6 @@
      the Mining button, matching the same tag already used by the Luck
      Vault treasure chest. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
-     up to 2 ads per 6-minute window with a 60s gap between them.
-     everyPage:false means this session (and its timing/frequency budget)
-     carries over to any other page that also calls show_11688228 with
-     these same settings — it does not reset per page. Polls briefly for
-     show_11688228 since the SDK script above finishes initializing
-     asynchronously. -->
-<script>
-(function startInAppInterstitial(){
-  function tryStart(retries){
-    if (typeof window.show_11688228 === 'function') {
-      try{
-        window.show_11688228({
-          type: 'inApp',
-          inAppSettings: {
-            frequency: 2,
-            capping: 0.1,
-            interval: 60,
-            timeout: 15,
-            everyPage: false
-          }
-        });
-      }catch(e){}
-      return;
-    }
-    if (retries > 0) setTimeout(function(){ tryStart(retries - 1); }, 200);
-  }
-  tryStart(50);
-})();
-</script>
 <script>
 /* This page already had CSS safe-area fallbacks (env()) but no actual
    Telegram WebApp integration — no expand(), no swipe-lock, and no
@@ -427,6 +397,78 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
   .hold-mine-btn,.hold-mine-btn.ready-pulse,.hold-mine-btn.cycle-complete,.miner-claim-btn.ready{animation:none !important}
 }
 
+/* =========================================================
+   PREMIUM MOTION LAYER — lightweight, GPU-friendly
+========================================================= */
+@keyframes premiumCardIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes softFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes minerPulse{0%,100%{opacity:.45;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
+@keyframes engineSweep{0%{transform:translateX(-120%)}100%{transform:translateX(220%)}}
+@keyframes hashRise{0%{opacity:0;transform:translateY(5px)}20%{opacity:1}80%{opacity:.75}100%{opacity:0;transform:translateY(-7px)}}
+@keyframes miningCore{0%,100%{transform:scale(1)}50%{transform:scale(1.018)}}
+@keyframes miningRingGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(34,224,255,0))}50%{filter:drop-shadow(0 0 7px rgba(34,224,255,.42))}}
+@keyframes startFlash{0%{opacity:0;transform:scale(.78)}35%{opacity:1}100%{opacity:0;transform:scale(1.3)}}
+@keyframes tinyBlink{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes pageLeave{to{opacity:0;transform:translateY(-5px) scale(.995)}}
+
+.earn-container>.back-link{animation:premiumCardIn .42s ease both}
+.mining-section-label{animation:premiumCardIn .46s ease .04s both}
+.mining-rig-wrap{animation:premiumCardIn .5s ease .08s both}
+.arcade-panel{animation:premiumCardIn .5s ease .14s both}
+.arcade-panel .game-item:nth-child(1){animation:premiumCardIn .42s ease .18s both}
+.arcade-panel .game-item:nth-child(2){animation:premiumCardIn .42s ease .23s both}
+.arcade-panel .game-item:nth-child(3){animation:premiumCardIn .42s ease .28s both}
+.arcade-panel .game-item:nth-child(4){animation:premiumCardIn .42s ease .33s both}
+
+button,.icon-btn,.game-item,.back-link,.arrow-btn,.miner-upgrade-btn,.miner-claim-btn,.miner-info-btn,.mining-close,.howworks-close-btn,.claim-btn,.miner-upgrade-choice{will-change:transform; -webkit-tap-highlight-color:transparent}
+.icon-btn,.miner-info-btn,.miner-upgrade-btn,.miner-claim-btn,.mining-close,.howworks-close-btn,.claim-btn,.miner-upgrade-choice{transition:transform .16s cubic-bezier(.2,.8,.25,1),box-shadow .16s cubic-bezier(.2,.8,.25,1),filter .16s ease}
+.icon-btn:hover,.miner-info-btn:hover,.miner-upgrade-btn:hover:not(:disabled),.miner-claim-btn:hover:not(:disabled),.howworks-close-btn:hover,.claim-btn:hover,.miner-upgrade-choice:hover:not(:disabled){filter:brightness(1.07)}
+.game-item:hover{transform:translateY(-2px)}
+
+.miner-card{isolation:isolate}
+.miner-card:after{content:"";position:absolute;left:0;right:0;top:0;height:2px;z-index:4;opacity:0;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(126,232,255,.9),transparent)}
+.miner-card.is-mining:after{opacity:.8;animation:engineSweep 2.6s linear infinite}
+.miner-card.is-mining{border-color:rgba(34,224,255,.34);box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 28px rgba(34,224,255,.09),inset 0 1px 0 rgba(255,255,255,.07)}
+.miner-card.is-mining .hold-mine-btn{animation:miningCore 2.2s ease-in-out infinite}
+.miner-card.is-mining .miner-dial-ring{animation:miningRingGlow 2.2s ease-in-out infinite}
+.miner-card.is-mining .hold-icon{animation:softFloat 1.35s ease-in-out infinite}
+.miner-card.is-mining .miner-badge-dot{animation:minerPulse 1.15s ease-in-out infinite}
+
+.miner-card.starting{border-color:rgba(126,232,255,.58);box-shadow:0 18px 44px rgba(0,0,0,.4),0 0 42px rgba(34,224,255,.2),inset 0 1px 0 rgba(255,255,255,.12)}
+.miner-card.starting .hold-mine-btn{animation:holdSuccessPop .45s ease both,minerPulse 1s ease-in-out .45s 2}
+.miner-card.starting .miner-badge-dot{background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:tinyBlink .5s ease-in-out infinite}
+
+.hash-console{position:relative;z-index:2;margin:0 0 11px;padding:10px 11px;border-radius:15px;overflow:hidden;background:linear-gradient(145deg,rgba(3,10,22,.82),rgba(8,18,34,.62));border:1px solid rgba(126,232,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.hash-console:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(34,224,255,.07),transparent);transform:translateX(-120%);pointer-events:none}
+.miner-card.is-mining .hash-console:before{animation:engineSweep 2.8s linear infinite}
+.hash-console-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.hash-console-label{display:flex;align-items:center;gap:6px;font-size:.54rem;font-weight:900;color:#9db5d3;letter-spacing:.08em;text-transform:uppercase}
+.hash-console-led{width:6px;height:6px;border-radius:50%;background:#53637a}
+.miner-card.is-mining .hash-console-led{background:#22e0ff;box-shadow:0 0 9px #22e0ff;animation:tinyBlink .8s ease-in-out infinite}
+.hash-console-rate{font-size:.54rem;color:#6fdbf0;font-weight:800;font-variant-numeric:tabular-nums}
+.hash-stream{position:relative;min-height:26px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.58rem;line-height:1.5;color:#8fefff;white-space:nowrap;overflow:hidden;letter-spacing:.025em}
+.hash-stream span{display:block;opacity:.55}
+.hash-stream .hash-live{color:#d7fbff;opacity:1;text-shadow:0 0 9px rgba(34,224,255,.35)}
+.miner-card.is-mining .hash-stream .hash-live{animation:hashRise .8s ease both}
+.hash-console-sub{margin-top:4px;font-size:.51rem;color:#6e7f96;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.miner-card.is-mining .hash-console-sub{color:#82bfd0}
+
+.mining-spark{position:absolute;width:4px;height:4px;border-radius:50%;background:#7ee8ff;box-shadow:0 0 9px rgba(34,224,255,.8);pointer-events:none;z-index:3;opacity:0}
+.miner-card.is-mining .mining-spark{animation:hashRise 1.3s ease-in-out infinite}
+.mining-spark.s1{left:16%;top:35%;animation-delay:.15s}.mining-spark.s2{left:84%;top:30%;animation-delay:.55s}.mining-spark.s3{left:22%;top:68%;animation-delay:.9s}.mining-spark.s4{left:78%;top:64%;animation-delay:.35s}
+.mining-start-flash{position:absolute;left:50%;top:42%;width:70px;height:70px;margin:-35px 0 0 -35px;border:2px solid rgba(126,232,255,.75);border-radius:50%;pointer-events:none;z-index:5;opacity:0}
+.miner-card.starting .mining-start-flash{animation:startFlash .65s ease-out both}
+
+body.is-leaving .earn-container{animation:pageLeave .22s ease forwards}
+@media(prefers-reduced-motion:reduce){
+  .earn-container>.back-link,.mining-section-label,.mining-rig-wrap,.arcade-panel,.arcade-panel .game-item,
+  .miner-card.is-mining .hold-mine-btn,.miner-card.is-mining .miner-dial-ring,.miner-card.is-mining .hold-icon,
+  .miner-card.is-mining .miner-badge-dot,.miner-card.is-mining:after,.miner-card.starting .hold-mine-btn,
+  .miner-card.is-mining .hash-console:before,.miner-card.is-mining .hash-console-led,
+  .miner-card.is-mining .hash-stream .hash-live,.miner-card.is-mining .mining-spark,.miner-card.starting .mining-start-flash{animation:none!important}
+}
+
+
 /* ---------------------------------------------------------
    UPGRADE POPUP — level picker sheet
 --------------------------------------------------------- */
@@ -589,82 +631,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
   <a href="/dashboard.html" class="back-link"><span>←</span><span>Back to Dashboard</span></a>
 
-  <!-- ======================================================
-       LUCK TICKET MINER — simple, colorful, compact card.
-       All existing mining IDs are preserved so the existing
-       server/API logic (PAYMELuckMining below) keeps working.
-  ======================================================= -->
-  <div class="section-label mining-section-label">
-    <h2>Luck Ticket Mining</h2>
-    <span>30-minute mining cycle</span>
-  </div>
-
-  <section class="mining-rig-wrap" id="luckMining">
-    <div class="miner-card" id="miningRig">
-
-      <div class="miner-top">
-        <div class="miner-badge">
-          <span class="miner-badge-dot" id="mineStatusLed" aria-hidden="true"></span>
-          <div>
-            <b id="miningLevel">LEVEL 1</b>
-            <small id="miningLevelCost">FREE MINER</small>
-          </div>
-        </div>
-        <button class="miner-info-btn" id="miningHowBtn" type="button" aria-haspopup="dialog" aria-label="How mining works">?</button>
-      </div>
-
-      <div class="miner-dial-wrap">
-        <button class="hold-mine-btn" id="holdMineBtn" type="button" aria-label="Hold for 2 seconds to start mining">
-          <svg class="miner-dial-ring" viewBox="0 0 158 158" aria-hidden="true">
-            <circle class="ring-track" cx="79" cy="79" r="69"/>
-            <circle class="ring-progress" id="miningMeterProgress" cx="79" cy="79" r="69"/>
-          </svg>
-          <span class="hold-ring" id="holdRing" aria-hidden="true"></span>
-          <span class="hold-core">
-            <span class="hold-icon" aria-hidden="true">⚡</span>
-            <span class="hold-label" id="holdLabel">HOLD TO<br>ACTIVATE</span>
-            <span class="hold-percent" id="miningPercent">0%</span>
-          </span>
-        </button>
-        <div class="miner-status-line">
-          <b id="miningStatus" data-state="offline">OFFLINE</b>
-          <span id="miningTime">30:00 cycle</span>
-        </div>
-      </div>
-
-      <div class="miner-infobar">
-        <div class="miner-infobar-text">
-          <b id="miningEta">Ready</b>
-          <span>Earn <strong id="miningRewardRange">1–2</strong> 🎫 per cycle</span>
-        </div>
-        <button class="miner-upgrade-btn" id="upgradeMiningBtn" type="button">Upgrade</button>
-      </div>
-
-      <div class="miner-footer-row">
-        <div class="miner-tickets-pill">
-          <span aria-hidden="true">🎫</span>
-          <div><b id="miningTickets">0.0</b><small>Luck Tickets</small></div>
-        </div>
-        <button class="miner-claim-btn" id="claimMiningBtn" type="button" disabled>🎫 Claim Tickets</button>
-      </div>
-
-      <small class="miner-foot" id="miningFoot">Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.</small>
-
-      <!-- Kept for compatibility with the mining script below; not part of the simplified visual layout. -->
-      <span id="miningHash" hidden>0x000000_idle</span>
-      <span id="mineHashrateStrip" hidden>⚡ 000.0 KH/s</span>
-      <span id="miningHashSub" hidden>Ready to activate</span>
-    </div>
-  </section>
-
-  <div class="rig-connector" aria-hidden="true"><span class="rig-connector-line"></span><span class="rig-connector-node"></span></div>
-
-
-  <!-- ======================================================
-       ARCADE GAMES — inlined directly on the page, no popup.
-       Styled to match the mining rig above so this reads as one
-       machine with more modules, not a separate block.
-  ======================================================= -->
   <div class="section-label"><h2>More Ways to Earn</h2><span>Tap a game to play</span></div>
 
   <div class="arcade-panel">
@@ -714,9 +680,9 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
       <a href="/dashboard.html#referrals" class="game-item game-invite">
         <div class="game-icon">🤝</div>
         <div class="game-details">
-          <h4>Invite &amp; Earn</h4>
-          <p>Share your invite link — every friend who joins puts more Gems in your wallet.</p>
-          <span class="game-reward">💎15 per successful referral</span>
+          <h4>Invite &amp; Grow</h4>
+          <p>Share your referral link. Confirmed referrals unlock stronger miner levels.</p>
+          <span class="game-reward">🚀 20 → 50 → 100 → 300 → 500 referrals</span>
         </div>
         <div class="game-arrow">→</div>
       </a>
@@ -727,103 +693,6 @@ header{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#0d08
 
 </main>
 
-<!-- Moved outside .earn-container: that container has CSS `perspective`
-     set on it, which (like `transform`) creates a containing block for
-     any `position:fixed` descendant. That was anchoring this modal and
-     toast to the container's own box instead of the viewport, so they
-     could render far down the page and need a scroll to see. Living
-     here, as a direct child of <body>, they stay pinned to the actual
-     screen regardless of scroll position. -->
-<div class="mining-modal" id="miningUpgradeModal" aria-hidden="true">
-  <div class="mining-modal-card" role="dialog" aria-modal="true" aria-labelledby="miningUpgradeTitle">
-    <div class="mining-modal-glow" aria-hidden="true"></div>
-    <div class="mining-modal-head">
-      <div class="mining-modal-head-left">
-        <div class="mining-modal-icon">⛏️</div>
-        <div>
-          <h3 id="miningUpgradeTitle">Upgrade Mining Rig</h3>
-          <p style="font-size:.6rem;color:var(--muted);margin-top:3px">Choose any higher level. Upgrades apply to your next cycle.</p>
-        </div>
-      </div>
-      <button class="mining-close" id="closeMiningUpgrade" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="level-progress-strip" id="levelProgressStrip" aria-hidden="true"></div>
-    <div class="miner-level-list" id="minerLevelList"></div>
-  </div>
-</div>
-
-<!-- HOW IT WORKS — plain-language explainer, opened from the button
-     at the top of the mining rig. Centered + animated like the claim
-     popup below, since this is an informational dialog, not a sheet. -->
-<div class="mining-modal modal-center" id="miningHowModal" aria-hidden="true">
-  <div class="mining-modal-card" role="dialog" aria-modal="true" aria-labelledby="miningHowTitle">
-    <div class="mining-modal-glow" aria-hidden="true"></div>
-    <div class="mining-modal-head">
-      <div class="mining-modal-head-left">
-        <div class="mining-modal-icon">💡</div>
-        <div>
-          <h3 id="miningHowTitle">How Mining Works</h3>
-          <p style="font-size:.6rem;color:var(--muted);margin-top:3px">The simple version — no jargon.</p>
-        </div>
-      </div>
-      <button class="mining-close" id="closeMiningHow" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="howworks-steps">
-      <div class="howworks-step">
-        <div class="howworks-num">1</div>
-        <div>
-          <h4>Hold the lightning button</h4>
-          <p>Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.</p>
-        </div>
-      </div>
-      <div class="howworks-step">
-        <div class="howworks-num">2</div>
-        <div>
-          <h4>Let it run for 30 minutes</h4>
-          <p>The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.</p>
-        </div>
-      </div>
-      <div class="howworks-step">
-        <div class="howworks-num">3</div>
-        <div>
-          <h4>Claim your Luck Tickets</h4>
-          <p>Once the ring hits 100%, hit "Claim Tickets" to collect your reward. Then you can start a brand new cycle right away.</p>
-        </div>
-      </div>
-      <div class="howworks-step">
-        <div class="howworks-num">4</div>
-        <div>
-          <h4>Upgrade for bigger rewards</h4>
-          <p>Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.</p>
-        </div>
-      </div>
-    </div>
-    <label class="howto-dontshow" id="miningHowDontShowLabel"><input type="checkbox" id="miningHowDontShow"><span>Don't show this again</span></label>
-    <button class="howworks-close-btn" id="miningHowGotIt" type="button">Got it</button>
-  </div>
-</div>
-
-<!-- CLAIM RESULT — centered, animated confirmation shown right after a
-     successful claim, with a direct path into the Upgrade popup. -->
-<div class="mining-modal modal-center" id="miningClaimModal" aria-hidden="true">
-  <div class="mining-modal-card" role="dialog" aria-modal="true" aria-labelledby="miningClaimTitle" style="max-width:360px;text-align:center">
-    <div class="mining-modal-glow" aria-hidden="true"></div>
-    <div class="claim-confetti" id="claimConfetti" aria-hidden="true"></div>
-    <div class="claim-modal-icon-wrap">
-      <div class="claim-modal-icon">🎉</div>
-    </div>
-    <h3 id="miningClaimTitle" class="claim-modal-title">Tickets Claimed!</h3>
-    <div class="claim-modal-amount" id="claimAmount">+0.0<span>🎫 Luck Tickets</span></div>
-    <p class="claim-modal-sub" id="claimSub">Added straight to your balance. Start a new cycle any time.</p>
-    <div class="claim-modal-actions">
-      <button class="claim-btn upgrade-cta" id="claimUpgradeCta" type="button">⛏️ Upgrade to get higher Luck Tickets</button>
-      <button class="claim-btn dismiss" id="claimDismiss" type="button">Nice, continue</button>
-    </div>
-  </div>
-</div>
-
-<div class="mining-toast" id="miningToast" role="status" aria-live="polite"></div>
-
 <div class="page-loader" id="pageLoader" aria-hidden="true"><div class="loader-dots" aria-label="Loading"><span></span><span></span><span></span></div></div>
 
 <script>
@@ -832,7 +701,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
  function showLoader(){if(loader){loader.classList.add('active');loader.setAttribute('aria-hidden','false')}}
  function hideLoader(){if(loader){loader.classList.remove('active');loader.setAttribute('aria-hidden','true')}}
- function go(url){showLoader();setTimeout(()=>{window.location.href=url},500)}
+ function go(url){document.body.classList.add('is-leaving');showLoader();setTimeout(()=>{window.location.href=url},360)}
 
  function closeModal(e){
    if(e){e.preventDefault();e.stopPropagation()}
@@ -889,583 +758,17 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 
-<script>
-(function PAYMELuckMining(){
-  'use strict';
 
-  const CYCLE_MS = 30 * 60 * 1000;
-  const HOLD_MS = 2000;
-
-  const els = {
-    rig: document.getElementById('miningRig'),
-    level: document.getElementById('miningLevel'),
-    levelCost: document.getElementById('miningLevelCost'),
-    meter: document.getElementById('miningMeterProgress'),
-    percent: document.getElementById('miningPercent'),
-    time: document.getElementById('miningTime'),
-    status: document.getElementById('miningStatus'),
-    hash: document.getElementById('miningHash'),
-    hashrate: document.getElementById('mineHashrateStrip'),
-    range: document.getElementById('miningRewardRange'),
-    tickets: document.getElementById('miningTickets'),
-    eta: document.getElementById('miningEta'),
-    hold: document.getElementById('holdMineBtn'),
-    holdRing: document.getElementById('holdRing'),
-    holdLabel: document.getElementById('holdLabel'),
-    claim: document.getElementById('claimMiningBtn'),
-    upgrade: document.getElementById('upgradeMiningBtn'),
-    foot: document.getElementById('miningFoot'),
-    hashSub: document.getElementById('miningHashSub'),
-    modal: document.getElementById('miningUpgradeModal'),
-    closeModal: document.getElementById('closeMiningUpgrade'),
-    levelList: document.getElementById('minerLevelList'),
-    levelStrip: document.getElementById('levelProgressStrip'),
-    toast: document.getElementById('miningToast'),
-    howBtn: document.getElementById('miningHowBtn'),
-    howModal: document.getElementById('miningHowModal'),
-    howClose: document.getElementById('closeMiningHow'),
-    howGotIt: document.getElementById('miningHowGotIt'),
-    howDontShow: document.getElementById('miningHowDontShow'),
-    claimModal: document.getElementById('miningClaimModal'),
-    claimAmount: document.getElementById('claimAmount'),
-    claimSub: document.getElementById('claimSub'),
-    claimUpgradeCta: document.getElementById('claimUpgradeCta'),
-    claimDismiss: document.getElementById('claimDismiss'),
-    claimConfetti: document.getElementById('claimConfetti')
-  };
-
-  if(!els.rig) return;
-
-  // The ring's real circumference, read straight from its own SVG
-  // geometry (2πr) instead of a guessed dash-length. Because the dash
-  // array is derived from the circle's actual radius, a progress value
-  // of exactly 1 always lands on exactly 0 dash-offset — the ring can
-  // never visually finish before (or after) the real 100% mark.
-  const RING_RADIUS = Number(els.meter?.getAttribute('r')) || 69;
-  const RING_CIRC = 2 * Math.PI * RING_RADIUS;
-  if(els.meter){
-    els.meter.style.strokeDasharray = String(RING_CIRC);
-    els.meter.style.strokeDashoffset = String(RING_CIRC);
-  }
-
-  let state = null;
-  let serverOffset = 0;
-  let miningStartInFlight = false;
-  let uiTimer = null;
-  let hashTimer = null;
-  let holdFrame = null;
-  let holdStart = 0;
-  let holdActive = false;
-  let lastVisibleAt = Date.now();
-  let toastTimer = null;
-
-  const levelMeta = {
-    1:{cost:0,min:1,max:2,label:'FREE MINER',decimals:1,tagline:'A free rig for casual, everyday mining.'},
-    2:{cost:500,min:3,max:4,label:'500 GEMS💎',decimals:0,tagline:'A faster rig with a higher reward floor.'},
-    3:{cost:500,min:5,max:8,label:'500 GEMS💎',decimals:0,tagline:'A solid mid-tier rig with steady payouts.'},
-    4:{cost:800,min:9,max:13,label:'800 GEMS💎',decimals:0,tagline:'A serious upgrade for regular miners.'},
-    5:{cost:2000,min:20,max:25,label:'2,000 GEMS💎',decimals:0,tagline:'A powerful rig with big payouts.'},
-    6:{cost:3000,min:26,max:35,label:'3,000 GEMS💎',decimals:0,tagline:'The top-tier rig — the biggest payouts.'}
-  };
-
-  // Balances are always shown to exactly one decimal place, since the
-  // free rig (and Level 3) can award fractional tickets like 1.1 or 4.5.
-  function fmt1(n){
-    return Number(n||0).toFixed(1);
-  }
-
-  function fmt(n){
-    return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:1});
-  }
-
-  function rewardRange(level){
-    const m = levelMeta[level] || levelMeta[1];
-    return `${fmt(m.min)}–${fmt(m.max)}`;
-  }
-
-  function serverNow(){
-    return Date.now() + serverOffset;
-  }
-
-  function formatTime(ms){
-    const total = Math.max(0,Math.ceil(ms/1000));
-    const min = Math.floor(total/60);
-    const sec = total%60;
-    return `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-  }
-
-  function showToast(title, message, action){
-    clearTimeout(toastTimer);
-    els.toast.innerHTML = `<strong>${title}</strong><span>${message}</span>${action ? `<br><button class="toast-action" type="button" id="miningToastAction">${action.label}</button>` : ''}`;
-    els.toast.classList.add('active');
-    if(action){
-      const btn=document.getElementById('miningToastAction');
-      if(btn) btn.addEventListener('click',()=>{ action.run(); els.toast.classList.remove('active'); },{once:true});
-      toastTimer=setTimeout(()=>els.toast.classList.remove('active'),6000);
-    }else{
-      toastTimer=setTimeout(()=>els.toast.classList.remove('active'),3500);
-    }
-  }
-
-  async function api(url, options={}){
-    const response = await fetch(url,{
-      credentials:'same-origin',
-      cache:'no-store',
-      ...options,
-      headers:{'Content-Type':'application/json',...(options.headers||{})}
-    });
-    let data={};
-    try{ data=await response.json(); }catch(_){}
-    if(!response.ok || data.success===false){
-      const err=new Error(data.message || 'Request failed.');
-      err.code=data.code;
-      err.payload=data;
-      throw err;
-    }
-    return data;
-  }
-
-  function stopAnimations(){
-    if(uiTimer){clearInterval(uiTimer);uiTimer=null;}
-    if(hashTimer){clearInterval(hashTimer);hashTimer=null;}
-  }
-
-  // Reads as a real hex hash with a leading zero-run (like mining
-  // "difficulty"), rather than a flat scramble of random letters —
-  // purely cosmetic, it never feeds into the actual reward.
-  function randomHash(){
-    const hexChars='0123456789abcdef';
-    let out='0x';
-    const zeros = 2 + Math.floor(Math.random()*3);
-    for(let i=0;i<zeros;i++) out += '0';
-    for(let i=0;i<14-zeros;i++) out += hexChars[Math.floor(Math.random()*hexChars.length)];
-    return out;
-  }
-
-  // Cosmetic-only hashrate readout — never feeds into the actual reward,
-  // just gives the rig a "real miner" heartbeat.
-  function randomHashrate(){
-    return (140 + Math.random()*760).toFixed(1);
-  }
-
-  function startVisualMining(){
-    els.rig.classList.add('is-mining');
-    stopAnimations();
-    hashTimer=setInterval(()=>{
-      els.hash.textContent=randomHash();
-      if(els.hashrate) els.hashrate.textContent='⚡ '+randomHashrate()+' KH/s';
-    },180);
-    uiTimer=setInterval(render,1000);
-    render();
-  }
-
-  function stopVisualMining(){
-    els.rig.classList.remove('is-mining');
-    stopAnimations();
-  }
-
-  function render(){
-    if(!state) return;
-    const level=Number(state.level)||1;
-    const meta=levelMeta[level]||levelMeta[1];
-    els.level.textContent=`LEVEL ${level}`;
-    els.levelCost.textContent=meta.cost===0?'FREE MINER':`${meta.cost.toLocaleString()} GEMS💎`;
-    els.range.textContent=rewardRange(level);
-    els.tickets.textContent=fmt1(state.luckTickets);
-    const status=String(state.status||'offline');
-    if(status==='mining'){
-      const start=Date.parse(state.startAt||'');
-      const complete=Date.parse(state.completeAt||'');
-      const now=serverNow();
-      // Clamp with the same ceiling everywhere: progress can approach 1
-      // but the ring, the % label and the "ready" state all flip over
-      // together only once `now` actually reaches `complete` — no early
-      // visual completion, no lagging behind the real finish time.
-      const progress=Math.max(0,Math.min(1,(now-start)/Math.max(1,complete-start)));
-      const remaining=Math.max(0,complete-now);
-      els.meter.style.strokeDashoffset=String(RING_CIRC - (RING_CIRC*progress));
-      els.percent.textContent=Math.floor(progress*100)+'%';
-      els.time.textContent=formatTime(remaining)+' remaining';
-      els.status.textContent='MINING';
-      els.status.dataset.state='mining';
-      els.eta.textContent=formatTime(remaining);
-      els.hold.disabled=true;
-      els.hold.classList.remove('ready-pulse','cycle-complete');
-      els.claim.disabled=true;
-      els.upgrade.disabled=true;
-      els.holdLabel.innerHTML='Mining<br>Active';
-      els.foot.textContent='ENERGY ACTIVE • Hashing continuously • Keeps running in the background';
-      if(els.hashSub) els.hashSub.textContent='Engine running — keeps going even if you leave the app';
-      if(!els.rig.classList.contains('is-mining')) startVisualMining();
-    }else if(status==='completed'){
-      els.meter.style.strokeDashoffset='0';
-      els.percent.textContent='100%';
-      els.time.textContent='Cycle complete';
-      els.status.textContent='READY TO CLAIM';
-      els.status.dataset.state='ready';
-      els.eta.textContent='Claim now';
-      els.hold.disabled=true;
-      els.hold.classList.remove('ready-pulse');
-      els.hold.classList.add('cycle-complete');
-      els.claim.disabled=false;
-      els.claim.classList.add('ready');
-      els.upgrade.disabled=true;
-      els.holdLabel.innerHTML='Cycle<br>Complete';
-      els.foot.textContent=`Your cycle finished. Claim ${fmt1(state.reward)} Luck Tickets to unlock the next mining cycle.`;
-      stopVisualMining();
-      els.hash.textContent='0x_ready';
-      if(els.hashrate) els.hashrate.textContent='⚡ 000.0 KH/s';
-      if(els.hashSub) els.hashSub.textContent='Engine parked — claim to reset it';
-    }else{
-      els.meter.style.strokeDashoffset=String(RING_CIRC);
-      els.percent.textContent='0%';
-      els.time.textContent='30:00 cycle';
-      els.status.textContent='OFFLINE';
-      els.status.dataset.state='offline';
-      els.eta.textContent='Ready';
-      els.hold.disabled=false;
-      els.hold.classList.remove('cycle-complete');
-      els.hold.classList.add('ready-pulse');
-      els.claim.disabled=true;
-      els.claim.classList.remove('ready');
-      els.upgrade.disabled=false;
-      els.holdLabel.innerHTML='Hold to<br>Mine';
-      els.foot.textContent='Hold for 2 seconds to start your rig. Your 30-minute cycle keeps running even if you close the app.';
-      stopVisualMining();
-      els.hash.textContent='0x000000_idle';
-      if(els.hashrate) els.hashrate.textContent='⚡ 000.0 KH/s';
-      if(els.hashSub) els.hashSub.textContent='Idle — hold below to activate';
-    }
-  }
-
-  const levelBadge = {1:'🔧',2:'⚙️',3:'🚀',4:'💎',5:'👑',6:'🔥'};
-
-  function buildLevelStrip(current){
-    if(!els.levelStrip) return;
-    els.levelStrip.innerHTML='';
-    for(let level=1;level<=6;level++){
-      const seg=document.createElement('div');
-      seg.className='level-progress-seg' + (level<=current?' filled':'');
-      seg.innerHTML='<i></i>';
-      els.levelStrip.appendChild(seg);
-    }
-  }
-
-  function buildUpgradeList(){
-    const current=Number(state?.level)||1;
-    buildLevelStrip(current);
-    const nextLevel = current < 6 ? current+1 : null;
-    els.levelList.innerHTML='';
-    for(let level=1;level<=6;level++){
-      const m=levelMeta[level];
-      const isNext = level === nextLevel;
-      const card=document.createElement('div');
-      card.className='miner-level-card ' + (level===current?'current':'') + (isNext?' available':' locked') + (isNext?' recommended':'');
-      card.dataset.level=String(level);
-      const canUpgrade=isNext && !['mining','completed'].includes(String(state?.status||''));
-      const buttonText=level===current
-        ?'CURRENT LEVEL'
-        :isNext?'UPGRADE TO LEVEL '+level
-        :level>current?'LOCKED — REACH LEVEL '+(level-1)+' FIRST'
-        :'LOCKED';
-      card.innerHTML=`
-        <div class="miner-level-top">
-          <span class="miner-level-name">
-            <span class="miner-level-badge">${levelBadge[level]||'⚡'}</span>
-            LEVEL ${level}${level===1?' — FREE':''}${isNext?'<span class="recommended-chip">Next up</span>':''}
-          </span>
-          <span class="miner-level-cost">${m.cost===0?'FREE':m.cost.toLocaleString()+' Gems💎'}</span>
-        </div>
-        <p class="miner-level-tagline">${m.tagline}</p>
-        <div class="miner-level-reward">Expected reward per cycle: <strong>${rewardRange(level)} Luck Tickets</strong></div>
-        <button class="miner-upgrade-choice" type="button" ${canUpgrade?'':'disabled'} data-level="${level}">${buttonText}</button>`;
-      els.levelList.appendChild(card);
-    }
-    els.levelList.querySelectorAll('[data-level]').forEach(btn=>{
-      if(btn.tagName==='BUTTON') btn.addEventListener('click',()=>upgradeMiner(Number(btn.dataset.level)));
-    });
-  }
-
-  function openUpgrade(){
-    buildUpgradeList();
-    els.modal.classList.add('active');
-    els.modal.setAttribute('aria-hidden','false');
-    document.body.classList.add('modal-open');
-  }
-
-  function closeUpgrade(){
-    els.modal.classList.remove('active');
-    els.modal.setAttribute('aria-hidden','true');
-    document.body.classList.remove('modal-open');
-  }
-
-  function openHow(){
-    els.howModal.classList.add('active');
-    els.howModal.setAttribute('aria-hidden','false');
-    document.body.classList.add('modal-open');
-  }
-
-  // "How Mining Works" is shown automatically the first time this page
-  // loads. If the user ticks "Don't show this again" before closing it,
-  // that choice is remembered in localStorage so it won't auto-open on
-  // future visits — the ⓘ button still opens it manually at any time.
-  const HOWTO_KEY = 'payme_earn_hide_howmining';
-  function closeHow(){
-    if(els.howDontShow && els.howDontShow.checked){
-      try{ localStorage.setItem(HOWTO_KEY,'1'); }catch(e){}
-    }
-    els.howModal.classList.remove('active');
-    els.howModal.setAttribute('aria-hidden','true');
-    document.body.classList.remove('modal-open');
-  }
-
-  function spawnConfetti(){
-    if(!els.claimConfetti) return;
-    els.claimConfetti.innerHTML='';
-    const colors=['#22e0ff','#ff4fb8','#ffcc33','#8b5cf6','#2fe89a'];
-    for(let i=0;i<10;i++){
-      const bit=document.createElement('i');
-      bit.style.left=(Math.random()*100)+'%';
-      bit.style.background=colors[Math.floor(Math.random()*colors.length)];
-      bit.style.animationDelay=(Math.random()*.3)+'s';
-      bit.style.animationDuration=(1+Math.random()*.6)+'s';
-      els.claimConfetti.appendChild(bit);
-    }
-  }
-
-  function openClaimResult(reward){
-    if(els.claimAmount) els.claimAmount.innerHTML = `+${fmt1(reward)}<span>🎫 Luck Tickets</span>`;
-    if(els.claimSub) els.claimSub.textContent = 'Added straight to your balance. Start a new cycle any time.';
-    spawnConfetti();
-    els.claimModal.classList.add('active');
-    els.claimModal.setAttribute('aria-hidden','false');
-    document.body.classList.add('modal-open');
-  }
-
-  function closeClaimResult(){
-    els.claimModal.classList.remove('active');
-    els.claimModal.setAttribute('aria-hidden','true');
-    document.body.classList.remove('modal-open');
-  }
-
-  async function loadState(){
-    try{
-      const data=await api('/api/luck-mining/state');
-      state=data.mining;
-      serverOffset=Date.parse(data.serverNow)-Date.now();
-      render();
-    }catch(err){
-      if(err.code==='UNAUTHORIZED') window.location.href='/';
-      else showToast('Mining unavailable',err.message||'Unable to load your mining rig.');
-    }
-  }
-
-  async function startMining(){
-    // Guard against a second hold firing a second request while the first
-    // is still in flight — that race was the source of a false "already
-    // active" popup while the rig visually still showed OFFLINE.
-    if(miningStartInFlight) return;
-    miningStartInFlight=true;
-    try{
-      els.hold.disabled=true;
-      const data=await api('/api/luck-mining/start',{
-        method:'POST',
-        body:JSON.stringify({holdMs:HOLD_MS})
-      });
-      state=data.mining;
-      serverOffset=Date.parse(data.serverNow)-Date.now();
-      render();
-    }catch(err){
-      if(err.code==='MINING_ACTIVE' || err.code==='READY_TO_CLAIM' || err.code==='MINING_STATE_CHANGED'){
-        // The server's truth disagrees with what we last rendered — pull
-        // the real state instead of leaving the rig stuck on OFFLINE.
-        await loadState();
-        if(err.code==='MINING_ACTIVE') showToast('Rig already running',"Your rig is already mining this cycle — sit tight.");
-        else if(err.code==='READY_TO_CLAIM') showToast('Cycle complete','Claim your Luck Tickets to start a new cycle.');
-        else showToast('Synced up',err.message||'Your mining state was refreshed.');
-      }else{
-        els.hold.disabled=false;
-        showToast('Could not activate rig',err.message||'Please try again.');
-      }
-    }finally{
-      miningStartInFlight=false;
-    }
-  }
-
-  async function claimTickets(){
-    try{
-      els.claim.disabled=true;
-      const data=await api('/api/luck-mining/claim',{method:'POST',body:'{}'});
-      state=data.mining;
-      serverOffset=Date.parse(data.serverNow)-Date.now();
-      render();
-      openClaimResult(data.reward);
-    }catch(err){
-      els.claim.disabled=false;
-      showToast('Claim failed',err.message||'Please return and try again.');
-    }
-  }
-
-  async function upgradeMiner(level){
-    try{
-      const data=await api('/api/luck-mining/upgrade',{
-        method:'POST',
-        body:JSON.stringify({level})
-      });
-      state=data.mining;
-      serverOffset=Date.parse(data.serverNow)-Date.now();
-      closeUpgrade();
-      render();
-      showToast('Miner upgraded',`Your rig is now Level ${level}.`);
-    }catch(err){
-      if(err.code==='INSUFFICIENT_GEMS'){
-        closeUpgrade();
-        showToast('Insufficient Gems💎',err.message||'You need more Gems to upgrade.',{
-          label:'Deposit Gems',
-          run:()=>{ window.location.href='/deposit.html'; }
-        });
-      }else{
-        showToast('Upgrade unavailable',err.message||'Please try again.');
-      }
-      buildUpgradeList();
-    }
-  }
-
-  function setHoldProgress(pct){
-    els.hold.style.setProperty('--progress', String(pct));
-  }
-
-  // Fires exactly once a hold has genuinely reached HOLD_MS, whether that
-  // was detected by the animation-frame loop or by the release handler
-  // (see endHold below). Guards itself so it can never double-fire.
-  function completeHold(){
-    if(!holdActive) return;
-    holdActive=false;
-    if(holdFrame) cancelAnimationFrame(holdFrame);
-    holdFrame=null;
-    setHoldProgress(100);
-    els.hold.classList.add('hold-success');
-    if(window.Telegram?.WebApp?.HapticFeedback){
-      try{window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');}catch(_){}
-    }
-    // A completed 2-second hold starts mining directly now — no rewarded
-    // ad gate in front of it.
-    startMining();
-    setTimeout(()=>{
-      els.hold.classList.remove('holding','hold-success');
-      setHoldProgress(0);
-    },400);
-  }
-
-  function holdLoop(now){
-    if(!holdActive) return;
-    const elapsed=now-holdStart;
-    const progress=Math.min(1,elapsed/HOLD_MS);
-    setHoldProgress(progress*100);
-    if(progress>=1){
-      completeHold();
-      return;
-    }
-    holdFrame=requestAnimationFrame(holdLoop);
-  }
-
-  function beginHold(e){
-    if(els.hold.disabled || holdActive || miningStartInFlight) return;
-    e.preventDefault();
-    holdActive=true;
-    holdStart=performance.now();
-    els.hold.classList.add('holding');
-    setHoldProgress(0);
-    holdFrame=requestAnimationFrame(holdLoop);
-  }
-
-  function endHold(e){
-    if(!holdActive) return;
-    if(e) e.preventDefault();
-    // A touch naturally lifts off right around the moment the hold
-    // finishes, and that pointerup can reach the browser before the next
-    // animation frame confirms 100% — which used to cancel a genuinely
-    // successful hold and make the button feel like it "did nothing".
-    // Trust the clock here instead of the frame loop's timing.
-    const elapsed=performance.now()-holdStart;
-    if(elapsed>=HOLD_MS){
-      completeHold();
-      return;
-    }
-    holdActive=false;
-    if(holdFrame) cancelAnimationFrame(holdFrame);
-    holdFrame=null;
-    els.hold.classList.remove('holding');
-    setHoldProgress(0);
-  }
-
-  els.hold.addEventListener('pointerdown',beginHold);
-  els.hold.addEventListener('pointerup',endHold);
-  els.hold.addEventListener('pointercancel',endHold);
-  els.hold.addEventListener('pointerleave',endHold);
-  els.hold.addEventListener('contextmenu',e=>e.preventDefault());
-  els.claim.addEventListener('click',claimTickets);
-  els.upgrade.addEventListener('click',openUpgrade);
-  els.closeModal.addEventListener('click',closeUpgrade);
-  els.modal.addEventListener('click',e=>{if(e.target===els.modal) closeUpgrade();});
-
-  if(els.howBtn) els.howBtn.addEventListener('click',openHow);
-  if(els.howClose) els.howClose.addEventListener('click',closeHow);
-  if(els.howGotIt) els.howGotIt.addEventListener('click',closeHow);
-  if(els.howModal) els.howModal.addEventListener('click',e=>{if(e.target===els.howModal) closeHow();});
-
-  if(els.claimDismiss) els.claimDismiss.addEventListener('click',closeClaimResult);
-  if(els.claimModal) els.claimModal.addEventListener('click',e=>{if(e.target===els.claimModal) closeClaimResult();});
-  if(els.claimUpgradeCta) els.claimUpgradeCta.addEventListener('click',()=>{
-    closeClaimResult();
-    openUpgrade();
-  });
-
-  document.addEventListener('keydown',e=>{
-    if(e.key!=='Escape') return;
-    if(els.claimModal?.classList.contains('active')) closeClaimResult();
-    else if(els.howModal?.classList.contains('active')) closeHow();
-    else closeUpgrade();
-  });
-
-  // Re-checking the server on every quick tab-switch is the main source of
-  // avoidable Supabase reads for this widget. Two guards cut that down:
-  // 1) a longer 60s debounce instead of 15s, and 2) skip the network call
-  // entirely when we can already tell, from the locally-held state, that
-  // nothing could have changed (still mid-cycle with time left, or idle).
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible'){
-      const now=Date.now();
-      if(now-lastVisibleAt>60000){
-        const s=state&&state.status;
-        const completeAt=s==='mining'?Date.parse(state.completeAt||''):NaN;
-        const cycleLikelyDone = s!=='mining' || !Number.isFinite(completeAt) || completeAt<=now;
-        if(cycleLikelyDone) loadState();
-      }
-      lastVisibleAt=now;
-    }else{
-      lastVisibleAt=Date.now();
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded',function(){
-    loadState();
-    let howHidden=false;
-    try{ howHidden = localStorage.getItem(HOWTO_KEY)==='1'; }catch(e){}
-    if(!howHidden && els.howModal) openHow();
-  });
-})();
-</script>
 
 <script>
 (function PAYMEEarnLanguage(){
   const I18N = {
-    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "More Ways to Earn": "طرق أكثر للربح", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your invite link — every friend who joins puts more Gems in your wallet.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "💎15 per successful referral": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "TIME / STATUS": "الوقت / الحالة", "LUCK TICKETS": "تذاكر الحظ", "Hold to activate": "اضغط مطولًا للتفعيل", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "Mining": "التعدين", "Active": "نشط", "Cycle": "الدورة", "Complete": "اكتملت", "Hold to": "اضغط مطولًا لـ", "Mine": "التعدين", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Don't show this again": "لا تُظهر هذا مرة أخرى", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
+    ar: {"Back to Dashboard": "العودة إلى لوحة التحكم", "PAYME REWARDS": "مكافآت PAYME", "Turn your activity": "حوّل نشاطك إلى", "real rewards.": "مكافآت حقيقية.", "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.": "العب الألعاب، وادعُ الأصدقاء، وروّج للمجتمعات، واربح في PAYME — كل ما يمكنك فعله موجود هنا في هذه الصفحة.", "3 games to play": "3 ألعاب للعب", "Instant rewards": "مكافآت فورية", "15 per referral": "15 لكل إحالة", "Earn more": "اربح أكثر", "More Ways to Earn": "طرق أكثر للربح", "Tap a game to play": "اضغط على لعبة للعب", "3 Games Active": "3 ألعاب نشطة", "Tap, spin and match for PAYME rewards.": "اضغط ودُر وطابق للحصول على مكافآت PAYME.", "Max Payout": "أقصى دفعة", "Luck Vault": "خزنة الحظ", "Crack open the vault to double your gems, score more Luck Tickets and unlock more ways to earn.": "افتح الخزنة لمضاعفة جواهرك، واحصل على مزيد من تذاكر الحظ، وافتح طرقًا أكثر للربح.", "20–50 Luck Tickets per chest": "20–50 تذكرة حظ لكل صندوق", "PAYME Spin": "دوران PAYME", "Spin the wheel and try your luck for instant cash prizes.": "أدر العجلة وجرّب حظك للفوز بجوائز نقدية فورية.", "🎯 Up to 💎2k prize opportunity": "🎯 فرصة الفوز بجائزة تصل إلى 💎2k", "Lucky3": "لاكي3", "Pick 3 numbers and stake your Luck Tickets for cash or free spins.": "اختر 3 أرقام وراهن بتذاكر حظك مقابل نقود أو دورات مجانية.", "Win up to 15,000": "اربح حتى 15,000", "Invite & Earn": "ادعُ واربح", "Share your referral link — confirmed referrals unlock stronger miner levels.": "شارك رابط دعوتك — كل صديق ينضم يضيف مزيدًا من الجواهر إلى محفظتك.", "🚀 Unlock miner levels with referrals": "💎15 لكل إحالة ناجحة", "Luck Ticket Mining": "تعدين تذاكر الحظ", "30-minute mining cycle": "دورة تعدين مدتها 30 دقيقة", "LUCK REWARDS": "مكافآت الحظ", "Ticket Miner": "جهاز تعدين التذاكر", "Activate once. Let your rig do the work.": "فعّله مرة واحدة، ودع جهازك يقوم بالعمل.", "LEVEL 1": "المستوى 1", "FREE MINER": "جهاز تعدين مجاني", "remaining": "متبقٍ", "OFFLINE": "غير متصل", "ONLINE": "متصل", "MINING": "جارٍ التعدين", "READY": "جاهز", "MINING ENGINE": "محرك التعدين", "Ready to activate": "جاهز للتفعيل", "ENGINE / ": "المحرك / ", "Ticket Range": "نطاق التذاكر", "Tickets Earned": "التذاكر المكتسبة", "Time / Status": "الوقت / الحالة", "TIME / STATUS": "الوقت / الحالة", "LUCK TICKETS": "تذاكر الحظ", "Hold to activate": "اضغط مطولًا للتفعيل", "Ready": "جاهز", "HOLD TO": "اضغط مطولًا لـ", "ACTIVATE": "تفعيل", "Mining": "التعدين", "Active": "نشط", "Cycle": "الدورة", "Complete": "اكتملت", "Hold to": "اضغط مطولًا لـ", "Mine": "التعدين", "🎫 Claim Tickets": "🎫 استلام التذاكر", "⚙ Upgrade Miner": "⚙ ترقية جهاز التعدين", "How it works": "كيف يعمل", "Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.": "اضغط مطولًا لمدة ثانيتين لتفعيل جهازك. تستمر دورتك لمدة 30 دقيقة أثناء غيابك.", "Upgrade Mining Rig": "ترقية جهاز التعدين", "Choose any higher level. Upgrades apply to your next cycle.": "اختر أي مستوى أعلى. تُطبَّق الترقيات على دورتك التالية.", "How Mining Works": "كيف يعمل التعدين", "The simple version — no jargon.": "النسخة المبسطة — بدون مصطلحات معقدة.", "Hold the lightning button": "اضغط مطولًا على زر البرق", "Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.": "اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — يعمل جهازك وتبدأ دورة التعدين.", "Let it run for 30 minutes": "دعه يعمل لمدة 30 دقيقة", "The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.": "تمتلئ الحلقة حول الجهاز مع مرور الوقت. يمكنك إغلاق التطبيق أو قفل هاتفك — تستمر الدورة في الخلفية وتكمل من حيث توقفت عند عودتك.", "Claim your Luck Tickets": "استلم تذاكر حظك", "Once the ring hits 100%, hit \"Claim Tickets\" to collect your reward. Then you can start a brand new cycle right away.": "بمجرد أن تصل الحلقة إلى 100%، اضغط على \"استلام التذاكر\" لجمع مكافأتك. ثم يمكنك بدء دورة جديدة فورًا.", "Upgrade for bigger rewards": "ترقّ للحصول على مكافآت أكبر", "Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.": "إنفاق الجواهر💎 لترقية جهازك يرفع نطاق تذاكر الحظ التي يمكنك كسبها في كل دورة — كلما ارتفع المستوى، زادت الدفعة المحتملة.", "Got it": "فهمت", "Don't show this again": "لا تُظهر هذا مرة أخرى", "Tickets Claimed!": "تم استلام التذاكر!", "Luck Tickets": "تذاكر الحظ", "Added straight to your balance. Start a new cycle any time.": "أُضيفت مباشرة إلى رصيدك. ابدأ دورة جديدة في أي وقت.", "⛏️ Upgrade to get higher Luck Tickets": "⛏️ ترقّ للحصول على تذاكر حظ أكثر", "Nice, continue": "رائع، متابعة", "CURRENT LEVEL": "المستوى الحالي", "UPGRADE TO LEVEL": "الترقية إلى المستوى", "LOCKED — REACH LEVEL": "مغلق — اصل إلى المستوى", "FIRST": "أولًا", "LOCKED": "مغلق", "LEVEL": "المستوى", "— FREE": "— مجاني", "Next up": "التالي", "FREE": "مجاني", "GEMS💎": "جواهر💎", "Gems💎": "جواهر💎", "Expected reward per cycle:": "المكافأة المتوقعة لكل دورة:", "A free rig for casual, everyday mining.": "جهاز مجاني للتعدين العادي اليومي.", "A faster rig with a higher reward floor.": "جهاز أسرع بحد أدنى أعلى للمكافآت.", "A solid mid-tier rig with steady payouts.": "جهاز متوسط قوي بدفعات ثابتة.", "A serious upgrade for regular miners.": "ترقية جادة للمعدّنين المنتظمين.", "A powerful rig with big payouts.": "جهاز قوي بدفعات كبيرة.", "The top-tier rig — the biggest payouts.": "الجهاز الأعلى فئة — أكبر الدفعات."},
     en: {
       "Back to Dashboard":"Back to Dashboard","PAYME REWARDS":"PAYME REWARDS",
       "Turn your activity":"Turn your activity","real rewards.":"real rewards.",
       "Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.":"Play games, invite friends, promote communities and earn on PAYME — everything you can do is right here on this page.",
-      "3 games to play":"3 games to play","Instant rewards":"Instant rewards","15 per referral":"15 per referral",
+      "3 games to play":"3 games to play","Instant rewards":"Instant rewards","15 per referral":"Referral milestones",
       "Earn more":"Earn more","More Ways to Earn":"More Ways to Earn","Tap a game to play":"Tap a game to play",
       "3 Games Active":"3 Games Active","Tap, spin and match for PAYME rewards.":"Tap, spin and match for PAYME rewards.",
       "Max Payout":"Max Payout","Luck Vault":"Luck Vault",
@@ -1475,8 +778,8 @@ document.addEventListener('DOMContentLoaded',function(){
       "🎯 Up to 💎2k prize opportunity":"🎯 Up to 💎2k prize opportunity","Lucky3":"Lucky3",
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Pick 3 numbers and stake your Luck Tickets for cash or free spins.",
       "Win up to 15,000":"Win up to 15,000",
-      "Invite & Earn":"Invite & Earn","Share your invite link — every friend who joins puts more Gems in your wallet.":"Share your invite link — every friend who joins puts more Gems in your wallet.",
-      "💎15 per successful referral":"💎15 per successful referral",
+      "Invite & Earn":"Invite & Earn","Share your referral link — confirmed referrals unlock stronger miner levels.":"Share your referral link — confirmed referrals unlock stronger miner levels.",
+      "🚀 Unlock miner levels with referrals":"🚀 Unlock miner levels with referrals",
 
       "Luck Ticket Mining":"Luck Ticket Mining","30-minute mining cycle":"30-minute mining cycle",
       "LUCK REWARDS":"LUCK REWARDS","Ticket Miner":"Ticket Miner","Activate once. Let your rig do the work.":"Activate once. Let your rig do the work.",
@@ -1523,8 +826,8 @@ document.addEventListener('DOMContentLoaded',function(){
       "🎯 Up to 💎2k prize opportunity":"🎯 Шанс получить до 💎2k","Lucky3":"Lucky3",
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Выберите 3 числа и поставьте билеты удачи на деньги или бесплатные вращения.",
       "Win up to 15,000":"Выигрыш до 15 000","Soon":"Скоро","Get your reward instantly, straight to your PAYME account.":"Получите награду мгновенно прямо на аккаунт PAYME.",
-      "Invite & Earn":"Приглашай и зарабатывай","Share your invite link — every friend who joins puts more Gems in your wallet.":"Поделитесь ссылкой — за каждого друга вы получаете больше гемов.",
-      "💎15 per successful referral":"💎15 за каждого приглашённого",
+      "Invite & Earn":"Приглашай и зарабатывай","Share your referral link — confirmed referrals unlock stronger miner levels.":"Поделитесь ссылкой — за каждого друга вы получаете больше гемов.",
+      "🚀 Unlock miner levels with referrals":"💎15 за каждого приглашённого",
 
       "Luck Ticket Mining":"Добыча билетов удачи","30-minute mining cycle":"30-минутный цикл добычи",
       "LUCK REWARDS":"НАГРАДЫ УДАЧИ","Ticket Miner":"Майнер билетов","Activate once. Let your rig do the work.":"Активируйте один раз — рига сделает всё сама.",
@@ -1570,8 +873,8 @@ document.addEventListener('DOMContentLoaded',function(){
       "🎯 Up to 💎2k prize opportunity":"🎯 Oportunidad de premio de hasta 💎2k","Lucky3":"Lucky3",
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"Elige 3 números y apuesta tus Tickets de Suerte por efectivo o giros gratis.",
       "Win up to 15,000":"Gana hasta 15.000","Soon":"Próximamente","Get your reward instantly, straight to your PAYME account.":"Recibe tu recompensa al instante directamente en tu cuenta PAYME.",
-      "Invite & Earn":"Invita y gana","Share your invite link — every friend who joins puts more Gems in your wallet.":"Comparte tu enlace — por cada amigo que se una ganas más Gemas.",
-      "💎15 per successful referral":"💎15 por cada referido exitoso",
+      "Invite & Earn":"Invita y gana","Share your referral link — confirmed referrals unlock stronger miner levels.":"Comparte tu enlace — por cada amigo que se una ganas más Gemas.",
+      "🚀 Unlock miner levels with referrals":"💎15 por cada referido exitoso",
 
       "Luck Ticket Mining":"Minería de Tickets de Suerte","30-minute mining cycle":"Ciclo de minería de 30 minutos",
       "LUCK REWARDS":"RECOMPENSAS DE SUERTE","Ticket Miner":"Minero de Tickets","Activate once. Let your rig do the work.":"Actívala una vez. Deja que tu equipo haga el trabajo.",
@@ -1617,8 +920,8 @@ document.addEventListener('DOMContentLoaded',function(){
       "🎯 Up to 💎2k prize opportunity":"🎯 💎2k तक इनाम का मौका","Lucky3":"Lucky3",
       "Pick 3 numbers and stake your Luck Tickets for cash or free spins.":"3 नंबर चुनें और नकद या फ्री स्पिन के लिए अपने लक टिकट दाँव पर लगाएँ।",
       "Win up to 15,000":"15,000 तक जीतें","Soon":"जल्द","Get your reward instantly, straight to your PAYME account.":"अपना रिवॉर्ड तुरंत अपने PAYME अकाउंट में पाएँ।",
-      "Invite & Earn":"आमंत्रित करें और कमाएँ","Share your invite link — every friend who joins puts more Gems in your wallet.":"अपनी लिंक साझा करें — हर दोस्त के जुड़ने पर आपके वॉलेट में ज़्यादा जेम्स आएँगे।",
-      "💎15 per successful referral":"हर सफल रेफरल पर 💎15",
+      "Invite & Earn":"आमंत्रित करें और कमाएँ","Share your referral link — confirmed referrals unlock stronger miner levels.":"अपनी लिंक साझा करें — हर दोस्त के जुड़ने पर आपके वॉलेट में ज़्यादा जेम्स आएँगे।",
+      "🚀 Unlock miner levels with referrals":"हर सफल रेफरल पर 💎15",
 
       "Luck Ticket Mining":"लक टिकट माइनिंग","30-minute mining cycle":"30 मिनट का माइनिंग चक्र",
       "LUCK REWARDS":"लक रिवॉर्ड्स","Ticket Miner":"टिकट माइनर","Activate once. Let your rig do the work.":"एक बार सक्रिय करें। आपकी रिग बाकी काम करेगी।",
@@ -1719,6 +1022,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </body>
 </html>
+
 
 
 

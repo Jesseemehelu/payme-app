@@ -323,7 +323,7 @@ const isProduction =
 
 const WELCOME_BONUS = 10;
 
-const REFERRAL_REWARD = 15;
+const REFERRAL_REWARD = 0;
 
 let MIN_WITHDRAWAL_LIMIT = Math.ceil(MIN_CRYPTO_USD / GEM_USD_RATE);
 
@@ -453,188 +453,259 @@ const LUCK_CHEST_CONFIG = {
 
 
 // ======================================================
-// LUCK TICKET MINING RIG
+// LUCK TICKET TAP MINING
 // ======================================================
-// Mining state is stored inside the existing daily_reward JSON column,
-// so this feature does not require a new Supabase table or extra columns.
-// The server is authoritative: the client only renders the timer locally.
+// Tap mining is deliberately stored in the existing daily_reward JSON blob.
+// There is no background timer, no mining-completion sweep and no server
+// polling. The browser may animate energy locally, while the server remains
+// authoritative whenever a batch of taps is submitted.
 const LUCK_MINING_CONFIG = {
-  cycleMs: 30 * 60 * 1000,
-  holdMs: 2000,
+  maxEnergy: 30,
+  energyRegenMs: 10 * 1000, // +1 energy every 10 seconds
+  batchMax: 30,
+  cycleReferenceMs: 30 * 60 * 1000,
+  referenceTaps: 210, // 30 starting energy + 180 regenerated over 30 minutes
   levels: {
-    1: { cost: 0, min: 1, max: 2, label: 'Free' },
-    2: { cost: 500, min: 3, max: 4, label: '500 Gems💎' },
-    3: { cost: 500, min: 5, max: 8, label: '500 Gems💎' },
-    4: { cost: 800, min: 9, max: 13, label: '800 Gems💎' },
-    5: { cost: 2000, min: 20, max: 25, label: '2,000 Gems💎' },
-    6: { cost: 3000, min: 26, max: 35, label: '3,000 Gems💎' }
+    1: { min: 1, max: 2, label: 'FREE MINER', referrals: 0 },
+    2: { min: 3, max: 4, label: 'LEVEL 2', referrals: 20 },
+    3: { min: 5, max: 8, label: 'LEVEL 3', referrals: 50 },
+    4: { min: 9, max: 13, label: 'LEVEL 4', referrals: 100 },
+    5: { min: 20, max: 25, label: 'LEVEL 5', referrals: 300 },
+    6: { min: 26, max: 35, label: 'LEVEL 6', referrals: 500 }
   }
 };
 
-// ======================================================
-// MINING-COMPLETE / INACTIVITY TELEGRAM REMINDERS
-// ======================================================
-// Both features message the user's own Telegram account directly, so they
-// go out through TELEGRAM_BOT_TOKEN (the Payme bot the user opened the Mini
-// App from) — never the deposit/admin bot, which only talks to the admin
-// chat. The "1 day since login" reminder and the mining-complete flag both
-// live inside the same daily_reward JSON blob as everything else on this
-// page, so neither needs a new Supabase column.
-const EARN_WEBAPP_URL = 'https://t.me/paymeoobot/earn?startapp=WF6R1R';
-const INACTIVITY_REMINDER_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 1 day since last login
-const INACTIVITY_REMINDER_REPEAT_MS = 24 * 60 * 60 * 1000; // don't re-ping more than once/day
-const INACTIVITY_SWEEP_INTERVAL_MS = 30 * 60 * 1000; // check every 30 minutes
-const MINING_SWEEP_INTERVAL_MS = 60 * 1000; // check every 60 seconds (cycle is 30 min)
-const REMINDER_SWEEP_PAGE_SIZE = 500;
-
-// Per-user in-process mutex. This is deliberately short-lived and only
-// serializes mining mutations on a single Render instance; the Supabase
-// compare-and-swap below remains the source of truth for duplicate safety.
 const luckMiningLocks = new Map();
-
-function luckMiningLockKey(userId) {
-  return String(userId || '');
-}
-
+function luckMiningLockKey(userId) { return String(userId || ''); }
 async function withLuckMiningLock(userId, fn) {
   const key = luckMiningLockKey(userId);
   const previous = luckMiningLocks.get(key) || Promise.resolve();
-
   let release;
   const current = new Promise(resolve => { release = resolve; });
   luckMiningLocks.set(key, current);
-
   await previous;
-
-  try {
-    return await fn();
-  } finally {
+  try { return await fn(); }
+  finally {
     release();
-    if (luckMiningLocks.get(key) === current) {
-      luckMiningLocks.delete(key);
-    }
+    if (luckMiningLocks.get(key) === current) luckMiningLocks.delete(key);
   }
 }
 
 function normalizeLuckMining(daily) {
-  const source =
-    daily && daily.luckMining && typeof daily.luckMining === 'object'
-      ? daily.luckMining
-      : {};
-
+  const source = daily && daily.luckMining && typeof daily.luckMining === 'object'
+    ? daily.luckMining : {};
   let level = Number(source.level);
   if (!Number.isInteger(level) || level < 1 || level > 6) level = 1;
 
-  let status = String(source.status || 'offline');
-  if (!['offline', 'mining', 'completed'].includes(status)) {
-    status = 'offline';
-  }
+  const now = Date.now();
+  let energy = Number(source.energy);
+  if (!Number.isFinite(energy)) energy = LUCK_MINING_CONFIG.maxEnergy;
+  energy = Math.max(0, Math.min(LUCK_MINING_CONFIG.maxEnergy, energy));
 
-  const startAt = String(source.startAt || '');
-  const completeAt = String(source.completeAt || '');
-  const reward = source.reward === null || source.reward === undefined
-    ? null
-    : Number(source.reward);
+  let energyUpdatedAt = Number(source.energyUpdatedAt);
+  if (!Number.isFinite(energyUpdatedAt) || energyUpdatedAt <= 0) energyUpdatedAt = now;
+
+  // Regeneration is calculated lazily only when state is touched.
+  const regen = Math.floor(Math.max(0, now - energyUpdatedAt) / LUCK_MINING_CONFIG.energyRegenMs);
+  if (regen > 0) {
+    energy = Math.min(LUCK_MINING_CONFIG.maxEnergy, energy + regen);
+    energyUpdatedAt = Math.min(now, energyUpdatedAt + regen * LUCK_MINING_CONFIG.energyRegenMs);
+    if (energy >= LUCK_MINING_CONFIG.maxEnergy) energyUpdatedAt = now;
+  }
 
   return {
     level,
-    status,
-    startAt: startAt || null,
-    completeAt: completeAt || null,
-    reward: Number.isFinite(reward) && reward >= 0 ? reward : null,
-    cycleId: String(source.cycleId || ''),
-    lastClaimAt: Number(source.lastClaimAt) || 0,
-    // Marks that the "mining complete" Telegram DM has already been sent
-    // for the current cycle, so the background sweep never double-sends.
-    // Reset to false whenever a new cycle is started.
-    notifiedComplete: !!source.notifiedComplete
+    energy,
+    energyUpdatedAt,
+    tapUnits: Math.max(0, Number(source.tapUnits) || 0),
+    totalTaps: Math.max(0, Number(source.totalTaps) || 0),
+    lastTapAt: Number(source.lastTapAt) || 0,
+    lastRewardAt: Number(source.lastRewardAt) || 0,
+    referralConfirmed: !!source.referralConfirmed
   };
 }
 
-function secureMiningReward(level) {
+function miningPerTapRange(level) {
   const cfg = LUCK_MINING_CONFIG.levels[level] || LUCK_MINING_CONFIG.levels[1];
+  return { min: cfg.min / LUCK_MINING_CONFIG.referenceTaps, max: cfg.max / LUCK_MINING_CONFIG.referenceTaps };
+}
 
-  // Level 1 (the free rig) and Level 3 pay out in single-decimal
-  // increments (e.g. 1.1, 1.7, 4.5) so even a small win still moves the
-  // balance. The other paid levels use whole tickets exactly within
-  // their configured inclusive range.
-  if (level === 1 || level === 3) {
-    const steps = Math.round((cfg.max - cfg.min) * 10);
-    const pick = crypto.randomInt(0, steps + 1);
-    return Number((cfg.min + pick / 10).toFixed(1));
-  }
-
-  return crypto.randomInt(
-    Math.floor(cfg.min),
-    Math.floor(cfg.max) + 1
-  );
+function miningTapReward(level, count) {
+  const range = miningPerTapRange(level);
+  let reward = 0;
+  for (let i = 0; i < count; i++) reward += range.min + Math.random() * (range.max - range.min);
+  return Number(reward.toFixed(3));
 }
 
 function getLuckMiningSnapshot(user, now = Date.now()) {
   const daily = normalizeDailyReward(user);
-  const mining = daily.luckMining;
-  let status = mining.status;
-  let reward = mining.reward;
-
-  if (status === 'mining') {
-    const completeAt = Date.parse(mining.completeAt || '');
-    if (Number.isFinite(completeAt) && completeAt <= now) {
-      status = 'completed';
-      if (reward === null) {
-        reward = secureMiningReward(mining.level);
-      }
-    }
-  }
-
-  const startMs = Date.parse(mining.startAt || '');
-  const completeMs = Date.parse(mining.completeAt || '');
-  const progress =
-    status === 'mining' && Number.isFinite(startMs) && Number.isFinite(completeMs)
-      ? Math.max(0, Math.min(1, (now - startMs) / Math.max(1, completeMs - startMs)))
-      : status === 'completed'
-      ? 1
-      : 0;
-
+  const mining = normalizeLuckMining(daily);
   const cfg = LUCK_MINING_CONFIG.levels[mining.level] || LUCK_MINING_CONFIG.levels[1];
-
+  const range = miningPerTapRange(mining.level);
   return {
     level: mining.level,
-    status,
-    startAt: mining.startAt,
-    completeAt: mining.completeAt,
-    reward,
-    cycleId: mining.cycleId || null,
-    lastClaimAt: mining.lastClaimAt || 0,
-    progress,
-    rewardMin: cfg.min,
-    rewardMax: cfg.max,
+    energy: Number(mining.energy.toFixed(2)),
+    maxEnergy: LUCK_MINING_CONFIG.maxEnergy,
+    energyRegenMs: LUCK_MINING_CONFIG.energyRegenMs,
+    energyUpdatedAt: mining.energyUpdatedAt,
+    totalTaps: mining.totalTaps,
+    lastTapAt: mining.lastTapAt,
+    luckTickets: number(daily.luckTickets),
+    perTapMin: Number(range.min.toFixed(6)),
+    perTapMax: Number(range.max.toFixed(6)),
+    rewardMin30m: cfg.min,
+    rewardMax30m: cfg.max,
     rewardLabel: `${cfg.min}–${cfg.max}`,
-    cycleMs: LUCK_MINING_CONFIG.cycleMs,
-    serverNow: now,
-    luckTickets: number(daily.luckTickets)
+    referralRequirement: cfg.referrals,
+    referrals: number(user.totalReferrals),
+    nextLevel: mining.level < 6 ? mining.level + 1 : 6,
+    nextLevelReferrals: mining.level < 6 ? LUCK_MINING_CONFIG.levels[mining.level + 1].referrals : 500,
+    serverNow: now
   };
 }
 
 async function commitLuckMiningCAS(user, oldDaily, newDaily, extraPatch = {}, conditions = {}) {
-  let query = supabase
-    .from('users')
-    .update({
-      daily_reward: newDaily,
-      ...extraPatch
-    })
-    .eq('id', user.id)
-    .eq('daily_reward', JSON.stringify(oldDaily));
-
-  for (const [column, value] of Object.entries(conditions || {})) {
-    query = query.eq(column, value);
-  }
-
+  let query = supabase.from('users').update({ daily_reward: newDaily, ...extraPatch }).eq('id', user.id).eq('daily_reward', JSON.stringify(oldDaily));
+  for (const [column, value] of Object.entries(conditions || {})) query = query.eq(column, value);
   const { data, error } = await query.select('id');
-
   if (error) throw error;
   return Array.isArray(data) && data.length > 0;
 }
 
+// ======================================================
+// ======================================================
+// REQUIRE LOGIN
+// ======================================================
+async function requireLogin(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized session."
+    });
+  }
+
+  if (!req.user) {
+    try {
+      req.user = await getUserById(req.session.userId);
+    } catch (err) {
+      console.error("Require login error:", err);
+      return res.status(401).json({
+        success: false,
+        message: "User session not found."
+      });
+    }
+  }
+
+  return next();
+}
+
+
+// LUCK TICKET TAP MINING API
+// ======================================================
+app.get('/api/luck-mining/state', requireLogin, async (req, res) => {
+  try {
+    const user = req.user;
+    const daily = normalizeDailyReward(user);
+    const mining = normalizeLuckMining(daily);
+    daily.luckMining = mining;
+    daily.luckTickets = number(daily.luckTickets);
+    user.dailyReward = daily;
+    return res.json({ success: true, mining: getLuckMiningSnapshot(user), luckTickets: number(daily.luckTickets) });
+  } catch (err) {
+    console.error('Luck mining state error:', err);
+    return res.status(500).json({ success:false, message:'Unable to load the mining rig.' });
+  }
+});
+
+app.post('/api/luck-mining/tap', requireLogin, async (req, res) => {
+  try {
+    const result = await withLuckMiningLock(req.user.id, async () => {
+      let user = req.user;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const rawDaily = user.dailyReward && typeof user.dailyReward === 'object' ? user.dailyReward : {};
+        const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+        const daily = normalizeDailyReward(user);
+        const mining = normalizeLuckMining(daily);
+        const requested = Math.max(1, Math.min(LUCK_MINING_CONFIG.batchMax, Math.floor(Number(req.body?.count) || 0)));
+
+        if (mining.energy < 1) {
+          return { status: 400, body: { success:false, code:'NO_ENERGY', message:'Your mining energy is empty. Wait for it to regenerate.', mining:getLuckMiningSnapshot(user) } };
+        }
+
+        const taps = Math.min(requested, Math.floor(mining.energy));
+        const now = Date.now();
+        mining.energy = Math.max(0, mining.energy - taps);
+        mining.energyUpdatedAt = now;
+        mining.totalTaps += taps;
+        mining.lastTapAt = now;
+        const reward = miningTapReward(mining.level, taps);
+        daily.luckMining = mining;
+        daily.luckTickets = Number((number(daily.luckTickets) + reward).toFixed(3));
+        user.dailyReward = daily;
+
+        const committed = await commitLuckMiningCAS(user, oldDaily, daily);
+        if (!committed) {
+          if (attempt === 0) {
+            const fresh = await getUserMiningCore(user.id);
+            if (!fresh) throw new Error('User session not found.');
+            user = fresh;
+            continue;
+          }
+          return { status:409, body:{success:false, code:'MINING_CONFLICT', message:'Mining state changed. Please tap again.'} };
+        }
+
+        await addTransaction(user.id, {
+          id: generateTransactionId('tx_luck_tap'),
+          type: 'luck_ticket_mining_tap',
+          description: `Tap Mining — Level ${mining.level} (${taps} taps)`,
+          amount: reward,
+          currency: 'LUCK_TICKETS',
+          status: 'completed',
+          bank: 'Luck Ticket Wallet'
+        });
+
+        return { status:200, body:{ success:true, taps, reward, mining:getLuckMiningSnapshot(user, now), luckTickets:number(daily.luckTickets) } };
+      }
+      throw new Error('Mining tap retry exhausted.');
+    });
+    return res.status(result.status || 200).json(result.body);
+  } catch (err) {
+    console.error('Luck mining tap error:', err);
+    return res.status(500).json({success:false, message:'Unable to save your mining taps.'});
+  }
+});
+
+app.post('/api/luck-mining/upgrade', requireLogin, async (req, res) => {
+  try {
+    const requestedLevel = Number(req.body?.level);
+    const result = await withLuckMiningLock(req.user.id, async () => {
+      const user = req.user;
+      const rawDaily = user.dailyReward && typeof user.dailyReward === 'object' ? user.dailyReward : {};
+      const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+      const daily = normalizeDailyReward(user);
+      const mining = normalizeLuckMining(daily);
+      const currentLevel = mining.level;
+      const target = LUCK_MINING_CONFIG.levels[requestedLevel];
+      if (!Number.isInteger(requestedLevel) || !target || requestedLevel !== currentLevel + 1) {
+        return {status:400, body:{success:false, code:'INVALID_UPGRADE', message: currentLevel >= 6 ? 'Your miner is already at the maximum level.' : `You need Level ${currentLevel + 1} next.`}};
+      }
+      const referrals = number(user.totalReferrals);
+      if (referrals < target.referrals) {
+        return {status:400, body:{success:false, code:'REFERRALS_REQUIRED', required:target.referrals, referrals, message:`You need ${target.referrals} confirmed referrals to unlock Level ${requestedLevel}.`}};
+      }
+      mining.level = requestedLevel;
+      daily.luckMining = mining;
+      user.dailyReward = daily;
+      const committed = await commitLuckMiningCAS(user, oldDaily, daily);
+      if (!committed) return {status:409, body:{success:false, code:'UPGRADE_CONFLICT', message:'Your mining state changed. Please try again.'}};
+      return {status:200, body:{success:true, mining:getLuckMiningSnapshot(user), referrals}};
+    });
+    return res.status(result.status || 200).json(result.body);
+  } catch (err) {
+    console.error('Luck mining upgrade error:', err);
+    return res.status(500).json({success:false, message:'Unable to upgrade the miner.'});
+  }
+});
 
 // Double Your Gems — weighted coin flip.
 // The server alone decides the outcome: 20% win / 80% loss.
@@ -1130,2874 +1201,6 @@ async function getUserById(id) {
 
 }
 
-// ------------------------------------------------------------------
-// LUCK MINING — narrow-column reads
-// ------------------------------------------------------------------
-// requireLogin's getUserById() above does `select('*')`, pulling every
-// column of the users row (name, email, phone, referral stats, etc.) on
-// every single authenticated request. The luck-mining rig only ever
-// touches daily_reward (and, for upgrades, the balance columns), so
-// giving it its own narrow SELECT — instead of riding on the full-row
-// fetch — meaningfully cuts the Supabase egress this feature is
-// responsible for, without changing behavior for any other endpoint.
-async function getUserMiningCore(id) {
-  if (!id) return null;
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('id, daily_reward')
-    .eq('id', String(id))
-    .maybeSingle();
-
-  if (error) throw error;
-  return mapUser(data);
-}
-
-async function getUserMiningWithBalance(id) {
-  if (!id) return null;
-
-  const { data, error } = await supabase
-    .from('users')
-    .select('id, daily_reward, balance, deposit_balance, withdrawable_balance')
-    .eq('id', String(id))
-    .maybeSingle();
-
-  if (error) throw error;
-  return mapUser(data);
-}
-
-async function requireLoginMiningCore(req, res, next) {
-  if (!req.session || !req.session.userId) {
-    return res.status(401).json({ success: false, message: 'Unauthorized session.' });
-  }
-
-  try {
-    req.user = await getUserMiningCore(req.session.userId);
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: 'User session not found.' });
-    }
-  } catch (err) {
-    console.error('Require login (mining) error:', err);
-    return res.status(401).json({ success: false, message: 'User session not found.' });
-  }
-
-  return next();
-}
-
-async function requireLoginMiningUpgrade(req, res, next) {
-  if (!req.session || !req.session.userId) {
-    return res.status(401).json({ success: false, message: 'Unauthorized session.' });
-  }
-
-  try {
-    req.user = await getUserMiningWithBalance(req.session.userId);
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: 'User session not found.' });
-    }
-  } catch (err) {
-    console.error('Require login (mining upgrade) error:', err);
-    return res.status(401).json({ success: false, message: 'User session not found.' });
-  }
-
-  return next();
-}
-
-async function getUserByTelegramId(
-  telegramId
-) {
-
-  if (!telegramId) {
-    return null;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('users')
-      .select('*')
-      .eq(
-        'telegram_id',
-        String(telegramId)
-      )
-      .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return mapUser(data);
-
-}
-
-async function getUserByUsername(
-  username
-) {
-
-  if (!username) {
-    return null;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('users')
-      .select('*')
-      .eq(
-        'username',
-        String(username)
-          .toLowerCase()
-      )
-      .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return mapUser(data);
-
-}
-
-async function getUserByEmail(
-  email
-) {
-
-  if (!email) {
-    return null;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('users')
-      .select('*')
-      .eq(
-        'email',
-        String(email)
-          .toLowerCase()
-      )
-      .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return mapUser(data);
-
-}
-
-async function getUserByReferralCode(
-  code
-) {
-
-  if (!code) {
-    return null;
-  }
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('users')
-      .select('*')
-      .eq(
-        'referral_code',
-        String(code).toUpperCase()
-      )
-      .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return mapUser(data);
-
-}
-
-async function createUser(user) {
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('users')
-      .insert(
-        userDbPatch(user)
-      )
-      .select('*')
-      .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return mapUser(data);
-
-}
-
-// Total registered users — a cheap head-only count (no rows transferred),
-// used to stamp new-signup notifications with the running user number and
-// to size the admin broadcast.
-async function getTotalUserCount() {
-  const { count, error } = await supabase
-    .from('users')
-    .select('id', { count: 'exact', head: true });
-
-  if (error) {
-    console.error('getTotalUserCount error:', error);
-    return null;
-  }
-
-  return count || 0;
-}
-
-// ======================================================
-// TRANSACTIONS
-// ======================================================
-
-async function addTransaction(
-  userId,
-  tx
-) {
-
-  const row = {
-
-    id:
-      tx.id ||
-      generateTransactionId('tx'),
-
-    user_id:
-      userId,
-
-    type:
-      tx.type ||
-      'transaction',
-
-    description:
-      tx.description ||
-      '',
-
-    amount:
-      number(tx.amount),
-
-    currency:
-      tx.currency ||
-      'GEMS',
-
-    status:
-      tx.status ||
-      'completed',
-
-    bank:
-      tx.bank ||
-      null,
-
-    account_name:
-      tx.accountName ||
-      null,
-
-    account_number:
-      tx.accountNumber ||
-      null,
-
-    created_at:
-      tx.createdAt ||
-      new Date().toISOString()
-
-  };
-
-  const {
-    error
-  } =
-    await supabase
-      .from('transactions')
-      .insert(row);
-
-  if (error) {
-    throw error;
-  }
-
-  // The inserted row is already available locally.
-  // Do not download it back from Supabase.
-  return row;
-
-}
-
-async function getTransactions(
-  userId,
-  limit = 25
-) {
-
-  const safeLimit = Math.min(
-    Math.max(Number(limit) || 25, 1),
-    50
-  );
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('transactions')
-      .select(`
-        id,
-        type,
-        description,
-        amount,
-        currency,
-        status,
-        bank,
-        account_name,
-        account_number,
-        created_at
-      `)
-      .eq(
-        'user_id',
-        userId
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false
-        }
-      )
-      .limit(safeLimit);
-
-  if (error) {
-    throw error;
-  }
-
-  return (
-    data || []
-  ).map(
-    t => ({
-
-      id:
-        t.id,
-
-      type:
-        t.type,
-
-      description:
-        t.description,
-
-      amount:
-        number(t.amount),
-
-      currency:
-        t.currency,
-
-      status:
-        t.status,
-
-      bank:
-        t.bank,
-
-      accountName:
-        t.account_name,
-
-      accountNumber:
-        t.account_number,
-
-      createdAt:
-        t.created_at
-
-    })
-  );
-
-}
-
-async function getRecentSpins(
-  userId,
-  limit = 20
-) {
-
-  const safeLimit = Math.min(
-    Math.max(Number(limit) || 20, 1),
-    50
-  );
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('transactions')
-      .select(`
-        id,
-        type,
-        description,
-        amount,
-        currency,
-        status,
-        created_at
-      `)
-      .eq(
-        'user_id',
-        userId
-      )
-      .ilike(
-        'type',
-        '%Spin%'
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false
-        }
-      )
-      .limit(safeLimit);
-
-  if (error) {
-    throw error;
-  }
-
-  return (
-    data || []
-  ).map(
-    t => ({
-      id: t.id,
-      type: t.type,
-      description: t.description,
-      amount: number(t.amount),
-      currency: t.currency,
-      status: t.status,
-      createdAt: t.created_at
-    })
-  );
-
-}
-
-// ======================================================
-// DEPOSITS
-// ======================================================
-
-async function getUserDeposits(
-  userId,
-  limit = 25
-) {
-
-  const safeLimit = Math.min(
-    Math.max(Number(limit) || 25, 1),
-    50
-  );
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('deposits')
-      .select(`
-        reference,
-        amount,
-        status,
-        reason,
-        created_at
-      `)
-      .eq(
-        'user_id',
-        userId
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false
-        }
-      )
-      .limit(safeLimit);
-
-  if (error) {
-    throw error;
-  }
-
-  return (
-    data || []
-  ).map(
-    d => ({
-
-      reference:
-        d.reference,
-
-      amount:
-        number(d.amount),
-
-      status:
-        d.status,
-
-      reason:
-        d.reason,
-
-      createdAt:
-        d.created_at
-
-    })
-  );
-
-}
-
-async function getDeposit(
-  reference
-) {
-
-  const {
-    data,
-    error
-  } =
-    await supabase
-      .from('deposits')
-      .select('*')
-      .eq(
-        'reference',
-        reference
-      )
-      .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-
-}
-
-// ======================================================
-// BALANCE HELPERS
-// ======================================================
-
-function getDepositBalance(
-  user
-) {
-
-  return Math.max(
-    0,
-    number(
-      user.depositBalance
-    )
-  );
-
-}
-
-function getWithdrawableBalance(
-  user
-) {
-
-  return Math.max(
-    0,
-    number(
-      user.withdrawableBalance
-    )
-  );
-
-}
-
-function syncUserBalance(
-  user
-) {
-
-  user.depositBalance =
-    getDepositBalance(user);
-
-  user.withdrawableBalance =
-    getWithdrawableBalance(user);
-
-  user.balance =
-    user.depositBalance +
-    user.withdrawableBalance;
-
-  return user.balance;
-
-}
-
-async function loadUserData(
-  user
-) {
-
-  if (!user) {
-    return null;
-  }
-
-  const [
-    transactions,
-    deposits
-  ] =
-    await Promise.all([
-
-      getTransactions(
-        user.id
-      ),
-
-      getUserDeposits(
-        user.id
-      )
-
-    ]);
-
-  user.transactions =
-    transactions;
-
-  user.deposits =
-    deposits;
-
-  syncUserBalance(user);
-
-  return user;
-
-}
-
-// ======================================================
-// SESSION SYSTEM
-// ======================================================
-
-function base64UrlEncode(
-  value
-) {
-
-  return Buffer
-    .from(value)
-    .toString('base64')
-    .replace(
-      /\+/g,
-      '-'
-    )
-    .replace(
-      /\//g,
-      '_'
-    )
-    .replace(
-      /=+$/,
-      ''
-    );
-
-}
-
-function base64UrlDecode(
-  value
-) {
-
-  let v =
-    String(value)
-      .replace(
-        /-/g,
-        '+'
-      )
-      .replace(
-        /_/g,
-        '/'
-      );
-
-  while (
-    v.length % 4
-  ) {
-    v += '=';
-  }
-
-  return Buffer
-    .from(
-      v,
-      'base64'
-    )
-    .toString('utf8');
-
-}
-
-function createSignature(
-  payload
-) {
-
-  return crypto
-    .createHmac(
-      'sha256',
-      SESSION_SECRET
-    )
-    .update(payload)
-    .digest('base64')
-    .replace(
-      /\+/g,
-      '-'
-    )
-    .replace(
-      /\//g,
-      '_'
-    )
-    .replace(
-      /=+$/,
-      ''
-    );
-
-}
-
-function createSessionToken(
-  user
-) {
-
-  const payload =
-    base64UrlEncode(
-      JSON.stringify({
-
-        userId:
-          user.id,
-
-        sessionVersion:
-          number(
-            user.sessionVersion
-          ),
-
-        expiresAt:
-          Date.now() +
-          SESSION_MAX_AGE
-
-      })
-    );
-
-  return (
-    payload +
-    '.' +
-    createSignature(payload)
-  );
-
-}
-
-function verifySessionToken(
-  token
-) {
-
-  try {
-
-    if (
-      !token ||
-      typeof token !== 'string'
-    ) {
-      return null;
-    }
-
-    const parts =
-      token.split('.');
-
-    if (
-      parts.length !== 2
-    ) {
-      return null;
-    }
-
-    const expected =
-      createSignature(
-        parts[0]
-      );
-
-    const a =
-      Buffer.from(
-        parts[1]
-      );
-
-    const b =
-      Buffer.from(
-        expected
-      );
-
-    if (
-      a.length !== b.length
-    ) {
-      return null;
-    }
-
-    if (
-      !crypto.timingSafeEqual(
-        a,
-        b
-      )
-    ) {
-      return null;
-    }
-
-    const decoded =
-      JSON.parse(
-        base64UrlDecode(
-          parts[0]
-        )
-      );
-
-    if (
-      !decoded.userId ||
-      !decoded.expiresAt
-    ) {
-      return null;
-    }
-
-    if (
-      Date.now() >
-      number(
-        decoded.expiresAt
-      )
-    ) {
-      return null;
-    }
-
-    return decoded;
-
-  } catch {
-
-    return null;
-
-  }
-
-}
-
-function getCookie(
-  req,
-  name
-) {
-
-  const header =
-    req.headers.cookie;
-
-  if (!header) {
-    return null;
-  }
-
-  for (
-    const cookie of
-    header.split(';')
-  ) {
-
-    const i =
-      cookie.indexOf('=');
-
-    if (i === -1) {
-      continue;
-    }
-
-    const key =
-      cookie
-        .slice(0, i)
-        .trim();
-
-    if (
-      key !== name
-    ) {
-      continue;
-    }
-
-    const value =
-      cookie
-        .slice(i + 1)
-        .trim();
-
-    try {
-
-      return decodeURIComponent(
-        value
-      );
-
-    } catch {
-
-      return value;
-
-    }
-
-  }
-
-  return null;
-
-}
-
-function setSessionCookie(
-  res,
-  token
-) {
-
-  const parts = [
-
-    `payme_session=${encodeURIComponent(token)}`,
-
-    'Path=/',
-
-    `Max-Age=${Math.floor(
-      SESSION_MAX_AGE / 1000
-    )}`,
-
-    'HttpOnly',
-
-    'SameSite=Lax'
-
-  ];
-
-  if (isProduction) {
-    parts.push('Secure');
-  }
-
-  res.setHeader(
-    'Set-Cookie',
-    parts.join('; ')
-  );
-
-}
-
-function clearSessionCookie(
-  res
-) {
-
-  const parts = [
-
-    'payme_session=',
-
-    'Path=/',
-
-    'Max-Age=0',
-
-    'HttpOnly',
-
-    'SameSite=Lax'
-
-  ];
-
-  if (isProduction) {
-    parts.push('Secure');
-  }
-
-  res.setHeader(
-    'Set-Cookie',
-    parts.join('; ')
-  );
-
-}
-
-// ======================================================
-// AUTHENTICATION MIDDLEWARE
-// ======================================================
-
-async function authenticateRequest(
-  req,
-  res,
-  next
-) {
-
-  req.session = null;
-  req.user = null;
-
-  try {
-
-    const token =
-      getCookie(
-        req,
-        'payme_session'
-      );
-
-    if (!token) {
-      return next();
-    }
-
-    const session =
-      verifySessionToken(
-        token
-      );
-
-    if (!session) {
-
-      clearSessionCookie(res);
-
-      return next();
-
-    }
-
-    const user =
-      await getUserById(
-        session.userId
-      );
-
-    if (
-      !user ||
-      number(
-        user.sessionVersion
-      ) !==
-      number(
-        session.sessionVersion
-      )
-    ) {
-
-      clearSessionCookie(res);
-
-      return next();
-
-    }
-
-    req.session = {
-      userId:
-        user.id
-    };
-
-    // Keep authentication lightweight. Transaction and deposit
-    // history is fetched only by endpoints that need it.
-    req.user = user;
-
-    return next();
-
-  } catch (err) {
-
-    console.error(
-      'Authentication middleware error:',
-      err
-    );
-
-    clearSessionCookie(res);
-
-    return next();
-
-  }
-
-}
-
-
-// ======================================================
-// CRYPTOBOT API HELPERS
-// ======================================================
-async function cryptoBotRequest(method, params = {}) {
-  if (!CRYPTOBOT_TOKEN) {
-    throw new Error('CRYPTOBOT_TOKEN is not configured.');
-  }
-
-  const options = {
-    method,
-    headers: {
-      'Crypto-Pay-API-Token': CRYPTOBOT_TOKEN
-    }
-  };
-
-  let url = `${CRYPTOBOT_API_BASE}/${params._method || ''}`.replace(/\/+$/, '');
-  delete params._method;
-
-  if (method === 'GET') {
-    const qs = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) qs.set(key, String(value));
-    });
-    const query = qs.toString();
-    if (query) url += `?${query}`;
-  } else {
-    options.headers['Content-Type'] = 'application/json';
-    options.body = JSON.stringify(params);
-  }
-
-  const response = await fetch(url, options);
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok || !data.ok) {
-    const message = data?.error?.name || data?.error || `CryptoBot API HTTP ${response.status}`;
-    throw new Error(String(message));
-  }
-
-  return data.result;
-}
-
-async function cryptoBotCreateInvoice({ gems, usd, reference }) {
-  return cryptoBotRequest('POST', {
-    _method: 'createInvoice',
-    currency_type: 'fiat',
-    fiat: 'USD',
-    amount: usd.toFixed(2),
-    accepted_assets: CRYPTO_ASSETS.join(','),
-    description: `PAYME wallet funding — ${gems.toLocaleString()} Gems`,
-    hidden_message: `PAYME deposit ${reference}`,
-    payload: reference,
-    allow_comments: false,
-    allow_anonymous: false,
-    expires_in: 3600
-  });
-}
-
-async function cryptoBotGetRates() {
-  return cryptoBotRequest('GET', { _method: 'getExchangeRates' });
-}
-
-async function cryptoBotGetCurrencies() {
-  return cryptoBotRequest('GET', { _method: 'getCurrencies' });
-}
-
-async function cryptoBotGetBalance() {
-  return cryptoBotRequest('GET', { _method: 'getBalance' });
-}
-
-async function cryptoBotTransfer({ telegramId, asset, amount, spendId, comment }) {
-  return cryptoBotRequest('POST', {
-    _method: 'transfer',
-    user_id: Number(telegramId),
-    asset,
-    amount,
-    spend_id: spendId,
-    comment,
-    disable_send_notification: false
-  });
-}
-
-function verifyCryptoBotWebhook(req) {
-  const signature = String(
-    req.headers['crypto-pay-api-signature'] ||
-    req.headers['tgcryptopay-api-signature'] ||
-    ''
-  ).trim();
-  if (!signature || !req.rawBody || !CRYPTOBOT_TOKEN) return false;
-
-  const secret = crypto.createHash('sha256').update(CRYPTOBOT_TOKEN).digest();
-  const expected = crypto.createHmac('sha256', secret).update(req.rawBody).digest('hex');
-
-  if (signature.length !== expected.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
-}
-
-function gemUsd(gems) {
-  return Number(gems) * GEM_USD_RATE;
-}
-
-function usdToGems(usd) {
-  return Number(usd) / GEM_USD_RATE;
-}
-
-function cryptoAmountFromUsd(usd, asset, rates, currencies) {
-  const rate = (rates || []).find(r =>
-    String(r.source).toUpperCase() === asset &&
-    String(r.target).toUpperCase() === 'USD' &&
-    r.is_valid !== false
-  );
-  if (!rate) throw new Error(`No current USD rate is available for ${asset}.`);
-
-  const numericRate = Number(rate.rate);
-  if (!Number.isFinite(numericRate) || numericRate <= 0) {
-    throw new Error(`Invalid USD rate for ${asset}.`);
-  }
-
-  const currency = (currencies || []).find(c => String(c.code).toUpperCase() === asset);
-  const decimals = Number.isInteger(Number(currency?.decimals))
-    ? Number(currency.decimals)
-    : 8;
-  const raw = Number(usd) / numericRate;
-  const factor = 10 ** Math.min(decimals, 18);
-  return {
-    rate: numericRate,
-    decimals,
-    amount: Math.floor(raw * factor) / factor
-  };
-}
-
-// ======================================================
-// TELEGRAM STARS API HELPERS
-// ======================================================
-async function telegramApi(method, payload = {}) {
-  if (!TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN is not configured.');
-  }
-
-  const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${method}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  const data = await response.json().catch(() => ({}));
-
-  if (!data.ok) {
-    throw new Error(data.description || `Telegram API error (${method})`);
-  }
-
-  return data.result;
-}
-
-function starsFromUsd(usd) {
-  // Stars are whole numbers — no fractional Stars.
-  return Math.max(1, Math.ceil(Number(usd) / STARS_USD_RATE));
-}
-
-async function createStarsInvoiceLink({ gems, usd, stars, reference }) {
-  return telegramApi('createInvoiceLink', {
-    title: `${gems.toLocaleString()} Gems`,
-    description: `Top up ${gems.toLocaleString()} Gems on PAYME (~$${usd.toFixed(2)}).`,
-    payload: reference,
-    currency: 'XTR',
-    prices: [{ label: 'Gems', amount: stars }]
-  });
-}
-
-// Shared by the /api/telegram/start-webhook handler once Telegram reports
-// a completed Stars payment. Mirrors the CryptoBot webhook credit logic
-// above so both payment rails behave identically.
-async function handleStarsSuccessfulPayment(successfulPayment, chatId) {
-  try {
-    const reference = String(successfulPayment?.invoice_payload || '').trim();
-    if (!reference) return;
-
-    const deposit = await getDeposit(reference);
-    if (!deposit) {
-      console.warn('Stars payment for unknown deposit reference:', reference);
-      return;
-    }
-
-    // Telegram may redeliver updates. Only a still-pending deposit may be
-    // credited.
-    if (deposit.status !== 'Pending Verification') return;
-
-    const gems = number(deposit.amount);
-    const usd = gemUsd(gems);
-    const chargeId = successfulPayment.telegram_payment_charge_id || '';
-    const starsPaid = number(successfulPayment.total_amount);
-
-    const user = await getUserById(deposit.user_id);
-    if (!user) return;
-
-    user.depositBalance = getDepositBalance(user) + gems;
-    await updateUser(user);
-
-    const { error } = await supabase
-      .from('deposits')
-      .update({
-        status: 'Approved',
-        reason: `Telegram Stars paid — ${starsPaid} XTR — $${usd.toFixed(2)} — charge ${chargeId}`
-      })
-      .eq('reference', reference)
-      .eq('status', 'Pending Verification');
-    if (error) throw error;
-
-    await addTransaction(user.id, {
-      id: generateTransactionId('tx_stars_deposit'),
-      type: 'Deposit Approved',
-      description: `Telegram Stars Deposit ${reference} — ${starsPaid} XTR — $${usd.toFixed(2)}`,
-      amount: gems,
-      currency: 'GEMS',
-      status: 'completed',
-      bank: 'Telegram Stars'
-    });
-
-    if (chatId && TELEGRAM_BOT_TOKEN) {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: `✅ ${gems.toLocaleString()} Gems have been credited to your PAYME wallet.`
-        })
-      }).catch(() => {});
-    }
-  } catch (err) {
-    console.error('Stars successful_payment handling error:', err.message);
-  }
-}
-
-// ======================================================
-// CRYPTOBOT WEBHOOK — DEPOSIT CONFIRMATION
-// ======================================================
-app.post('/api/crypto/webhook', async (req, res) => {
-  try {
-    if (!verifyCryptoBotWebhook(req)) {
-      return res.status(401).send('invalid signature');
-    }
-
-    const update = req.body || {};
-    if (update.update_type !== 'invoice_paid') {
-      return res.status(200).send('ignored');
-    }
-
-    const invoice = update.payload || {};
-    const reference = String(invoice.payload || '').trim();
-    if (!reference) return res.status(200).send('missing payload');
-
-    const deposit = await getDeposit(reference);
-    if (!deposit) return res.status(404).send('deposit not found');
-
-    // Webhooks may be delivered more than once. Only Pending Verification
-    // deposits are allowed to credit Gems.
-    if (deposit.status !== 'Pending Verification') {
-      return res.status(200).send('already processed');
-    }
-
-    const gems = number(deposit.amount);
-    const usd = gemUsd(gems);
-    const paidUsd = number(invoice.paid_usd_rate) > 0
-      ? number(invoice.paid_amount) * number(invoice.paid_usd_rate)
-      : usd;
-
-    // A fiat invoice is the source of truth for the USD price. Do not credit
-    // a payment that is materially below the invoice value.
-    if (paidUsd + 0.000001 < usd) {
-      await supabase
-        .from('deposits')
-        .update({
-          status: 'Rejected',
-          reason: `CryptoBot payment was below the required $${usd.toFixed(2)}.`
-        })
-        .eq('reference', reference);
-      return res.status(200).send('underpaid');
-    }
-
-    const user = await getUserById(deposit.user_id);
-    if (!user) return res.status(404).send('user not found');
-
-    user.depositBalance = getDepositBalance(user) + gems;
-    await updateUser(user);
-
-    const { error } = await supabase
-      .from('deposits')
-      .update({
-        status: 'Approved',
-        reason: `CryptoBot paid — ${invoice.paid_amount || ''} ${invoice.paid_asset || ''} — $${usd.toFixed(2)}`
-      })
-      .eq('reference', reference)
-      .eq('status', 'Pending Verification');
-
-    if (error) throw error;
-
-    await addTransaction(user.id, {
-      id: generateTransactionId('tx_crypto_deposit'),
-      type: 'Deposit Approved',
-      description: `CryptoBot Deposit ${reference} — $${usd.toFixed(2)}`,
-      amount: gems,
-      currency: 'GEMS',
-      status: 'completed',
-      bank: `CryptoBot ${invoice.paid_asset || ''}`.trim()
-    });
-
-    return res.status(200).send('ok');
-  } catch (err) {
-    console.error('CryptoBot webhook error:', err);
-    return res.status(500).send('server error');
-  }
-});
-
-app.use(
-  authenticateRequest
-);
-
-// ======================================================
-// REQUIRE LOGIN
-// ======================================================
-
-async function requireLogin(
-  req,
-  res,
-  next
-) {
-
-  if (
-    !req.session ||
-    !req.session.userId
-  ) {
-
-    return res.status(401).json({
-
-      success:
-        false,
-
-      message:
-        'Unauthorized session.'
-
-    });
-
-  }
-
-  if (!req.user) {
-
-    try {
-
-      req.user =
-        await getUserById(
-          req.session.userId
-        );
-
-    } catch (err) {
-
-      console.error(
-        'Require login error:',
-        err
-      );
-
-      return res.status(401).json({
-
-        success:
-          false,
-
-        message:
-          'User session not found.'
-
-      });
-
-    }
-
-  }
-
-  return next();
-
-}
-
-
-
-
-
-// ======================================================
-// LUCK TICKET MINING RIG API
-// ======================================================
-// GET performs one server read. While a cycle is active the browser renders
-// progress locally using serverNow; there is no polling.
-// ======================================================
-
-async function finalizeLuckMiningIfDue(user, persist = true) {
-  const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
-    ? user.dailyReward
-    : {};
-
-  const oldDaily = JSON.parse(JSON.stringify(rawDaily));
-  const daily = normalizeDailyReward(user);
-  const mining = daily.luckMining;
-  const now = Date.now();
-
-  const completeAt = Date.parse(mining.completeAt || '');
-  if (
-    mining.status === 'mining' &&
-    Number.isFinite(completeAt) &&
-    completeAt <= now
-  ) {
-    mining.status = 'completed';
-    if (mining.reward === null) {
-      mining.reward = secureMiningReward(mining.level);
-    }
-    user.dailyReward = daily;
-
-    if (persist) {
-      const committed = await commitLuckMiningCAS(user, oldDaily, daily);
-      if (!committed) {
-        const fresh = await getUserMiningCore(user.id);
-        if (!fresh) throw new Error('User session not found.');
-        user.dailyReward = fresh.dailyReward;
-        return { user: fresh, changed: false };
-      }
-    }
-
-    return { user, changed: true };
-  }
-
-  return { user, changed: false };
-}
-
-app.get('/api/luck-mining/state', requireLoginMiningCore, async (req, res) => {
-  try {
-    const result = await withLuckMiningLock(req.user.id, async () => {
-      const resolved = await finalizeLuckMiningIfDue(req.user, true);
-      const user = resolved.user;
-      const now = Date.now();
-
-      return {
-        success: true,
-        mining: getLuckMiningSnapshot(user, now),
-        serverNow: new Date(now).toISOString()
-      };
-    });
-
-    return res.json(result);
-  } catch (err) {
-    console.error('Luck mining state error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to load the mining rig.'
-    });
-  }
-});
-
-app.post('/api/luck-mining/start', requireLoginMiningCore, async (req, res) => {
-  try {
-    const result = await withLuckMiningLock(req.user.id, async () => {
-      const user = req.user;
-      const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
-        ? user.dailyReward
-        : {};
-      const oldDaily = JSON.parse(JSON.stringify(rawDaily));
-      const daily = normalizeDailyReward(user);
-      const mining = daily.luckMining;
-      const now = Date.now();
-
-      // Resolve an already-finished cycle before deciding whether a new
-      // session can start. This prevents starting over an unclaimed cycle.
-      const completeAt = Date.parse(mining.completeAt || '');
-      if (
-        mining.status === 'mining' &&
-        Number.isFinite(completeAt) &&
-        completeAt <= now
-      ) {
-        mining.status = 'completed';
-        if (mining.reward === null) mining.reward = secureMiningReward(mining.level);
-      }
-
-      if (mining.status === 'mining') {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'MINING_ACTIVE',
-            message: 'Your mining rig is already active.'
-          }
-        };
-      }
-
-      if (mining.status === 'completed') {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'READY_TO_CLAIM',
-            message: 'Claim your completed Luck Tickets before starting another cycle.'
-          }
-        };
-      }
-
-      const holdMs = Math.max(0, Math.min(10000, number(req.body?.holdMs)));
-      if (holdMs < LUCK_MINING_CONFIG.holdMs) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            code: 'HOLD_REQUIRED',
-            message: 'Hold the mining button continuously for 2 seconds.'
-          }
-        };
-      }
-
-      const cycleId = generateTransactionId('luck_mining');
-      mining.status = 'mining';
-      mining.startAt = new Date(now).toISOString();
-      mining.completeAt = new Date(now + LUCK_MINING_CONFIG.cycleMs).toISOString();
-      mining.reward = null;
-      mining.cycleId = cycleId;
-      mining.notifiedComplete = false;
-      user.dailyReward = daily;
-
-      const committed = await commitLuckMiningCAS(user, oldDaily, daily);
-      if (!committed) {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'MINING_STATE_CHANGED',
-            message: 'Your mining state changed. Please reload and try again.'
-          }
-        };
-      }
-
-      return {
-        status: 200,
-        body: {
-          success: true,
-          mining: getLuckMiningSnapshot(user, now),
-          serverNow: new Date(now).toISOString()
-        }
-      };
-    });
-
-    return res.status(result.status || 200).json(result.body);
-  } catch (err) {
-    console.error('Luck mining start error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to activate the mining rig.'
-    });
-  }
-});
-
-app.post('/api/luck-mining/claim', requireLoginMiningCore, async (req, res) => {
-  try {
-    const result = await withLuckMiningLock(req.user.id, async () => {
-      let user = req.user;
-
-      for (let attempt = 0; attempt < 2; attempt++) {
-        const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
-          ? user.dailyReward
-          : {};
-        const oldDaily = JSON.parse(JSON.stringify(rawDaily));
-        const daily = normalizeDailyReward(user);
-        const mining = daily.luckMining;
-        const now = Date.now();
-
-        const completeAt = Date.parse(mining.completeAt || '');
-        if (mining.status === 'mining') {
-          if (!Number.isFinite(completeAt) || completeAt > now) {
-            return {
-              status: 400,
-              body: {
-                success: false,
-                code: 'NOT_COMPLETE',
-                message: 'Your mining cycle is not complete yet.'
-              }
-            };
-          }
-
-          mining.status = 'completed';
-          if (mining.reward === null) {
-            mining.reward = secureMiningReward(mining.level);
-          }
-        }
-
-        if (mining.status !== 'completed') {
-          return {
-            status: 400,
-            body: {
-              success: false,
-              code: 'NOT_READY',
-              message: 'There are no Luck Tickets ready to claim.'
-            }
-          };
-        }
-
-        const reward = Number(mining.reward);
-        if (!Number.isFinite(reward) || reward <= 0) {
-          return {
-            status: 409,
-            body: {
-              success: false,
-              code: 'INVALID_REWARD',
-              message: 'The mining reward is invalid. Please contact support.'
-            }
-          };
-        }
-
-        daily.luckTickets = number(daily.luckTickets) + reward;
-        mining.status = 'offline';
-        mining.startAt = null;
-        mining.completeAt = null;
-        mining.lastClaimAt = now;
-        mining.reward = null;
-        mining.notifiedComplete = false;
-        user.dailyReward = daily;
-
-        const committed = await commitLuckMiningCAS(user, oldDaily, daily);
-        if (!committed) {
-          if (attempt === 0) {
-            const fresh = await getUserMiningCore(user.id);
-            if (!fresh) throw new Error('User session not found.');
-            user = fresh;
-            continue;
-          }
-
-          return {
-            status: 409,
-            body: {
-              success: false,
-              code: 'CLAIM_CONFLICT',
-              message: 'This mining claim was already processed or the state changed.'
-            }
-          };
-        }
-
-        await addTransaction(user.id, {
-          id: generateTransactionId('tx_luck_mining'),
-          type: 'luck_mining_reward',
-          description: `Luck Ticket Mining — Level ${mining.level} cycle ${mining.cycleId || ''}`.trim(),
-          amount: reward,
-          currency: 'LUCK_TICKETS',
-          status: 'completed',
-          bank: 'Luck Ticket Wallet'
-        });
-
-        return {
-          status: 200,
-          body: {
-            success: true,
-            reward,
-            mining: getLuckMiningSnapshot(user, now),
-            luckTickets: number(daily.luckTickets),
-            serverNow: new Date(now).toISOString()
-          }
-        };
-      }
-
-      throw new Error('Mining claim retry exhausted.');
-    });
-
-    return res.status(result.status || 200).json(result.body);
-  } catch (err) {
-    console.error('Luck mining claim error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to claim Luck Tickets.'
-    });
-  }
-});
-
-app.post('/api/luck-mining/upgrade', requireLoginMiningUpgrade, async (req, res) => {
-  try {
-    const requestedLevel = Number(req.body?.level);
-
-    const result = await withLuckMiningLock(req.user.id, async () => {
-      const user = req.user;
-      const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
-        ? user.dailyReward
-        : {};
-      const oldDaily = JSON.parse(JSON.stringify(rawDaily));
-      const daily = normalizeDailyReward(user);
-      const mining = daily.luckMining;
-      const currentLevel = Number(mining.level) || 1;
-      const target = LUCK_MINING_CONFIG.levels[requestedLevel];
-
-      if (!Number.isInteger(requestedLevel) || !target || requestedLevel !== currentLevel + 1) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            code: 'INVALID_UPGRADE',
-            message: currentLevel >= 6
-              ? 'Your miner is already at the maximum level.'
-              : `Upgrades happen one level at a time — you need Level ${currentLevel + 1} next.`
-          }
-        };
-      }
-
-      if (mining.status === 'mining') {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'MINING_ACTIVE',
-            message: 'Wait for the current mining cycle to finish before upgrading.'
-          }
-        };
-      }
-
-      if (mining.status === 'completed') {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'READY_TO_CLAIM',
-            message: 'Claim your completed Luck Tickets before upgrading the miner.'
-          }
-        };
-      }
-
-      const cost = Number(target.cost) || 0;
-      const originalDepositBalance = getDepositBalance(user);
-      const originalWithdrawableBalance = getWithdrawableBalance(user);
-      const currentBalance = originalDepositBalance + originalWithdrawableBalance;
-      if (currentBalance < cost) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            code: 'INSUFFICIENT_GEMS',
-            message: `You need ${cost.toLocaleString()} Gems💎 to upgrade to Level ${requestedLevel}. Your current balance is ${currentBalance.toLocaleString()} Gems💎.`
-          }
-        };
-      }
-
-      // Spend deposit balance first, then withdrawable earnings, matching
-      // the existing PAYME spending convention.
-      let remaining = cost;
-      let deposit = getDepositBalance(user);
-      let earnings = getWithdrawableBalance(user);
-
-      if (deposit >= remaining) {
-        deposit -= remaining;
-        remaining = 0;
-      } else {
-        remaining -= deposit;
-        deposit = 0;
-        earnings = Math.max(0, earnings - remaining);
-        remaining = 0;
-      }
-
-      mining.level = requestedLevel;
-      user.dailyReward = daily;
-
-      const extraPatch = {
-        deposit_balance: deposit,
-        withdrawable_balance: earnings,
-        balance: deposit + earnings
-      };
-
-      const committed = await commitLuckMiningCAS(
-        user,
-        oldDaily,
-        daily,
-        extraPatch,
-        {
-          deposit_balance: originalDepositBalance,
-          withdrawable_balance: originalWithdrawableBalance
-        }
-      );
-      if (!committed) {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'UPGRADE_CONFLICT',
-            message: 'Your balance or mining state changed. Please reload and try again.'
-          }
-        };
-      }
-
-      user.depositBalance = deposit;
-      user.withdrawableBalance = earnings;
-      user.balance = deposit + earnings;
-
-      await addTransaction(user.id, {
-        id: generateTransactionId('tx_luck_miner_upgrade'),
-        type: 'luck_miner_upgrade',
-        description: `Luck Ticket Miner upgraded from Level ${currentLevel} to Level ${requestedLevel}`,
-        amount: cost,
-        currency: 'GEMS',
-        status: 'completed',
-        bank: 'PAYME Wallet'
-      });
-
-      const now = Date.now();
-      return {
-        status: 200,
-        body: {
-          success: true,
-          mining: getLuckMiningSnapshot(user, now),
-          balance: user.balance,
-          serverNow: new Date(now).toISOString()
-        }
-      };
-    });
-
-    return res.status(result.status || 200).json(result.body);
-  } catch (err) {
-    console.error('Luck mining upgrade error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to upgrade the mining rig.'
-    });
-  }
-});
-
-// ======================================================
-// MONETAG REWARDED INTERSTITIAL API
-// ======================================================
-
-// Called by dashboard.html immediately before opening the Monetag ad.
-// It does NOT award anything. It only records that this authenticated
-// user intentionally requested a rewarded ad.
-app.post('/api/monetag/start', requireLogin, async (req, res) => {
-  try {
-    const user = req.user;
-
-    const recent = await getRecentMonetagReward(user.id);
-    if (recent) {
-      const nextAllowedAt = new Date(recent.created_at).getTime() + MONETAG_REWARD_COOLDOWN;
-      return res.status(429).json({
-        success: false,
-        message: 'Please wait before watching another rewarded ad.',
-        nextAllowedAt
-      });
-    }
-
-    const rawContext = String(req.body?.context || 'dashboard').trim();
-    const context = rawContext === 'luck_chest'
-      ? 'luck_chest'
-      : rawContext === 'game_free_spin'
-      ? 'game_free_spin'
-      : rawContext === 'earn_watch_ad'
-      ? 'earn_watch_ad'
-      : rawContext === 'mining_gate'
-      ? 'mining_gate'
-      : 'dashboard';
-
-    if (context === 'luck_chest') {
-      const readiness = checkLuckChestReady(user);
-      if (!readiness.ready) {
-        return res.status(429).json({
-          success: false,
-          message: readiness.message,
-          nextAllowedAt: readiness.nextAllowedAt
-        });
-      }
-    }
-
-    const sessionId = `monetag_${Date.now().toString(36)}_${crypto.randomBytes(12).toString('hex')}`;
-    const now = Date.now();
-
-    monetagPendingSessions.set(sessionId, {
-      userId: user.id,
-      telegramId: String(user.telegramId || ''),
-      context,
-      createdAt: now,
-      expiresAt: now + MONETAG_SESSION_TTL
-    });
-
-    return res.json({
-      success: true,
-      sessionId,
-      zoneId: MONETAG_ZONE_ID,
-      createdAt: now,
-      expiresAt: now + MONETAG_SESSION_TTL
-    });
-  } catch (err) {
-    console.error('Monetag start error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Unable to start the rewarded ad.'
-    });
-  }
-});
-
-// Browser polling endpoint. It never decides the reward; it only reads the
-// reward that the server-side postback has already recorded.
-app.get('/api/monetag/status', requireLogin, async (req, res) => {
-  try {
-    const sessionId = String(req.query?.sessionId || '').trim();
-    const startedAt = Number(req.query?.startedAt || 0);
-    if (!sessionId) {
-      return res.status(400).json({ success: false, message: 'Ad session is required.' });
-    }
-
-    const completed = monetagCompletedSessions.get(sessionId);
-    if (completed && String(completed.userId) === String(req.user.id)) {
-      return res.json({
-        success: true,
-        confirmed: true,
-        reward: completed.reward,
-        luck: completed.reward?.luck || null,
-        tickets: number(completed.reward?.tickets),
-        completedAt: completed.completedAt
-      });
-    }
-
-    const pending = monetagPendingSessions.get(sessionId);
-    if (pending && String(pending.userId) === String(req.user.id)) {
-      return res.json({ success: true, confirmed: false });
-    }
-
-    // If Render restarted after the postback was written to Supabase,
-    // recover the reward from the most recent Monetag transaction.
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('id, amount, description, created_at')
-      .eq('user_id', req.user.id)
-      .eq('type', 'monetag_reward')
-      .gte('created_at', new Date(startedAt > 0 ? startedAt : Date.now()).toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-
-    if (Array.isArray(data) && data.length) {
-      const tx = data[0];
-      if (/^Luck Chest Ad$/i.test(String(tx.description || ''))) {
-        const freshUser = await getUserById(req.user.id);
-        const luck = freshUser ? getLuckChestSnapshot(freshUser) : null;
-        return res.json({
-          success: true,
-          confirmed: true,
-          reward: { key: 'luck_chest_ad', label: 'Luck Chest Ad', cash: 0, spins: 0 },
-          luck,
-          tickets: 0,
-          completedAt: tx.created_at
-        });
-      }
-      const description = String(tx.description || 'Monetag Reward');
-      const label = description.replace(/^(Monetag Reward|Watch Ad Free Spin|Earn Watch Ad Reward)\s*[—-]?\s*/i, '').trim() || 'Reward confirmed';
-      let spins = 0;
-      const spinMatch = label.match(/([\d.]+)\s*Free Spins?/i);
-      if (spinMatch) spins = Number(spinMatch[1]) || 0;
-
-      return res.json({
-        success: true,
-        confirmed: true,
-        reward: {
-          key: 'server_confirmed',
-          label,
-          cash: number(tx.amount),
-          spins
-        },
-        completedAt: tx.created_at
-      });
-    }
-
-    return res.json({ success: true, confirmed: false });
-  } catch (err) {
-    console.error('Monetag status error:', err);
-    return res.status(500).json({ success: false, message: 'Unable to check ad reward status.' });
-  }
-});
-
-// Monetag server-side postback.
-// Supports both GET and POST because the postback screen does not require
-// us to assume one transport method. Monetag values may arrive in the body
-// or query string depending on the configured callback.
-app.all('/api/monetag/postback', async (req, res) => {
-  try {
-    const telegramId = normalizeMonetagTelegramId(
-      monetagValue(req, ['telegram_id', 'telegramId', 'telegram_id_int', 'user_id'])
-    );
-
-    const zoneId = monetagValue(req, ['zone_id', 'zoneId']);
-    const eventType = monetagValue(req, ['event_type', 'eventType']).toLowerCase();
-    const rewardEventType = monetagValue(req, [
-      'reward_event_type',
-      'rewardEventType',
-      'rewarded',
-      'reward'
-    ]).toLowerCase();
-    const ymid = monetagValue(req, ['ymid', 'YMID']);
-    const requestVar = monetagValue(req, ['request_var', 'requestVar']);
-    const subZoneId = monetagValue(req, ['sub_zone_id', 'subZoneId']);
-    const estimatedPrice = monetagValue(req, ['estimated_price', 'estimatedPrice']);
-
-    // Always acknowledge malformed/non-reward events without crediting a user.
-    if (zoneId && String(zoneId) !== MONETAG_ZONE_ID) {
-      console.warn('Rejected Monetag postback: unexpected zone ID', zoneId);
-      return res.status(400).send('invalid zone');
-    }
-
-    // Monetag currently documents `valued` / `non_valued`; the older
-    // publisher UI may show `yes` / `no`. Support both forms.
-    if (!['valued', 'yes', 'true', '1'].includes(rewardEventType)) {
-      return res.status(200).send('ignored');
-    }
-
-    // YMID is the unique identifier we generate for every ad call. It is the
-    // primary idempotency key and also lets us map the callback to the pending
-    // PAYME watch session even when Telegram ID is not present.
-    if (!ymid && !requestVar) {
-      console.warn('Rejected Monetag postback: missing YMID/request_var');
-      return res.status(400).send('missing ymid');
-    }
-
-    const eventId = String(ymid || requestVar).trim();
-
-    let user = null;
-    if (telegramId) {
-      user = await getUserByTelegramId(telegramId);
-    }
-
-    const pending = findMonetagPendingSession({
-      userId: user ? user.id : null,
-      sessionId: requestVar,
-      ymid,
-      requestVar
-    });
-
-    if (!user && pending) {
-      user = await getUserById(pending.session.userId);
-    }
-
-    if (!user) {
-      console.warn('Monetag postback: user not found', telegramId || eventId);
-      return res.status(404).send('user not found');
-    }
-
-    // The app-created session is single-use. If Monetag does not echo our
-    // session identifier, findMonetagPendingSession() can still associate
-    // the callback with this user's pending watch session using Telegram ID.
-    if (pending) {
-      monetagPendingSessions.delete(pending.id);
-    }
-
-    // The database transaction ID is the idempotency key. A duplicate YMID
-    // can therefore never produce another reward.
-    const transactionId = `tx_monetag_${crypto
-      .createHash('sha256')
-      .update(eventId)
-      .digest('hex')
-      .slice(0, 48)}`;
-
-    const { data: existing, error: existingError } = await supabase
-      .from('transactions')
-      .select('id, amount, description, created_at, status')
-      .eq('id', transactionId)
-      .maybeSingle();
-
-    if (existingError) throw existingError;
-
-    if (existing) {
-      return res.status(200).send('already processed');
-    }
-
-    // Server-side reward selection. The browser never decides which reward
-    // is won. The context (dashboard cash reel vs. game free-spin reel)
-    // comes from the pending session created when the ad was requested.
-    const pendingContext = pending && pending.session && pending.session.context;
-    const adContext = pendingContext === 'luck_chest'
-      ? 'luck_chest'
-      : pendingContext === 'game_free_spin'
-      ? 'game_free_spin'
-      : pendingContext === 'earn_watch_ad'
-      ? 'earn_watch_ad'
-      : pendingContext === 'mining_gate'
-      ? 'mining_gate'
-      : 'dashboard';
-
-    // The mining-gate ad is a pure gate, not a cash/free-spin reward — it
-    // only exists so startMining() on the client can wait for a genuine
-    // server-confirmed ad watch instead of trusting the browser. Record
-    // the zero-value transaction (idempotency lock, same as every other
-    // context) and mark the session confirmed; nothing is credited to the
-    // user's balance.
-    if (adContext === 'mining_gate') {
-      await addTransaction(user.id, {
-        id: transactionId,
-        type: 'monetag_reward',
-        description: 'Mining Gate Ad',
-        amount: 0,
-        currency: 'GEMS',
-        status: 'completed',
-        bank: `Monetag ${MONETAG_ZONE_ID}`
-      });
-
-      if (pending) {
-        monetagCompletedSessions.set(pending.id, {
-          userId: user.id,
-          reward: { key: 'mining_gate', label: 'Mining Gate Ad', cash: 0, spins: 0 },
-          completedAt: Date.now(),
-          expiresAt: Date.now() + 5 * 60 * 1000
-        });
-      }
-
-      console.log('Monetag mining-gate ad confirmed:', {
-        userId: user.id,
-        telegramId,
-        zoneId: zoneId || MONETAG_ZONE_ID,
-        eventType,
-        rewardEventType,
-        ymid: ymid || null,
-        requestVar: requestVar || null,
-        subZoneId: subZoneId || null,
-        estimatedPrice: estimatedPrice || null
-      });
-
-      return res.status(200).send('ok');
-    }
-
-    // Chest ads are progress events, not cash/free-spin rewards.
-    if (adContext === 'luck_chest') {
-      const rewardResult = { key: 'chest', label: 'Luck Chest Ad', cash: 0, spins: 0 };
-
-      // Use the Monetag transaction ID as the idempotency lock before changing
-      // progress. A duplicate postback therefore cannot count twice.
-      await addTransaction(user.id, {
-        id: transactionId,
-        type: 'monetag_reward',
-        description: `Luck Chest Ad`,
-        amount: 0,
-        currency: 'LUCK_TICKETS',
-        status: 'completed',
-        bank: `Monetag ${MONETAG_ZONE_ID}`
-      });
-
-      const result = applyLuckChestCompletion(user);
-      syncUserBalance(user);
-      await updateUser(user);
-
-      if (result.granted) {
-        await addTransaction(user.id, {
-          id: generateTransactionId('tx_luck_chest_reward'),
-          type: 'luck_ticket_reward',
-          description: `Luck Chest opened — ${result.tickets} Luck Tickets`,
-          amount: result.tickets,
-          currency: 'LUCK_TICKETS',
-          status: 'completed',
-          bank: 'Luck Ticket Wallet'
-        });
-      }
-
-      if (pending) {
-        monetagCompletedSessions.set(pending.id, {
-          userId: user.id,
-          reward: { ...rewardResult, tickets: result.tickets, granted: result.granted, luck: result.state },
-          completedAt: Date.now(),
-          expiresAt: Date.now() + 5 * 60 * 1000
-        });
-      }
-
-      return res.status(200).send('ok');
-    }
-
-    const reward = chooseMonetagReward(adContext);
-    const rewardResult = buildMonetagRewardResult(reward);
-
-    // Insert the unique transaction first. The primary/unique transaction ID
-    // acts as our idempotency lock for duplicate postbacks.
-    await addTransaction(user.id, {
-      id: transactionId,
-      type: 'monetag_reward',
-      description: adContext === 'game_free_spin'
-        ? `Watch Ad Free Spin — ${rewardResult.label}`
-        : adContext === 'earn_watch_ad'
-        ? `Earn Watch Ad Reward — ${rewardResult.label}`
-        : `Monetag Reward — ${rewardResult.label}`,
-      amount: rewardResult.cash,
-      currency: 'GEMS',
-      status: 'completed',
-      bank: `Monetag ${MONETAG_ZONE_ID}`
-    });
-
-    if (rewardResult.cash > 0) {
-      user.withdrawableBalance =
-        getWithdrawableBalance(user) + rewardResult.cash;
-    }
-
-    if (rewardResult.spins > 0) {
-      user.freeSpins = number(user.freeSpins) + rewardResult.spins;
-    }
-
-    syncUserBalance(user);
-    await updateUser(user);
-
-    if (pending) {
-      monetagCompletedSessions.set(pending.id, {
-        userId: user.id,
-        reward: rewardResult,
-        completedAt: Date.now(),
-        expiresAt: Date.now() + 5 * 60 * 1000
-      });
-    }
-
-    console.log('Monetag reward credited:', {
-      userId: user.id,
-      telegramId,
-      zoneId: zoneId || MONETAG_ZONE_ID,
-      eventType,
-      rewardEventType,
-      ymid: ymid || null,
-      requestVar: requestVar || null,
-      subZoneId: subZoneId || null,
-      estimatedPrice: estimatedPrice || null,
-      reward: rewardResult
-    });
-
-    return res.status(200).send('ok');
-  } catch (err) {
-    console.error('Monetag postback error:', err);
-    return res.status(500).send('server error');
-  }
-});
-
-// ======================================================
-// MONETAG REWARDED INTERSTITIAL HELPERS
-// ======================================================
-
-function monetagValue(req, names) {
-  const body = req.body && typeof req.body === 'object' ? req.body : {};
-  const query = req.query && typeof req.query === 'object' ? req.query : {};
-  const headers = req.headers || {};
-
-  for (const name of names) {
-    if (body[name] !== undefined && body[name] !== null && String(body[name]).trim() !== '') {
-      return String(body[name]).trim();
-    }
-    if (query[name] !== undefined && query[name] !== null && String(query[name]).trim() !== '') {
-      return String(query[name]).trim();
-    }
-  }
-
-  return '';
-}
-
-function normalizeMonetagTelegramId(value) {
-  const clean = String(value || '').trim();
-  if (!clean) return '';
-  if (!/^-?\d{3,30}$/.test(clean)) return '';
-  return clean;
-}
-
-function chooseMonetagReward(context) {
-  // context ('dashboard' | 'earn_watch_ad' | 'game_free_spin') is still used
-  // elsewhere (transaction description text) to indicate where the ad was
-  // watched from, but all three now draw from the exact same reward table
-  // at the exact same odds — see AD_WATCH_FREESPIN_REWARD_SLOTS above.
-  const table = AD_WATCH_FREESPIN_REWARD_SLOTS;
-  const roll = crypto.randomInt(0, 100000) + 1;
-  for (const reward of table) {
-    if (roll <= reward.max) {
-      return reward;
-    }
-  }
-  return table[0];
-}
-
-function findMonetagPendingSession({ userId, sessionId, ymid, requestVar }) {
-  cleanupMonetagSessions();
-
-  const candidates = [sessionId, requestVar, ymid]
-    .map(v => String(v || '').trim())
-    .filter(Boolean);
-
-  for (const id of candidates) {
-    const session = monetagPendingSessions.get(id);
-    if (session && (!userId || String(session.userId) === String(userId))) {
-      return { id, session };
-    }
-  }
-
-  if (userId) {
-    for (const [id, session] of monetagPendingSessions.entries()) {
-      if (String(session.userId) === String(userId)) {
-        return { id, session };
-      }
-    }
-  }
-
-  return null;
-}
-
-async function getRecentMonetagReward(userId) {
-  const since = new Date(Date.now() - MONETAG_REWARD_COOLDOWN).toISOString();
-
-  const { data, error } = await supabase
-    .from('transactions')
-    .select('id, created_at, status, description')
-    .eq('user_id', userId)
-    .eq('type', 'monetag_reward')
-    .gte('created_at', since)
-    .order('created_at', { ascending: false })
-    .limit(1);
-
-  if (error) throw error;
-  return Array.isArray(data) && data.length ? data[0] : null;
-}
-
-function buildMonetagRewardResult(reward) {
-  return {
-    key: reward.key,
-    label: reward.label,
-    cash: number(reward.cash),
-    spins: number(reward.spins)
-  };
-}
-
-// ======================================================
-// TELEGRAM NOTIFICATION
-// ======================================================
-
-async function sendTelegramNotification(
-  message
-) {
-
-  if (
-    !TELEGRAM_DEPOSIT_BOT_TOKEN ||
-    !TELEGRAM_CHAT_ID
-  ) {
-
-    console.warn(
-      'Telegram notification disabled: TELEGRAM_DEPOSIT_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.'
-    );
-
-    return;
-
-  }
-
-  try {
-
-    const response =
-      await fetch(
-        `https://api.telegram.org/bot${TELEGRAM_DEPOSIT_BOT_TOKEN}/sendMessage`,
-        {
-
-          method:
-            'POST',
-
-          headers: {
-            'Content-Type':
-              'application/json'
-          },
-
-          body:
-            JSON.stringify({
-
-              chat_id:
-                TELEGRAM_CHAT_ID,
-
-              text:
-                message,
-
-              parse_mode:
-                'HTML'
-
-            })
-
-        }
-      );
-
-    const data =
-      await response.json();
-
-    if (!data.ok) {
-
-      console.error(
-        'Telegram API error:',
-        data
-      );
-
-    }
-
-  } catch (err) {
-
-    console.error(
-      'Telegram notification error:',
-      err.message
-    );
-
-  }
-
-}
-
-// ======================================================
-// TELEGRAM DIRECT-TO-USER MESSAGES
-// ======================================================
-// Sends a DM through the main Payme bot (TELEGRAM_BOT_TOKEN) to a specific
-// user's Telegram ID — as opposed to sendTelegramNotification() above,
-// which always posts to the admin chat via the deposit bot. Used for the
-// mining-complete ping, the inactivity reminder, and the admin broadcast.
-async function sendTelegramUserMessage(telegramId, text, options = {}) {
-
-  if (!TELEGRAM_BOT_TOKEN || !telegramId) {
-    return null;
-  }
-
-  try {
-
-    const body = {
-      chat_id: telegramId,
-      text,
-      parse_mode: 'HTML',
-      disable_web_page_preview: true
-    };
-
-    if (options.replyMarkup) {
-      body.reply_markup = options.replyMarkup;
-    }
-
-    const response = await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      }
-    );
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!data.ok) {
-      // Common and expected for users who blocked the bot or never
-      // started a chat with it — log quietly rather than throwing.
-      console.warn('Telegram user message not delivered:', telegramId, data.description || data);
-      return null;
-    }
-
-    return data.result;
-
-  } catch (err) {
-
-    console.error('Telegram user message send error:', telegramId, err.message);
-    return null;
-
-  }
-
-}
-
-function earnWebappKeyboard(label) {
-  return {
-    inline_keyboard: [
-      [
-        { text: label, url: EARN_WEBAPP_URL }
-      ]
-    ]
-  };
-}
-
-// ======================================================
-// TELEGRAM BOT — PER-USER MESSAGE TRANSLATIONS
-// ======================================================
-// The signup page lets a user choose en/ru/es/hi and stores it on
-// daily_reward.language. Every proactive DM the bot sends on its own
-// initiative (mining-complete ping, inactivity reminder, etc.) should be
-// worded in that same language instead of always defaulting to English.
-// Admin-authored messages (the /broadcast command, the admin notification
-// channel) are intentionally NOT covered here — those are free text an
-// admin typed themselves and are sent verbatim to everyone.
-const PAYME_BOT_SUPPORTED_LANGUAGES = ['en', 'ru', 'es', 'hi', 'ar'];
-
-function resolveBotLanguage(daily) {
-  const lang = daily && typeof daily === 'object' ? String(daily.language || '') : '';
-  return PAYME_BOT_SUPPORTED_LANGUAGES.includes(lang) ? lang : 'en';
-}
-
-const PAYME_BOT_MESSAGES = {
-
-  miningComplete: {
-    en: (min, max) =>
-      `⛏️ <b>Mining Complete!</b>\n\n` +
-      `Your Luck Ticket Mining Rig just finished a cycle — ${min}–${max} Luck Tickets🎟️ are ready to claim.\n\n` +
-      `Open PAYME to collect your reward and start the next cycle before it sits idle.`,
-    ru: (min, max) =>
-      `⛏️ <b>Майнинг завершён!</b>\n\n` +
-      `Ваша майнинг-установка только что завершила цикл — ${min}–${max} билетов удачи🎟️ готовы к получению.\n\n` +
-      `Откройте PAYME, чтобы забрать награду и запустить новый цикл, пока он не простаивает.`,
-    es: (min, max) =>
-      `⛏️ <b>¡Minería completada!</b>\n\n` +
-      `Tu equipo de minería de Boletos de la Suerte acaba de terminar un ciclo — ${min}–${max} Boletos de la Suerte🎟️ están listos para reclamar.\n\n` +
-      `Abre PAYME para recoger tu recompensa e iniciar el siguiente ciclo antes de que quede inactivo.`,
-    hi: (min, max) =>
-      `⛏️ <b>माइनिंग पूरी हुई!</b>\n\n` +
-      `आपकी माइनिंग रिग ने अभी एक चक्र पूरा किया है — ${min}–${max} Luck Tickets🎟️ लेने के लिए तैयार हैं।\n\n` +
-      `अपना इनाम पाने और अगला चक्र शुरू करने के लिए PAYME खोलें, इससे पहले कि यह बेकार पड़ा रहे।`,
-    ar: (min, max) =>
-      `⛏️ <b>اكتمل التعدين!</b>\n\n` +
-      `انتهت جهاز تعدين بطاقات الحظ من دورة جديدة — ${min}–${max} بطاقة حظ🎟️ جاهزة للاستلام.\n\n` +
-      `افتح PAYME لتحصيل مكافأتك وبدء الدورة التالية قبل أن يبقى خاملاً.`
-  },
-
-  miningCompleteButton: {
-    en: '⛏️ Claim Now',
-    ru: '⛏️ Забрать сейчас',
-    es: '⛏️ Reclamar ahora',
-    hi: '⛏️ अभी लें',
-    ar: '⛏️ استلم الآن'
-  },
-
-  inactivityReminder: {
-    en: () =>
-      `👋 <b>We miss you on PAYME!</b>\n\n` +
-      `It's been a day since you last logged in. Your Luck Tickets, mining rig, daily rewards, and referral earnings are all still waiting for you.\n\n` +
-      `Tap below to jump back in. 💎`,
-    ru: () =>
-      `👋 <b>Мы скучаем по вам на PAYME!</b>\n\n` +
-      `Прошли сутки с вашего последнего входа. Ваши билеты удачи, майнинг-установка, ежедневные награды и реферальный доход всё ещё ждут вас.\n\n` +
-      `Нажмите ниже, чтобы вернуться. 💎`,
-    es: () =>
-      `👋 <b>¡Te extrañamos en PAYME!</b>\n\n` +
-      `Ha pasado un día desde tu último inicio de sesión. Tus Boletos de la Suerte, tu equipo de minería, las recompensas diarias y las ganancias por referidos siguen esperándote.\n\n` +
-      `Toca abajo para volver. 💎`,
-    hi: () =>
-      `👋 <b>हमें PAYME पर आपकी कमी खल रही है!</b>\n\n` +
-      `आपको लॉग इन किए एक दिन हो गया है। आपके Luck Tickets, माइनिंग रिग, दैनिक इनाम और रेफ़रल कमाई अभी भी आपका इंतज़ार कर रहे हैं।\n\n` +
-      `वापस आने के लिए नीचे टैप करें। 💎`,
-    ar: () =>
-      `👋 <b>اشتقنا إليك في PAYME!</b>\n\n` +
-      `مرّ يوم منذ آخر تسجيل دخول لك. بطاقات الحظ، جهاز التعدين، المكافآت اليومية وأرباح الإحالة لا تزال بانتظارك.\n\n` +
-      `اضغط أدناه للعودة. 💎`
-  },
-
-  inactivityReminderButton: {
-    en: '🚀 Open PAYME',
-    ru: '🚀 Открыть PAYME',
-    es: '🚀 Abrir PAYME',
-    hi: '🚀 PAYME खोलें',
-    ar: '🚀 افتح PAYME'
-  }
-
-};
-
-// ======================================================
-// TELEGRAM BOT — /start WELCOME MESSAGE
-// ======================================================
-// This is a webhook (push), not a getUpdates poll loop — Telegram only
-// calls this endpoint the moment someone actually messages the bot, so it
-// costs zero requests/CPU the rest of the time. That's the lowest-egress
-// way to answer /start; a second permanent 1-req/sec poll loop (like the
-// deposit bot's below) would run forever whether or not anyone starts the
-// bot.
-//
-// ONE-TIME SETUP after you deploy this: point the Payme bot's webhook at
-// this endpoint by visiting (once, in a browser, with your real values):
-//   https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://payme-app-jusi.onrender.com/api/telegram/start-webhook&secret_token=<TELEGRAM_START_WEBHOOK_SECRET>
-// Set TELEGRAM_START_WEBHOOK_SECRET to that same value in your Render env
-// vars first (any random string) — it's how this endpoint verifies a
-// request genuinely came from Telegram and not some random POST to a
-// guessed public URL.
-const TELEGRAM_START_WEBHOOK_SECRET = String(process.env.TELEGRAM_START_WEBHOOK_SECRET || '').trim();
-const PAYME_OPEN_APP_URL = 'https://t.me/paymeoobot/earn?startapp';
-
-app.post('/api/telegram/start-webhook', async (req, res) => {
-  // Acknowledge immediately. Telegram retries webhook deliveries that
-  // don't get a fast 200, and we don't want a slow sendMessage call on
-  // our end to turn into duplicate welcome messages.
-  res.status(200).end();
-
-  try {
-    if (
-      TELEGRAM_START_WEBHOOK_SECRET &&
-      req.get('X-Telegram-Bot-Api-Secret-Token') !== TELEGRAM_START_WEBHOOK_SECRET
-    ) {
-      return;
-    }
-
-    // ---- Telegram Stars: pre-checkout approval ----
-    // Telegram requires ok/false within 10 seconds or the payment fails
-    // client-side. Only approve payloads that match a still-pending
-    // deposit we actually created.
-    const preCheckout = req.body && req.body.pre_checkout_query;
-    if (preCheckout) {
-      try {
-        const deposit = await getDeposit(String(preCheckout.invoice_payload || '').trim());
-        const ok = !!deposit && deposit.status === 'Pending Verification';
-        await telegramApi('answerPreCheckoutQuery', {
-          pre_checkout_query_id: preCheckout.id,
-          ok,
-          ...(ok ? {} : { error_message: 'This deposit is no longer valid — please start a new deposit.' })
-        });
-      } catch (err) {
-        console.error('Stars pre-checkout error:', err.message);
-      }
-      return;
-    }
-
-    // ---- Telegram Stars: payment completed ----
-    const successfulPayment = req.body?.message?.successful_payment;
-    if (successfulPayment) {
-      await handleStarsSuccessfulPayment(successfulPayment, req.body.message.chat?.id);
-      return;
-    }
-
-    const message = req.body && req.body.message;
-    const text = typeof message?.text === 'string' ? message.text.trim() : '';
-    if (!/^\/start(\s|$|@)/i.test(text)) return;
-
-    const chatId = message?.chat?.id;
-    if (!chatId || !TELEGRAM_BOT_TOKEN) return;
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: "Press 'OPEN' and enter your dashboard 👇",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'OPEN APP', url: PAYME_OPEN_APP_URL }]
-          ]
-        }
-      })
-    });
-  } catch (err) {
-    console.error('Telegram /start webhook error:', err.message);
-  }
-});
-
-// ------------------------------------------------------------------
-// MINING-COMPLETE SWEEP
-// ------------------------------------------------------------------
-// The mining rig itself only finalizes a cycle lazily (when the user next
-// opens the app and calls /api/luck-mining/state or /claim). This sweep
-// runs independently every MINING_SWEEP_INTERVAL_MS and proactively DMs
-// anyone whose cycle finished but who hasn't come back to claim it yet, so
-// they find out even if they never reopen the app on their own.
-//
-// EGRESS: completeAt is stored as an ISO-8601 UTC string, which — unlike
-// most timestamp formats — sorts correctly as plain text. That lets the
-// "already due" and "not already notified" checks run as real Postgres
-// filters (?daily_reward->luckMining->>completeAt=lte....) instead of
-// pulling every active miner over the wire and filtering in Node. In
-// steady state this query returns 0 rows on almost every tick — only
-// users who are BOTH mining AND already past completeAt AND not yet
-// notified ever come back. The write-back reuses the row already in hand
-// (no extra getUserById/updateUser round trip) and is guarded by a WHERE
-// clause matching the exact cycle, so a claim/upgrade racing in between
-// simply makes the update a no-op instead of clobbering it.
-async function runMiningCompletionSweep() {
-
-  if (!TELEGRAM_BOT_TOKEN) return;
-
-  const now = Date.now();
-
-  try {
-
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, telegram_id, daily_reward')
-      .eq('daily_reward->luckMining->>status', 'mining')
-      .lte('daily_reward->luckMining->>completeAt', new Date(now).toISOString())
-      .neq('daily_reward->luckMining->>notifiedComplete', 'true');
-
-    if (error) {
-      console.error('Mining completion sweep read error:', error);
-      return;
-    }
-
-    for (const row of data || []) {
-
-      try {
-
-        const telegramId = row.telegram_id;
-        if (!telegramId) continue;
-
-        const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
-        const mining = daily.luckMining || {};
-
-        // Belt-and-braces re-check in Node in case of any edge-case in the
-        // above filter (e.g. a malformed completeAt string) — cheap since
-        // the query already narrowed this down to a handful of rows.
-        const completeAt = Date.parse(mining.completeAt || '');
-        if (!Number.isFinite(completeAt) || completeAt > now) continue;
-        if (mining.notifiedComplete) continue;
-
-        const cfg = LUCK_MINING_CONFIG.levels[mining.level] || LUCK_MINING_CONFIG.levels[1];
-        const lang = resolveBotLanguage(daily);
-
-        const sent = await sendTelegramUserMessage(
-          telegramId,
-          PAYME_BOT_MESSAGES.miningComplete[lang](cfg.min, cfg.max),
-          { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.miningCompleteButton[lang]) }
-        );
-
-        if (!sent) continue;
-
-        // Single targeted write using the data already fetched above — no
-        // extra read. The WHERE guard means this only takes effect if the
-        // row is still on this exact cycle, so a claim/upgrade that lands
-        // in between just makes this a 0-row no-op.
-        const updatedDaily = {
-          ...daily,
-          luckMining: { ...mining, notifiedComplete: true }
-        };
-
-        const { error: writeError } = await supabase
-          .from('users')
-          .update({ daily_reward: updatedDaily })
-          .eq('id', row.id)
-          .eq('daily_reward->luckMining->>status', 'mining')
-          .eq('daily_reward->luckMining->>completeAt', mining.completeAt);
-
-        if (writeError) {
-          console.error('Mining completion sweep write error:', row.id, writeError);
-        }
-
-      } catch (rowErr) {
-        console.error('Mining completion sweep row error:', row.id, rowErr.message);
-      }
-
-    }
-
-  } catch (err) {
-    console.error('Mining completion sweep error:', err.message);
-  }
-
-}
-
-setInterval(
-  () => {
-    runMiningCompletionSweep().catch(
-      err => console.error('Mining completion sweep error:', err)
-    );
-  },
-  MINING_SWEEP_INTERVAL_MS
-).unref();
-
-// ------------------------------------------------------------------
-// INACTIVITY REMINDER SWEEP
-// ------------------------------------------------------------------
-// Every INACTIVITY_SWEEP_INTERVAL_MS, DM anyone who hasn't opened the Mini
-// App (i.e. hit /api/auth/telegram-signup) in over a day, pointing them
-// back to the earn page. Re-pinging is capped at once per
-// INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt.
-//
-// EGRESS: lastLoginAt/lastInactivityReminderAt are stored as epoch-ms
-// numbers, and every epoch-ms value between now and the year 2286 is
-// exactly 13 digits — so, like the ISO strings above, they sort correctly
-// as plain text. Both thresholds are therefore pushed into the query
-// (?lte./lt.) instead of paging through the entire users table and
-// filtering client-side, so only users who are actually due ever cross
-// the wire. The write-back skips the old "re-read then write" step and
-// instead does a single guarded update keyed on the exact lastLoginAt we
-// read, so a login that lands mid-sweep makes the write a no-op rather
-// than overwriting a fresher timestamp.
-async function runInactivityReminderSweep() {
-
-  if (!TELEGRAM_BOT_TOKEN) return;
-
-  const now = Date.now();
-  const loginCutoff = String(now - INACTIVITY_REMINDER_THRESHOLD_MS);
-  const reminderCutoff = String(now - INACTIVITY_REMINDER_REPEAT_MS);
-  let offset = 0;
-
-  try {
-
-    while (true) {
-
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, telegram_id, daily_reward')
-        .not('telegram_id', 'is', null)
-        .not('daily_reward->>lastLoginAt', 'is', null)
-        .lte('daily_reward->>lastLoginAt', loginCutoff)
-        .lt('daily_reward->>lastInactivityReminderAt', reminderCutoff)
-        .range(offset, offset + REMINDER_SWEEP_PAGE_SIZE - 1);
-
-      if (error) {
-        console.error('Inactivity reminder sweep read error:', error);
-        break;
-      }
-
-      if (!data || data.length === 0) break;
-
-      for (const row of data) {
-
-        try {
-
-          const telegramId = row.telegram_id;
-          if (!telegramId) continue;
-
-          const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
-          const lastLoginAt = Number(daily.lastLoginAt) || 0;
-          const lastReminderAt = Number(daily.lastInactivityReminderAt) || 0;
-
-          // Belt-and-braces re-check — the query already narrowed this to
-          // a small set, so re-validating in Node is essentially free.
-          if (!lastLoginAt) continue;
-          if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
-          if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
-
-          const lang = resolveBotLanguage(daily);
-
-          const sent = await sendTelegramUserMessage(
-            telegramId,
-            PAYME_BOT_MESSAGES.inactivityReminder[lang](),
-            { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.inactivityReminderButton[lang]) }
-          );
-
-          if (!sent) continue;
-
-          const updatedDaily = { ...daily, lastInactivityReminderAt: now };
-
-          const { error: writeError } = await supabase
-            .from('users')
-            .update({ daily_reward: updatedDaily })
-            .eq('id', row.id)
-            .eq('daily_reward->>lastLoginAt', String(lastLoginAt));
-
-          if (writeError) {
-            console.error('Inactivity reminder sweep write error:', row.id, writeError);
-          }
-
-        } catch (rowErr) {
-          console.error('Inactivity reminder sweep row error:', row.id, rowErr.message);
-        }
-
-      }
-
-      if (data.length < REMINDER_SWEEP_PAGE_SIZE) break;
-      offset += REMINDER_SWEEP_PAGE_SIZE;
-
-    }
-
-  } catch (err) {
-    console.error('Inactivity reminder sweep error:', err.message);
-  }
-
-}
-
-setInterval(
-  () => {
-    runInactivityReminderSweep().catch(
-      err => console.error('Inactivity reminder sweep error:', err)
-    );
-  },
-  INACTIVITY_SWEEP_INTERVAL_MS
-).unref();
-
-
-
-// ======================================================
 // MANUAL USDT WITHDRAWAL TELEGRAM HELPERS
 // ======================================================
 
@@ -4775,79 +1978,41 @@ app.post('/api/auth/localtest-signup', async (req, res) => {
 
 
 // ======================================================
-// PROCESS REFERRAL
+// CONFIRM REFERRAL AFTER TELEGRAM CHANNEL JOIN
 // ======================================================
+// Referrals never pay Gems. A referral becomes "successful" only after the
+// referred user has been verified as a member of @paymechannel.
+async function processReferral(referrer, newUser) {
+  if (!referrer || !newUser || referrer.id === newUser.id) return false;
+  const daily = normalizeDailyReward(newUser);
+  if (daily.referralConfirmed) return false;
 
-async function processReferral(
-  referrer,
-  newUser
-) {
+  referrer.totalReferrals = number(referrer.totalReferrals) + 1;
+  referrer.successfulReferrals = number(referrer.successfulReferrals) + 1;
+  // Keep legacy referralEarnings untouched: referrals no longer award Gems.
+  await updateUser(referrer);
 
-  const confirmedAt =
-    new Date().toISOString();
+  daily.referralConfirmed = true;
+  newUser.dailyReward = daily;
+  await updateUser(newUser);
 
-  referrer.withdrawableBalance =
-    getWithdrawableBalance(
-      referrer
-    ) +
-    REFERRAL_REWARD;
-
-  referrer.totalReferrals =
-    number(
-      referrer.totalReferrals
-    ) +
-    1;
-
-  referrer.successfulReferrals =
-    number(
-      referrer.successfulReferrals
-    ) +
-    1;
-
-  referrer.referralEarnings =
-    number(
-      referrer.referralEarnings
-    ) +
-    REFERRAL_REWARD;
-
-  await updateUser(
-    referrer
-  );
-
-  await addTransaction(
-    referrer.id,
-    {
-
-      id:
-        generateTransactionId(
-          'tx_ref'
-        ),
-
-      type:
-        'referral_reward',
-
-      description:
-        `Referral Reward (@${newUser.username})`,
-
-      amount:
-        REFERRAL_REWARD,
-
-      currency:
-        'GEMS',
-
-      status:
-        'completed',
-
-      createdAt:
-        confirmedAt
-
-    }
-  );
-
+  // Keep a zero-value confirmation transaction so legacy referral reporting
+  // can still count confirmed referrals without crediting any Gems.
+  await addTransaction(referrer.id, {
+    id: generateTransactionId('tx_ref'),
+    type: 'referral_reward',
+    description: `Referral confirmed (@${newUser.username}) — no Gem reward`,
+    amount: 0,
+    currency: 'GEMS',
+    status: 'completed',
+    createdAt: new Date().toISOString()
+  });
+  return true;
 }
 
 // ======================================================
 // TELEGRAM SIGN UP / AUTHENTICATION
+
 // SUPABASE VERSION
 // SECURE TELEGRAM WEB APP INITDATA
 // ======================================================
@@ -5066,21 +2231,9 @@ app.post(
       // --------------------------------------------------
 
       const cleanRefInput =
-        referralCode
-          ? String(
-              referralCode
-            )
-              .trim()
-              .toUpperCase()
-          : (
-              telegramAuth.startParam
-                ? String(
-                    telegramAuth.startParam
-                  )
-                    .trim()
-                    .toUpperCase()
-                : null
-            );
+        telegramAuth.startParam
+          ? String(telegramAuth.startParam).trim().toUpperCase()
+          : null;
 
       console.log(
         'Telegram signup request:',
@@ -5261,38 +2414,7 @@ app.post(
           );
 
         }
-
-        if (cleanRefInput) {
-
-          try {
-
-            const referrer =
-              await getUserByReferralCode(
-                cleanRefInput
-              );
-
-            if (
-              referrer &&
-              referrer.id !== savedUser.id
-            ) {
-
-              await processReferral(
-                referrer,
-                savedUser
-              );
-
-            }
-
-          } catch (referralError) {
-
-            console.error(
-              'Telegram referral processing error:',
-              referralError
-            );
-
-          }
-
-        }
+        // Referral is intentionally NOT confirmed here. It is confirmed only after @paymechannel membership is verified.
 
         user =
           await getUserById(
@@ -6261,11 +3383,21 @@ app.post(
         req.user;
 
       const isLocal =
-        req.body?.isLocal ||
-        process.env.NODE_ENV !==
-        'production';
+        process.env.NODE_ENV !== 'production' &&
+        (req.body?.isLocal === true ||
+         req.headers.host?.includes('localhost') ||
+         req.headers.host?.includes('127.0.0.1'));
 
       if (isLocal) {
+
+        if (user.referredBy && !normalizeDailyReward(user).referralConfirmed) {
+          try {
+            const referrer = await getUserByReferralCode(user.referredBy);
+            if (referrer && referrer.id !== user.id) await processReferral(referrer, user);
+          } catch (referralError) {
+            console.error('Referral join confirmation error:', referralError);
+          }
+        }
 
         if (
           !user.hasClaimedGiftBox
@@ -6349,6 +3481,15 @@ app.post(
           data.result?.status
         )
       ) {
+
+        if (user.referredBy && !normalizeDailyReward(user).referralConfirmed) {
+          try {
+            const referrer = await getUserByReferralCode(user.referredBy);
+            if (referrer && referrer.id !== user.id) await processReferral(referrer, user);
+          } catch (referralError) {
+            console.error('Referral join confirmation error:', referralError);
+          }
+        }
 
         if (
           !user.hasClaimedGiftBox
@@ -8467,6 +5608,9 @@ app.post(
             number(
               daily.luckTickets
             ),
+
+          luckMining:
+            getLuckMiningSnapshot(user),
 
           lastClaimedDay:
             daily.claimedDays.length
@@ -11349,6 +8493,7 @@ app.listen(
   }
 
 );
+
 
 
 
