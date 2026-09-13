@@ -10,6 +10,37 @@
      the Mining button, matching the same tag already used by the Luck
      Vault treasure chest. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
+<!-- Monetag in-app interstitial: first ad 6s after this page loads, then
+     up to 2 ads per 4-minute window with a 30s minimum gap between them.
+     everyPage:true means the timing/frequency budget resets fresh every
+     time this page is loaded, instead of carrying over from a previous
+     visit — so leaving the page and coming back starts the 6s-delay/
+     2-per-4-min cycle over again rather than remembering prior ad shows.
+     Polls briefly for show_11688228 since the SDK script above finishes
+     initializing asynchronously. -->
+<script>
+(function startInAppInterstitial(){
+  function tryStart(retries){
+    if (typeof window.show_11688228 === 'function') {
+      try{
+        window.show_11688228({
+          type: 'inApp',
+          inAppSettings: {
+            frequency: 2,
+            capping: 4 / 60,
+            interval: 30,
+            timeout: 6,
+            everyPage: true
+          }
+        });
+      }catch(e){}
+      return;
+    }
+    if (retries > 0) setTimeout(function(){ tryStart(retries - 1); }, 200);
+  }
+  tryStart(50);
+})();
+</script>
 <script>
 /* This page already had CSS safe-area fallbacks (env()) but no actual
    Telegram WebApp integration — no expand(), no swipe-lock, and no
@@ -1022,6 +1053,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 </body>
 </html>
+
 
 
 

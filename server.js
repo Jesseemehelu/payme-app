@@ -3953,6 +3953,15 @@ setInterval(
 // pointing them back to the earn page. Re-pinging is capped at once per
 // INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt.
 //
+// OLD ACCOUNTS: accounts created before lastLoginAt/lastInactivityReminderAt
+// existed have neither field set. A plain `.lte()`/`.lt()` filter on a
+// missing JSON key evaluates to NULL in Postgres (i.e. "unknown"), which
+// silently drops those rows from the WHERE clause forever — so old users
+// would never get a first reminder. Both filters below are `.or()`'d with
+// an `is.null` branch so "never tracked" counts as "overdue"/"never
+// reminded" instead of being excluded. `created_at` is pulled in as the
+// fallback activity timestamp for anyone with no lastLoginAt at all.
+//
 // EGRESS: lastLoginAt/lastInactivityReminderAt are stored as epoch-ms
 // numbers, and every epoch-ms value between now and the year 2286 is
 // exactly 13 digits — so, like the ISO strings above, they sort correctly
@@ -3961,8 +3970,8 @@ setInterval(
 // filtering client-side, so only users who are actually due ever cross
 // the wire. The write-back skips the old "re-read then write" step and
 // instead does a single guarded update keyed on the exact lastLoginAt we
-// read, so a login that lands mid-sweep makes the write a no-op rather
-// than overwriting a fresher timestamp.
+// read (or its absence), so a login that lands mid-sweep makes the write
+// a no-op rather than overwriting a fresher timestamp.
 async function runInactivityReminderSweep() {
 
   if (!TELEGRAM_BOT_TOKEN) return;
@@ -3978,11 +3987,10 @@ async function runInactivityReminderSweep() {
 
       const { data, error } = await supabase
         .from('users')
-        .select('id, telegram_id, daily_reward')
+        .select('id, telegram_id, daily_reward, created_at')
         .not('telegram_id', 'is', null)
-        .not('daily_reward->>lastLoginAt', 'is', null)
-        .lte('daily_reward->>lastLoginAt', loginCutoff)
-        .lt('daily_reward->>lastInactivityReminderAt', reminderCutoff)
+        .or(`daily_reward->>lastLoginAt.is.null,daily_reward->>lastLoginAt.lte.${loginCutoff}`)
+        .or(`daily_reward->>lastInactivityReminderAt.is.null,daily_reward->>lastInactivityReminderAt.lt.${reminderCutoff}`)
         .range(offset, offset + REMINDER_SWEEP_PAGE_SIZE - 1);
 
       if (error) {
@@ -4000,12 +4008,18 @@ async function runInactivityReminderSweep() {
           if (!telegramId) continue;
 
           const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
-          const lastLoginAt = Number(daily.lastLoginAt) || 0;
+          const rawLastLoginAt = daily.lastLoginAt;
           const lastReminderAt = Number(daily.lastInactivityReminderAt) || 0;
+
+          // Old accounts with no lastLoginAt ever stamped fall back to
+          // their signup time, so they're treated as overdue rather than
+          // skipped forever for lacking the field.
+          const lastLoginAt = Number(rawLastLoginAt) ||
+            (row.created_at ? new Date(row.created_at).getTime() : 0) ||
+            0;
 
           // Belt-and-braces re-check — the query already narrowed this to
           // a small set, so re-validating in Node is essentially free.
-          if (!lastLoginAt) continue;
           if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
           if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
 
@@ -4022,11 +4036,20 @@ async function runInactivityReminderSweep() {
 
           const updatedDaily = { ...daily, lastInactivityReminderAt: now };
 
-          const { error: writeError } = await supabase
+          let updateQuery = supabase
             .from('users')
             .update({ daily_reward: updatedDaily })
-            .eq('id', row.id)
-            .eq('daily_reward->>lastLoginAt', String(lastLoginAt));
+            .eq('id', row.id);
+
+          // Guard on whatever the row actually had: a real value gets an
+          // exact-match guard, a genuinely missing field gets an `is null`
+          // guard — either way a concurrent real login invalidates the
+          // guard and turns this write into a no-op.
+          updateQuery = (rawLastLoginAt === undefined || rawLastLoginAt === null)
+            ? updateQuery.is('daily_reward->>lastLoginAt', null)
+            : updateQuery.eq('daily_reward->>lastLoginAt', String(rawLastLoginAt));
+
+          const { error: writeError } = await updateQuery;
 
           if (writeError) {
             console.error('Inactivity reminder sweep write error:', row.id, writeError);

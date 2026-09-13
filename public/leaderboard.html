@@ -54,13 +54,14 @@
 
 <!-- Monetag rewarded interstitial SDK, same zone used across the app. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 15s after this page loads, then
-     up to 2 ads per 6-minute window with a 60s gap between them.
-     everyPage:false means this session (and its timing/frequency budget)
-     carries over to any other page that also calls show_11688228 with
-     these same settings — it does not reset per page. Polls briefly for
-     show_11688228 since the SDK script above finishes initializing
-     asynchronously. -->
+<!-- Monetag in-app interstitial: first ad 6s after this page loads, then
+     up to 2 ads per 4-minute window with a 30s minimum gap between them.
+     everyPage:true means the timing/frequency budget resets fresh every
+     time this page is loaded, instead of carrying over from a previous
+     visit — so leaving the page and coming back starts the 6s-delay/
+     2-per-4-min cycle over again rather than remembering prior ad shows.
+     Polls briefly for show_11688228 since the SDK script above finishes
+     initializing asynchronously. -->
 <script>
 (function startInAppInterstitial(){
   function tryStart(retries){
@@ -70,10 +71,10 @@
           type: 'inApp',
           inAppSettings: {
             frequency: 2,
-            capping: 0.1,
-            interval: 60,
-            timeout: 15,
-            everyPage: false
+            capping: 4 / 60,
+            interval: 30,
+            timeout: 6,
+            everyPage: true
           }
         });
       }catch(e){}
@@ -3358,6 +3359,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 </body>
 </html>
+
 
 
 
