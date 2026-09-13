@@ -3683,45 +3683,55 @@ const PAYME_BOT_MESSAGES = {
   },
 
   inactivityReminder: {
-    en: () =>
+    en: (isFirst) =>
       `👋 <b>We miss you on PAYME!</b>\n\n` +
-      `It's been 2 hours since you last logged in — log in now to claim your rewards and much more:\n\n` +
+      (isFirst
+        ? `It's been 2 hours since you last logged in — log in now to claim your rewards and much more:\n\n`
+        : `You haven't logged in in a while — log in now to claim your rewards and much more:\n\n`) +
       `⛏️ Mining rig payouts\n` +
       `🎁 Daily login rewards\n` +
       `🎟️ Luck Tickets\n` +
       `🕹️ Tap Rush leaderboard prizes\n` +
       `👥 Referral earnings\n\n` +
       `Tap below to jump back in. 💎`,
-    ru: () =>
+    ru: (isFirst) =>
       `👋 <b>Мы скучаем по вам на PAYME!</b>\n\n` +
-      `Прошло 2 часа с вашего последнего входа — зайдите сейчас, чтобы забрать награды и не только:\n\n` +
+      (isFirst
+        ? `Прошло 2 часа с вашего последнего входа — зайдите сейчас, чтобы забрать награды и не только:\n\n`
+        : `Вы давно не заходили — зайдите сейчас, чтобы забрать награды и не только:\n\n`) +
       `⛏️ Выплаты с майнинг-установки\n` +
       `🎁 Ежедневные награды за вход\n` +
       `🎟️ Билеты удачи\n` +
       `🕹️ Призы рейтинга Tap Rush\n` +
       `👥 Реферальный доход\n\n` +
       `Нажмите ниже, чтобы вернуться. 💎`,
-    es: () =>
+    es: (isFirst) =>
       `👋 <b>¡Te extrañamos en PAYME!</b>\n\n` +
-      `Han pasado 2 horas desde tu último inicio de sesión — entra ahora para reclamar tus recompensas y mucho más:\n\n` +
+      (isFirst
+        ? `Han pasado 2 horas desde tu último inicio de sesión — entra ahora para reclamar tus recompensas y mucho más:\n\n`
+        : `Hace tiempo que no inicias sesión — entra ahora para reclamar tus recompensas y mucho más:\n\n`) +
       `⛏️ Pagos del equipo de minería\n` +
       `🎁 Recompensas diarias por iniciar sesión\n` +
       `🎟️ Boletos de la Suerte\n` +
       `🕹️ Premios del ranking de Tap Rush\n` +
       `👥 Ganancias por referidos\n\n` +
       `Toca abajo para volver. 💎`,
-    hi: () =>
+    hi: (isFirst) =>
       `👋 <b>हमें PAYME पर आपकी कमी खल रही है!</b>\n\n` +
-      `आपको लॉग इन किए 2 घंटे हो गए हैं — अभी लॉग इन करें और अपने इनाम व और भी बहुत कुछ पाएं:\n\n` +
+      (isFirst
+        ? `आपको लॉग इन किए 2 घंटे हो गए हैं — अभी लॉग इन करें और अपने इनाम व और भी बहुत कुछ पाएं:\n\n`
+        : `आपने काफी समय से लॉग इन नहीं किया है — अभी लॉग इन करें और अपने इनाम व और भी बहुत कुछ पाएं:\n\n`) +
       `⛏️ माइनिंग रिग का भुगतान\n` +
       `🎁 दैनिक लॉगिन इनाम\n` +
       `🎟️ Luck Tickets\n` +
       `🕹️ Tap Rush लीडरबोर्ड इनाम\n` +
       `👥 रेफ़रल कमाई\n\n` +
       `वापस आने के लिए नीचे टैप करें। 💎`,
-    ar: () =>
+    ar: (isFirst) =>
       `👋 <b>اشتقنا إليك في PAYME!</b>\n\n` +
-      `مرّت ساعتان منذ آخر تسجيل دخول لك — سجّل الدخول الآن لتحصيل مكافآتك وأكثر من ذلك بكثير:\n\n` +
+      (isFirst
+        ? `مرّت ساعتان منذ آخر تسجيل دخول لك — سجّل الدخول الآن لتحصيل مكافآتك وأكثر من ذلك بكثير:\n\n`
+        : `لم تسجّل الدخول منذ فترة — سجّل الدخول الآن لتحصيل مكافآتك وأكثر من ذلك بكثير:\n\n`) +
       `⛏️ أرباح جهاز التعدين\n` +
       `🎁 مكافآت الدخول اليومية\n` +
       `🎟️ بطاقات الحظ\n` +
@@ -3955,40 +3965,24 @@ setInterval(
 // than overwriting a fresher timestamp.
 async function runInactivityReminderSweep() {
 
-  if (!TELEGRAM_BOT_TOKEN) {
-    // Was previously a silent no-op — if this env var is missing in
-    // production the sweep looked like it was "running" (no errors) while
-    // actually never sending a single message. Log loudly instead.
-    console.warn('Inactivity reminder sweep skipped: TELEGRAM_BOT_TOKEN is not set.');
-    return;
-  }
+  if (!TELEGRAM_BOT_TOKEN) return;
 
   const now = Date.now();
   const loginCutoff = String(now - INACTIVITY_REMINDER_THRESHOLD_MS);
   const reminderCutoff = String(now - INACTIVITY_REMINDER_REPEAT_MS);
   let offset = 0;
-  let candidates = 0;
-  let sentCount = 0;
-
-  console.log('Inactivity reminder sweep starting...');
 
   try {
 
     while (true) {
 
-      // A row with no lastLoginAt at all (accounts created before this
-      // field existed, or any other path that never stamped it) used to
-      // be excluded entirely by `.not(...,'is',null)` — meaning those
-      // users could never receive a reminder. Treat "never recorded" the
-      // same as "definitely overdue": is-null OR past the cutoff. Same
-      // idea for lastInactivityReminderAt so a never-reminded legacy row
-      // isn't skipped either.
       const { data, error } = await supabase
         .from('users')
         .select('id, telegram_id, daily_reward')
         .not('telegram_id', 'is', null)
-        .or(`daily_reward->>lastLoginAt.is.null,daily_reward->>lastLoginAt.lte.${loginCutoff}`)
-        .or(`daily_reward->>lastInactivityReminderAt.is.null,daily_reward->>lastInactivityReminderAt.lt.${reminderCutoff}`)
+        .not('daily_reward->>lastLoginAt', 'is', null)
+        .lte('daily_reward->>lastLoginAt', loginCutoff)
+        .lt('daily_reward->>lastInactivityReminderAt', reminderCutoff)
         .range(offset, offset + REMINDER_SWEEP_PAGE_SIZE - 1);
 
       if (error) {
@@ -3998,8 +3992,6 @@ async function runInactivityReminderSweep() {
 
       if (!data || data.length === 0) break;
 
-      candidates += data.length;
-
       for (const row of data) {
 
         try {
@@ -4008,48 +4000,33 @@ async function runInactivityReminderSweep() {
           if (!telegramId) continue;
 
           const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
-          const rawLastLoginAt = daily.lastLoginAt;
-          const lastLoginAtMissing = rawLastLoginAt === null || rawLastLoginAt === undefined;
-          const lastLoginAt = Number(rawLastLoginAt) || 0;
+          const lastLoginAt = Number(daily.lastLoginAt) || 0;
           const lastReminderAt = Number(daily.lastInactivityReminderAt) || 0;
 
           // Belt-and-braces re-check — the query already narrowed this to
           // a small set, so re-validating in Node is essentially free.
-          // A missing/zero lastLoginAt is treated as "always overdue"
-          // rather than skipped, so accounts that never had this field
-          // stamped still get reminded.
-          if (lastLoginAt && now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
+          if (!lastLoginAt) continue;
+          if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
           if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
 
           const lang = resolveBotLanguage(daily);
+          const isFirstReminder = !lastReminderAt;
 
           const sent = await sendTelegramUserMessage(
             telegramId,
-            PAYME_BOT_MESSAGES.inactivityReminder[lang](),
+            PAYME_BOT_MESSAGES.inactivityReminder[lang](isFirstReminder),
             { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.inactivityReminderButton[lang]) }
           );
 
           if (!sent) continue;
 
-          sentCount++;
-
           const updatedDaily = { ...daily, lastInactivityReminderAt: now };
 
-          // Guard on whatever lastLoginAt actually looked like when read:
-          // a real timestamp needs an .eq() match, but a missing value
-          // can only be matched with .is(null) — .eq('...','0') would
-          // never match a genuinely-absent key and would silently make
-          // every write below a no-op for these legacy rows.
-          let writeQuery = supabase
+          const { error: writeError } = await supabase
             .from('users')
             .update({ daily_reward: updatedDaily })
-            .eq('id', row.id);
-
-          writeQuery = lastLoginAtMissing
-            ? writeQuery.is('daily_reward->>lastLoginAt', null)
-            : writeQuery.eq('daily_reward->>lastLoginAt', String(lastLoginAt));
-
-          const { error: writeError } = await writeQuery;
+            .eq('id', row.id)
+            .eq('daily_reward->>lastLoginAt', String(lastLoginAt));
 
           if (writeError) {
             console.error('Inactivity reminder sweep write error:', row.id, writeError);
@@ -4066,30 +4043,11 @@ async function runInactivityReminderSweep() {
 
     }
 
-    console.log(`Inactivity reminder sweep finished: ${candidates} candidate(s), ${sentCount} message(s) sent.`);
-
   } catch (err) {
     console.error('Inactivity reminder sweep error:', err.message);
   }
 
 }
-
-// setInterval() only fires AFTER the full delay elapses — with a 2-hour
-// interval, that means this would never run at all on a host that
-// restarts more often than every 2 hours (redeploys, crash-restarts,
-// free-tier dynos spinning down/up). Kick off one run shortly after boot
-// so overdue users get caught immediately, then fall back to the regular
-// 2-hour cadence for everyone after that. Each user's own repeat cadence
-// is still correctly throttled by lastInactivityReminderAt regardless of
-// how often this fires, so an extra early run here is always safe.
-setTimeout(
-  () => {
-    runInactivityReminderSweep().catch(
-      err => console.error('Inactivity reminder sweep error:', err)
-    );
-  },
-  15 * 1000
-).unref();
 
 setInterval(
   () => {
@@ -8385,9 +8343,6 @@ app.post(
       // every tab-return) was pure wasted Supabase egress for data that
       // was silently discarded on arrival.
 
-      const justCompletedFreeSpin =
-        Number(recentFreeSpinCompletions.get(String(user.id)) || 0) > Date.now();
-
       const daily =
         normalizeDailyReward(
           user
@@ -8444,12 +8399,6 @@ app.post(
           ...sanitizeUser(
             user
           ),
-
-          showOnboardingTutorial:
-            !!user.hasReceivedWelcomeBonus &&
-            !!user.hasClaimedGiftBox &&
-            !user.hasSeenPopup &&
-            justCompletedFreeSpin,
 
           isNewUser,
 
@@ -11381,6 +11330,7 @@ app.listen(
   }
 
 );
+
 
 
 
