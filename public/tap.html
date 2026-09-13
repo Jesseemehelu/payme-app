@@ -1129,44 +1129,6 @@
 <div class="section-title"><h3>Milestone Rewards</h3><span>Claim once</span></div>
 <section class="vault-card" id="milestoneSection" style="padding:16px 14px 14px">
 
-  <div class="milestone-card" id="milestoneRef10">
-    <div class="milestone-head">
-      <div class="milestone-icon">🤝</div>
-      <div class="milestone-body">
-        <h4>Refer 10 Friends</h4>
-        <p>Invite 10 friends to PAYME.</p>
-      </div>
-      <div class="milestone-reward"><small>Reward</small>100 🪙</div>
-    </div>
-    <div class="milestone-progress-row">
-      <div class="milestone-bar"><div class="milestone-bar-fill" id="ref10Fill"></div></div>
-      <div class="milestone-count" id="ref10Count">0/10</div>
-    </div>
-    <div class="milestone-actions">
-      <a href="/dashboard.html#referrals" class="milestone-go">Go <span>→</span></a>
-      <button class="milestone-claim" id="ref10Claim" data-id="ref10">Claim</button>
-    </div>
-  </div>
-
-  <div class="milestone-card" id="milestoneRef25">
-    <div class="milestone-head">
-      <div class="milestone-icon">🚀</div>
-      <div class="milestone-body">
-        <h4>Refer 25 Friends</h4>
-        <p>Invite 25 friends to PAYME.</p>
-      </div>
-      <div class="milestone-reward"><small>Reward</small>100 🪙</div>
-    </div>
-    <div class="milestone-progress-row">
-      <div class="milestone-bar"><div class="milestone-bar-fill" id="ref25Fill"></div></div>
-      <div class="milestone-count" id="ref25Count">0/25</div>
-    </div>
-    <div class="milestone-actions">
-      <a href="/dashboard.html#referrals" class="milestone-go">Go <span>→</span></a>
-      <button class="milestone-claim" id="ref25Claim" data-id="ref25">Claim</button>
-    </div>
-  </div>
-
   <div class="milestone-card" id="milestoneChest5">
     <div class="milestone-head">
       <div class="milestone-icon">🗝️</div>
@@ -1666,8 +1628,6 @@ async function loadVault(){
 
 /* ============ MILESTONE REWARDS ============ */
 const MILESTONE_DEFS={
-  ref10:{need:10,unit:'referrals',fillId:'ref10Fill',countId:'ref10Count',cardId:'milestoneRef10',btnId:'ref10Claim'},
-  ref25:{need:25,unit:'referrals',fillId:'ref25Fill',countId:'ref25Count',cardId:'milestoneRef25',btnId:'ref25Claim'},
   chest5:{need:5,unit:'chests',fillId:'chest5Fill',countId:'chest5Count',cardId:'milestoneChest5',btnId:'chest5Claim'}
 };
 let busyMilestone=false;
@@ -2119,6 +2079,7 @@ loadVault();
 
 </body>
 </html>
+
 
 
 

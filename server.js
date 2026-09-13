@@ -2921,7 +2921,13 @@ app.post('/api/luck-mining/upgrade', requireLoginMiningUpgrade, async (req, res)
           body: {
             success: false,
             code: 'REFERRALS_REQUIRED',
-            message: `You need ${requiredReferrals.toLocaleString()} verified referrals to unlock Level ${requestedLevel}. You currently have ${currentReferrals.toLocaleString()}.`
+            message: `You need ${requiredReferrals.toLocaleString()} verified referrals to unlock Level ${requestedLevel}. You currently have ${currentReferrals.toLocaleString()}.`,
+            // Structured fields so the client can render a progress popup
+            // (count, target, remaining) without parsing the message text.
+            level: requestedLevel,
+            currentReferrals,
+            requiredReferrals,
+            referralsRemaining: Math.max(0, requiredReferrals - currentReferrals)
           }
         };
       }
@@ -11299,6 +11305,7 @@ app.listen(
   }
 
 );
+
 
 
 

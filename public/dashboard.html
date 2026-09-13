@@ -461,9 +461,15 @@ header{
 .referral-progress-bar{margin-top:6px;height:8px;border-radius:999px;background:var(--border-soft);overflow:hidden}
 .referral-progress-bar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .4s ease}
 .referral-stats{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.referral-stats-2col{grid-template-columns:repeat(2,1fr)}
 .referral-stat{padding:10px 6px;border-radius:13px;background:var(--bg);text-align:center}
 .referral-stat b{display:block;font-size:.92rem;font-weight:900;color:var(--ink)}
 .referral-stat span{font-size:.6rem;font-weight:700;color:var(--muted)}
+.referral-progress-hint{display:block;margin-top:7px;font-size:.64rem;font-weight:650;color:var(--muted);line-height:1.45}
+.invite-mining-badge{font-size:.6rem;font-weight:900;color:var(--blue-dark);white-space:nowrap;background:var(--blue-soft);border:1px solid #dce5fb;padding:5px 9px;border-radius:999px;letter-spacing:.02em}
+.invite-how-it-works{display:flex;flex-direction:column;gap:7px;margin:14px 0 4px;padding:12px 13px;border-radius:15px;background:rgba(47,107,255,.05);border:1px solid rgba(47,107,255,.12)}
+.invite-how-step{display:flex;align-items:center;gap:9px;font-size:.7rem;font-weight:750;color:var(--ink-soft)}
+.invite-how-num{flex:none;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:.62rem;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple))}
 
 /* ---------- SIDE COLUMN ---------- */
 .earners-cta-card{
@@ -575,6 +581,7 @@ header{
   position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
   padding:20px;background:rgba(8,12,24,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease;
+  will-change:opacity;
 }
 .modal-overlay.active,.daily-overlay.show,.bonus-overlay.show,.gift-overlay.show,
 .claim-success-overlay.show,.streak-congrats-overlay.show,.telegram-preview-overlay.show,
@@ -583,6 +590,20 @@ header{
   width:100%;max-width:400px;background:var(--white);border-radius:24px;padding:20px;
   box-shadow:var(--shadow-pop);transform:translateY(16px) scale(.97);transition:transform .28s cubic-bezier(.16,1,.3,1);
   max-height:86vh;overflow-y:auto;
+  will-change:transform;backface-visibility:hidden;
+}
+/* Perf: a full-screen backdrop-filter has to keep re-sampling whatever is
+   behind it, so any of the dashboard's own infinite decorative animations
+   (glows, floats, shines, bounces) left running underneath an open modal
+   forced the browser to redo that blur on every single frame — that
+   constant repaint work was the real source of the popups feeling slow
+   and laggy, independent of the modal's own transition. Freezing those
+   background animations for as long as a modal is open removes that cost
+   entirely; the modal's own entrance/idle animations are unaffected since
+   they live inside the excluded overlay element itself. */
+body.modal-open>*:not(.modal-overlay):not(.daily-overlay):not(.bonus-overlay):not(.gift-overlay):not(.claim-success-overlay):not(.streak-congrats-overlay):not(.telegram-preview-overlay):not(.mining-modal),
+body.modal-open>*:not(.modal-overlay):not(.daily-overlay):not(.bonus-overlay):not(.gift-overlay):not(.claim-success-overlay):not(.streak-congrats-overlay):not(.telegram-preview-overlay):not(.mining-modal) *{
+  animation-play-state:paused!important;
 }
 .modal-overlay.active .modal-card,.daily-overlay.show .daily-card,.bonus-overlay.show .bonus-card,
 .streak-congrats-overlay.show .streak-congrats-card,.claim-success-overlay.show .claim-success-card,
@@ -853,15 +874,15 @@ header{
 .community-card .referral-actions button,.community-card button{font-weight:900!important;box-shadow:0 7px 16px rgba(47,107,255,.18)}
 .community-card .community-head{position:relative;z-index:1}
 
-.mining-modal{background:rgba(4,8,20,.76)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
-.mining-modal-card{position:relative;width:min(100%,390px)!important;max-height:82vh!important;overflow:auto;border-radius:30px!important;padding:20px!important;background:linear-gradient(155deg,#182341 0%,#0b1020 62%,#130d28 100%)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 35px 100px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.12)!important;transform:translateY(26px) scale(.91)!important;transition:transform .42s cubic-bezier(.16,1.3,.3,1)!important}
+.mining-modal{background:rgba(4,8,20,.8)!important;backdrop-filter:blur(11px)!important;-webkit-backdrop-filter:blur(11px)!important}
+.mining-modal-card{position:relative;width:min(100%,390px)!important;max-height:82vh!important;overflow:auto;border-radius:30px!important;padding:20px!important;background:linear-gradient(155deg,#182341 0%,#0b1020 62%,#130d28 100%)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 35px 100px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.12)!important;transform:translateY(26px) scale(.91)!important;transition:transform .42s cubic-bezier(.16,1.3,.3,1)!important;will-change:transform!important;backface-visibility:hidden!important;contain:layout style paint!important}
 .mining-modal.active .mining-modal-card{transform:translateY(0) scale(1)!important}
 .mining-modal-card:before{content:"";position:absolute;inset:-40% -30% auto auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(34,224,255,.13),transparent 68%);pointer-events:none}
 .mining-modal-head{position:relative;z-index:1}
 .mining-modal-head h3{color:#fff!important;font-size:1.02rem!important;font-weight:950!important}
 .mining-modal-icon{box-shadow:0 10px 24px rgba(124,92,252,.3)!important;animation:modalIconBounce 2.2s ease-in-out infinite}
 @keyframes modalIconBounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
-.miner-level-list{position:relative;z-index:1;display:grid;gap:10px;margin-top:12px}
+.miner-level-list{position:relative;z-index:1;display:grid;gap:10px;margin-top:12px;contain:layout style}
 .miner-level-card{padding:14px!important;border-radius:19px!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;animation:upgradeCardIn .45s cubic-bezier(.16,1,.3,1) both}
 .miner-level-card:nth-child(2){animation-delay:.04s}.miner-level-card:nth-child(3){animation-delay:.08s}.miner-level-card:nth-child(4){animation-delay:.12s}.miner-level-card:nth-child(5){animation-delay:.16s}.miner-level-card:nth-child(6){animation-delay:.20s}
 @keyframes upgradeCardIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
@@ -895,6 +916,13 @@ header{
 .claim-success-overlay{background:rgba(7,12,26,.72)!important;backdrop-filter:blur(15px)!important}
 .claim-success-card{position:relative!important;align-self:center!important;border-radius:30px!important;box-shadow:0 35px 90px rgba(15,23,42,.38),inset 0 1px 0 #fff!important;transform:translateY(25px) scale(.9)!important;transition:transform .42s cubic-bezier(.16,1.25,.3,1)!important}
 .claim-success-overlay.show .claim-success-card{transform:none!important}
+
+/* ===== REFERRALS-REQUIRED POPUP ===== */
+.referral-req-progress{position:relative;z-index:1;margin:16px 0 4px;padding:13px 15px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);text-align:left}
+.referral-req-progress-top{display:flex;align-items:center;justify-content:space-between;font-size:.7rem;font-weight:900;color:#e8edff}
+.referral-req-progress-top span:last-child{color:#8fa0c5;font-weight:800;font-size:.62rem}
+.referral-req-progress-bar{margin-top:9px;height:9px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+.referral-req-progress-bar i{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22e0ff,#8b5cf6);box-shadow:0 0 12px rgba(34,224,255,.5);transition:width .5s cubic-bezier(.16,1,.3,1)}
 
 </style>
 </head>
@@ -1176,9 +1204,14 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
   <div class="community-head">
     <div style="display:flex;align-items:center;gap:10px;min-width:0">
       <div class="community-icon">👥</div>
-      <div><div class="community-title">Invite &amp; Unlock</div><div class="community-sub">Invite friends. Verified joins count toward your miner level.</div></div>
+      <div><div class="community-title">Invite &amp; Unlock</div><div class="community-sub">Every verified friend who joins powers up your mining rig.</div></div>
     </div>
-    <div style="font-size:.62rem;font-weight:900;color:#64748b;white-space:nowrap">NO GEM REWARD</div>
+    <div class="invite-mining-badge">⛏️ FUELS MINING</div>
+  </div>
+  <div class="invite-how-it-works">
+    <div class="invite-how-step"><span class="invite-how-num">1</span><span>Share your link with friends</span></div>
+    <div class="invite-how-step"><span class="invite-how-num">2</span><span>They join &amp; get verified</span></div>
+    <div class="invite-how-step"><span class="invite-how-num">3</span><span>Your miner level goes up</span></div>
   </div>
   <div class="referral-link-box">
     <span style="font-size:.9rem">🔗</span><span class="iv-link-text" id="referralLinkText">Preparing your invite link…</span>
@@ -1189,13 +1222,13 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
     <button class="iv-share-btn iv-share-wa" onclick="shareToWhatsApp()">💬 WhatsApp</button>
   </div>
   <div class="referral-progress">
-    <div class="referral-progress-top"><span>Verified referrals</span><span id="referralLevelProgressText">0 / 20</span></div>
+    <div class="referral-progress-top"><span>Progress to next miner level</span><span id="referralLevelProgressText">0 / 20</span></div>
     <div class="referral-progress-bar"><i id="referralLevelProgressBar"></i></div>
+    <small class="referral-progress-hint" id="referralProgressHint">Invite 20 verified friends to unlock Level 2 and bigger Luck Ticket rewards.</small>
   </div>
-  <div class="referral-stats">
+  <div class="referral-stats referral-stats-2col">
     <div class="referral-stat"><b id="totalRefersText">0</b><span>Referrals</span></div>
     <div class="referral-stat"><b id="activeRefersText">0</b><span>Verified</span></div>
-    <div class="referral-stat"><b id="refEarningsText">💎 0</b><span>Referral earnings</span></div>
   </div>
 </section>
 
@@ -1732,14 +1765,25 @@ showGiftModal();
 
 function updateMinerReferralProgress(count){
   const milestones=[20,50,100,300,500];
+  const milestoneLevel={20:2,50:3,100:4,300:5,500:6};
   const current=Number(count)||0;
   const next=milestones.find(n=>current<n)||500;
   const prev=current>=500?500:(milestones.slice().reverse().find(n=>current>=n)||0);
   const pct=current>=500?100:Math.max(0,Math.min(100,((current-prev)/Math.max(1,next-prev))*100));
   const text=document.getElementById("referralLevelProgressText");
   const bar=document.getElementById("referralLevelProgressBar");
+  const hint=document.getElementById("referralProgressHint");
   if(text) text.textContent=current>=500?"500+ • Level 6 unlocked":`${current.toLocaleString()} / ${next.toLocaleString()}`;
   if(bar) bar.style.width=pct+"%";
+  if(hint){
+    if(current>=500){
+      hint.textContent="You've unlocked every miner level — thanks for growing the community!";
+    }else{
+      const remaining=Math.max(0,next-current);
+      const lvl=milestoneLevel[next]||"";
+      hint.textContent=`Invite ${remaining.toLocaleString()} more verified friend${remaining===1?'':'s'} to unlock Level ${lvl}.`;
+    }
+  }
 }
 
 /* REFERRAL LINK */
@@ -2240,17 +2284,6 @@ document.getElementById(
 "activeRefersText"
 ).innerText =
 user.successfulReferrals || 0;
-
-document.getElementById(
-"refEarningsText"
-).innerText =
-"💎 " +
-Number(
-user.referralEarnings || 0
-).toLocaleString("en-US", {
-    minimumFractionDigits:3,
-    maximumFractionDigits:3
-});
 
 updateMinerReferralProgress(Number(user.totalReferrals||0));
 
@@ -3661,6 +3694,13 @@ const PAYME_DASH_MINER_I18N={
  ar:{"Invite & Unlock":"ادعُ وافتح المستويات","Invite friends. Verified joins count toward your miner level.":"ادعُ الأصدقاء. الانضمامات الموثقة تُحتسب لمستوى جهاز التعدين.","NO GEM REWARD":"بدون مكافأة جواهر","Verified referrals":"الإحالات الموثقة","Referral earnings":"أرباح الإحالات","Luck Ticket Mining":"تعدين تذاكر الحظ","2-minute cycle":"دورة 30 دقيقة","FREE MINER":"جهاز مجاني","REFERRALS":"إحالات","MINING":"جارٍ التعدين","OFFLINE":"غير متصل","READY TO CLAIM":"جاهز للاستلام","Cycle complete":"اكتملت الدورة","Claim now":"استلم الآن","Hold to Mine":"اضغط مطولًا للتعدين","Cycle Complete":"اكتملت الدورة","CURRENT LEVEL":"المستوى الحالي","UNLOCK LEVEL 2":"افتح المستوى 2","UNLOCK LEVEL 3":"افتح المستوى 3","UNLOCK LEVEL 4":"افتح المستوى 4","UNLOCK LEVEL 5":"افتح المستوى 5","UNLOCK LEVEL 6":"افتح المستوى 6"}
 };
 Object.keys(PAYME_DASH_MINER_I18N).forEach(l=>Object.assign(PAYME_DASH_I18N[l]||{},PAYME_DASH_MINER_I18N[l]));
+const PAYME_DASH_MINER_I18N_2={
+ ru:{"Upgrade Mining Rig":"Улучшить майнинг-риг","Choose any higher level. Upgrades apply to your next cycle.":"Выберите любой более высокий уровень. Улучшение вступит в силу со следующего цикла.","How Mining Works":"Как работает майнинг","The simple version — no jargon.":"Просто и без сложных терминов.","Hold the lightning button":"Удерживайте кнопку молнии","Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"Нажмите и удерживайте кнопку ⚡ 2 секунды. Всё — риг включится и начнёт цикл добычи.","Let it run for 2 minutes":"Дайте поработать 2 минуты","Each cycle runs for 2 minutes. You can close the app or lock your phone — the server keeps the cycle running and your progress is restored when you return.":"Каждый цикл длится 2 минуты. Можно закрыть приложение или заблокировать телефон — сервер продолжит цикл, а прогресс восстановится при возвращении.","Claim your Luck Tickets":"Получите билеты удачи","When the 2-minute cycle finishes, it counts as one successful cycle. Resume mining until you complete 10 successful cycles, then your Luck Tickets unlock for claiming.":"Когда 2-минутный цикл завершится, он засчитывается как успешный. Продолжайте добычу, пока не наберёте 10 успешных циклов — тогда билеты удачи можно будет забрать.","Upgrade for bigger rewards":"Улучшайте ради большей награды","Invite verified friends to unlock higher miner levels. Level 2 starts at 20 verified referrals, and higher levels require more referrals and unlock larger Luck Ticket ranges.":"Приглашайте подтверждённых друзей, чтобы открывать более высокие уровни майнера. Уровень 2 открывается за 20 подтверждённых рефералов, а более высокие уровни требуют больше рефералов и дают больше билетов удачи.","Don't show this again":"Больше не показывать","Got it":"Понятно","Tickets Claimed!":"Билеты получены!","🎫 Luck Tickets":"🎫 Билетов удачи","Added to your Luck Ticket balance. Complete another 10 successful cycles to unlock your next claim.":"Добавлено на баланс билетов удачи. Завершите ещё 10 успешных циклов, чтобы открыть следующее получение.","⛏️ Upgrade to get higher Luck Tickets":"⛏️ Улучшите, чтобы получать больше билетов","Nice, continue":"Отлично, продолжить","More referrals needed":"Нужно больше рефералов","You need more verified referrals to unlock this miner level.":"Вам нужно больше подтверждённых рефералов, чтобы открыть этот уровень майнера.","👥 Invite More":"👥 Пригласить ещё","Maybe later":"Может позже","LEVEL":"УРОВЕНЬ","UNLOCK":"ОТКРЫТЬ","REACH LEVEL":"ДОСТИГНИТЕ УРОВНЯ","FIRST":"СНАЧАЛА","Next up":"Следующий","Unlock requirement:":"Требование для открытия:","Reward per cycle:":"Награда за цикл:","Free":"Бесплатно","verified referrals":"подтверждённых рефералов","Luck Tickets":"билетов удачи","Start free. Complete 10 × 2-minute cycles to unlock 3 Luck Tickets.":"Бесплатный старт. Завершите 10 циклов по 2 минуты, чтобы получить 3 билета удачи.","Invite 20 verified members to unlock 6 Luck Tickets per cycle.":"Пригласите 20 подтверждённых участников, чтобы получать 6 билетов удачи за цикл.","Reach 50 verified referrals to unlock 9 Luck Tickets per cycle.":"Наберите 50 подтверждённых рефералов, чтобы получать 9 билетов удачи за цикл.","Reach 100 verified referrals to unlock 13 Luck Tickets per cycle.":"Наберите 100 подтверждённых рефералов, чтобы получать 13 билетов удачи за цикл.","Reach 300 verified referrals to unlock 22 Luck Tickets per cycle.":"Наберите 300 подтверждённых рефералов, чтобы получать 22 билета удачи за цикл.","Reach 500 verified referrals to unlock 30 Luck Tickets per cycle.":"Наберите 500 подтверждённых рефералов, чтобы получать 30 билетов удачи за цикл.","Invite and verify more friends to unlock Level":"Пригласите и подтвердите больше друзей, чтобы открыть уровень","Invite and verify more friends to unlock this miner level.":"Пригласите и подтвердите больше друзей, чтобы открыть этот уровень майнера.","verified":"подтверждено","to go":"осталось","Complete!":"Готово!"},
+ es:{"Upgrade Mining Rig":"Mejorar el equipo de minería","Choose any higher level. Upgrades apply to your next cycle.":"Elige cualquier nivel superior. Las mejoras se aplican a tu próximo ciclo.","How Mining Works":"Cómo funciona la minería","The simple version — no jargon.":"La versión simple, sin tecnicismos.","Hold the lightning button":"Mantén presionado el botón del rayo","Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"Mantén presionado el botón ⚡ durante 2 segundos. Eso es todo: tu equipo se enciende y empieza un ciclo de minería.","Let it run for 2 minutes":"Déjalo funcionar 2 minutos","Each cycle runs for 2 minutes. You can close the app or lock your phone — the server keeps the cycle running and your progress is restored when you return.":"Cada ciclo dura 2 minutos. Puedes cerrar la app o bloquear tu teléfono: el servidor mantiene el ciclo activo y tu progreso se restaura cuando vuelvas.","Claim your Luck Tickets":"Reclama tus Tickets de Suerte","When the 2-minute cycle finishes, it counts as one successful cycle. Resume mining until you complete 10 successful cycles, then your Luck Tickets unlock for claiming.":"Cuando el ciclo de 2 minutos termina, cuenta como un ciclo exitoso. Sigue minando hasta completar 10 ciclos exitosos; entonces podrás reclamar tus Tickets de Suerte.","Upgrade for bigger rewards":"Mejora para obtener mayores recompensas","Invite verified friends to unlock higher miner levels. Level 2 starts at 20 verified referrals, and higher levels require more referrals and unlock larger Luck Ticket ranges.":"Invita amigos verificados para desbloquear niveles superiores. El nivel 2 requiere 20 referidos verificados, y los niveles más altos requieren más referidos y desbloquean mayores rangos de Tickets de Suerte.","Don't show this again":"No volver a mostrar","Got it":"Entendido","Tickets Claimed!":"¡Tickets reclamados!","🎫 Luck Tickets":"🎫 Tickets de Suerte","Added to your Luck Ticket balance. Complete another 10 successful cycles to unlock your next claim.":"Añadido a tu saldo de Tickets de Suerte. Completa otros 10 ciclos exitosos para desbloquear tu próximo reclamo.","⛏️ Upgrade to get higher Luck Tickets":"⛏️ Mejora para obtener más Tickets de Suerte","Nice, continue":"Genial, continuar","More referrals needed":"Se necesitan más referidos","You need more verified referrals to unlock this miner level.":"Necesitas más referidos verificados para desbloquear este nivel de minero.","👥 Invite More":"👥 Invitar más","Maybe later":"Quizás después","LEVEL":"NIVEL","UNLOCK":"DESBLOQUEAR","REACH LEVEL":"ALCANZA EL NIVEL","FIRST":"PRIMERO","Next up":"Siguiente","Unlock requirement:":"Requisito de desbloqueo:","Reward per cycle:":"Recompensa por ciclo:","Free":"Gratis","verified referrals":"referidos verificados","Luck Tickets":"Tickets de Suerte","Start free. Complete 10 × 2-minute cycles to unlock 3 Luck Tickets.":"Empieza gratis. Completa 10 ciclos de 2 minutos para desbloquear 3 Tickets de Suerte.","Invite 20 verified members to unlock 6 Luck Tickets per cycle.":"Invita a 20 miembros verificados para desbloquear 6 Tickets de Suerte por ciclo.","Reach 50 verified referrals to unlock 9 Luck Tickets per cycle.":"Alcanza 50 referidos verificados para desbloquear 9 Tickets de Suerte por ciclo.","Reach 100 verified referrals to unlock 13 Luck Tickets per cycle.":"Alcanza 100 referidos verificados para desbloquear 13 Tickets de Suerte por ciclo.","Reach 300 verified referrals to unlock 22 Luck Tickets per cycle.":"Alcanza 300 referidos verificados para desbloquear 22 Tickets de Suerte por ciclo.","Reach 500 verified referrals to unlock 30 Luck Tickets per cycle.":"Alcanza 500 referidos verificados para desbloquear 30 Tickets de Suerte por ciclo.","Invite and verify more friends to unlock Level":"Invita y verifica a más amigos para desbloquear el nivel","Invite and verify more friends to unlock this miner level.":"Invita y verifica a más amigos para desbloquear este nivel de minero.","verified":"verificado","to go":"restantes","Complete!":"¡Completo!"},
+ hi:{"Upgrade Mining Rig":"माइनिंग रिग अपग्रेड करें","Choose any higher level. Upgrades apply to your next cycle.":"कोई भी उच्च लेवल चुनें। अपग्रेड आपके अगले चक्र से लागू होगा।","How Mining Works":"माइनिंग कैसे काम करती है","The simple version — no jargon.":"आसान भाषा में — कोई तकनीकी शब्द नहीं।","Hold the lightning button":"बिजली बटन दबाकर रखें","Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"⚡ बटन को 2 सेकंड तक दबाकर रखें। बस — आपका रिग चालू होकर माइनिंग चक्र शुरू कर देगा।","Let it run for 2 minutes":"इसे 2 मिनट तक चलने दें","Each cycle runs for 2 minutes. You can close the app or lock your phone — the server keeps the cycle running and your progress is restored when you return.":"हर चक्र 2 मिनट तक चलता है। आप ऐप बंद कर सकते हैं या फोन लॉक कर सकते हैं — सर्वर चक्र जारी रखता है और वापस आने पर आपकी प्रगति बहाल हो जाती है।","Claim your Luck Tickets":"अपने लक टिकट क्लेम करें","When the 2-minute cycle finishes, it counts as one successful cycle. Resume mining until you complete 10 successful cycles, then your Luck Tickets unlock for claiming.":"जब 2 मिनट का चक्र पूरा होता है, तो वह एक सफल चक्र माना जाता है। 10 सफल चक्र पूरे होने तक माइनिंग जारी रखें, फिर आपके लक टिकट क्लेम के लिए अनलॉक हो जाएंगे।","Upgrade for bigger rewards":"बड़े रिवॉर्ड के लिए अपग्रेड करें","Invite verified friends to unlock higher miner levels. Level 2 starts at 20 verified referrals, and higher levels require more referrals and unlock larger Luck Ticket ranges.":"उच्च माइनर लेवल अनलॉक करने के लिए सत्यापित दोस्तों को आमंत्रित करें। लेवल 2 के लिए 20 सत्यापित रेफरल चाहिए, और उच्च लेवल के लिए अधिक रेफरल चाहिए जो अधिक लक टिकट देते हैं।","Don't show this again":"दोबारा न दिखाएं","Got it":"समझ गया","Tickets Claimed!":"टिकट मिल गए!","🎫 Luck Tickets":"🎫 लक टिकट","Added to your Luck Ticket balance. Complete another 10 successful cycles to unlock your next claim.":"आपके लक टिकट बैलेंस में जोड़ दिया गया है। अगला क्लेम अनलॉक करने के लिए 10 और सफल चक्र पूरे करें।","⛏️ Upgrade to get higher Luck Tickets":"⛏️ अधिक लक टिकट पाने के लिए अपग्रेड करें","Nice, continue":"बढ़िया, जारी रखें","More referrals needed":"और रेफरल चाहिए","You need more verified referrals to unlock this miner level.":"इस माइनर लेवल को अनलॉक करने के लिए आपको और सत्यापित रेफरल चाहिए।","👥 Invite More":"👥 और आमंत्रित करें","Maybe later":"शायद बाद में","LEVEL":"लेवल","UNLOCK":"अनलॉक करें","REACH LEVEL":"लेवल तक पहुँचें","FIRST":"पहले","Next up":"अगला","Unlock requirement:":"अनलॉक की शर्त:","Reward per cycle:":"प्रति चक्र रिवॉर्ड:","Free":"मुफ़्त","verified referrals":"सत्यापित रेफरल","Luck Tickets":"लक टिकट","Start free. Complete 10 × 2-minute cycles to unlock 3 Luck Tickets.":"मुफ़्त शुरुआत करें। 3 लक टिकट पाने के लिए 10 × 2-मिनट के चक्र पूरे करें।","Invite 20 verified members to unlock 6 Luck Tickets per cycle.":"प्रति चक्र 6 लक टिकट पाने के लिए 20 सत्यापित सदस्यों को आमंत्रित करें।","Reach 50 verified referrals to unlock 9 Luck Tickets per cycle.":"प्रति चक्र 9 लक टिकट पाने के लिए 50 सत्यापित रेफरल तक पहुँचें।","Reach 100 verified referrals to unlock 13 Luck Tickets per cycle.":"प्रति चक्र 13 लक टिकट पाने के लिए 100 सत्यापित रेफरल तक पहुँचें।","Reach 300 verified referrals to unlock 22 Luck Tickets per cycle.":"प्रति चक्र 22 लक टिकट पाने के लिए 300 सत्यापित रेफरल तक पहुँचें।","Reach 500 verified referrals to unlock 30 Luck Tickets per cycle.":"प्रति चक्र 30 लक टिकट पाने के लिए 500 सत्यापित रेफरल तक पहुँचें।","Invite and verify more friends to unlock Level":"लेवल अनलॉक करने के लिए और दोस्तों को आमंत्रित व सत्यापित करें","Invite and verify more friends to unlock this miner level.":"इस माइनर लेवल को अनलॉक करने के लिए और दोस्तों को आमंत्रित करें और सत्यापित करें।","verified":"सत्यापित","to go":"शेष","Complete!":"पूरा!"},
+ ar:{"Upgrade Mining Rig":"ترقية جهاز التعدين","Choose any higher level. Upgrades apply to your next cycle.":"اختر أي مستوى أعلى. تُطبَّق الترقية على دورتك التالية.","How Mining Works":"كيف يعمل التعدين","The simple version — no jargon.":"النسخة المبسطة — بدون مصطلحات معقدة.","Hold the lightning button":"اضغط مطولًا على زر البرق","Press and hold the ⚡ button for 2 seconds. That's it — your rig switches on and starts a mining cycle.":"اضغط مطولًا على زر ⚡ لمدة ثانيتين. هذا كل شيء — سيعمل جهازك ويبدأ دورة تعدين.","Let it run for 2 minutes":"دعه يعمل لمدة دقيقتين","Each cycle runs for 2 minutes. You can close the app or lock your phone — the server keeps the cycle running and your progress is restored when you return.":"تستمر كل دورة لمدة دقيقتين. يمكنك إغلاق التطبيق أو قفل هاتفك — يواصل الخادم الدورة ويُستعاد تقدمك عند عودتك.","Claim your Luck Tickets":"استلم تذاكر حظك","When the 2-minute cycle finishes, it counts as one successful cycle. Resume mining until you complete 10 successful cycles, then your Luck Tickets unlock for claiming.":"عند انتهاء دورة الدقيقتين، تُحتسب كدورة ناجحة. واصل التعدين حتى تكمل 10 دورات ناجحة، عندها تُفتح تذاكر الحظ للاستلام.","Upgrade for bigger rewards":"رقِّ للحصول على مكافآت أكبر","Invite verified friends to unlock higher miner levels. Level 2 starts at 20 verified referrals, and higher levels require more referrals and unlock larger Luck Ticket ranges.":"ادعُ أصدقاء موثقين لفتح مستويات تعدين أعلى. يبدأ المستوى 2 بـ 20 إحالة موثقة، وتتطلب المستويات الأعلى المزيد من الإحالات وتفتح نطاقات أكبر من تذاكر الحظ.","Don't show this again":"عدم الإظهار مرة أخرى","Got it":"فهمت","Tickets Claimed!":"تم استلام التذاكر!","🎫 Luck Tickets":"🎫 تذاكر حظ","Added to your Luck Ticket balance. Complete another 10 successful cycles to unlock your next claim.":"تمت إضافتها إلى رصيد تذاكر حظك. أكمل 10 دورات ناجحة أخرى لفتح استلامك التالي.","⛏️ Upgrade to get higher Luck Tickets":"⛏️ رقِّ للحصول على تذاكر حظ أكبر","Nice, continue":"رائع، متابعة","More referrals needed":"مطلوب المزيد من الإحالات","You need more verified referrals to unlock this miner level.":"تحتاج إلى المزيد من الإحالات الموثقة لفتح مستوى التعدين هذا.","👥 Invite More":"👥 ادعُ المزيد","Maybe later":"ربما لاحقًا","LEVEL":"المستوى","UNLOCK":"افتح","REACH LEVEL":"الوصول إلى المستوى","FIRST":"أولاً","Next up":"التالي","Unlock requirement:":"شرط الفتح:","Reward per cycle:":"المكافأة لكل دورة:","Free":"مجانًا","verified referrals":"إحالة موثقة","Luck Tickets":"تذكرة حظ","Start free. Complete 10 × 2-minute cycles to unlock 3 Luck Tickets.":"ابدأ مجانًا. أكمل 10 دورات من دقيقتين لفتح 3 تذاكر حظ.","Invite 20 verified members to unlock 6 Luck Tickets per cycle.":"ادعُ 20 عضوًا موثقًا لفتح 6 تذاكر حظ لكل دورة.","Reach 50 verified referrals to unlock 9 Luck Tickets per cycle.":"اوصل إلى 50 إحالة موثقة لفتح 9 تذاكر حظ لكل دورة.","Reach 100 verified referrals to unlock 13 Luck Tickets per cycle.":"اوصل إلى 100 إحالة موثقة لفتح 13 تذكرة حظ لكل دورة.","Reach 300 verified referrals to unlock 22 Luck Tickets per cycle.":"اوصل إلى 300 إحالة موثقة لفتح 22 تذكرة حظ لكل دورة.","Reach 500 verified referrals to unlock 30 Luck Tickets per cycle.":"اوصل إلى 500 إحالة موثقة لفتح 30 تذكرة حظ لكل دورة.","Invite and verify more friends to unlock Level":"ادعُ ووثّق المزيد من الأصدقاء لفتح المستوى","Invite and verify more friends to unlock this miner level.":"ادعُ ووثّق المزيد من الأصدقاء لفتح مستوى التعدين هذا.","verified":"موثّق","to go":"متبقٍ","Complete!":"مكتمل!"}
+};
+Object.keys(PAYME_DASH_MINER_I18N_2).forEach(l=>Object.assign(PAYME_DASH_I18N[l]||{},PAYME_DASH_MINER_I18N_2[l]));
 let paymeDashboardLanguage='en';
 function dashboardLocale(){return {en:'en-US',ru:'ru-RU',es:'es-ES',hi:'hi-IN',ar:'ar-SA'}[paymeDashboardLanguage]||'en-US';}
 function dashboardT(k){
@@ -3684,6 +3724,7 @@ function applyDashboardLanguage(lang){
   translateDashboardText(document.body);
   if(typeof renderDashboardTutorialStep==='function'&&typeof dashboardTutorialOpen!=='undefined'&&dashboardTutorialOpen)renderDashboardTutorialStep();
   if(typeof renderDailyGrid==='function'&&document.getElementById('dailyGrid')?.children.length)renderDailyGrid();
+  if(document.getElementById('miningUpgradeModal')?.classList.contains('active')&&typeof window.__paymeRebuildUpgradeList==='function')window.__paymeRebuildUpgradeList();
 }
 const paymeLanguageObserver=new MutationObserver(ms=>{if(paymeDashboardLanguage==='en')return;ms.forEach(m=>{if(m.type==='characterData'||m.addedNodes?.length)translateDashboardText(m.target.nodeType===1?m.target:m.target.parentElement);});});
 paymeLanguageObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
@@ -3787,6 +3828,31 @@ setTimeout(()=>translateDashboardText(document.body),0);
   </div>
 </div>
 
+<!-- REFERRALS REQUIRED — shown instead of the plain toast when an
+     upgrade attempt doesn't have enough verified referrals yet. Shows
+     exactly where the user stands and gives a direct path to invite. -->
+<div class="mining-modal modal-center" id="miningReferralModal" aria-hidden="true">
+  <div class="mining-modal-card" role="dialog" aria-modal="true" aria-labelledby="miningReferralTitle" style="max-width:370px;text-align:center">
+    <div class="mining-modal-glow" aria-hidden="true"></div>
+    <div class="claim-modal-icon-wrap">
+      <div class="claim-modal-icon">🔒</div>
+    </div>
+    <h3 id="miningReferralTitle" class="claim-modal-title">More referrals needed</h3>
+    <p class="claim-modal-sub" id="miningReferralMessage">You need more verified referrals to unlock this miner level.</p>
+    <div class="referral-req-progress">
+      <div class="referral-req-progress-top">
+        <span id="miningReferralCountText">0 / 0</span>
+        <span id="miningReferralRemainingText">0 to go</span>
+      </div>
+      <div class="referral-req-progress-bar"><i id="miningReferralProgressBar"></i></div>
+    </div>
+    <div class="claim-modal-actions">
+      <button class="claim-btn upgrade-cta" id="miningReferralInviteBtn" type="button">👥 Invite More</button>
+      <button class="claim-btn dismiss" id="miningReferralDismiss" type="button">Maybe later</button>
+    </div>
+  </div>
+</div>
+
 <div class="mining-toast" id="miningToast" role="status" aria-live="polite"></div>
 
 
@@ -3842,7 +3908,14 @@ setTimeout(()=>translateDashboardText(document.body),0);
     claimSub: document.getElementById('claimSub'),
     claimUpgradeCta: document.getElementById('claimUpgradeCta'),
     claimDismiss: document.getElementById('claimDismiss'),
-    claimConfetti: document.getElementById('claimConfetti')
+    claimConfetti: document.getElementById('claimConfetti'),
+    referralModal: document.getElementById('miningReferralModal'),
+    referralMessage: document.getElementById('miningReferralMessage'),
+    referralCountText: document.getElementById('miningReferralCountText'),
+    referralRemainingText: document.getElementById('miningReferralRemainingText'),
+    referralProgressBar: document.getElementById('miningReferralProgressBar'),
+    referralInviteBtn: document.getElementById('miningReferralInviteBtn'),
+    referralDismiss: document.getElementById('miningReferralDismiss')
   };
 
   if(!els.rig) return;
@@ -4121,20 +4194,24 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
   function buildLevelStrip(current){
     if(!els.levelStrip) return;
-    els.levelStrip.innerHTML='';
+    const frag=document.createDocumentFragment();
     for(let level=1;level<=6;level++){
       const seg=document.createElement('div');
       seg.className='level-progress-seg' + (level<=current?' filled':'');
       seg.innerHTML='<i></i>';
-      els.levelStrip.appendChild(seg);
+      frag.appendChild(seg);
     }
+    els.levelStrip.innerHTML='';
+    els.levelStrip.appendChild(frag);
   }
 
   function buildUpgradeList(){
     const current=Number(state?.level)||1;
     buildLevelStrip(current);
     const nextLevel = current < 6 ? current+1 : null;
-    els.levelList.innerHTML='';
+    const frag=document.createDocumentFragment();
+    const levelWord=dashboardT('LEVEL');
+    const freeWord=dashboardT('FREE');
     for(let level=1;level<=6;level++){
       const m=levelMeta[level];
       const isNext = level === nextLevel;
@@ -4143,33 +4220,45 @@ setTimeout(()=>translateDashboardText(document.body),0);
       card.dataset.level=String(level);
       const canUpgrade=isNext && !['mining','completed'].includes(String(state?.status||''));
       const buttonText=level===current
-        ?'CURRENT LEVEL'
-        :isNext?'UNLOCK LEVEL '+level
-        :level>current?'LOCKED — REACH LEVEL '+(level-1)+' FIRST'
-        :'LOCKED';
+        ?dashboardT('CURRENT LEVEL')
+        :isNext?`${dashboardT('UNLOCK')} ${levelWord} ${level}`
+        :level>current?`${dashboardT('LOCKED')} — ${dashboardT('REACH LEVEL')} ${level-1} ${dashboardT('FIRST')}`
+        :dashboardT('LOCKED');
       card.innerHTML=`
         <div class="miner-level-top">
           <span class="miner-level-name">
             <span class="miner-level-badge">${levelBadge[level]||'⚡'}</span>
-            LEVEL ${level}${level===1?' — FREE':''}${isNext?'<span class="recommended-chip">Next up</span>':''}
+            ${levelWord} ${level}${level===1?' — '+freeWord:''}${isNext?`<span class="recommended-chip">${dashboardT('Next up')}</span>`:''}
           </span>
-          <span class="miner-level-cost">${level===1?'FREE':m.referrals.toLocaleString()+' REFERRALS'}</span>
+          <span class="miner-level-cost">${level===1?freeWord:m.referrals.toLocaleString()+' '+dashboardT('REFERRALS')}</span>
         </div>
-        <p class="miner-level-tagline">${m.tagline}</p>
-        <div class="miner-level-reward">Unlock requirement: <strong>${level===1?'Free':m.referrals.toLocaleString()+' verified referrals'}</strong><br>Reward per cycle: <strong>${rewardRange(level)} Luck Tickets</strong></div>
+        <p class="miner-level-tagline">${dashboardT(m.tagline)}</p>
+        <div class="miner-level-reward">${dashboardT('Unlock requirement:')} <strong>${level===1?dashboardT('Free'):m.referrals.toLocaleString()+' '+dashboardT('verified referrals')}</strong><br>${dashboardT('Reward per cycle:')} <strong>${rewardRange(level)} ${dashboardT('Luck Tickets')}</strong></div>
         <button class="miner-upgrade-choice" type="button" ${canUpgrade?'':'disabled'} data-level="${level}">${buttonText}</button>`;
-      els.levelList.appendChild(card);
+      frag.appendChild(card);
     }
-    els.levelList.querySelectorAll('[data-level]').forEach(btn=>{
-      if(btn.tagName==='BUTTON') btn.addEventListener('click',()=>upgradeMiner(Number(btn.dataset.level)));
-    });
+    els.levelList.innerHTML='';
+    els.levelList.appendChild(frag);
   }
 
+  // Delegated once, outside the (re)build function, so re-opening or
+  // refreshing the list never re-attaches listeners or re-walks the DOM.
+  if(els.levelList){
+    els.levelList.addEventListener('click',e=>{
+      const btn=e.target.closest('button[data-level]');
+      if(btn && !btn.disabled) upgradeMiner(Number(btn.dataset.level));
+    });
+  }
+  window.__paymeRebuildUpgradeList=buildUpgradeList;
+
   function openUpgrade(){
-    buildUpgradeList();
+    // Show + start the entrance transition immediately; build the (heavier)
+    // card list one frame later so constructing/inserting six cards never
+    // blocks the first, most-visible frame of the popup's own animation.
     els.modal.classList.add('active');
     els.modal.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
+    requestAnimationFrame(buildUpgradeList);
   }
 
   function closeUpgrade(){
@@ -4224,6 +4313,39 @@ setTimeout(()=>translateDashboardText(document.body),0);
   function closeClaimResult(){
     els.claimModal.classList.remove('active');
     els.claimModal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
+  }
+
+  // Shown instead of a plain toast when an upgrade attempt is short on
+  // verified referrals — gives the exact count, a progress bar, and a
+  // direct way to go invite more friends.
+  function openReferralModal(data){
+    const current = Number(data?.currentReferrals) || 0;
+    const required = Math.max(1, Number(data?.requiredReferrals) || 1);
+    const remaining = Math.max(0, Number(data?.referralsRemaining ?? (required - current)));
+    const pct = Math.max(0, Math.min(100, (current / required) * 100));
+    const level = data?.level;
+
+    if(els.referralMessage){
+      els.referralMessage.textContent = data?.message ||
+        (level
+          ? `${dashboardT('Invite and verify more friends to unlock Level')} ${level}.`
+          : dashboardT('Invite and verify more friends to unlock this miner level.'));
+    }
+    if(els.referralCountText) els.referralCountText.textContent = `${current.toLocaleString()} / ${required.toLocaleString()} ${dashboardT('verified')}`;
+    if(els.referralRemainingText) els.referralRemainingText.textContent = remaining>0 ? `${remaining.toLocaleString()} ${dashboardT('to go')}` : dashboardT('Complete!');
+    if(els.referralProgressBar) els.referralProgressBar.style.width = pct + '%';
+
+    if(!els.referralModal) return;
+    els.referralModal.classList.add('active');
+    els.referralModal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+  }
+
+  function closeReferralModal(){
+    if(!els.referralModal) return;
+    els.referralModal.classList.remove('active');
+    els.referralModal.setAttribute('aria-hidden','true');
     document.body.classList.remove('modal-open');
   }
 
@@ -4304,7 +4426,8 @@ setTimeout(()=>translateDashboardText(document.body),0);
       showToast('Miner upgraded',`Your rig is now Level ${level}.`);
     }catch(err){
       if(err.code==='REFERRALS_REQUIRED'){
-        showToast('More referrals needed',err.message||'Invite and verify more friends to unlock this miner level.');
+        closeUpgrade();
+        openReferralModal(err);
       }else{
         showToast('Upgrade unavailable',err.message||'Please try again.');
       }
@@ -4402,9 +4525,22 @@ setTimeout(()=>translateDashboardText(document.body),0);
     openUpgrade();
   });
 
+  if(els.referralDismiss) els.referralDismiss.addEventListener('click',closeReferralModal);
+  if(els.referralModal) els.referralModal.addEventListener('click',e=>{if(e.target===els.referralModal) closeReferralModal();});
+  if(els.referralInviteBtn) els.referralInviteBtn.addEventListener('click',()=>{
+    closeReferralModal();
+    const target=document.getElementById('referrals');
+    if(target && typeof target.scrollIntoView==='function'){
+      target.scrollIntoView({behavior:'smooth',block:'start'});
+    }else{
+      window.location.hash='referrals';
+    }
+  });
+
   document.addEventListener('keydown',e=>{
     if(e.key!=='Escape') return;
     if(els.claimModal?.classList.contains('active')) closeClaimResult();
+    else if(els.referralModal?.classList.contains('active')) closeReferralModal();
     else if(els.howModal?.classList.contains('active')) closeHow();
     else closeUpgrade();
   });
@@ -4437,6 +4573,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 </script>
 </body>
 </html>
+
 
 
 
