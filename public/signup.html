@@ -69,8 +69,23 @@ async function authenticate(language){
     setTimeout(()=>{window.location.replace('/dashboard.html')},650);
   }catch(err){console.error(err);setText('Unable to sign in',err.message||'Please reopen PAYME and try again.');setTimeout(()=>authenticate(language||''),1800)}
 }
+function isLocalHost(){try{return /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(location.hostname)}catch(e){return false}}
 function boot(){
-  if(!tg||!tg.initData){setText('Open PAYME from Telegram','This secure sign-in page needs Telegram Web App authentication.');return}
+  if(!tg||!tg.initData){
+    // No real Telegram session (e.g. opened directly in a browser on Termux
+    // instead of through the bot). On localhost this is expected during dev,
+    // so fall through to the server's local-test bypass instead of dead-ending
+    // here. This path never fires on a real deployed host.
+    if(isLocalHost()){
+      console.warn('[PAYME] No Telegram WebApp context — using local dev bypass.');
+      setText('Local test mode','No Telegram session detected — signing in as the local dev tester.');
+      initData='local_test';
+      authenticate('');
+      return;
+    }
+    setText('Open PAYME from Telegram','This secure sign-in page needs Telegram Web App authentication.');
+    return;
+  }
   initData=tg.initData;
   // Always authenticate immediately. New users receive a language prompt only after
   // the server confirms that a language is required; returning users go straight in.
@@ -82,4 +97,5 @@ boot();
 </script>
 </body>
 </html>
+
 
