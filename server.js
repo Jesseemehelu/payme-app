@@ -2661,77 +2661,100 @@ app.post('/api/luck-mining/start', requireLoginMiningCore, async (req, res) => {
       const resolved = await finalizeLuckMiningIfDue(user, true);
       user = resolved.user;
 
-      const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
-        ? user.dailyReward
-        : {};
-      const oldDaily = JSON.parse(JSON.stringify(rawDaily));
-      const daily = normalizeDailyReward(user);
-      const mining = daily.luckMining;
-      const now = Date.now();
+      // Retry once with a truly fresh DB read if the CAS below misses.
+      // finalizeLuckMiningIfDue() calls normalizeDailyReward(), which
+      // mutates user.dailyReward IN PLACE to backfill fields that may not
+      // exist yet on the row (luckMining/milestones/chestOpensTotal — e.g.
+      // brand-new accounts, or any legacy row from before those fields
+      // existed). That backfill never gets persisted here, so the very
+      // next line's "oldDaily" snapshot can end up richer than what is
+      // actually stored in Supabase, and the CAS below would then always
+      // miss — surfacing a false MINING_STATE_CHANGED on literally the
+      // first activation attempt. Re-reading the row fresh (bypassing the
+      // already-mutated in-memory object) fixes the snapshot and lets the
+      // CAS match. Mirrors the same retry already used in /claim.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
+          ? user.dailyReward
+          : {};
+        const oldDaily = JSON.parse(JSON.stringify(rawDaily));
+        const daily = normalizeDailyReward(user);
+        const mining = daily.luckMining;
+        const now = Date.now();
 
-      if (mining.status === 'mining') {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'MINING_ACTIVE',
-            message: 'Your mining rig is already active.'
-          }
-        };
-      }
-
-      if (mining.status === 'completed' || Number(mining.successfulCycles) >= 10) {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'READY_TO_CLAIM',
-            message: 'You completed 10 mining cycles. Claim your Luck Tickets before starting again.'
-          }
-        };
-      }
-
-      const holdMs = Math.max(0, Math.min(10000, number(req.body?.holdMs)));
-      if (holdMs < LUCK_MINING_CONFIG.holdMs) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            code: 'HOLD_REQUIRED',
-            message: 'Hold the mining button continuously for 2 seconds.'
-          }
-        };
-      }
-
-      const cycleId = generateTransactionId('luck_mining');
-      mining.status = 'mining';
-      mining.startAt = new Date(now).toISOString();
-      mining.completeAt = new Date(now + LUCK_MINING_CONFIG.cycleMs).toISOString();
-      mining.reward = null;
-      mining.cycleId = cycleId;
-      mining.notifiedComplete = false;
-      user.dailyReward = daily;
-
-      const committed = await commitLuckMiningCAS(user, oldDaily, daily);
-      if (!committed) {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            code: 'MINING_STATE_CHANGED',
-            message: 'Your mining state changed. Please reload and try again.'
-          }
-        };
-      }
-
-      return {
-        status: 200,
-        body: {
-          success: true,
-          mining: getLuckMiningSnapshot(user, now),
-          serverNow: new Date(now).toISOString()
+        if (mining.status === 'mining') {
+          return {
+            status: 409,
+            body: {
+              success: false,
+              code: 'MINING_ACTIVE',
+              message: 'Your mining rig is already active.'
+            }
+          };
         }
-      };
+
+        if (mining.status === 'completed' || Number(mining.successfulCycles) >= 10) {
+          return {
+            status: 409,
+            body: {
+              success: false,
+              code: 'READY_TO_CLAIM',
+              message: 'You completed 10 mining cycles. Claim your Luck Tickets before starting again.'
+            }
+          };
+        }
+
+        const holdMs = Math.max(0, Math.min(10000, number(req.body?.holdMs)));
+        if (holdMs < LUCK_MINING_CONFIG.holdMs) {
+          return {
+            status: 400,
+            body: {
+              success: false,
+              code: 'HOLD_REQUIRED',
+              message: 'Hold the mining button continuously for 2 seconds.'
+            }
+          };
+        }
+
+        const cycleId = generateTransactionId('luck_mining');
+        mining.status = 'mining';
+        mining.startAt = new Date(now).toISOString();
+        mining.completeAt = new Date(now + LUCK_MINING_CONFIG.cycleMs).toISOString();
+        mining.reward = null;
+        mining.cycleId = cycleId;
+        mining.notifiedComplete = false;
+        user.dailyReward = daily;
+
+        const committed = await commitLuckMiningCAS(user, oldDaily, daily);
+        if (!committed) {
+          if (attempt === 0) {
+            const fresh = await getUserMiningCore(user.id);
+            if (!fresh) throw new Error('User session not found.');
+            user = fresh;
+            continue;
+          }
+
+          return {
+            status: 409,
+            body: {
+              success: false,
+              code: 'MINING_STATE_CHANGED',
+              message: 'Your mining state changed. Please reload and try again.'
+            }
+          };
+        }
+
+        return {
+          status: 200,
+          body: {
+            success: true,
+            mining: getLuckMiningSnapshot(user, now),
+            serverNow: new Date(now).toISOString()
+          }
+        };
+      }
+
+      throw new Error('Mining start retry exhausted.');
     });
 
     return res.status(result.status || 200).json(result.body);
