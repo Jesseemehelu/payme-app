@@ -459,15 +459,15 @@ const LUCK_CHEST_CONFIG = {
 // so this feature does not require a new Supabase table or extra columns.
 // The server is authoritative: the client only renders the timer locally.
 const LUCK_MINING_CONFIG = {
-  cycleMs: 30 * 60 * 1000,
+  cycleMs: 2 * 60 * 1000,
   holdMs: 2000,
   levels: {
-    1: { cost: 0, referrals: 0, min: 1, max: 2, label: 'Free' },
-    2: { cost: 0, referrals: 20, min: 3, max: 4, label: '20 Referrals' },
-    3: { cost: 0, referrals: 50, min: 5, max: 8, label: '50 Referrals' },
-    4: { cost: 0, referrals: 100, min: 9, max: 13, label: '100 Referrals' },
-    5: { cost: 0, referrals: 300, min: 20, max: 25, label: '300 Referrals' },
-    6: { cost: 0, referrals: 500, min: 26, max: 35, label: '500 Referrals' }
+    1: { cost: 0, referrals: 0, min: 3, max: 3, label: 'Free' },
+    2: { cost: 0, referrals: 20, min: 6, max: 6, label: '20 Referrals' },
+    3: { cost: 0, referrals: 50, min: 9, max: 9, label: '50 Referrals' },
+    4: { cost: 0, referrals: 100, min: 13, max: 13, label: '100 Referrals' },
+    5: { cost: 0, referrals: 300, min: 22, max: 22, label: '300 Referrals' },
+    6: { cost: 0, referrals: 500, min: 30, max: 30, label: '500 Referrals' }
   }
 };
 
@@ -480,11 +480,15 @@ const LUCK_MINING_CONFIG = {
 // chat. The "1 day since login" reminder and the mining-complete flag both
 // live inside the same daily_reward JSON blob as everything else on this
 // page, so neither needs a new Supabase column.
-const EARN_WEBAPP_URL = 'https://t.me/paymeoobot/earn?startapp=WF6R1R';
-const INACTIVITY_REMINDER_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 1 day since last login
-const INACTIVITY_REMINDER_REPEAT_MS = 24 * 60 * 60 * 1000; // don't re-ping more than once/day
-const INACTIVITY_SWEEP_INTERVAL_MS = 30 * 60 * 1000; // check every 30 minutes
-const MINING_SWEEP_INTERVAL_MS = 60 * 1000; // check every 60 seconds (cycle is 30 min)
+//
+// Inactivity reminder cadence: every 2 hours, anyone who hasn't logged in
+// during the preceding 2 hours gets DM'd once (capped at one ping per 2h
+// window via lastInactivityReminderAt) with a button back into the app.
+const EARN_WEBAPP_URL = 'https://t.me/paymeoobot/earn?startapp';
+const INACTIVITY_REMINDER_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours since last login
+const INACTIVITY_REMINDER_REPEAT_MS = 2 * 60 * 60 * 1000; // don't re-ping more than once per 2h window
+const INACTIVITY_SWEEP_INTERVAL_MS = 2 * 60 * 60 * 1000; // check every 2 hours
+const MINING_SWEEP_INTERVAL_MS = 60 * 1000; // check every 60 seconds (cycle is 2 min)
 const REMINDER_SWEEP_PAGE_SIZE = 500;
 
 // Per-user in-process mutex. This is deliberately short-lived and only
@@ -531,10 +535,32 @@ function normalizeLuckMining(daily) {
   }
 
   const startAt = String(source.startAt || '');
-  const completeAt = String(source.completeAt || '');
+  let completeAt = String(source.completeAt || '');
   const reward = source.reward === null || source.reward === undefined
     ? null
     : Number(source.reward);
+
+  let successfulCycles = Number(source.successfulCycles);
+  if (!Number.isInteger(successfulCycles) || successfulCycles < 0) successfulCycles = 0;
+  successfulCycles = Math.min(10, successfulCycles);
+
+  /*
+   * Mining was previously stored as a 2-minute cycle. New cycles are 2
+   * minutes. If an older active cycle is encountered, migrate its finish
+   * time to the new 2-minute duration so users do not get trapped in the
+   * old 2-minute flow.
+   */
+  if (status === 'mining' && startAt && completeAt) {
+    const startMs = Date.parse(startAt);
+    const completeMs = Date.parse(completeAt);
+    if (
+      Number.isFinite(startMs) &&
+      Number.isFinite(completeMs) &&
+      completeMs - startMs > LUCK_MINING_CONFIG.cycleMs
+    ) {
+      completeAt = new Date(startMs + LUCK_MINING_CONFIG.cycleMs).toISOString();
+    }
+  }
 
   return {
     level,
@@ -544,9 +570,9 @@ function normalizeLuckMining(daily) {
     reward: Number.isFinite(reward) && reward >= 0 ? reward : null,
     cycleId: String(source.cycleId || ''),
     lastClaimAt: Number(source.lastClaimAt) || 0,
+    successfulCycles,
     // Marks that the "mining complete" Telegram DM has already been sent
-    // for the current cycle, so the background sweep never double-sends.
-    // Reset to false whenever a new cycle is started.
+    // for the current 10-cycle run, so the background sweep never double-sends.
     notifiedComplete: !!source.notifiedComplete
   };
 }
@@ -554,15 +580,10 @@ function normalizeLuckMining(daily) {
 function secureMiningReward(level) {
   const cfg = LUCK_MINING_CONFIG.levels[level] || LUCK_MINING_CONFIG.levels[1];
 
-  // Level 1 (the free rig) and Level 3 pay out in single-decimal
-  // increments (e.g. 1.1, 1.7, 4.5) so even a small win still moves the
-  // balance. The other paid levels use whole tickets exactly within
-  // their configured inclusive range.
-  if (level === 1 || level === 3) {
-    const steps = Math.round((cfg.max - cfg.min) * 10);
-    const pick = crypto.randomInt(0, steps + 1);
-    return Number((cfg.min + pick / 10).toFixed(1));
-  }
+  // Mining rewards are configured as exact whole-ticket amounts for each level.
+  // crypto.randomInt is retained here so the server remains the sole authority
+  // for reward selection if a future level is configured with a range.
+  if (cfg.min === cfg.max) return cfg.min;
 
   return crypto.randomInt(
     Math.floor(cfg.min),
@@ -575,13 +596,21 @@ function getLuckMiningSnapshot(user, now = Date.now()) {
   const mining = daily.luckMining;
   let status = mining.status;
   let reward = mining.reward;
+  let successfulCycles = Math.min(10, Math.max(0, Number(mining.successfulCycles) || 0));
 
   if (status === 'mining') {
     const completeAt = Date.parse(mining.completeAt || '');
     if (Number.isFinite(completeAt) && completeAt <= now) {
-      status = 'completed';
-      if (reward === null) {
-        reward = secureMiningReward(mining.level);
+      successfulCycles = Math.min(10, successfulCycles + 1);
+
+      if (successfulCycles >= 10) {
+        status = 'completed';
+        if (reward === null) {
+          reward = secureMiningReward(mining.level);
+        }
+      } else {
+        status = 'offline';
+        reward = null;
       }
     }
   }
@@ -605,6 +634,8 @@ function getLuckMiningSnapshot(user, now = Date.now()) {
     reward,
     cycleId: mining.cycleId || null,
     lastClaimAt: mining.lastClaimAt || 0,
+    successfulCycles,
+    cyclesRequired: 10,
     progress,
     rewardMin: cfg.min,
     rewardMax: cfg.max,
@@ -2558,10 +2589,26 @@ async function finalizeLuckMiningIfDue(user, persist = true) {
     Number.isFinite(completeAt) &&
     completeAt <= now
   ) {
-    mining.status = 'completed';
-    if (mining.reward === null) {
-      mining.reward = secureMiningReward(mining.level);
+    mining.successfulCycles = Math.min(
+      10,
+      (Number(mining.successfulCycles) || 0) + 1
+    );
+
+    mining.startAt = null;
+    mining.completeAt = null;
+    mining.cycleId = '';
+    mining.notifiedComplete = false;
+
+    if (mining.successfulCycles >= 10) {
+      mining.status = 'completed';
+      if (mining.reward === null) {
+        mining.reward = secureMiningReward(mining.level);
+      }
+    } else {
+      mining.status = 'offline';
+      mining.reward = null;
     }
+
     user.dailyReward = daily;
 
     if (persist) {
@@ -2607,7 +2654,13 @@ app.get('/api/luck-mining/state', requireLoginMiningCore, async (req, res) => {
 app.post('/api/luck-mining/start', requireLoginMiningCore, async (req, res) => {
   try {
     const result = await withLuckMiningLock(req.user.id, async () => {
-      const user = req.user;
+      let user = req.user;
+
+      // Finish any due cycle first. This is what advances the 10-cycle
+      // counter even if the user was away when the timer expired.
+      const resolved = await finalizeLuckMiningIfDue(user, true);
+      user = resolved.user;
+
       const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
         ? user.dailyReward
         : {};
@@ -2615,18 +2668,6 @@ app.post('/api/luck-mining/start', requireLoginMiningCore, async (req, res) => {
       const daily = normalizeDailyReward(user);
       const mining = daily.luckMining;
       const now = Date.now();
-
-      // Resolve an already-finished cycle before deciding whether a new
-      // session can start. This prevents starting over an unclaimed cycle.
-      const completeAt = Date.parse(mining.completeAt || '');
-      if (
-        mining.status === 'mining' &&
-        Number.isFinite(completeAt) &&
-        completeAt <= now
-      ) {
-        mining.status = 'completed';
-        if (mining.reward === null) mining.reward = secureMiningReward(mining.level);
-      }
 
       if (mining.status === 'mining') {
         return {
@@ -2639,13 +2680,13 @@ app.post('/api/luck-mining/start', requireLoginMiningCore, async (req, res) => {
         };
       }
 
-      if (mining.status === 'completed') {
+      if (mining.status === 'completed' || Number(mining.successfulCycles) >= 10) {
         return {
           status: 409,
           body: {
             success: false,
             code: 'READY_TO_CLAIM',
-            message: 'Claim your completed Luck Tickets before starting another cycle.'
+            message: 'You completed 10 mining cycles. Claim your Luck Tickets before starting again.'
           }
         };
       }
@@ -2708,6 +2749,10 @@ app.post('/api/luck-mining/claim', requireLoginMiningCore, async (req, res) => {
     const result = await withLuckMiningLock(req.user.id, async () => {
       let user = req.user;
 
+      // Finalize a just-expired cycle before checking the 10-cycle gate.
+      const resolved = await finalizeLuckMiningIfDue(user, true);
+      user = resolved.user;
+
       for (let attempt = 0; attempt < 2; attempt++) {
         const rawDaily = user.dailyReward && typeof user.dailyReward === 'object'
           ? user.dailyReward
@@ -2717,32 +2762,25 @@ app.post('/api/luck-mining/claim', requireLoginMiningCore, async (req, res) => {
         const mining = daily.luckMining;
         const now = Date.now();
 
-        const completeAt = Date.parse(mining.completeAt || '');
         if (mining.status === 'mining') {
-          if (!Number.isFinite(completeAt) || completeAt > now) {
-            return {
-              status: 400,
-              body: {
-                success: false,
-                code: 'NOT_COMPLETE',
-                message: 'Your mining cycle is not complete yet.'
-              }
-            };
-          }
-
-          mining.status = 'completed';
-          if (mining.reward === null) {
-            mining.reward = secureMiningReward(mining.level);
-          }
-        }
-
-        if (mining.status !== 'completed') {
           return {
             status: 400,
             body: {
               success: false,
-              code: 'NOT_READY',
-              message: 'There are no Luck Tickets ready to claim.'
+              code: 'NOT_COMPLETE',
+              message: 'Your current 2-minute mining cycle is not complete yet.'
+            }
+          };
+        }
+
+        if (mining.status !== 'completed' || Number(mining.successfulCycles) < 10) {
+          const done = Math.max(0, Number(mining.successfulCycles) || 0);
+          return {
+            status: 400,
+            body: {
+              success: false,
+              code: 'CYCLES_REQUIRED',
+              message: `Complete ${10 - done} more 2-minute mining cycle${10 - done === 1 ? '' : 's'} before claiming your Luck Tickets.`
             }
           };
         }
@@ -2760,11 +2798,14 @@ app.post('/api/luck-mining/claim', requireLoginMiningCore, async (req, res) => {
         }
 
         daily.luckTickets = number(daily.luckTickets) + reward;
+
         mining.status = 'offline';
         mining.startAt = null;
         mining.completeAt = null;
         mining.lastClaimAt = now;
         mining.reward = null;
+        mining.cycleId = '';
+        mining.successfulCycles = 0;
         mining.notifiedComplete = false;
         user.dailyReward = daily;
 
@@ -2790,7 +2831,7 @@ app.post('/api/luck-mining/claim', requireLoginMiningCore, async (req, res) => {
         await addTransaction(user.id, {
           id: generateTransactionId('tx_luck_mining'),
           type: 'luck_mining_reward',
-          description: `Luck Ticket Mining — Level ${mining.level} cycle ${mining.cycleId || ''}`.trim(),
+          description: `Luck Ticket Mining — Level ${mining.level} — 10 cycle run`,
           amount: reward,
           currency: 'LUCK_TICKETS',
           status: 'completed',
@@ -3583,24 +3624,24 @@ const PAYME_BOT_MESSAGES = {
 
   miningComplete: {
     en: (min, max) =>
-      `⛏️ <b>Mining Complete!</b>\n\n` +
+      `⛏️ <b>Mining completed ⛏️</b>\n\n` +
       `Your Luck Ticket Mining Rig just finished a cycle — ${min}–${max} Luck Tickets🎟️ are ready to claim.\n\n` +
       `Open PAYME to collect your reward and start the next cycle before it sits idle.`,
     ru: (min, max) =>
-      `⛏️ <b>Майнинг завершён!</b>\n\n` +
+      `⛏️ <b>Майнинг завершён ⛏️</b>\n\n` +
       `Ваша майнинг-установка только что завершила цикл — ${min}–${max} билетов удачи🎟️ готовы к получению.\n\n` +
       `Откройте PAYME, чтобы забрать награду и запустить новый цикл, пока он не простаивает.`,
     es: (min, max) =>
-      `⛏️ <b>¡Minería completada!</b>\n\n` +
+      `⛏️ <b>Minería completada ⛏️</b>\n\n` +
       `Tu equipo de minería de Boletos de la Suerte acaba de terminar un ciclo — ${min}–${max} Boletos de la Suerte🎟️ están listos para reclamar.\n\n` +
       `Abre PAYME para recoger tu recompensa e iniciar el siguiente ciclo antes de que quede inactivo.`,
     hi: (min, max) =>
-      `⛏️ <b>माइनिंग पूरी हुई!</b>\n\n` +
+      `⛏️ <b>माइनिंग पूरी हुई ⛏️</b>\n\n` +
       `आपकी माइनिंग रिग ने अभी एक चक्र पूरा किया है — ${min}–${max} Luck Tickets🎟️ लेने के लिए तैयार हैं।\n\n` +
       `अपना इनाम पाने और अगला चक्र शुरू करने के लिए PAYME खोलें, इससे पहले कि यह बेकार पड़ा रहे।`,
     ar: (min, max) =>
-      `⛏️ <b>اكتمل التعدين!</b>\n\n` +
-      `انتهت جهاز تعدين بطاقات الحظ من دورة جديدة — ${min}–${max} بطاقة حظ🎟️ جاهزة للاستلام.\n\n` +
+      `⛏️ <b>اكتمل التعدين ⛏️</b>\n\n` +
+      `انتهى جهاز تعدين بطاقات الحظ من دورة جديدة — ${min}–${max} بطاقة حظ🎟️ جاهزة للاستلام.\n\n` +
       `افتح PAYME لتحصيل مكافأتك وبدء الدورة التالية قبل أن يبقى خاملاً.`
   },
 
@@ -3615,32 +3656,57 @@ const PAYME_BOT_MESSAGES = {
   inactivityReminder: {
     en: () =>
       `👋 <b>We miss you on PAYME!</b>\n\n` +
-      `It's been a day since you last logged in. Your Luck Tickets, mining rig, daily rewards, and referral earnings are all still waiting for you.\n\n` +
+      `It's been 2 hours since you last logged in — log in now to claim your rewards and much more:\n\n` +
+      `⛏️ Mining rig payouts\n` +
+      `🎁 Daily login rewards\n` +
+      `🎟️ Luck Tickets\n` +
+      `🕹️ Tap Rush leaderboard prizes\n` +
+      `👥 Referral earnings\n\n` +
       `Tap below to jump back in. 💎`,
     ru: () =>
       `👋 <b>Мы скучаем по вам на PAYME!</b>\n\n` +
-      `Прошли сутки с вашего последнего входа. Ваши билеты удачи, майнинг-установка, ежедневные награды и реферальный доход всё ещё ждут вас.\n\n` +
+      `Прошло 2 часа с вашего последнего входа — зайдите сейчас, чтобы забрать награды и не только:\n\n` +
+      `⛏️ Выплаты с майнинг-установки\n` +
+      `🎁 Ежедневные награды за вход\n` +
+      `🎟️ Билеты удачи\n` +
+      `🕹️ Призы рейтинга Tap Rush\n` +
+      `👥 Реферальный доход\n\n` +
       `Нажмите ниже, чтобы вернуться. 💎`,
     es: () =>
       `👋 <b>¡Te extrañamos en PAYME!</b>\n\n` +
-      `Ha pasado un día desde tu último inicio de sesión. Tus Boletos de la Suerte, tu equipo de minería, las recompensas diarias y las ganancias por referidos siguen esperándote.\n\n` +
+      `Han pasado 2 horas desde tu último inicio de sesión — entra ahora para reclamar tus recompensas y mucho más:\n\n` +
+      `⛏️ Pagos del equipo de minería\n` +
+      `🎁 Recompensas diarias por iniciar sesión\n` +
+      `🎟️ Boletos de la Suerte\n` +
+      `🕹️ Premios del ranking de Tap Rush\n` +
+      `👥 Ganancias por referidos\n\n` +
       `Toca abajo para volver. 💎`,
     hi: () =>
       `👋 <b>हमें PAYME पर आपकी कमी खल रही है!</b>\n\n` +
-      `आपको लॉग इन किए एक दिन हो गया है। आपके Luck Tickets, माइनिंग रिग, दैनिक इनाम और रेफ़रल कमाई अभी भी आपका इंतज़ार कर रहे हैं।\n\n` +
+      `आपको लॉग इन किए 2 घंटे हो गए हैं — अभी लॉग इन करें और अपने इनाम व और भी बहुत कुछ पाएं:\n\n` +
+      `⛏️ माइनिंग रिग का भुगतान\n` +
+      `🎁 दैनिक लॉगिन इनाम\n` +
+      `🎟️ Luck Tickets\n` +
+      `🕹️ Tap Rush लीडरबोर्ड इनाम\n` +
+      `👥 रेफ़रल कमाई\n\n` +
       `वापस आने के लिए नीचे टैप करें। 💎`,
     ar: () =>
       `👋 <b>اشتقنا إليك في PAYME!</b>\n\n` +
-      `مرّ يوم منذ آخر تسجيل دخول لك. بطاقات الحظ، جهاز التعدين، المكافآت اليومية وأرباح الإحالة لا تزال بانتظارك.\n\n` +
+      `مرّت ساعتان منذ آخر تسجيل دخول لك — سجّل الدخول الآن لتحصيل مكافآتك وأكثر من ذلك بكثير:\n\n` +
+      `⛏️ أرباح جهاز التعدين\n` +
+      `🎁 مكافآت الدخول اليومية\n` +
+      `🎟️ بطاقات الحظ\n` +
+      `🕹️ جوائز لوحة صدارة Tap Rush\n` +
+      `👥 أرباح الإحالة\n\n` +
       `اضغط أدناه للعودة. 💎`
   },
 
   inactivityReminderButton: {
-    en: '🚀 Open PAYME',
-    ru: '🚀 Открыть PAYME',
-    es: '🚀 Abrir PAYME',
-    hi: '🚀 PAYME खोलें',
-    ar: '🚀 افتح PAYME'
+    en: '🚀 Login & Claim',
+    ru: '🚀 Войти и забрать',
+    es: '🚀 Entrar y reclamar',
+    hi: '🚀 लॉगिन करें और लें',
+    ar: '🚀 دخول واستلام'
   }
 
 };
@@ -3843,9 +3909,9 @@ setInterval(
 // ------------------------------------------------------------------
 // INACTIVITY REMINDER SWEEP
 // ------------------------------------------------------------------
-// Every INACTIVITY_SWEEP_INTERVAL_MS, DM anyone who hasn't opened the Mini
-// App (i.e. hit /api/auth/telegram-signup) in over a day, pointing them
-// back to the earn page. Re-pinging is capped at once per
+// Every INACTIVITY_SWEEP_INTERVAL_MS (2 hours), DM anyone who hasn't opened
+// the Mini App (i.e. hit /api/auth/telegram-signup) in over 2 hours,
+// pointing them back to the earn page. Re-pinging is capped at once per
 // INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt.
 //
 // EGRESS: lastLoginAt/lastInactivityReminderAt are stored as epoch-ms

@@ -762,26 +762,57 @@ header{
 .mining-toast span{color:#c3cbe6}
 .toast-action{margin-top:8px;padding:8px 12px;border-radius:9px;background:#22e0ff;color:#0c1430;font-weight:900;font-size:.7rem}
 
+/* ===== DASHBOARD CONVERT TICKETS CTA ===== */
+.dashboard-convert-card{position:relative;overflow:hidden;display:flex;align-items:center;gap:11px;padding:14px 15px;border-radius:20px;background:linear-gradient(135deg,#fffdf5,#f7fbff);border:1px solid #e8d99a;box-shadow:0 16px 34px -22px rgba(245,158,11,.35),inset 0 1px 0 #fff;animation:convertCardFloat 3.4s ease-in-out infinite}
+.dashboard-convert-card:before{content:"";position:absolute;inset:-70% auto auto -15%;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.14),transparent 68%);pointer-events:none}
+.dashboard-convert-icon{position:relative;z-index:1;width:43px;height:43px;border-radius:14px;display:grid;place-items:center;font-size:1.25rem;background:linear-gradient(145deg,#ffd76a,#ffae2d);box-shadow:0 9px 20px rgba(245,158,11,.25);flex:none}
+.dashboard-convert-copy{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:3px;flex:1}
+.dashboard-convert-copy strong{font-size:.78rem;font-weight:950;color:#172033}
+.dashboard-convert-copy span{font-size:.61rem;font-weight:700;line-height:1.35;color:#69758d}
+.dashboard-convert-btn{position:relative;z-index:1;flex:none;padding:9px 12px;border-radius:12px;background:linear-gradient(135deg,#0fb56b,#06b6d4);color:#fff;font-size:.64rem;font-weight:950;box-shadow:0 8px 18px rgba(15,181,107,.24);transition:transform .18s ease,filter .18s ease}
+.dashboard-convert-btn:active{transform:scale(.95);filter:brightness(.96)}
+@keyframes convertCardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+
+/* ===== BOLDER INVITE & UNLOCK ===== */
+.community-card{border:1px solid rgba(47,107,255,.25)!important;background:linear-gradient(145deg,#fff 0%,#f5f8ff 100%)!important;box-shadow:0 24px 55px -25px rgba(47,107,255,.38),inset 0 1px 0 #fff!important}
+.community-title{font-size:1.08rem!important;font-weight:950!important}
+.community-sub{font-size:.72rem!important;font-weight:750!important;line-height:1.4!important}
+.community-card .referral-link-box{border-width:1.5px!important}
+.community-card .referral-progress-top{font-weight:900!important}
+.community-card .referral-stat b{font-size:1.02rem!important;font-weight:950!important}
+
+/* ===== PRESS-TO-MINE GLOWING HOLD RING ===== */
+.hold-mine-btn{--progress:0;touch-action:none;user-select:none;-webkit-user-select:none}
+.hold-ring{inset:7px;border:3px solid rgba(255,255,255,.07)!important;box-shadow:none!important;opacity:.65;transition:opacity .15s ease}
+.hold-ring:before{content:"";position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(#22e0ff calc(var(--progress,0) * 1%), rgba(34,224,255,.07) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 0);mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 0);filter:drop-shadow(0 0 8px rgba(34,224,255,.75));transform:rotate(-90deg);transition:filter .12s ease}
+.hold-mine-btn.holding .hold-ring{opacity:1;border-color:rgba(34,224,255,.18)!important;box-shadow:0 0 28px rgba(34,224,255,.2)!important}
+.hold-mine-btn.holding .hold-icon{animation:holdPressPulse .65s ease-in-out infinite}
+.hold-mine-btn.holding .hold-label{color:#9cefff}
+.hold-mine-btn.holding .hold-percent{color:#fff;text-shadow:0 0 12px rgba(34,224,255,.65)}
+@keyframes holdPressPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
+.hold-mine-btn.hold-success .hold-ring:before{animation:holdRingBurst .42s ease-out forwards}
+@keyframes holdRingBurst{0%{filter:drop-shadow(0 0 8px rgba(34,224,255,.75))}100%{filter:drop-shadow(0 0 22px rgba(34,224,255,1))}}
+
 /* ============================================================
    FIRST-USE TUTORIAL
 ============================================================ */
-.dashboard-tutorial{position:fixed;inset:0;z-index:400;opacity:0;visibility:hidden;transition:.2s}
-.dashboard-tutorial.show{opacity:1;visibility:visible}
-.tutorial-dim{position:absolute;inset:0;background:rgba(6,10,20,.7)}
-.tutorial-spotlight{position:absolute;border-radius:20px;box-shadow:0 0 0 4000px rgba(6,10,20,.7);transition:.25s ease;pointer-events:none}
-.tutorial-card{
-  position:absolute;left:50%;bottom:calc(110px + var(--safe-bottom));transform:translateX(-50%);
-  width:min(90vw,340px);background:#fff;border-radius:20px;padding:18px;box-shadow:var(--shadow-pop);
-}
-.tutorial-step{font-size:.6rem;font-weight:800;color:var(--muted-soft);letter-spacing:.05em}
-.tutorial-icon{font-size:1.8rem;margin-top:6px}
-.tutorial-title{margin-top:6px;font-size:1rem;font-weight:900}
-.tutorial-text{margin-top:6px;font-size:.76rem;color:var(--muted);line-height:1.5}
-.tutorial-progress{display:flex;gap:5px;margin-top:14px}
-.tutorial-progress i{flex:1;height:4px;border-radius:99px;background:var(--border)}
-.tutorial-actions{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
-.tutorial-skip{font-size:.72rem;font-weight:800;color:var(--muted)}
-.tutorial-next{padding:10px 18px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:900;font-size:.76rem}
+.dashboard-tutorial{position:fixed;inset:0;z-index:400;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease;pointer-events:none}
+.dashboard-tutorial.show{opacity:1;visibility:visible;pointer-events:auto}
+.tutorial-dim{position:absolute;inset:0;background:rgba(6,10,20,.76);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.tutorial-spotlight{position:fixed;border-radius:20px;box-shadow:0 0 0 4000px rgba(6,10,20,.76),0 0 0 2px rgba(255,255,255,.35),0 0 30px rgba(34,224,255,.25);transition:top .35s cubic-bezier(.16,1,.3,1),left .35s cubic-bezier(.16,1,.3,1),width .35s ease,height .35s ease;pointer-events:none}
+.tutorial-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.94);width:min(90vw,370px);max-height:min(70vh,430px);overflow:auto;background:linear-gradient(155deg,#fff,#f7f9ff);border:1px solid rgba(255,255,255,.9);border-radius:26px;padding:22px;box-shadow:0 35px 100px rgba(0,0,0,.45),inset 0 1px 0 #fff;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.dashboard-tutorial.show .tutorial-card{transform:translate(-50%,-50%) scale(1)}
+.tutorial-step{font-size:.62rem;font-weight:900;color:var(--blue);letter-spacing:.08em;text-transform:uppercase}
+.tutorial-icon{width:54px;height:54px;margin-top:10px;border-radius:17px;display:grid;place-items:center;font-size:1.7rem;background:linear-gradient(145deg,#edf3ff,#fff);box-shadow:0 10px 22px rgba(47,107,255,.12)}
+.tutorial-title{margin-top:11px;font-size:1.18rem;font-weight:950;letter-spacing:-.03em}
+.tutorial-text{margin-top:8px;font-size:.8rem;font-weight:650;color:#5f6d86;line-height:1.6}
+.tutorial-progress{display:flex;gap:5px;margin-top:18px}
+.tutorial-progress i{flex:1;height:5px;border-radius:99px;background:var(--border);position:relative;overflow:hidden}
+.tutorial-progress i.active{background:linear-gradient(90deg,var(--blue),var(--purple));box-shadow:0 0 8px rgba(47,107,255,.2)}
+.tutorial-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
+.tutorial-skip{font-size:.73rem;font-weight:850;color:var(--muted);padding:10px 4px}
+.tutorial-next{min-width:105px;padding:12px 18px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:950;font-size:.78rem;box-shadow:0 10px 22px rgba(47,107,255,.25)}
+@media(max-width:380px){.tutorial-card{width:calc(100vw - 24px);padding:18px}.tutorial-title{font-size:1.05rem}.tutorial-text{font-size:.74rem}}
 
 /* ============================================================
    RESPONSIVE
@@ -799,6 +830,72 @@ header{
   .balance-card{padding:26px}
   .total-balance{font-size:2.5rem}
 }
+
+/* ===== PAYME MODERN MINING / DAILY / INVITE OVERRIDES ===== */
+.mining-cycle-progress{margin-top:13px;padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.mining-cycle-progress-head{display:flex;justify-content:space-between;align-items:center;font-size:.54rem;font-weight:900;letter-spacing:.09em;color:#8fa0c5}
+.mining-cycle-progress-head strong{color:#fff;font-size:.68rem;letter-spacing:0}
+.mining-cycle-track{height:7px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+.mining-cycle-track i{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#22e0ff,#8b5cf6,#ec4899);box-shadow:0 0 12px rgba(34,224,255,.45);transition:width .5s cubic-bezier(.16,1,.3,1)}
+.mining-cycle-progress small{display:block;margin-top:7px;color:#7788ad;font-size:.55rem;font-weight:700;line-height:1.35}
+
+.miner-card{box-shadow:0 30px 70px -25px rgba(11,18,38,.78),inset 0 1px 0 rgba(255,255,255,.07)}
+.miner-card:before{content:"";position:absolute;inset:-30% auto auto -20%;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(34,224,255,.12),transparent 68%);pointer-events:none;animation:minerGlow 5s ease-in-out infinite}
+@keyframes minerGlow{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,12px)}}
+
+.community-card{position:relative;overflow:hidden;border:1px solid rgba(47,107,255,.18);background:linear-gradient(145deg,#fff,#f7f9ff);box-shadow:0 22px 45px -22px rgba(47,107,255,.32),inset 0 1px 0 #fff}
+.community-card:before{content:"";position:absolute;left:-70px;top:-90px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(47,107,255,.14),transparent 68%);pointer-events:none}
+.community-icon{width:46px!important;height:46px!important;border-radius:15px!important;display:grid!important;place-items:center;background:linear-gradient(145deg,#2f6bff,#7c5cfc)!important;color:#fff;box-shadow:0 10px 22px rgba(47,107,255,.3),inset 0 1px 0 rgba(255,255,255,.4);font-size:1.25rem!important;transform:translateZ(0);animation:inviteFloat 2.8s ease-in-out infinite}
+@keyframes inviteFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-4px) rotate(1deg)}}
+.community-title{font-size:1.03rem!important;font-weight:950!important;letter-spacing:-.035em!important}
+.community-sub{font-weight:700!important;color:#66738e!important}
+.community-card .referral-link-box{border-radius:16px!important;background:linear-gradient(145deg,#eef3ff,#fff)!important;border:1px solid #dce5fb!important;box-shadow:inset 0 1px 0 #fff,0 8px 18px rgba(15,23,42,.06)!important}
+.community-card .referral-actions button,.community-card button{font-weight:900!important;box-shadow:0 7px 16px rgba(47,107,255,.18)}
+.community-card .community-head{position:relative;z-index:1}
+
+.mining-modal{background:rgba(4,8,20,.76)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+.mining-modal-card{position:relative;width:min(100%,390px)!important;max-height:82vh!important;overflow:auto;border-radius:30px!important;padding:20px!important;background:linear-gradient(155deg,#182341 0%,#0b1020 62%,#130d28 100%)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 35px 100px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.12)!important;transform:translateY(26px) scale(.91)!important;transition:transform .42s cubic-bezier(.16,1.3,.3,1)!important}
+.mining-modal.active .mining-modal-card{transform:translateY(0) scale(1)!important}
+.mining-modal-card:before{content:"";position:absolute;inset:-40% -30% auto auto;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(34,224,255,.13),transparent 68%);pointer-events:none}
+.mining-modal-head{position:relative;z-index:1}
+.mining-modal-head h3{color:#fff!important;font-size:1.02rem!important;font-weight:950!important}
+.mining-modal-icon{box-shadow:0 10px 24px rgba(124,92,252,.3)!important;animation:modalIconBounce 2.2s ease-in-out infinite}
+@keyframes modalIconBounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+.miner-level-list{position:relative;z-index:1;display:grid;gap:10px;margin-top:12px}
+.miner-level-card{padding:14px!important;border-radius:19px!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;animation:upgradeCardIn .45s cubic-bezier(.16,1,.3,1) both}
+.miner-level-card:nth-child(2){animation-delay:.04s}.miner-level-card:nth-child(3){animation-delay:.08s}.miner-level-card:nth-child(4){animation-delay:.12s}.miner-level-card:nth-child(5){animation-delay:.16s}.miner-level-card:nth-child(6){animation-delay:.20s}
+@keyframes upgradeCardIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.miner-level-card.current{border-color:rgba(34,224,255,.28)!important;background:linear-gradient(145deg,rgba(34,224,255,.10),rgba(139,92,246,.08))!important}
+.miner-level-card.recommended{border-color:rgba(139,92,246,.45)!important;box-shadow:0 0 0 1px rgba(139,92,246,.08),0 15px 35px rgba(124,58,252,.12)!important}
+.miner-level-tagline{color:#b8c5df!important;font-size:.64rem!important;font-weight:700!important;line-height:1.45!important}
+.miner-level-reward{color:#8190b1!important;font-size:.58rem!important;line-height:1.55!important}
+.miner-level-reward strong{color:#fff!important}
+.miner-upgrade-choice{margin-top:10px!important;border-radius:13px!important;padding:10px 12px!important;font-weight:950!important;letter-spacing:.02em!important;background:linear-gradient(135deg,#2f6bff,#8b5cf6)!important;color:#fff!important;box-shadow:0 9px 20px rgba(47,107,255,.25)!important;transition:transform .18s ease,filter .18s ease!important}
+.miner-upgrade-choice:not(:disabled):active{transform:scale(.96)!important}
+.miner-upgrade-choice:disabled{opacity:.42!important;box-shadow:none!important}
+.recommended-chip{animation:chipBounce 1.8s ease-in-out infinite}
+@keyframes chipBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+
+.daily-overlay{background:rgba(7,12,26,.68)!important;backdrop-filter:blur(15px)!important;-webkit-backdrop-filter:blur(15px)!important}
+.daily-card{position:relative!important;align-self:center!important;width:min(100%,390px)!important;max-height:82vh!important;overflow:auto!important;padding:21px!important;border-radius:29px!important;background:linear-gradient(155deg,#fff,#f7f9ff)!important;border:1px solid rgba(255,255,255,.85)!important;box-shadow:0 32px 90px rgba(15,23,42,.38),inset 0 1px 0 #fff!important;transform:translateY(28px) scale(.9)!important;transition:transform .4s cubic-bezier(.16,1.25,.3,1)!important}
+.daily-overlay.show .daily-card{transform:none!important}
+.daily-header{padding:5px 30px 14px!important}
+.daily-title{font-size:1.25rem!important;font-weight:950!important;letter-spacing:-.045em!important}
+.daily-subtitle{font-weight:650!important;color:#687590!important}
+.daily-close-btn{top:13px!important;right:13px!important;width:32px!important;height:32px!important;border-radius:11px!important;background:#eef2f8!important;box-shadow:0 5px 12px rgba(15,23,42,.09)!important}
+.daily-grid{gap:9px!important}
+.reward-card{border-radius:17px!important;box-shadow:0 8px 18px rgba(15,23,42,.06),inset 0 1px 0 #fff!important;transition:transform .2s ease,box-shadow .2s ease!important}
+.reward-card.claimable{animation:dailyPulse 1.7s ease-in-out infinite,cardIn .35s ease both!important;border-color:rgba(47,107,255,.38)!important;background:linear-gradient(145deg,#edf3ff,#fff)!important}
+@keyframes dailyPulse{0%,100%{transform:translateY(0);box-shadow:0 8px 18px rgba(15,23,42,.06)}50%{transform:translateY(-3px);box-shadow:0 14px 25px rgba(47,107,255,.15)}}
+.daily-claim-button{font-weight:950!important;box-shadow:0 7px 15px rgba(15,23,42,.08)!important}
+.reward-card.day-7-card{background:linear-gradient(135deg,#fff7df,#fff)!important;border-color:#f3d681!important}
+.daily-timer-box{margin-top:13px!important;padding:11px 13px!important;border-radius:15px!important;background:#eef4ff!important;color:#64748b!important;font-weight:800!important;text-align:center!important}
+#dailyCountdownText{display:block;margin-top:3px;color:#1d4ed8;font-size:.9rem;font-weight:950}
+
+.claim-success-overlay{background:rgba(7,12,26,.72)!important;backdrop-filter:blur(15px)!important}
+.claim-success-card{position:relative!important;align-self:center!important;border-radius:30px!important;box-shadow:0 35px 90px rgba(15,23,42,.38),inset 0 1px 0 #fff!important;transform:translateY(25px) scale(.9)!important;transition:transform .42s cubic-bezier(.16,1.25,.3,1)!important}
+.claim-success-overlay.show .claim-success-card{transform:none!important}
+
 </style>
 </head>
 <body>
@@ -852,7 +949,7 @@ stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         aria-label="Mine Luck Tickets — go to Earn page">
 <span class="mine-btn-shine" aria-hidden="true"></span>
 <span class="mine-btn-icon" aria-hidden="true">⛏️</span>
-<span class="mine-btn-label">Mine now</span>
+<span class="mine-btn-label">Use now</span>
 </button>
 </div>
 </div>
@@ -976,7 +1073,7 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
 </section>
 
 <!-- LUCK TICKET MINER — placed right after the balance section -->
-<div class="section-label mining-section-label"><h2>Luck Ticket Mining</h2><span>30-minute cycle</span></div>
+<div class="section-label mining-section-label"><h2>Luck Ticket Mining</h2><span>2-minute cycle</span></div>
 <section class="mining-rig-wrap" id="luckMining">
     <div class="miner-card" id="miningRig">
 
@@ -1006,7 +1103,15 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
         </button>
         <div class="miner-status-line">
           <b id="miningStatus" data-state="offline">OFFLINE</b>
-          <span id="miningTime">30:00 cycle</span>
+          <span id="miningTime">02:00 cycle</span>
+        </div>
+        <div class="mining-cycle-progress">
+          <div class="mining-cycle-progress-head">
+            <span>LUCK TICKET RUN</span>
+            <strong id="miningCycleCountTop">0 / 10</strong>
+          </div>
+          <div class="mining-cycle-track"><i id="miningCycleProgress"></i></div>
+          <small id="miningCycleHint">Complete 10 successful cycles to unlock your Luck Tickets.</small>
         </div>
 
         <div class="hash-console" aria-live="polite" aria-label="Mining engine activity">
@@ -1027,7 +1132,8 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
       <div class="miner-infobar">
         <div class="miner-infobar-text">
           <b id="miningEta">Ready</b>
-          <span>Earn <strong id="miningRewardRange">1–2</strong> 🎫 per cycle</span>
+          <span><strong id="miningCycleCount">0/10</strong> successful cycles</span>
+          <span class="miner-reward-range">Earn <strong id="miningRewardRange">3</strong> 🎫</span>
         </div>
         <button class="miner-upgrade-btn" id="upgradeMiningBtn" type="button">Upgrade</button>
       </div>
@@ -1040,7 +1146,7 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
         <button class="miner-claim-btn" id="claimMiningBtn" type="button" disabled>🎫 Claim Tickets</button>
       </div>
 
-      <small class="miner-foot" id="miningFoot">Hold for 2 seconds to activate your rig. Your 30-minute cycle continues while you're away.</small>
+      <small class="miner-foot" id="miningFoot">Hold for 2 seconds to activate your rig. Your 2-minute cycle continues while you're away.</small>
 
       <span class="mining-spark s1" aria-hidden="true"></span>
       <span class="mining-spark s2" aria-hidden="true"></span>
@@ -1053,6 +1159,16 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
       <span id="mineHashrateStrip" hidden>⚡ 000.0 KH/s</span>
       <span id="miningHashSub" hidden>Ready to activate</span>
     </div>
+</section>
+
+<!-- CONVERT LUCK TICKETS TO GEMS -->
+<section class="dashboard-convert-card" id="dashboardConvertTickets">
+  <div class="dashboard-convert-icon">🪙</div>
+  <div class="dashboard-convert-copy">
+    <strong>Convert Tickets to Gems</strong>
+    <span>Turn your Luck Tickets into withdrawable Gems.</span>
+  </div>
+  <a class="dashboard-convert-btn" href="/tap.html#luckSwapSection" aria-label="Convert Luck Tickets to Gems">Convert →</a>
 </section>
 
 <!-- INVITE & REFERRALS -->
@@ -2174,11 +2290,11 @@ error
    FIRST-USE DASHBOARD TUTORIAL
    ========================================================= */
 const dashboardTutorialSteps = [
-    {target:"balance-card",icon:"💳",title:"Your wallet",text:"Your balance is now compact and easy to scan. Deposit, withdraw and view transactions from here.",position:"bottom"},
-    {target:"luckMining",icon:"⛏️",title:"Mine Luck Tickets",text:"Hold the mining button for 2 seconds. Your rig runs for 30 minutes, even when you leave the app.",position:"top"},
-    {target:"referrals",icon:"👥",title:"Invite to unlock",text:"Share only your invite link. A referral counts after the new user joins the Telegram channel. Referrals unlock higher miner levels.",position:"top"},
-    {target:'a[href="/earn.html"]',icon:"💎",title:"Earn",text:"Open Earn to discover the other earning opportunities and games available on PAYME.",position:"top"},
-    {target:'a[href="/leaderboard.html"]',icon:"🏆",title:"Ranking",text:"Check the leaderboard and see how you compare with other PAYME users.",position:"top"}
+    {target:"balance-card",icon:"💳",title:"Your wallet",text:"Your wallet shows your available Gems, earnings and deposit balance. Deposit, withdraw or open your transaction history here.",position:"bottom"},
+    {target:"luckMining",icon:"⛏️",title:"Mine Luck Tickets",text:"Press and hold the glowing mining button for 2 seconds. One mining cycle lasts 2 minutes and can continue while you are away.",position:"top"},
+    {target:"referrals",icon:"👥",title:"Invite to unlock",text:"Invite friends with your referral link. Verified referrals help you unlock higher miner levels and bigger Luck Ticket rewards.",position:"top"},
+    {target:'a[href="/earn.html"]',icon:"💎",title:"Earn",text:"Use the Earn section to find available earning opportunities, including Luck Ticket mining and other rewards.",position:"top"},
+    {target:'a[href="/leaderboard.html"]',icon:"🏆",title:"Ranking",text:"Open Ranking to see the leaderboard, your position and the weekly referral competition.",position:"top"}
 ];
 let dashboardTutorialIndex = 0;
 let dashboardTutorialOpen = false;
@@ -2218,43 +2334,36 @@ function findTutorialTarget(selector){
 
 function positionDashboardTutorial(){
     if(!dashboardTutorialOpen) return;
+    const step=dashboardTutorialSteps[dashboardTutorialIndex];
+    const target=findTutorialTarget(step.target);
+    const spotlight=document.getElementById("tutorialSpotlight");
+    const card=document.getElementById("tutorialCard");
+    if(!target||!spotlight||!card) return;
+    const rect=target.getBoundingClientRect();
+    const pad=8;
+    spotlight.style.display="block";
+    spotlight.style.left=`${Math.max(4,rect.left-pad)}px`;
+    spotlight.style.top=`${Math.max(4,rect.top-pad)}px`;
+    spotlight.style.width=`${Math.min(window.innerWidth-8,rect.width+pad*2)}px`;
+    spotlight.style.height=`${Math.min(window.innerHeight-8,rect.height+pad*2)}px`;
+    card.style.left="50%";
+    card.style.top="50%";
+}
 
-    const step = dashboardTutorialSteps[dashboardTutorialIndex];
-    const target = findTutorialTarget(step.target);
-    const spotlight = document.getElementById("tutorialSpotlight");
-    const card = document.getElementById("tutorialCard");
-    if(!target || !spotlight || !card) return;
-
-    const rect = target.getBoundingClientRect();
-    const pad = 7;
-    spotlight.style.display = "block";
-    spotlight.style.left = `${Math.max(5,rect.left-pad)}px`;
-    spotlight.style.top = `${Math.max(5,rect.top-pad)}px`;
-    spotlight.style.width = `${Math.min(window.innerWidth-10,rect.width+pad*2)}px`;
-    spotlight.style.height = `${Math.min(window.innerHeight-10,rect.height+pad*2)}px`;
-
-    const cardRect = card.getBoundingClientRect();
-    const gap = 16;
-    let top;
-
-    if(step.position === "top"){
-        top = rect.top - cardRect.height - gap;
-    }else{
-        top = rect.bottom + gap;
+function ensureDashboardTutorialTargetVisible(target){
+    if(!target) return;
+    const rect=target.getBoundingClientRect();
+    const safeTop=Math.max(72,window.innerHeight*.16);
+    const safeBottom=Math.min(window.innerHeight-96,window.innerHeight*.84);
+    if(rect.top < safeTop || rect.bottom > safeBottom){
+        try{ target.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'}); }catch(e){ target.scrollIntoView(false); }
     }
-
-    if(top < 12) top = Math.min(window.innerHeight-cardRect.height-12, rect.bottom+gap);
-    if(top > window.innerHeight-cardRect.height-12) top = Math.max(12, rect.top-cardRect.height-gap);
-
-    let left = rect.left + (rect.width-cardRect.width)/2;
-    left = Math.max(12,Math.min(window.innerWidth-cardRect.width-12,left));
-
-    card.style.left = `${left}px`;
-    card.style.top = `${top}px`;
 }
 
 function renderDashboardTutorialStep(){
     const step = dashboardTutorialSteps[dashboardTutorialIndex];
+    const target = findTutorialTarget(step.target);
+    ensureDashboardTutorialTargetVisible(target);
     const total = dashboardTutorialSteps.length;
     const stepEl = document.getElementById("tutorialStep");
     const iconEl = document.getElementById("tutorialIcon");
@@ -2318,6 +2427,8 @@ async function nextDashboardTutorial(){
 function maybeShowDashboardTutorial(user){
     if(dashboardTutorialOpen || !user) return;
     if(!user.showOnboardingTutorial) return;
+    try{ if(localStorage.getItem("paymeDashboardTutorialSeen") === "1") return; }catch(e){}
+    try{ localStorage.setItem("paymeDashboardTutorialSeen","1"); }catch(e){}
     
 
     const overlay = document.getElementById("dashboardTutorial");
@@ -3543,11 +3654,11 @@ const PAYME_DASH_I18N={"ar":{"Dashboard": "لوحة التحكم", "Earn": "ار
 const PAYME_DASH_EXTRA_I18N={"ar":{"Support": "الدعم", "Hide balance": "إخفاء الرصيد", "Show balance": "إظهار الرصيد", "Loading user name": "جارٍ تحميل اسم المستخدم", "Loading balance": "جارٍ تحميل الرصيد", "Loading total earnings": "جارٍ تحميل إجمالي الأرباح", "Loading deposit balance": "جارٍ تحميل رصيد الإيداع", "Share referral link on Telegram": "مشاركة رابط الإحالة على تيليجرام", "Share referral link on WhatsApp": "مشاركة رابط الإحالة على واتساب", "Total payouts this week": "إجمالي المدفوعات هذا الأسبوع", "Play Lucky number game": "العب لعبة الرقم المحظوظ", "Main navigation": "التنقل الرئيسي", "Close": "إغلاق", "DAY 7 • SPECIAL BONUS": "اليوم 7 • مكافأة خاصة", "🎟️ 200 LUCK TICKETS": "🎟️ 200 تذكرة حظ", "LOCKED": "مغلق", "COMPLETED ✓": "مكتمل ✓", "CLAIM NOW": "احصل عليها الآن", "NEXT UP": "التالي", "No recent transactions found.": "لم يتم العثور على معاملات حديثة.", "Failed to load transactions. Please try again.": "فشل تحميل المعاملات. حاول مرة أخرى.", "Unable to copy link.": "تعذر نسخ الرابط.", "Unable to copy code.": "تعذر نسخ الرمز.", "✓ Copied": "✓ تم النسخ", "✓ Copied!": "✓ تم النسخ!", "Daily reward claimed!": "تم الحصول على المكافأة اليومية!", "Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!": "تمت إضافة مكافأتك 💎10 إلى رصيدك. حافظ على سلسلتك وعُد غدًا!", "Unable to claim reward. Please try again.": "تعذر الحصول على المكافأة. حاول مرة أخرى.", "Network error. Could not claim reward.": "خطأ في الشبكة. تعذر الحصول على المكافأة.", "Free spin granted! Redirecting to the Spin Game...": "تم منح دوران مجاني! جارٍ التحويل إلى لعبة الدوران...", "Verification failed. Please try again.": "فشل التحقق. حاول مرة أخرى.", "Telegram Join Reward": "مكافأة الانضمام إلى تيليجرام", "Telegram Advertising Refund": "استرداد إعلانات تيليجرام", "Telegram Advertising": "إعلانات تيليجرام", "Weekly Referral — 1st Place": "الإحالة الأسبوعية — المركز الأول", "Weekly Referral — 2nd Place": "الإحالة الأسبوعية — المركز الثاني", "Weekly Referral — 3rd Place": "الإحالة الأسبوعية — المركز الثالث", "Weekly Referral Prize": "جائزة الإحالة الأسبوعية", "Tap Rush — 1st Place Prize": "تاب راش — جائزة المركز الأول", "Tap Rush — 2nd Place Prize": "تاب راش — جائزة المركز الثاني", "Tap Rush — 3rd Place Prize": "تاب راش — جائزة المركز الثالث", "Tap Rush Contest Prize": "جائزة مسابقة تاب راش", "Tap Rush Entry Fee": "رسوم دخول تاب راش", "Tap Rush Winnings": "أرباح تاب راش", "Tap Rush": "تاب راش", "Transaction": "معاملة", "completed": "مكتملة", "pending": "قيد الانتظار", "failed": "فاشلة", "Loading transactions…": "جارٍ تحميل المعاملات…", "Join me on PAYME and claim your bonus! 🎁 Use my link to get started:": "انضم إليّ في PAYME واحصل على مكافأتك! 🎁 استخدم رابطي للبدء:", "Join me on PAYME and claim your bonus! Click here:": "انضم إليّ في PAYME واحصل على مكافأتك! اضغط هنا:", "Earn rewards, invite friends and play games.": "اربح المكافآت وادعُ الأصدقاء والعب الألعاب.", "Tap the gift to reveal your surprise ✨": "اضغط على الهدية للكشف عن مفاجأتك ✨", "You've unlocked a special reward. Join our Telegram channel to receive": "لقد فتحت مكافأة خاصة. انضم إلى قناتنا على تيليجرام للحصول على", "1 FREE SPIN": "دوران مجاني واحد", "Join the channel to claim your free spin": "انضم إلى القناة للحصول على دورانك المجاني", "Your free spin will be verified before you enter the game.": "سيتم التحقق من دورانك المجاني قبل دخول اللعبة.", "Your daily reward has been added to your balance.\nKeep your streak going tomorrow!": "تمت إضافة مكافأتك اليومية إلى رصيدك.\nواصل سلسلتك غدًا!", "Awesome!": "رائع!", "Add money to your deposit balance here when you want to fund your account.": "أضف أموالًا إلى رصيد إيداعك هنا عندما ترغب في تمويل حسابك.", "SPECIAL WELCOME REWARD": "مكافأة ترحيب خاصة", "FREE": "مجاني", "SPIN": "دوران", "COUPON": "كوبون", "Join Telegram Channel": "انضم إلى قناة تيليجرام", "I Have Joined, Claim Spin": "لقد انضممت، احصل على الدوران"},"ru":{"Support":"Поддержка","Hide balance":"Скрыть баланс","Show balance":"Показать баланс","Loading user name":"Загрузка имени пользователя","Loading balance":"Загрузка баланса","Loading total earnings":"Загрузка общего дохода","Loading deposit balance":"Загрузка баланса депозита","Share referral link on Telegram":"Поделиться реферальной ссылкой в Telegram","Share referral link on WhatsApp":"Поделиться реферальной ссылкой в WhatsApp","Total payouts this week":"Общие выплаты за эту неделю","Play Lucky number game":"Играть в игру «Счастливое число»","Main navigation":"Основная навигация","Close":"Закрыть","DAY 7 • SPECIAL BONUS":"ДЕНЬ 7 • СПЕЦИАЛЬНЫЙ БОНУС","🎟️ 200 LUCK TICKETS":"🎟️ 200 БИЛЕТОВ УДАЧИ","LOCKED":"ЗАБЛОКИРОВАНО","COMPLETED ✓":"ВЫПОЛНЕНО ✓","CLAIM NOW":"ПОЛУЧИТЬ","NEXT UP":"СЛЕДУЮЩИЙ","No recent transactions found.":"Недавних операций нет.","Failed to load transactions. Please try again.":"Не удалось загрузить операции. Попробуйте ещё раз.","Unable to copy link.":"Не удалось скопировать ссылку.","Unable to copy code.":"Не удалось скопировать код.","✓ Copied":"✓ Скопировано","✓ Copied!":"✓ Скопировано!","Daily reward claimed!":"Ежедневная награда получена!","Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!":"Награда 💎10 добавлена на ваш баланс. Продолжайте серию и возвращайтесь завтра!","Unable to claim reward. Please try again.":"Не удалось получить награду. Попробуйте ещё раз.","Network error. Could not claim reward.":"Ошибка сети. Не удалось получить награду.","Free spin granted! Redirecting to the Spin Game...":"Бесплатный спин получен! Переходим к игре Spin...","Verification failed. Please try again.":"Проверка не удалась. Попробуйте ещё раз.","Telegram Join Reward":"Награда за вступление в Telegram","Telegram Advertising Refund":"Возврат за рекламу в Telegram","Telegram Advertising":"Реклама в Telegram","Weekly Referral — 1st Place":"Еженедельный реферальный приз — 1-е место","Weekly Referral — 2nd Place":"Еженедельный реферальный приз — 2-е место","Weekly Referral — 3rd Place":"Еженедельный реферальный приз — 3-е место","Weekly Referral Prize":"Еженедельный реферальный приз","Tap Rush — 1st Place Prize":"Tap Rush — приз за 1-е место","Tap Rush — 2nd Place Prize":"Tap Rush — приз за 2-е место","Tap Rush — 3rd Place Prize":"Tap Rush — приз за 3-е место","Tap Rush Contest Prize":"Приз конкурса Tap Rush","Tap Rush Entry Fee":"Входной взнос Tap Rush","Tap Rush Winnings":"Выигрыш Tap Rush","Tap Rush":"Tap Rush","Transaction":"Операция","completed":"выполнено","pending":"в ожидании","failed":"ошибка","Loading transactions…":"Загрузка операций…","Join me on PAYME and claim your bonus! 🎁 Use my link to get started:":"Присоединяйтесь ко мне в PAYME и получите бонус! 🎁 Используйте мою ссылку, чтобы начать:","Join me on PAYME and claim your bonus! Click here:":"Присоединяйтесь ко мне в PAYME и получите бонус! Нажмите здесь:","Earn rewards, invite friends and play games.":"Получайте награды, приглашайте друзей и играйте.","Tap the gift to reveal your surprise ✨":"Нажмите на подарок, чтобы открыть сюрприз ✨","You've unlocked a special reward. Join our Telegram channel to receive":"Вы разблокировали специальную награду. Вступите в наш Telegram-канал, чтобы получить","1 FREE SPIN":"1 БЕСПЛАТНЫЙ СПИН","Join the channel to claim your free spin":"Вступите в канал, чтобы получить бесплатный спин","Your free spin will be verified before you enter the game.":"Ваш бесплатный спин будет проверен перед входом в игру.","Your daily reward has been added to your balance.\nKeep your streak going tomorrow!":"Ежедневная награда добавлена на ваш баланс.\nПродолжайте серию завтра!","Awesome!":"Отлично!","Add money to your deposit balance here when you want to fund your account.":"Пополняйте баланс депозита здесь, когда хотите внести средства на счёт.","SPECIAL WELCOME REWARD":"СПЕЦИАЛЬНАЯ НАГРАДА","FREE":"БЕСПЛАТНО","SPIN":"СПИН","COUPON":"КУПОН","Join Telegram Channel":"Открыть Telegram-канал","I Have Joined, Claim Spin":"Я вступил, получить спин"},"es":{"Support":"Soporte","Hide balance":"Ocultar saldo","Show balance":"Mostrar saldo","Loading user name":"Cargando nombre de usuario","Loading balance":"Cargando saldo","Loading total earnings":"Cargando ganancias totales","Loading deposit balance":"Cargando saldo de depósito","Share referral link on Telegram":"Compartir enlace de referido en Telegram","Share referral link on WhatsApp":"Compartir enlace de referido en WhatsApp","Total payouts this week":"Pagos totales esta semana","Play Lucky number game":"Jugar al número de la suerte","Main navigation":"Navegación principal","Close":"Cerrar","DAY 7 • SPECIAL BONUS":"DÍA 7 • BONO ESPECIAL","🎟️ 200 LUCK TICKETS":"🎟️ 200 BOLETOS DE SUERTE","LOCKED":"BLOQUEADO","COMPLETED ✓":"COMPLETADO ✓","CLAIM NOW":"RECLAMAR AHORA","NEXT UP":"SIGUIENTE","No recent transactions found.":"No se encontraron transacciones recientes.","Failed to load transactions. Please try again.":"No se pudieron cargar las transacciones. Inténtalo de nuevo.","Unable to copy link.":"No se pudo copiar el enlace.","Unable to copy code.":"No se pudo copiar el código.","✓ Copied":"✓ Copiado","✓ Copied!":"✓ ¡Copiado!","Daily reward claimed!":"¡Recompensa diaria reclamada!","Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!":"Tu recompensa de 💎10 se añadió a tu saldo. ¡Mantén tu racha y vuelve mañana!","Unable to claim reward. Please try again.":"No se pudo reclamar la recompensa. Inténtalo de nuevo.","Network error. Could not claim reward.":"Error de red. No se pudo reclamar la recompensa.","Free spin granted! Redirecting to the Spin Game...":"¡Giro gratis concedido! Redirigiendo al juego Spin...","Verification failed. Please try again.":"La verificación falló. Inténtalo de nuevo.","Telegram Join Reward":"Recompensa por unirse a Telegram","Telegram Advertising Refund":"Reembolso de publicidad de Telegram","Telegram Advertising":"Publicidad de Telegram","Weekly Referral — 1st Place":"Premio semanal por referidos — 1.º lugar","Weekly Referral — 2nd Place":"Premio semanal por referidos — 2.º lugar","Weekly Referral — 3rd Place":"Premio semanal por referidos — 3.º lugar","Weekly Referral Prize":"Premio semanal por referidos","Tap Rush — 1st Place Prize":"Tap Rush — premio del 1.º lugar","Tap Rush — 2nd Place Prize":"Tap Rush — premio del 2.º lugar","Tap Rush — 3rd Place Prize":"Tap Rush — premio del 3.º lugar","Tap Rush Contest Prize":"Premio del concurso Tap Rush","Tap Rush Entry Fee":"Entrada de Tap Rush","Tap Rush Winnings":"Ganancias de Tap Rush","Tap Rush":"Tap Rush","Transaction":"Transacción","completed":"completada","pending":"pendiente","failed":"fallida","Loading transactions…":"Cargando transacciones…","Join me on PAYME and claim your bonus! 🎁 Use my link to get started:":"¡Únete a PAYME y reclama tu bono! 🎁 Usa mi enlace para empezar:","Join me on PAYME and claim your bonus! Click here:":"¡Únete a PAYME y reclama tu bono! Haz clic aquí:","Earn rewards, invite friends and play games.":"Gana recompensas, invita a tus amigos y juega.","Tap the gift to reveal your surprise ✨":"Toca el regalo para revelar tu sorpresa ✨","You've unlocked a special reward. Join our Telegram channel to receive":"Has desbloqueado una recompensa especial. Únete a nuestro canal de Telegram para recibir","1 FREE SPIN":"1 GIRO GRATIS","Join the channel to claim your free spin":"Únete al canal para reclamar tu giro gratis","Your free spin will be verified before you enter the game.":"Tu giro gratis se verificará antes de entrar al juego.","Your daily reward has been added to your balance.\nKeep your streak going tomorrow!":"Tu recompensa diaria se añadió a tu saldo.\n¡Continúa tu racha mañana!","Awesome!":"¡Genial!","Add money to your deposit balance here when you want to fund your account.":"Añade dinero a tu saldo de depósito cuando quieras financiar tu cuenta.","SPECIAL WELCOME REWARD":"RECOMPENSA ESPECIAL","FREE":"GRATIS","SPIN":"GIRO","COUPON":"CUPÓN","Join Telegram Channel":"Unirse al canal de Telegram","I Have Joined, Claim Spin":"Ya me uní, reclamar giro"},"hi":{"Support":"सहायता","Hide balance":"बैलेंस छिपाएँ","Show balance":"बैलेंस दिखाएँ","Loading user name":"यूज़र नाम लोड हो रहा है","Loading balance":"बैलेंस लोड हो रहा है","Loading total earnings":"कुल कमाई लोड हो रही है","Loading deposit balance":"डिपॉज़िट बैलेंस लोड हो रहा है","Share referral link on Telegram":"Telegram पर रेफरल लिंक साझा करें","Share referral link on WhatsApp":"WhatsApp पर रेफरल लिंक साझा करें","Total payouts this week":"इस सप्ताह कुल भुगतान","Play Lucky number game":"लकी नंबर गेम खेलें","Main navigation":"मुख्य नेविगेशन","Close":"बंद करें","DAY 7 • SPECIAL BONUS":"दिन 7 • विशेष बोनस","🎟️ 200 LUCK TICKETS":"🎟️ 200 लक टिकट","LOCKED":"लॉक है","COMPLETED ✓":"पूरा ✓","CLAIM NOW":"अभी लें","NEXT UP":"अगला","No recent transactions found.":"हाल के लेन-देन नहीं मिले।","Failed to load transactions. Please try again.":"लेन-देन लोड नहीं हो सके। फिर कोशिश करें।","Unable to copy link.":"लिंक कॉपी नहीं हो सका।","Unable to copy code.":"कोड कॉपी नहीं हो सका।","✓ Copied":"✓ कॉपी हो गया","✓ Copied!":"✓ कॉपी हो गया!","Daily reward claimed!":"दैनिक रिवॉर्ड मिल गया!","Your 💎 10 reward has been added to your balance. Keep your streak alive and come back tomorrow!":"आपका 💎10 रिवॉर्ड बैलेंस में जोड़ दिया गया है। अपनी स्ट्रीक जारी रखें और कल वापस आएँ!","Unable to claim reward. Please try again.":"रिवॉर्ड नहीं मिल सका। फिर कोशिश करें।","Network error. Could not claim reward.":"नेटवर्क त्रुटि। रिवॉर्ड नहीं मिल सका।","Free spin granted! Redirecting to the Spin Game...":"फ्री स्पिन मिल गया! Spin गेम पर भेजा जा रहा है...","Verification failed. Please try again.":"सत्यापन विफल हुआ। फिर कोशिश करें।","Telegram Join Reward":"Telegram जॉइन रिवॉर्ड","Telegram Advertising Refund":"Telegram विज्ञापन रिफंड","Telegram Advertising":"Telegram विज्ञापन","Weekly Referral — 1st Place":"साप्ताहिक रेफरल — पहला स्थान","Weekly Referral — 2nd Place":"साप्ताहिक रेफरल — दूसरा स्थान","Weekly Referral — 3rd Place":"साप्ताहिक रेफरल — तीसरा स्थान","Weekly Referral Prize":"साप्ताहिक रेफरल पुरस्कार","Tap Rush — 1st Place Prize":"Tap Rush — पहला स्थान पुरस्कार","Tap Rush — 2nd Place Prize":"Tap Rush — दूसरा स्थान पुरस्कार","Tap Rush — 3rd Place Prize":"Tap Rush — तीसरा स्थान पुरस्कार","Tap Rush Contest Prize":"Tap Rush प्रतियोगिता पुरस्कार","Tap Rush Entry Fee":"Tap Rush प्रवेश शुल्क","Tap Rush Winnings":"Tap Rush जीत","Tap Rush":"Tap Rush","Transaction":"लेन-देन","completed":"पूरा","pending":"लंबित","failed":"विफल","Loading transactions…":"लेन-देन लोड हो रहे हैं…","Join me on PAYME and claim your bonus! 🎁 Use my link to get started:":"PAYME से जुड़ें और अपना बोनस लें! 🎁 शुरू करने के लिए मेरी लिंक का उपयोग करें:","Join me on PAYME and claim your bonus! Click here:":"PAYME से जुड़ें और अपना बोनस लें! यहाँ क्लिक करें:","Earn rewards, invite friends and play games.":"रिवॉर्ड कमाएँ, दोस्तों को आमंत्रित करें और गेम खेलें।","Tap the gift to reveal your surprise ✨":"सरप्राइज़ देखने के लिए गिफ्ट पर टैप करें ✨","You've unlocked a special reward. Join our Telegram channel to receive":"आपने विशेष रिवॉर्ड अनलॉक किया है। इसे पाने के लिए हमारे Telegram चैनल से जुड़ें","1 FREE SPIN":"1 फ्री स्पिन","Join the channel to claim your free spin":"फ्री स्पिन पाने के लिए चैनल से जुड़ें","Your free spin will be verified before you enter the game.":"गेम में जाने से पहले आपके फ्री स्पिन का सत्यापन होगा।","Your daily reward has been added to your balance.\nKeep your streak going tomorrow!":"दैनिक रिवॉर्ड आपके बैलेंस में जोड़ दिया गया है।\nकल भी अपनी स्ट्रीक जारी रखें!","Awesome!":"शानदार!","Add money to your deposit balance here when you want to fund your account.":"जब अकाउंट में पैसे जमा करने हों, यहाँ अपना डिपॉज़िट बैलेंस बढ़ाएँ।","SPECIAL WELCOME REWARD":"विशेष स्वागत रिवॉर्ड","FREE":"मुफ़्त","SPIN":"स्पिन","COUPON":"कूपन","Join Telegram Channel":"Telegram चैनल से जुड़ें","I Have Joined, Claim Spin":"मैं जुड़ गया हूँ, स्पिन लें"}};Object.keys(PAYME_DASH_EXTRA_I18N).forEach(l=>Object.assign(PAYME_DASH_I18N[l]||{},PAYME_DASH_EXTRA_I18N[l]));
 
 const PAYME_DASH_MINER_I18N={
- en:{"Invite & Unlock":"Invite & Unlock","Invite friends. Verified joins count toward your miner level.":"Invite friends. Verified joins count toward your miner level.","NO GEM REWARD":"NO GEM REWARD","Verified referrals":"Verified referrals","Referral earnings":"Referral earnings","Luck Ticket Mining":"Luck Ticket Mining","30-minute cycle":"30-minute cycle","FREE MINER":"FREE MINER","REFERRALS":"REFERRALS","MINING":"MINING","OFFLINE":"OFFLINE","READY TO CLAIM":"READY TO CLAIM","Cycle complete":"Cycle complete","Claim now":"Claim now","Hold to Mine":"Hold to Mine","Cycle Complete":"Cycle Complete","Hold for 2 seconds to start your rig. Your 30-minute cycle keeps running even if you close the app.":"Hold for 2 seconds to start your rig. Your 30-minute cycle keeps running even if you close the app.","NO GEM REWARD":"NO GEM REWARD","CURRENT LEVEL":"CURRENT LEVEL","UNLOCK LEVEL 2":"UNLOCK LEVEL 2","UNLOCK LEVEL 3":"UNLOCK LEVEL 3","UNLOCK LEVEL 4":"UNLOCK LEVEL 4","UNLOCK LEVEL 5":"UNLOCK LEVEL 5","UNLOCK LEVEL 6":"UNLOCK LEVEL 6"},
- ru:{"Invite & Unlock":"Приглашай и открывай","Invite friends. Verified joins count toward your miner level.":"Приглашайте друзей. Подтверждённые участники повышают уровень майнера.","NO GEM REWARD":"БЕЗ НАГРАДЫ GEM","Verified referrals":"Подтверждённые рефералы","Referral earnings":"Доход с рефералов","Luck Ticket Mining":"Добыча билетов удачи","30-minute cycle":"30-минутный цикл","FREE MINER":"БЕСПЛАТНЫЙ МАЙНЕР","REFERRALS":"РЕФЕРАЛЫ","MINING":"ДОБЫЧА","OFFLINE":"ОФЛАЙН","READY TO CLAIM":"ГОТОВО К ПОЛУЧЕНИЮ","Cycle complete":"Цикл завершён","Claim now":"Забрать сейчас","Hold to Mine":"Держите для добычи","Cycle Complete":"Цикл завершён","CURRENT LEVEL":"ТЕКУЩИЙ УРОВЕНЬ","UNLOCK LEVEL 2":"ОТКРЫТЬ УРОВЕНЬ 2","UNLOCK LEVEL 3":"ОТКРЫТЬ УРОВЕНЬ 3","UNLOCK LEVEL 4":"ОТКРЫТЬ УРОВЕНЬ 4","UNLOCK LEVEL 5":"ОТКРЫТЬ УРОВЕНЬ 5","UNLOCK LEVEL 6":"ОТКРЫТЬ УРОВЕНЬ 6"},
- es:{"Invite & Unlock":"Invita y desbloquea","Invite friends. Verified joins count toward your miner level.":"Invita amigos. Las incorporaciones verificadas cuentan para el nivel de tu minero.","NO GEM REWARD":"SIN RECOMPENSA GEM","Verified referrals":"Referidos verificados","Referral earnings":"Ganancias por referidos","Luck Ticket Mining":"Minería de Tickets de Suerte","30-minute cycle":"Ciclo de 30 minutos","FREE MINER":"MINERO GRATIS","REFERRALS":"REFERIDOS","MINING":"MINANDO","OFFLINE":"DESCONECTADO","READY TO CLAIM":"LISTO PARA RECLAMAR","Cycle complete":"Ciclo completado","Claim now":"Reclamar ahora","Hold to Mine":"Mantén para minar","Cycle Complete":"Ciclo completado","CURRENT LEVEL":"NIVEL ACTUAL","UNLOCK LEVEL 2":"DESBLOQUEAR NIVEL 2","UNLOCK LEVEL 3":"DESBLOQUEAR NIVEL 3","UNLOCK LEVEL 4":"DESBLOQUEAR NIVEL 4","UNLOCK LEVEL 5":"DESBLOQUEAR NIVEL 5","UNLOCK LEVEL 6":"DESBLOQUEAR NIVEL 6"},
- hi:{"Invite & Unlock":"आमंत्रित करें और अनलॉक करें","Invite friends. Verified joins count toward your miner level.":"दोस्तों को आमंत्रित करें। सत्यापित जुड़ाव आपके माइनर लेवल में गिने जाते हैं।","NO GEM REWARD":"कोई GEM रिवॉर्ड नहीं","Verified referrals":"सत्यापित रेफरल","Referral earnings":"रेफरल कमाई","Luck Ticket Mining":"लक टिकट माइनिंग","30-minute cycle":"30 मिनट का चक्र","FREE MINER":"फ्री माइनर","REFERRALS":"रेफरल","MINING":"माइनिंग","OFFLINE":"ऑफ़लाइन","READY TO CLAIM":"क्लेम के लिए तैयार","Cycle complete":"चक्र पूरा","Claim now":"अभी क्लेम करें","Hold to Mine":"माइन करने के लिए दबाकर रखें","Cycle Complete":"चक्र पूरा","CURRENT LEVEL":"वर्तमान लेवल","UNLOCK LEVEL 2":"लेवल 2 अनलॉक करें","UNLOCK LEVEL 3":"लेवल 3 अनलॉक करें","UNLOCK LEVEL 4":"लेवल 4 अनलॉक करें","UNLOCK LEVEL 5":"लेवल 5 अनलॉक करें","UNLOCK LEVEL 6":"लेवल 6 अनलॉक करें"},
- ar:{"Invite & Unlock":"ادعُ وافتح المستويات","Invite friends. Verified joins count toward your miner level.":"ادعُ الأصدقاء. الانضمامات الموثقة تُحتسب لمستوى جهاز التعدين.","NO GEM REWARD":"بدون مكافأة جواهر","Verified referrals":"الإحالات الموثقة","Referral earnings":"أرباح الإحالات","Luck Ticket Mining":"تعدين تذاكر الحظ","30-minute cycle":"دورة 30 دقيقة","FREE MINER":"جهاز مجاني","REFERRALS":"إحالات","MINING":"جارٍ التعدين","OFFLINE":"غير متصل","READY TO CLAIM":"جاهز للاستلام","Cycle complete":"اكتملت الدورة","Claim now":"استلم الآن","Hold to Mine":"اضغط مطولًا للتعدين","Cycle Complete":"اكتملت الدورة","CURRENT LEVEL":"المستوى الحالي","UNLOCK LEVEL 2":"افتح المستوى 2","UNLOCK LEVEL 3":"افتح المستوى 3","UNLOCK LEVEL 4":"افتح المستوى 4","UNLOCK LEVEL 5":"افتح المستوى 5","UNLOCK LEVEL 6":"افتح المستوى 6"}
+ en:{"Invite & Unlock":"Invite & Unlock","Invite friends. Verified joins count toward your miner level.":"Invite friends. Verified joins count toward your miner level.","NO GEM REWARD":"NO GEM REWARD","Verified referrals":"Verified referrals","Referral earnings":"Referral earnings","Luck Ticket Mining":"Luck Ticket Mining","2-minute cycle":"2-minute cycle","FREE MINER":"FREE MINER","REFERRALS":"REFERRALS","MINING":"MINING","OFFLINE":"OFFLINE","READY TO CLAIM":"READY TO CLAIM","Cycle complete":"Cycle complete","Claim now":"Claim now","Hold to Mine":"Hold to Mine","Cycle Complete":"Cycle Complete","Hold for 2 seconds to start your rig. Your 2-minute cycle keeps running even if you close the app.":"Hold for 2 seconds to start your rig. Your 2-minute cycle keeps running even if you close the app.","NO GEM REWARD":"NO GEM REWARD","CURRENT LEVEL":"CURRENT LEVEL","UNLOCK LEVEL 2":"UNLOCK LEVEL 2","UNLOCK LEVEL 3":"UNLOCK LEVEL 3","UNLOCK LEVEL 4":"UNLOCK LEVEL 4","UNLOCK LEVEL 5":"UNLOCK LEVEL 5","UNLOCK LEVEL 6":"UNLOCK LEVEL 6"},
+ ru:{"Invite & Unlock":"Приглашай и открывай","Invite friends. Verified joins count toward your miner level.":"Приглашайте друзей. Подтверждённые участники повышают уровень майнера.","NO GEM REWARD":"БЕЗ НАГРАДЫ GEM","Verified referrals":"Подтверждённые рефералы","Referral earnings":"Доход с рефералов","Luck Ticket Mining":"Добыча билетов удачи","2-minute cycle":"30-минутный цикл","FREE MINER":"БЕСПЛАТНЫЙ МАЙНЕР","REFERRALS":"РЕФЕРАЛЫ","MINING":"ДОБЫЧА","OFFLINE":"ОФЛАЙН","READY TO CLAIM":"ГОТОВО К ПОЛУЧЕНИЮ","Cycle complete":"Цикл завершён","Claim now":"Забрать сейчас","Hold to Mine":"Держите для добычи","Cycle Complete":"Цикл завершён","CURRENT LEVEL":"ТЕКУЩИЙ УРОВЕНЬ","UNLOCK LEVEL 2":"ОТКРЫТЬ УРОВЕНЬ 2","UNLOCK LEVEL 3":"ОТКРЫТЬ УРОВЕНЬ 3","UNLOCK LEVEL 4":"ОТКРЫТЬ УРОВЕНЬ 4","UNLOCK LEVEL 5":"ОТКРЫТЬ УРОВЕНЬ 5","UNLOCK LEVEL 6":"ОТКРЫТЬ УРОВЕНЬ 6"},
+ es:{"Invite & Unlock":"Invita y desbloquea","Invite friends. Verified joins count toward your miner level.":"Invita amigos. Las incorporaciones verificadas cuentan para el nivel de tu minero.","NO GEM REWARD":"SIN RECOMPENSA GEM","Verified referrals":"Referidos verificados","Referral earnings":"Ganancias por referidos","Luck Ticket Mining":"Minería de Tickets de Suerte","2-minute cycle":"Ciclo de 30 minutos","FREE MINER":"MINERO GRATIS","REFERRALS":"REFERIDOS","MINING":"MINANDO","OFFLINE":"DESCONECTADO","READY TO CLAIM":"LISTO PARA RECLAMAR","Cycle complete":"Ciclo completado","Claim now":"Reclamar ahora","Hold to Mine":"Mantén para minar","Cycle Complete":"Ciclo completado","CURRENT LEVEL":"NIVEL ACTUAL","UNLOCK LEVEL 2":"DESBLOQUEAR NIVEL 2","UNLOCK LEVEL 3":"DESBLOQUEAR NIVEL 3","UNLOCK LEVEL 4":"DESBLOQUEAR NIVEL 4","UNLOCK LEVEL 5":"DESBLOQUEAR NIVEL 5","UNLOCK LEVEL 6":"DESBLOQUEAR NIVEL 6"},
+ hi:{"Invite & Unlock":"आमंत्रित करें और अनलॉक करें","Invite friends. Verified joins count toward your miner level.":"दोस्तों को आमंत्रित करें। सत्यापित जुड़ाव आपके माइनर लेवल में गिने जाते हैं।","NO GEM REWARD":"कोई GEM रिवॉर्ड नहीं","Verified referrals":"सत्यापित रेफरल","Referral earnings":"रेफरल कमाई","Luck Ticket Mining":"लक टिकट माइनिंग","2-minute cycle":"30 मिनट का चक्र","FREE MINER":"फ्री माइनर","REFERRALS":"रेफरल","MINING":"माइनिंग","OFFLINE":"ऑफ़लाइन","READY TO CLAIM":"क्लेम के लिए तैयार","Cycle complete":"चक्र पूरा","Claim now":"अभी क्लेम करें","Hold to Mine":"माइन करने के लिए दबाकर रखें","Cycle Complete":"चक्र पूरा","CURRENT LEVEL":"वर्तमान लेवल","UNLOCK LEVEL 2":"लेवल 2 अनलॉक करें","UNLOCK LEVEL 3":"लेवल 3 अनलॉक करें","UNLOCK LEVEL 4":"लेवल 4 अनलॉक करें","UNLOCK LEVEL 5":"लेवल 5 अनलॉक करें","UNLOCK LEVEL 6":"लेवल 6 अनलॉक करें"},
+ ar:{"Invite & Unlock":"ادعُ وافتح المستويات","Invite friends. Verified joins count toward your miner level.":"ادعُ الأصدقاء. الانضمامات الموثقة تُحتسب لمستوى جهاز التعدين.","NO GEM REWARD":"بدون مكافأة جواهر","Verified referrals":"الإحالات الموثقة","Referral earnings":"أرباح الإحالات","Luck Ticket Mining":"تعدين تذاكر الحظ","2-minute cycle":"دورة 30 دقيقة","FREE MINER":"جهاز مجاني","REFERRALS":"إحالات","MINING":"جارٍ التعدين","OFFLINE":"غير متصل","READY TO CLAIM":"جاهز للاستلام","Cycle complete":"اكتملت الدورة","Claim now":"استلم الآن","Hold to Mine":"اضغط مطولًا للتعدين","Cycle Complete":"اكتملت الدورة","CURRENT LEVEL":"المستوى الحالي","UNLOCK LEVEL 2":"افتح المستوى 2","UNLOCK LEVEL 3":"افتح المستوى 3","UNLOCK LEVEL 4":"افتح المستوى 4","UNLOCK LEVEL 5":"افتح المستوى 5","UNLOCK LEVEL 6":"افتح المستوى 6"}
 };
 Object.keys(PAYME_DASH_MINER_I18N).forEach(l=>Object.assign(PAYME_DASH_I18N[l]||{},PAYME_DASH_MINER_I18N[l]));
 let paymeDashboardLanguage='en';
@@ -3633,22 +3744,22 @@ setTimeout(()=>translateDashboardText(document.body),0);
       <div class="howworks-step">
         <div class="howworks-num">2</div>
         <div>
-          <h4>Let it run for 30 minutes</h4>
-          <p>The ring around the rig fills up as time passes. You can close the app or lock your phone — the cycle keeps going in the background and picks up right where it left off when you come back.</p>
+          <h4>Let it run for 2 minutes</h4>
+          <p>Each cycle runs for 2 minutes. You can close the app or lock your phone — the server keeps the cycle running and your progress is restored when you return.</p>
         </div>
       </div>
       <div class="howworks-step">
         <div class="howworks-num">3</div>
         <div>
           <h4>Claim your Luck Tickets</h4>
-          <p>Once the ring hits 100%, hit "Claim Tickets" to collect your reward. Then you can start a brand new cycle right away.</p>
+          <p>When the 2-minute cycle finishes, it counts as one successful cycle. Resume mining until you complete 10 successful cycles, then your Luck Tickets unlock for claiming.</p>
         </div>
       </div>
       <div class="howworks-step">
         <div class="howworks-num">4</div>
         <div>
           <h4>Upgrade for bigger rewards</h4>
-          <p>Spending Gems💎 to upgrade your rig raises the range of Luck Tickets you can earn per cycle — the higher the level, the bigger the potential payout.</p>
+          <p>Invite verified friends to unlock higher miner levels. Level 2 starts at 20 verified referrals, and higher levels require more referrals and unlock larger Luck Ticket ranges.</p>
         </div>
       </div>
     </div>
@@ -3668,7 +3779,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
     </div>
     <h3 id="miningClaimTitle" class="claim-modal-title">Tickets Claimed!</h3>
     <div class="claim-modal-amount" id="claimAmount">+0.0<span>🎫 Luck Tickets</span></div>
-    <p class="claim-modal-sub" id="claimSub">Added straight to your balance. Start a new cycle any time.</p>
+    <p class="claim-modal-sub" id="claimSub">Added to your Luck Ticket balance. Complete another 10 successful cycles to unlock your next claim.</p>
     <div class="claim-modal-actions">
       <button class="claim-btn upgrade-cta" id="claimUpgradeCta" type="button">⛏️ Upgrade to get higher Luck Tickets</button>
       <button class="claim-btn dismiss" id="claimDismiss" type="button">Nice, continue</button>
@@ -3685,7 +3796,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 (function PAYMELuckMining(){
   'use strict';
 
-  const CYCLE_MS = 30 * 60 * 1000;
+  const CYCLE_MS = 2 * 60 * 1000;
   const HOLD_MS = 2000;
 
   const els = {
@@ -3695,6 +3806,10 @@ setTimeout(()=>translateDashboardText(document.body),0);
     meter: document.getElementById('miningMeterProgress'),
     percent: document.getElementById('miningPercent'),
     time: document.getElementById('miningTime'),
+    cycleCount: document.getElementById('miningCycleCount'),
+    cycleCountTop: document.getElementById('miningCycleCountTop'),
+    cycleProgress: document.getElementById('miningCycleProgress'),
+    cycleHint: document.getElementById('miningCycleHint'),
     status: document.getElementById('miningStatus'),
     hash: document.getElementById('miningHash'),
     hashrate: document.getElementById('mineHashrateStrip'),
@@ -3746,6 +3861,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
   let state = null;
   let serverOffset = 0;
+  let finishSyncInFlight = false;
   let miningStartInFlight = false;
   let uiTimer = null;
   let hashTimer = null;
@@ -3756,16 +3872,16 @@ setTimeout(()=>translateDashboardText(document.body),0);
   let toastTimer = null;
 
   const levelMeta = {
-    1:{cost:0,referrals:0,min:1,max:2,label:'FREE MINER',decimals:1,tagline:'Start free. Mine 1–2 Luck Tickets every 30 minutes.'},
-    2:{cost:0,referrals:20,min:3,max:4,label:'20 REFERRALS',decimals:0,tagline:'Invite 20 verified members to unlock Level 2.'},
-    3:{cost:0,referrals:50,min:5,max:8,label:'50 REFERRALS',decimals:0,tagline:'Reach 50 verified referrals to unlock Level 3.'},
-    4:{cost:0,referrals:100,min:9,max:13,label:'100 REFERRALS',decimals:0,tagline:'Reach 100 verified referrals to unlock Level 4.'},
-    5:{cost:0,referrals:300,min:20,max:25,label:'300 REFERRALS',decimals:0,tagline:'Reach 300 verified referrals to unlock Level 5.'},
-    6:{cost:0,referrals:500,min:26,max:35,label:'500 REFERRALS',decimals:0,tagline:'Reach 500 verified referrals to unlock Level 6.'}
+    1:{cost:0,referrals:0,min:3,max:3,label:'FREE MINER',decimals:0,tagline:'Start free. Complete 10 × 2-minute cycles to unlock 3 Luck Tickets.'},
+     2:{cost:0,referrals:20,min:6,max:6,label:'20 REFERRALS',decimals:0,tagline:'Invite 20 verified members to unlock 6 Luck Tickets per cycle.'},
+     3:{cost:0,referrals:50,min:9,max:9,label:'50 REFERRALS',decimals:0,tagline:'Reach 50 verified referrals to unlock 9 Luck Tickets per cycle.'},
+     4:{cost:0,referrals:100,min:13,max:13,label:'100 REFERRALS',decimals:0,tagline:'Reach 100 verified referrals to unlock 13 Luck Tickets per cycle.'},
+     5:{cost:0,referrals:300,min:22,max:22,label:'300 REFERRALS',decimals:0,tagline:'Reach 300 verified referrals to unlock 22 Luck Tickets per cycle.'},
+     6:{cost:0,referrals:500,min:30,max:30,label:'500 REFERRALS',decimals:0,tagline:'Reach 500 verified referrals to unlock 30 Luck Tickets per cycle.'}
   };
 
-  // Balances are always shown to exactly one decimal place, since the
-  // free rig (and Level 3) can award fractional tickets like 1.1 or 4.5.
+  // Keep the existing one-decimal balance formatter so legacy fractional
+  // ticket balances remain display-safe; current mining rewards are whole tickets.
   function fmt1(n){
     return Number(n||0).toFixed(1);
   }
@@ -3776,7 +3892,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
   function rewardRange(level){
     const m = levelMeta[level] || levelMeta[1];
-    return `${fmt(m.min)}–${fmt(m.max)}`;
+    return m.min === m.max ? fmt(m.min) : `${fmt(m.min)}–${fmt(m.max)}`;
   }
 
   function serverNow(){
@@ -3905,22 +4021,32 @@ setTimeout(()=>translateDashboardText(document.body),0);
     if(!state) return;
     const level=Number(state.level)||1;
     const meta=levelMeta[level]||levelMeta[1];
+    const completedCycles=Math.min(10,Math.max(0,Number(state.successfulCycles)||0));
+    const cyclesRequired=10;
     els.level.textContent=`LEVEL ${level}`;
-    els.levelCost.textContent=level===1?(typeof window.dashboardT==='function'?dashboardT('FREE MINER'):'FREE MINER'):`${meta.referrals.toLocaleString()} ${typeof window.dashboardT==='function'?dashboardT('REFERRALS'):'REFERRALS'}`; 
+    els.levelCost.textContent=level===1?(typeof window.dashboardT==='function'?dashboardT('FREE MINER'):'FREE MINER'):`${meta.referrals.toLocaleString()} ${typeof window.dashboardT==='function'?dashboardT('REFERRALS'):'REFERRALS'}`;
     els.range.textContent=rewardRange(level);
     els.tickets.textContent=fmt1(state.luckTickets);
+
+    if(els.cycleCount) els.cycleCount.textContent=`${completedCycles}/${cyclesRequired}`;
+    if(els.cycleCountTop) els.cycleCountTop.textContent=`${completedCycles} / ${cyclesRequired}`;
+    if(els.cycleProgress) els.cycleProgress.style.width=`${completedCycles/cyclesRequired*100}%`;
+    if(els.cycleHint) els.cycleHint.textContent=completedCycles>=10
+      ? '10 successful cycles complete — your Luck Tickets are ready to claim!'
+      : `${10-completedCycles} successful cycle${10-completedCycles===1?'':'s'} left before your Luck Tickets unlock.`;
+
     const status=String(state.status||'offline');
     if(status==='mining'){
       els.rig.classList.remove('starting');
       const start=Date.parse(state.startAt||'');
       const complete=Date.parse(state.completeAt||'');
       const now=serverNow();
-      // Clamp with the same ceiling everywhere: progress can approach 1
-      // but the ring, the % label and the "ready" state all flip over
-      // together only once `now` actually reaches `complete` — no early
-      // visual completion, no lagging behind the real finish time.
       const progress=Math.max(0,Math.min(1,(now-start)/Math.max(1,complete-start)));
       const remaining=Math.max(0,complete-now);
+      if(remaining<=0 && !finishSyncInFlight){
+        finishSyncInFlight=true;
+        loadState().finally(()=>{finishSyncInFlight=false;});
+      }
       els.meter.style.strokeDashoffset=String(RING_CIRC - (RING_CIRC*progress));
       els.percent.textContent=Math.floor(progress*100)+'%';
       els.time.textContent=formatTime(remaining)+' remaining';
@@ -3932,52 +4058,64 @@ setTimeout(()=>translateDashboardText(document.body),0);
       els.claim.disabled=true;
       els.upgrade.disabled=true;
       els.holdLabel.innerHTML='Mining<br>Active';
-      els.foot.textContent='ENERGY ACTIVE • Hashing continuously • Keeps running in the background';
-      if(els.hashSub) els.hashSub.textContent='Engine running — keeps going even if you leave the app';
+      els.foot.textContent=`Cycle ${completedCycles+1}/10 is running. Keep the rig active for 2 minutes.`;
+      if(els.hashSub) els.hashSub.textContent='Engine running — this cycle completes in 2 minutes';
       if(!els.rig.classList.contains('is-mining')) startVisualMining();
     }else if(status==='completed'){
       els.meter.style.strokeDashoffset='0';
       els.percent.textContent='100%';
-      els.time.textContent=typeof window.dashboardT==='function'?dashboardT('Cycle complete'):'Cycle complete';
+      els.time.textContent='10 cycles complete';
       els.status.textContent=typeof window.dashboardT==='function'?dashboardT('READY TO CLAIM'):'READY TO CLAIM';
       els.status.dataset.state='ready';
-      els.eta.textContent=typeof window.dashboardT==='function'?dashboardT('Claim now'):'Claim now';
+      els.eta.textContent='Claim now';
       els.hold.disabled=true;
       els.hold.classList.remove('ready-pulse');
       els.hold.classList.add('cycle-complete');
       els.claim.disabled=false;
       els.claim.classList.add('ready');
       els.upgrade.disabled=true;
-      els.holdLabel.innerHTML=(typeof window.dashboardT==='function'?dashboardT('Cycle Complete'):'Cycle Complete').replace(' ','<br>',1);
-      els.foot.textContent=`Your cycle finished. Claim ${fmt1(state.reward)} Luck Tickets to unlock the next mining cycle.`;
+      els.holdLabel.innerHTML='CLAIM<br>READY';
+      els.foot.textContent=`10 successful cycles complete. Claim ${fmt1(state.reward)} Luck Tickets to reset your run.`;
       stopVisualMining();
       els.hash.textContent='0x_ready';
       if(els.hashrate) els.hashrate.textContent='⚡ 000.0 KH/s';
-      if(els.hashSub) els.hashSub.textContent='Engine parked — claim to reset it';
-      if(els.visibleHashSub) els.visibleHashSub.textContent='Engine parked — claim to reset it';
+      if(els.hashSub) els.hashSub.textContent='Engine parked — 10-cycle run complete';
+      if(els.visibleHashSub) els.visibleHashSub.textContent='10-cycle run complete — claim your tickets';
       if(els.visibleHashrate) els.visibleHashrate.textContent='⚡ 000.0 KH/s';
       if(els.visibleHash) els.visibleHash.textContent='0x_ready';
     }else{
       els.meter.style.strokeDashoffset=String(RING_CIRC);
       els.percent.textContent='0%';
-      els.time.textContent='30:00 cycle';
-      els.status.textContent='OFFLINE';
-      els.status.dataset.state='offline';
-      els.eta.textContent='Ready';
-      els.hold.disabled=false;
+      els.time.textContent=completedCycles>=10?'Claim your tickets':'02:00 cycle';
+      els.status.textContent=completedCycles>=10?'READY TO CLAIM':'READY';
+      els.status.dataset.state=completedCycles>=10?'ready':'offline';
+      els.eta.textContent=completedCycles>=10?'Claim now':'Resume';
+      els.hold.disabled=completedCycles>=10;
       els.hold.classList.remove('cycle-complete');
-      els.hold.classList.add('ready-pulse');
-      els.claim.disabled=true;
-      els.claim.classList.remove('ready');
-      els.upgrade.disabled=false;
-      els.holdLabel.innerHTML='Hold to<br>Mine';
-      els.foot.textContent='Hold for 2 seconds to start your rig. Your 30-minute cycle keeps running even if you close the app.';
+      if(completedCycles>=10){
+        els.hold.classList.remove('ready-pulse');
+        els.claim.disabled=false;
+        els.claim.classList.add('ready');
+        els.upgrade.disabled=true;
+        els.holdLabel.innerHTML='CLAIM<br>READY';
+        els.foot.textContent=`Your 10 successful cycles are complete. Claim ${fmt1(state.reward||0)} Luck Tickets.`;
+      }else{
+        els.hold.classList.add('ready-pulse');
+        els.claim.disabled=true;
+        els.claim.classList.remove('ready');
+        els.upgrade.disabled=false;
+        els.holdLabel.innerHTML=completedCycles>0?'RESUME<br>MINING':'HOLD TO<br>ACTIVATE';
+        els.foot.textContent=completedCycles>0
+          ? `Cycle ${completedCycles}/10 complete. Hold again to resume mining.`
+          : 'Hold for 2 seconds to start your first 2-minute mining cycle.';
+      }
       stopVisualMining();
       els.hash.textContent='0x000000_idle';
       if(els.hashrate) els.hashrate.textContent='⚡ 000.0 KH/s';
-      if(els.hashSub) els.hashSub.textContent='Idle — hold below to activate';
+      if(els.hashSub) els.hashSub.textContent=completedCycles>0?'Waiting for the next 2-minute cycle':'Idle — hold below to activate';
     }
   }
+
 
   const levelBadge = {1:'🔧',2:'⚙️',3:'🚀',4:'💎',5:'👑',6:'🔥'};
 
@@ -4076,7 +4214,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
 
   function openClaimResult(reward){
     if(els.claimAmount) els.claimAmount.innerHTML = `+${fmt1(reward)}<span>🎫 Luck Tickets</span>`;
-    if(els.claimSub) els.claimSub.textContent = 'Added straight to your balance. Start a new cycle any time.';
+    if(els.claimSub) els.claimSub.textContent = 'Added to your Luck Ticket balance. Complete another 10 successful cycles to unlock your next claim.';
     spawnConfetti();
     els.claimModal.classList.add('active');
     els.claimModal.setAttribute('aria-hidden','false');
