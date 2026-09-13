@@ -95,7 +95,7 @@ const scene=document.getElementById('authScene'), modal=document.getElementById(
 let initData='', pending=false;
 function startParam(){try{return String(tg?.initDataUnsafe?.start_param||'').trim().toUpperCase()}catch(e){return ''}}
 function setText(a,b){if(title)title.textContent=a;if(sub)sub.textContent=b}
-function showLanguage(){pending=true;document.body.classList.remove('auth-loading');setText('One quick choice…','Choose your language to finish setting up PAYME.');modal.classList.add('show');modal.setAttribute('aria-hidden','false')}
+function showLanguage(){pending=false;document.body.classList.remove('auth-loading');setText('One quick choice…','Choose your language to finish setting up PAYME.');modal.classList.add('show');modal.setAttribute('aria-hidden','false')}
 async function authenticate(language){
   if(!language) pending=false;
   if(!initData){setText('Telegram authentication required','Please reopen PAYME from Telegram.');return}
