@@ -3683,61 +3683,51 @@ const PAYME_BOT_MESSAGES = {
   },
 
   inactivityReminder: {
-    en: (isFirst) =>
-      `👋 <b>We miss you on PAYME!</b>\n\n` +
-      (isFirst
-        ? `It's been 2 hours since you last logged in — log in now to claim your rewards and much more:\n\n`
-        : `You haven't logged in in a while — log in now to claim your rewards and much more:\n\n`) +
+    en: () =>
+      `💎 <b>Your rewards are piling up on PAYME!</b>\n\n` +
+      `There are Gems💎 and Luck Tickets🎟️ waiting for you right now:\n\n` +
       `⛏️ Mining rig payouts\n` +
       `🎁 Daily login rewards\n` +
       `🎟️ Luck Tickets\n` +
       `🕹️ Tap Rush leaderboard prizes\n` +
       `👥 Referral earnings\n\n` +
-      `Tap below to jump back in. 💎`,
-    ru: (isFirst) =>
-      `👋 <b>Мы скучаем по вам на PAYME!</b>\n\n` +
-      (isFirst
-        ? `Прошло 2 часа с вашего последнего входа — зайдите сейчас, чтобы забрать награды и не только:\n\n`
-        : `Вы давно не заходили — зайдите сейчас, чтобы забрать награды и не только:\n\n`) +
+      `Log in and claim them before they slip away. 💎`,
+    ru: () =>
+      `💎 <b>Ваши награды растут на PAYME!</b>\n\n` +
+      `Гемы💎 и Билеты удачи🎟️ уже ждут вас:\n\n` +
       `⛏️ Выплаты с майнинг-установки\n` +
       `🎁 Ежедневные награды за вход\n` +
       `🎟️ Билеты удачи\n` +
       `🕹️ Призы рейтинга Tap Rush\n` +
       `👥 Реферальный доход\n\n` +
-      `Нажмите ниже, чтобы вернуться. 💎`,
-    es: (isFirst) =>
-      `👋 <b>¡Te extrañamos en PAYME!</b>\n\n` +
-      (isFirst
-        ? `Han pasado 2 horas desde tu último inicio de sesión — entra ahora para reclamar tus recompensas y mucho más:\n\n`
-        : `Hace tiempo que no inicias sesión — entra ahora para reclamar tus recompensas y mucho más:\n\n`) +
+      `Войдите и заберите их, пока не поздно. 💎`,
+    es: () =>
+      `💎 <b>¡Tus recompensas se acumulan en PAYME!</b>\n\n` +
+      `Hay Gemas💎 y Boletos de la Suerte🎟️ esperándote ahora mismo:\n\n` +
       `⛏️ Pagos del equipo de minería\n` +
       `🎁 Recompensas diarias por iniciar sesión\n` +
       `🎟️ Boletos de la Suerte\n` +
       `🕹️ Premios del ranking de Tap Rush\n` +
       `👥 Ganancias por referidos\n\n` +
-      `Toca abajo para volver. 💎`,
-    hi: (isFirst) =>
-      `👋 <b>हमें PAYME पर आपकी कमी खल रही है!</b>\n\n` +
-      (isFirst
-        ? `आपको लॉग इन किए 2 घंटे हो गए हैं — अभी लॉग इन करें और अपने इनाम व और भी बहुत कुछ पाएं:\n\n`
-        : `आपने काफी समय से लॉग इन नहीं किया है — अभी लॉग इन करें और अपने इनाम व और भी बहुत कुछ पाएं:\n\n`) +
+      `Entra y reclámalos antes de que se te escapen. 💎`,
+    hi: () =>
+      `💎 <b>PAYME पर आपके इनाम बढ़ रहे हैं!</b>\n\n` +
+      `अभी Gems💎 और Luck Tickets🎟️ आपका इंतज़ार कर रहे हैं:\n\n` +
       `⛏️ माइनिंग रिग का भुगतान\n` +
       `🎁 दैनिक लॉगिन इनाम\n` +
       `🎟️ Luck Tickets\n` +
       `🕹️ Tap Rush लीडरबोर्ड इनाम\n` +
       `👥 रेफ़रल कमाई\n\n` +
-      `वापस आने के लिए नीचे टैप करें। 💎`,
-    ar: (isFirst) =>
-      `👋 <b>اشتقنا إليك في PAYME!</b>\n\n` +
-      (isFirst
-        ? `مرّت ساعتان منذ آخر تسجيل دخول لك — سجّل الدخول الآن لتحصيل مكافآتك وأكثر من ذلك بكثير:\n\n`
-        : `لم تسجّل الدخول منذ فترة — سجّل الدخول الآن لتحصيل مكافآتك وأكثر من ذلك بكثير:\n\n`) +
+      `लॉग इन करें और इन्हें हाथ से जाने न दें। 💎`,
+    ar: () =>
+      `💎 <b>مكافآتك تتراكم في PAYME!</b>\n\n` +
+      `هناك جواهر💎 وبطاقات حظ🎟️ بانتظارك الآن:\n\n` +
       `⛏️ أرباح جهاز التعدين\n` +
       `🎁 مكافآت الدخول اليومية\n` +
       `🎟️ بطاقات الحظ\n` +
       `🕹️ جوائز لوحة صدارة Tap Rush\n` +
       `👥 أرباح الإحالة\n\n` +
-      `اضغط أدناه للعودة. 💎`
+      `سجّل الدخول واحصل عليها قبل فوات الأوان. 💎`
   },
 
   inactivityReminderButton: {
@@ -3951,35 +3941,39 @@ setInterval(
 // Every INACTIVITY_SWEEP_INTERVAL_MS (2 hours), DM anyone who hasn't opened
 // the Mini App (i.e. hit /api/auth/telegram-signup) in over 2 hours,
 // pointing them back to the earn page. Re-pinging is capped at once per
-// INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt.
+// INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt. This runs
+// forever on that cadence: whether a user is brand new, an old account
+// that's never been swept before, or someone who opens the dashboard and
+// leaves again, the same rule applies — 2 hours of no login since their
+// last visit (or last reminder) and they get pinged again.
+//
+// FILTERING HAPPENS IN NODE, NOT IN THE QUERY. An earlier version pushed
+// the "lastLoginAt overdue" / "not already reminded" checks into the
+// Supabase query as two chained `.or()` calls on JSON-path filters. That
+// combination is fragile — PostgREST/postgrest-js does not reliably AND
+// together two separately-chained `.or()` groups on the same table, so
+// the query could silently return zero rows (or the wrong rows) and no
+// reminder ever went out. This version instead pages through every user
+// with a telegram_id and decides eligibility with plain JS — a bit more
+// data over the wire per sweep, but correct, and sweeps only run once
+// every 2 hours so the extra egress is negligible.
 //
 // OLD ACCOUNTS: accounts created before lastLoginAt/lastInactivityReminderAt
-// existed have neither field set. A plain `.lte()`/`.lt()` filter on a
-// missing JSON key evaluates to NULL in Postgres (i.e. "unknown"), which
-// silently drops those rows from the WHERE clause forever — so old users
-// would never get a first reminder. Both filters below are `.or()`'d with
-// an `is.null` branch so "never tracked" counts as "overdue"/"never
-// reminded" instead of being excluded. `created_at` is pulled in as the
-// fallback activity timestamp for anyone with no lastLoginAt at all.
+// existed have neither field set. `created_at` is used as the fallback
+// "last known activity" timestamp for those, so they're treated as
+// overdue (not skipped forever) the first time this runs.
 //
-// EGRESS: lastLoginAt/lastInactivityReminderAt are stored as epoch-ms
-// numbers, and every epoch-ms value between now and the year 2286 is
-// exactly 13 digits — so, like the ISO strings above, they sort correctly
-// as plain text. Both thresholds are therefore pushed into the query
-// (?lte./lt.) instead of paging through the entire users table and
-// filtering client-side, so only users who are actually due ever cross
-// the wire. The write-back skips the old "re-read then write" step and
-// instead does a single guarded update keyed on the exact lastLoginAt we
-// read (or its absence), so a login that lands mid-sweep makes the write
-// a no-op rather than overwriting a fresher timestamp.
-async function runInactivityReminderSweep() {
+// forceAll: used for the one-time "just redeployed" broadcast — every
+// user with a telegram_id gets the reminder regardless of how recently
+// they logged in or were last reminded. Normal 2-hourly sweeps call this
+// with no arguments and go through the full eligibility check.
+async function runInactivityReminderSweep({ forceAll = false } = {}) {
 
   if (!TELEGRAM_BOT_TOKEN) return;
 
   const now = Date.now();
-  const loginCutoff = String(now - INACTIVITY_REMINDER_THRESHOLD_MS);
-  const reminderCutoff = String(now - INACTIVITY_REMINDER_REPEAT_MS);
   let offset = 0;
+  let sent = 0;
 
   try {
 
@@ -3989,8 +3983,7 @@ async function runInactivityReminderSweep() {
         .from('users')
         .select('id, telegram_id, daily_reward, created_at')
         .not('telegram_id', 'is', null)
-        .or(`daily_reward->>lastLoginAt.is.null,daily_reward->>lastLoginAt.lte.${loginCutoff}`)
-        .or(`daily_reward->>lastInactivityReminderAt.is.null,daily_reward->>lastInactivityReminderAt.lt.${reminderCutoff}`)
+        .order('id', { ascending: true })
         .range(offset, offset + REMINDER_SWEEP_PAGE_SIZE - 1);
 
       if (error) {
@@ -4014,25 +4007,25 @@ async function runInactivityReminderSweep() {
           // Old accounts with no lastLoginAt ever stamped fall back to
           // their signup time, so they're treated as overdue rather than
           // skipped forever for lacking the field.
-          const lastLoginAt = Number(rawLastLoginAt) ||
-            (row.created_at ? new Date(row.created_at).getTime() : 0) ||
-            0;
+          const lastLoginAt = Number.isFinite(Number(rawLastLoginAt)) && rawLastLoginAt !== null
+            ? Number(rawLastLoginAt)
+            : (row.created_at ? new Date(row.created_at).getTime() : 0) || 0;
 
-          // Belt-and-braces re-check — the query already narrowed this to
-          // a small set, so re-validating in Node is essentially free.
-          if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
-          if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
+          if (!forceAll) {
+            if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
+            if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
+          }
 
           const lang = resolveBotLanguage(daily);
-          const isFirstReminder = !lastReminderAt;
 
-          const sent = await sendTelegramUserMessage(
+          const delivered = await sendTelegramUserMessage(
             telegramId,
-            PAYME_BOT_MESSAGES.inactivityReminder[lang](isFirstReminder),
+            PAYME_BOT_MESSAGES.inactivityReminder[lang](),
             { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.inactivityReminderButton[lang]) }
           );
 
-          if (!sent) continue;
+          if (!delivered) continue;
+          sent++;
 
           const updatedDaily = { ...daily, lastInactivityReminderAt: now };
 
@@ -4055,6 +4048,13 @@ async function runInactivityReminderSweep() {
             console.error('Inactivity reminder sweep write error:', row.id, writeError);
           }
 
+          // Telegram allows roughly ~30 messages/second across all chats.
+          // A small per-message delay keeps a forceAll run (which can hit
+          // every user in one pass) comfortably under that limit.
+          if (forceAll) {
+            await new Promise(resolve => setTimeout(resolve, 40));
+          }
+
         } catch (rowErr) {
           console.error('Inactivity reminder sweep row error:', row.id, rowErr.message);
         }
@@ -4066,11 +4066,29 @@ async function runInactivityReminderSweep() {
 
     }
 
+    if (forceAll) {
+      console.log(`Inactivity reminder sweep (forceAll): sent ${sent} messages.`);
+    }
+
   } catch (err) {
     console.error('Inactivity reminder sweep error:', err.message);
   }
 
 }
+
+// One-time broadcast, 15 seconds after every server boot (i.e. every
+// redeploy/restart): DM every user with a telegram_id — old and new,
+// active or not — pointing them back to the app. After this one pass,
+// the regular 2-hourly sweep below takes over its normal per-user cadence
+// forever (2 hours of no login since their last visit or last reminder).
+setTimeout(
+  () => {
+    runInactivityReminderSweep({ forceAll: true }).catch(
+      err => console.error('Inactivity reminder sweep (forceAll) error:', err)
+    );
+  },
+  15 * 1000
+).unref();
 
 setInterval(
   () => {
