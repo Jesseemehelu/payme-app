@@ -3971,7 +3971,7 @@ setInterval(
 // end-of-sweep summary line (rows scanned / eligible / sent / skipped /
 // errors), plus a per-user debug line for every message actually sent, so
 // production logs show exactly when a sweep ran, why, and what it did.
-async function runInactivityReminderSweep({ reason = 'scheduled' } = {}) {
+async function runInactivityReminderSweep({ reason = 'scheduled', forceAll = false } = {}) {
 
   const startedAt = Date.now();
 
@@ -3980,7 +3980,7 @@ async function runInactivityReminderSweep({ reason = 'scheduled' } = {}) {
     return;
   }
 
-  console.log(`Inactivity reminder sweep [${reason}]: starting at ${new Date(startedAt).toISOString()}.`);
+  console.log(`Inactivity reminder sweep [${reason}]: starting at ${new Date(startedAt).toISOString()}${forceAll ? ' (forceAll)' : ''}.`);
 
   const now = Date.now();
   let offset = 0;
@@ -4033,13 +4033,15 @@ async function runInactivityReminderSweep({ reason = 'scheduled' } = {}) {
             ? Number(rawLastLoginAt)
             : (row.created_at ? new Date(row.created_at).getTime() : 0) || 0;
 
-          if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) {
-            skippedNotOverdue++;
-            continue;
-          }
-          if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) {
-            skippedRecentlyReminded++;
-            continue;
+          if (!forceAll) {
+            if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) {
+              skippedNotOverdue++;
+              continue;
+            }
+            if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) {
+              skippedRecentlyReminded++;
+              continue;
+            }
           }
 
           const lang = resolveBotLanguage(daily);
@@ -4083,6 +4085,13 @@ async function runInactivityReminderSweep({ reason = 'scheduled' } = {}) {
             console.error('Inactivity reminder sweep write error:', row.id, writeError);
           }
 
+          // Telegram allows roughly ~30 messages/second across all chats.
+          // A small per-message delay keeps a forceAll run (which can hit
+          // every user in one pass) comfortably under that limit.
+          if (forceAll) {
+            await new Promise(resolve => setTimeout(resolve, 40));
+          }
+
         } catch (rowErr) {
           rowErrors++;
           console.error('Inactivity reminder sweep row error:', row.id, rowErr.message);
@@ -4109,9 +4118,32 @@ async function runInactivityReminderSweep({ reason = 'scheduled' } = {}) {
 
 }
 
-// Recurring sweep only — there is no "fire once on server boot/restart"
-// broadcast. A redeploy/restart just re-arms this interval; it does not
-// trigger a send by itself, so restarting the process never re-pings users.
+// BUG THIS FIXES: setInterval does NOT fire on a leading edge — it only
+// fires after the full INACTIVITY_SWEEP_INTERVAL_MS (3h) has elapsed. If
+// the process redeploys/restarts more often than every 3 hours (normal
+// on most hosts, since every deploy restarts the process), the timer
+// keeps getting torn down and re-armed before it ever reaches 3 hours,
+// so the sweep could run rarely or never. The setTimeout below forces a
+// real send 15s after every boot — restart or fresh deploy — so there is
+// always a leading-edge run, and the recurring setInterval after it
+// covers the steady-state 3-hourly cadence from then on.
+//
+// The 15s boot run uses forceAll: true — every user with a telegram_id
+// gets pinged once on that pass regardless of how recently they logged
+// in or were last reminded (a per-message delay inside the sweep keeps
+// this under Telegram's rate limit). After that one pass, the recurring
+// sweep below goes back to the normal 3-hourly per-user eligibility
+// check, so it won't re-broadcast to everyone again until they're
+// actually 3 hours idle.
+setTimeout(
+  () => {
+    runInactivityReminderSweep({ reason: 'restart', forceAll: true }).catch(
+      err => console.error('Inactivity reminder sweep (restart) error:', err)
+    );
+  },
+  15 * 1000
+).unref();
+
 setInterval(
   () => {
     runInactivityReminderSweep({ reason: 'scheduled' }).catch(
