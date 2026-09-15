@@ -8,72 +8,39 @@
 
   <!-- Monetag rewarded interstitial SDK, same zone used across the app. -->
   <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-  <!-- Monetag in-app interstitial: first attempt 10s after entering this
-       page, then up to 2 ads per rolling 5-minute window with a 45s
-       minimum gap between them. The budget is tracked in localStorage
-       (shared across all pages of the app) instead of the SDK's own
-       per-page frequency/capping settings, so navigating to another page
-       does NOT reset the count or the gap timer — it keeps counting from
-       where it left off. Identical script is included on every page. -->
+  <!-- Monetag in-app interstitial: initialize ONCE per page load with the
+       SDK's own inAppSettings (frequency/capping/interval/timeout), and
+       let Monetag's internal scheduler handle when ads actually display.
+       A previous version of this script called show_11688228({type:'inApp'})
+       on a repeating custom timer (every 45s, using a localStorage-tracked
+       budget) — Monetag's own integration docs explicitly call this out as
+       a mistake: calling show_XXX({type:'inApp'}) more than once resets the
+       SDK's internal in-app logic and interrupts the ad flow, which is why
+       no interstitial was ever actually showing. frequency/capping/interval
+       below reproduce the same intended cadence (≤2 ads, ~5-6 min window,
+       45s min gap, first ad after 10s) but as config the SDK itself reads,
+       via a single call. Identical script is included on every page. -->
   <script>
-  (function startInAppInterstitial(){
+  (function initInAppInterstitial(){
     var SHOW_FN = 'show_11688228';
-    var STORAGE_KEY = 'paymeAdSchedule';
-    var PAGE_DELAY_MS = 10 * 1000;   // wait 10s after entering this page
-    var WINDOW_MS = 5 * 60 * 1000;   // rolling window for the frequency cap
-    var MAX_PER_WINDOW = 2;          // max ads inside that window
-    var MIN_GAP_MS = 45 * 1000;      // minimum gap between two ads
-    var pageEnteredAt = Date.now();
 
-    function readState(){
+    function init(){
       try{
-        var raw = localStorage.getItem(STORAGE_KEY);
-        var state = raw ? JSON.parse(raw) : null;
-        if(!state || !Array.isArray(state.shows)) state = {shows: []};
-        return state;
-      }catch(e){ return {shows: []}; }
-    }
-    function writeState(state){
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
-    }
-    function pruneShows(shows, now){
-      return shows.filter(function(t){ return (now - t) < WINDOW_MS; });
-    }
-
-    function attempt(){
-      var now = Date.now();
-      var state = readState();
-      state.shows = pruneShows(state.shows, now);
-
-      var pageDelayLeft = PAGE_DELAY_MS - (now - pageEnteredAt);
-      var lastShow = state.shows.length ? state.shows[state.shows.length - 1] : 0;
-      var gapLeft = lastShow ? (MIN_GAP_MS - (now - lastShow)) : 0;
-      var underCap = state.shows.length < MAX_PER_WINDOW;
-
-      if(pageDelayLeft <= 0 && gapLeft <= 0 && underCap){
-        if(typeof window[SHOW_FN] === 'function'){
-          try{
-            window[SHOW_FN]({ type: 'inApp' });
-            state.shows.push(now);
-            writeState(state);
-          }catch(e){}
-        }
-        setTimeout(attempt, MIN_GAP_MS);
-        return;
-      }
-
-      var waits = [];
-      if(pageDelayLeft > 0) waits.push(pageDelayLeft);
-      if(gapLeft > 0) waits.push(gapLeft);
-      if(!underCap){
-        var oldest = state.shows[0];
-        waits.push((WINDOW_MS - (now - oldest)) + 250);
-      }
-      setTimeout(attempt, Math.max(500, Math.min.apply(null, waits)));
+        window[SHOW_FN]({
+          type: 'inApp',
+          inAppSettings: {
+            frequency: 2,     // max ads shown per capping window
+            capping: 0.1,     // capping window length, in HOURS (~6 min)
+            interval: 45,     // min seconds between two ad impressions
+            timeout: 10,      // seconds after load before the first ad can show
+            everyPage: false  // this script already runs fresh on every page load
+          }
+        });
+      }catch(e){}
     }
 
     function waitForSdk(retries){
-      if (typeof window[SHOW_FN] === 'function') { attempt(); return; }
+      if (typeof window[SHOW_FN] === 'function') { init(); return; }
       if (retries > 0) setTimeout(function(){ waitForSdk(retries - 1); }, 200);
     }
     waitForSdk(50);
