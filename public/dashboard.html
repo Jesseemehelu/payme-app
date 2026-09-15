@@ -480,17 +480,6 @@ header{
 .invite-how-num{flex:none;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:.62rem;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple))}
 
 /* ---------- SIDE COLUMN ---------- */
-.earners-cta-card{
-  display:block;width:100%;text-align:left;padding:18px;border-radius:var(--radius-lg);
-  background:linear-gradient(150deg,#fff4e0,#ffe4c2);border:1px solid #ffd699;
-  box-shadow:var(--shadow-card);
-}
-.earners-cta-badge{display:inline-block;font-size:.6rem;font-weight:900;letter-spacing:.03em;color:#a1590a;background:rgba(255,255,255,.6);padding:5px 10px;border-radius:999px}
-.earners-cta-title{margin-top:10px;font-size:.98rem;font-weight:900;color:#3a2400}
-.earners-cta-sub{margin-top:5px;font-size:.72rem;color:#6b4a1a;line-height:1.5}
-.earners-cta-action{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:.72rem;font-weight:900;color:#a1590a}
-.earners-cta-arrow{transition:transform .2s ease}
-.earners-cta-card:hover .earners-cta-arrow{transform:translateX(3px)}
 
 .coming-card{background:var(--white)}
 .coming-label{font-size:.6rem;font-weight:900;letter-spacing:.06em;color:var(--blue)}
@@ -944,7 +933,6 @@ body.modal-open>*:not(.modal-overlay):not(.daily-overlay):not(.bonus-overlay):no
 <li><a href="/dashboard.html" class="active">Dashboard</a></li>
 <li><a href="/earn.html">Earn</a></li>
 <li><a href="#referrals">Referrals</a></li>
-<li><a href="/leaderboard.html">Leaderboard</a></li>
 </ul>
 <div class="header-actions">
 <a href="https://t.me/paymesupportline" target="_blank" class="support-btn"
@@ -1244,14 +1232,6 @@ id="depositBalanceText" class="loading-skeleton balance-loading" aria-label="Loa
 <!-- SIDE -->
 <div class="side-col">
 
-<!-- TOP EARNERS + WEEKLY CHALLENGE CTA -->
-<button class="earners-cta-card" id="leaderboard" onclick="goToLeaderboard(this)">
-<span class="earners-cta-badge">🔥 Weekly Challenge Live</span>
-<div class="earners-cta-title">Top Earners This Week</div>
-<div class="earners-cta-sub">See who's leading, find your own rank, and check what it takes to win this week's referral prizes.</div>
-<span class="earners-cta-action">View Leaderboard <span class="earners-cta-arrow">→</span></span>
-</button>
-
 <!-- COMING SOON -->
 <section class="card coming-card">
 <div class="coming-label"># PAYME</div>
@@ -1418,9 +1398,6 @@ Awesome ✨
   </a>
   <a href="/dashboard.html#referrals" class="nav-item">
     <span class="nav-icon">🤝</span><span>Refer</span>
-  </a>
-  <a href="/leaderboard.html" class="nav-item">
-    <span class="nav-icon">🏆</span><span>Ranking</span>
   </a>
 </nav>
 
@@ -1854,19 +1831,6 @@ window.open(
 whatsappUrl,
 "_blank"
 );
-
-}
-
-/* LEADERBOARD */
-async function goToLeaderboard(btn){
-
-if(btn){
-setButtonLoading(btn);
-await waitForButtonLoader(360);
-}
-
-window.location.href =
-"/leaderboard.html";
 
 }
 
@@ -2334,8 +2298,7 @@ const dashboardTutorialSteps = [
     {target:"balance-card",icon:"💳",title:"Your wallet",text:"Your wallet shows your available Gems, earnings and deposit balance. Deposit, withdraw or open your transaction history here.",position:"bottom"},
     {target:"luckMining",icon:"⛏️",title:"Mine Luck Tickets",text:"Press and hold the glowing mining button for 2 seconds. One mining cycle lasts 2 minutes and can continue while you are away.",position:"top"},
     {target:"referrals",icon:"👥",title:"Invite to unlock",text:"Invite friends with your referral link. Verified referrals help you unlock higher miner levels and bigger Luck Ticket rewards.",position:"top"},
-    {target:'a[href="/earn.html"]',icon:"💎",title:"Earn",text:"Use the Earn section to find available earning opportunities, including Luck Ticket mining and other rewards.",position:"top"},
-    {target:'a[href="/leaderboard.html"]',icon:"🏆",title:"Ranking",text:"Open Ranking to see the leaderboard, your position and the weekly referral competition.",position:"top"}
+    {target:'a[href="/earn.html"]',icon:"💎",title:"Earn",text:"Use the Earn section to find available earning opportunities, including Luck Ticket mining and other rewards.",position:"top"}
 ];
 let dashboardTutorialIndex = 0;
 let dashboardTutorialOpen = false;
@@ -2356,12 +2319,12 @@ function findTutorialTarget(selector){
      if(!byId && selector === "luckMining") { const e=document.getElementById("luckMining"); if(e) return e; }
     if(byId) return byId;
 
-    /* Some nav links (Earn, Refer, Ranking) exist twice in the DOM —
+    /* Some nav links (Earn, Refer) exist twice in the DOM —
        once in the hidden .desktop-nav list and once in the visible
        .mobile-nav bar. querySelector() alone always returns the first
        match in document order, which is the hidden desktop-nav copy,
        so its zero-size rect broke the spotlight/card positioning for
-       those three steps. Walk every match and use the first one that
+       those steps. Walk every match and use the first one that
        is actually visible on screen. */
     const candidates = document.querySelectorAll(selector);
     for(const candidate of candidates){
@@ -3465,15 +3428,6 @@ function txTitle(tx){
     return "Telegram Advertising";
   }
 
-  if(
-    /weekly_referral_reward|weekly referral challenge/.test(lower)
-  ){
-    if(/1st\s*place/.test(lower)) return "Weekly Referral — 1st Place";
-    if(/2nd\s*place/.test(lower)) return "Weekly Referral — 2nd Place";
-    if(/3rd\s*place/.test(lower)) return "Weekly Referral — 3rd Place";
-    return "Weekly Referral Prize";
-  }
-
   if(txIsTapRush(tx)){
     if(/contest|challenge|1st\s*place|2nd\s*place|3rd\s*place/.test(fullText)){
       if(/1st\s*place/.test(fullText)) return "Tap Rush — 1st Place Prize";
@@ -4448,7 +4402,7 @@ setTimeout(()=>translateDashboardText(document.body),0);
     }catch(err){
       if(err.code==='REFERRALS_REQUIRED'){
         closeUpgrade();
-        openReferralModal(err);
+        openReferralModal(err.payload);
       }else{
         showToast('Upgrade unavailable',err.message||'Please try again.');
       }
