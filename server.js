@@ -1189,7 +1189,7 @@ async function getUserMiningWithBalance(id) {
 
   const { data, error } = await supabase
     .from('users')
-    .select('id, daily_reward, balance, deposit_balance, withdrawable_balance')
+    .select('id, daily_reward, balance, deposit_balance, withdrawable_balance, total_referrals, successful_referrals')
     .eq('id', String(id))
     .maybeSingle();
 
