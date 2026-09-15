@@ -54,35 +54,75 @@
 
 <!-- Monetag rewarded interstitial SDK, same zone used across the app. -->
 <script src='//libtl.com/sdk.js' data-zone='11688228' data-sdk='show_11688228'></script>
-<!-- Monetag in-app interstitial: first ad 6s after this page loads, then
-     up to 2 ads per 4-minute window with a 30s minimum gap between them.
-     everyPage:true means the timing/frequency budget resets fresh every
-     time this page is loaded, instead of carrying over from a previous
-     visit — so leaving the page and coming back starts the 6s-delay/
-     2-per-4-min cycle over again rather than remembering prior ad shows.
-     Polls briefly for show_11688228 since the SDK script above finishes
-     initializing asynchronously. -->
+<!-- Monetag in-app interstitial: first attempt 10s after entering this
+     page, then up to 2 ads per rolling 5-minute window with a 45s
+     minimum gap between them. The budget is tracked in localStorage
+     (shared across all pages of the app) instead of the SDK's own
+     per-page frequency/capping settings, so navigating to another page
+     does NOT reset the count or the gap timer — it keeps counting from
+     where it left off. Identical script is included on every page. -->
 <script>
 (function startInAppInterstitial(){
-  function tryStart(retries){
-    if (typeof window.show_11688228 === 'function') {
-      try{
-        window.show_11688228({
-          type: 'inApp',
-          inAppSettings: {
-            frequency: 2,
-            capping: 4 / 60,
-            interval: 30,
-            timeout: 6,
-            everyPage: true
-          }
-        });
-      }catch(e){}
+  var SHOW_FN = 'show_11688228';
+  var STORAGE_KEY = 'paymeAdSchedule';
+  var PAGE_DELAY_MS = 10 * 1000;   // wait 10s after entering this page
+  var WINDOW_MS = 5 * 60 * 1000;   // rolling window for the frequency cap
+  var MAX_PER_WINDOW = 2;          // max ads inside that window
+  var MIN_GAP_MS = 45 * 1000;      // minimum gap between two ads
+  var pageEnteredAt = Date.now();
+
+  function readState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var state = raw ? JSON.parse(raw) : null;
+      if(!state || !Array.isArray(state.shows)) state = {shows: []};
+      return state;
+    }catch(e){ return {shows: []}; }
+  }
+  function writeState(state){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  function pruneShows(shows, now){
+    return shows.filter(function(t){ return (now - t) < WINDOW_MS; });
+  }
+
+  function attempt(){
+    var now = Date.now();
+    var state = readState();
+    state.shows = pruneShows(state.shows, now);
+
+    var pageDelayLeft = PAGE_DELAY_MS - (now - pageEnteredAt);
+    var lastShow = state.shows.length ? state.shows[state.shows.length - 1] : 0;
+    var gapLeft = lastShow ? (MIN_GAP_MS - (now - lastShow)) : 0;
+    var underCap = state.shows.length < MAX_PER_WINDOW;
+
+    if(pageDelayLeft <= 0 && gapLeft <= 0 && underCap){
+      if(typeof window[SHOW_FN] === 'function'){
+        try{
+          window[SHOW_FN]({ type: 'inApp' });
+          state.shows.push(now);
+          writeState(state);
+        }catch(e){}
+      }
+      setTimeout(attempt, MIN_GAP_MS);
       return;
     }
-    if (retries > 0) setTimeout(function(){ tryStart(retries - 1); }, 200);
+
+    var waits = [];
+    if(pageDelayLeft > 0) waits.push(pageDelayLeft);
+    if(gapLeft > 0) waits.push(gapLeft);
+    if(!underCap){
+      var oldest = state.shows[0];
+      waits.push((WINDOW_MS - (now - oldest)) + 250);
+    }
+    setTimeout(attempt, Math.max(500, Math.min.apply(null, waits)));
   }
-  tryStart(50);
+
+  function waitForSdk(retries){
+    if (typeof window[SHOW_FN] === 'function') { attempt(); return; }
+    if (retries > 0) setTimeout(function(){ waitForSdk(retries - 1); }, 200);
+  }
+  waitForSdk(50);
 })();
 </script>
 
@@ -3359,6 +3399,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 </body>
 </html>
+
 
 
 

@@ -481,13 +481,13 @@ const LUCK_MINING_CONFIG = {
 // live inside the same daily_reward JSON blob as everything else on this
 // page, so neither needs a new Supabase column.
 //
-// Inactivity reminder cadence: every 2 hours, anyone who hasn't logged in
-// during the preceding 2 hours gets DM'd once (capped at one ping per 2h
+// Inactivity reminder cadence: every 3 hours, anyone who hasn't logged in
+// during the preceding 3 hours gets DM'd once (capped at one ping per 3h
 // window via lastInactivityReminderAt) with a button back into the app.
 const EARN_WEBAPP_URL = 'https://t.me/paymeoobot/earn?startapp';
-const INACTIVITY_REMINDER_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours since last login
-const INACTIVITY_REMINDER_REPEAT_MS = 2 * 60 * 60 * 1000; // don't re-ping more than once per 2h window
-const INACTIVITY_SWEEP_INTERVAL_MS = 2 * 60 * 60 * 1000; // check every 2 hours
+const INACTIVITY_REMINDER_THRESHOLD_MS = 3 * 60 * 60 * 1000; // 3 hours since last login
+const INACTIVITY_REMINDER_REPEAT_MS = 3 * 60 * 60 * 1000; // don't re-ping more than once per 3h window
+const INACTIVITY_SWEEP_INTERVAL_MS = 3 * 60 * 60 * 1000; // check every 3 hours
 const MINING_SWEEP_INTERVAL_MS = 60 * 1000; // check every 60 seconds (cycle is 2 min)
 const REMINDER_SWEEP_PAGE_SIZE = 500;
 
@@ -3938,14 +3938,18 @@ setInterval(
 // ------------------------------------------------------------------
 // INACTIVITY REMINDER SWEEP
 // ------------------------------------------------------------------
-// Every INACTIVITY_SWEEP_INTERVAL_MS (2 hours), DM anyone who hasn't opened
-// the Mini App (i.e. hit /api/auth/telegram-signup) in over 2 hours,
+// Every INACTIVITY_SWEEP_INTERVAL_MS (3 hours), DM anyone who hasn't opened
+// the Mini App (i.e. hit /api/auth/telegram-signup) in over 3 hours,
 // pointing them back to the earn page. Re-pinging is capped at once per
 // INACTIVITY_REMINDER_REPEAT_MS via lastInactivityReminderAt. This runs
 // forever on that cadence: whether a user is brand new, an old account
 // that's never been swept before, or someone who opens the dashboard and
-// leaves again, the same rule applies — 2 hours of no login since their
+// leaves again, the same rule applies — 3 hours of no login since their
 // last visit (or last reminder) and they get pinged again.
+//
+// NOTE: there is deliberately no "fire once on every server boot/restart"
+// broadcast anymore — only the recurring INACTIVITY_SWEEP_INTERVAL_MS timer
+// below triggers sends, so a redeploy/restart no longer re-pings everyone.
 //
 // FILTERING HAPPENS IN NODE, NOT IN THE QUERY. An earlier version pushed
 // the "lastLoginAt overdue" / "not already reminded" checks into the
@@ -3956,24 +3960,37 @@ setInterval(
 // reminder ever went out. This version instead pages through every user
 // with a telegram_id and decides eligibility with plain JS — a bit more
 // data over the wire per sweep, but correct, and sweeps only run once
-// every 2 hours so the extra egress is negligible.
+// every 3 hours so the extra egress is negligible.
 //
 // OLD ACCOUNTS: accounts created before lastLoginAt/lastInactivityReminderAt
 // existed have neither field set. `created_at` is used as the fallback
 // "last known activity" timestamp for those, so they're treated as
 // overdue (not skipped forever) the first time this runs.
 //
-// forceAll: used for the one-time "just redeployed" broadcast — every
-// user with a telegram_id gets the reminder regardless of how recently
-// they logged in or were last reminded. Normal 2-hourly sweeps call this
-// with no arguments and go through the full eligibility check.
-async function runInactivityReminderSweep({ forceAll = false } = {}) {
+// LOGGING: every sweep logs a start line (with the trigger reason) and an
+// end-of-sweep summary line (rows scanned / eligible / sent / skipped /
+// errors), plus a per-user debug line for every message actually sent, so
+// production logs show exactly when a sweep ran, why, and what it did.
+async function runInactivityReminderSweep({ reason = 'scheduled' } = {}) {
 
-  if (!TELEGRAM_BOT_TOKEN) return;
+  const startedAt = Date.now();
+
+  if (!TELEGRAM_BOT_TOKEN) {
+    console.log(`Inactivity reminder sweep [${reason}]: skipped — TELEGRAM_BOT_TOKEN not configured.`);
+    return;
+  }
+
+  console.log(`Inactivity reminder sweep [${reason}]: starting at ${new Date(startedAt).toISOString()}.`);
 
   const now = Date.now();
   let offset = 0;
+  let scanned = 0;
   let sent = 0;
+  let skippedNotOverdue = 0;
+  let skippedRecentlyReminded = 0;
+  let skippedNoTelegramId = 0;
+  let deliveryFailed = 0;
+  let rowErrors = 0;
 
   try {
 
@@ -3995,10 +4012,15 @@ async function runInactivityReminderSweep({ forceAll = false } = {}) {
 
       for (const row of data) {
 
+        scanned++;
+
         try {
 
           const telegramId = row.telegram_id;
-          if (!telegramId) continue;
+          if (!telegramId) {
+            skippedNoTelegramId++;
+            continue;
+          }
 
           const daily = row.daily_reward && typeof row.daily_reward === 'object' ? row.daily_reward : {};
           const rawLastLoginAt = daily.lastLoginAt;
@@ -4011,9 +4033,13 @@ async function runInactivityReminderSweep({ forceAll = false } = {}) {
             ? Number(rawLastLoginAt)
             : (row.created_at ? new Date(row.created_at).getTime() : 0) || 0;
 
-          if (!forceAll) {
-            if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) continue;
-            if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) continue;
+          if (now - lastLoginAt < INACTIVITY_REMINDER_THRESHOLD_MS) {
+            skippedNotOverdue++;
+            continue;
+          }
+          if (lastReminderAt && now - lastReminderAt < INACTIVITY_REMINDER_REPEAT_MS) {
+            skippedRecentlyReminded++;
+            continue;
           }
 
           const lang = resolveBotLanguage(daily);
@@ -4024,8 +4050,17 @@ async function runInactivityReminderSweep({ forceAll = false } = {}) {
             { replyMarkup: earnWebappKeyboard(PAYME_BOT_MESSAGES.inactivityReminderButton[lang]) }
           );
 
-          if (!delivered) continue;
+          if (!delivered) {
+            deliveryFailed++;
+            continue;
+          }
           sent++;
+
+          const idleForMs = now - lastLoginAt;
+          console.log(
+            `Inactivity reminder sweep [${reason}]: sent to user ${row.id} ` +
+            `(telegram_id ${telegramId}, idle ${Math.round(idleForMs / 60000)}m, lang ${lang}).`
+          );
 
           const updatedDaily = { ...daily, lastInactivityReminderAt: now };
 
@@ -4048,14 +4083,8 @@ async function runInactivityReminderSweep({ forceAll = false } = {}) {
             console.error('Inactivity reminder sweep write error:', row.id, writeError);
           }
 
-          // Telegram allows roughly ~30 messages/second across all chats.
-          // A small per-message delay keeps a forceAll run (which can hit
-          // every user in one pass) comfortably under that limit.
-          if (forceAll) {
-            await new Promise(resolve => setTimeout(resolve, 40));
-          }
-
         } catch (rowErr) {
+          rowErrors++;
           console.error('Inactivity reminder sweep row error:', row.id, rowErr.message);
         }
 
@@ -4066,33 +4095,26 @@ async function runInactivityReminderSweep({ forceAll = false } = {}) {
 
     }
 
-    if (forceAll) {
-      console.log(`Inactivity reminder sweep (forceAll): sent ${sent} messages.`);
-    }
+    const durationMs = Date.now() - startedAt;
+    console.log(
+      `Inactivity reminder sweep [${reason}]: done in ${durationMs}ms — ` +
+      `scanned ${scanned}, sent ${sent}, skipped not-overdue ${skippedNotOverdue}, ` +
+      `skipped recently-reminded ${skippedRecentlyReminded}, skipped no-telegram-id ${skippedNoTelegramId}, ` +
+      `delivery failed ${deliveryFailed}, row errors ${rowErrors}.`
+    );
 
   } catch (err) {
-    console.error('Inactivity reminder sweep error:', err.message);
+    console.error(`Inactivity reminder sweep [${reason}]: fatal error —`, err.message);
   }
 
 }
 
-// One-time broadcast, 15 seconds after every server boot (i.e. every
-// redeploy/restart): DM every user with a telegram_id — old and new,
-// active or not — pointing them back to the app. After this one pass,
-// the regular 2-hourly sweep below takes over its normal per-user cadence
-// forever (2 hours of no login since their last visit or last reminder).
-setTimeout(
-  () => {
-    runInactivityReminderSweep({ forceAll: true }).catch(
-      err => console.error('Inactivity reminder sweep (forceAll) error:', err)
-    );
-  },
-  15 * 1000
-).unref();
-
+// Recurring sweep only — there is no "fire once on server boot/restart"
+// broadcast. A redeploy/restart just re-arms this interval; it does not
+// trigger a send by itself, so restarting the process never re-pings users.
 setInterval(
   () => {
-    runInactivityReminderSweep().catch(
+    runInactivityReminderSweep({ reason: 'scheduled' }).catch(
       err => console.error('Inactivity reminder sweep error:', err)
     );
   },
@@ -11371,6 +11393,7 @@ app.listen(
   }
 
 );
+
 
 
 
